@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 21
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,17 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/ui/Toast.tsx` + `useToast()`（页面底部居中，堆叠）
-- [ ] `action`（Undo）形态留到 Sprint 2
+- [x] `src/components/ui/Toast.tsx` + `useToast()`（页面底部居中，堆叠）
+- [x] `action`（Undo）形态留到 Sprint 2
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 关闭按钮用 `IconButton` sm（28px），设计稿 24px 不满足可点区域规则，已记入 components.md"已知差异"\n- `IconButton` 图标色改为 `var(--icon-button-ink, ink-muted)`，Toast 设 `currentColor` 跟随色调（不新增 prop）\n- 测试用 `fireEvent`：fake timers 接管 setImmediate 后 user-event 会卡住
 
 ## 依赖
 

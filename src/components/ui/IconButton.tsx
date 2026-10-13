@@ -1,4 +1,5 @@
 // IconButton（components.md"基础组件"）：只有图标的按钮，aria-label 必填；不使用 SpecularButton
+// 图标色默认 ink-muted；父元素可设 --icon-button-ink（如 currentColor）让它跟随所在提示的色调
 import type { ButtonHTMLAttributes } from "react";
 import { ICONS, type IconName } from "./icons";
 
@@ -14,7 +15,7 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
 }
 
 const BASE =
-  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-control text-ink-muted transition-colors duration-200 ease-in-out hover:bg-surface-sunken hover:text-ink disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-ink-muted";
+  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-control text-(--icon-button-ink,var(--color-ink-muted)) transition-colors duration-200 ease-in-out hover:bg-surface-sunken hover:text-ink disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-(--icon-button-ink,var(--color-ink-muted))";
 const VARIANTS: Record<IconButtonVariant, string> = {
   ghost: "bg-transparent",
   outline: "border border-line-strong bg-transparent",

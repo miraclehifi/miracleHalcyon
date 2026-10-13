@@ -23,7 +23,7 @@
 | 设计稿组件 | React 组件 | Props / variant | 使用位置 |
 |-----------|-----------|----------------|---------|
 | `Button/Primary` · `Secondary` · `Outline` · `Ghost` · `Danger` · `GhostDanger` | `Button` | `variant`；`icon?`（图标名，lucide）；`children`；底层为 `SpecularButton`，参数见"按钮质感参数" | 全部页面。Outline = 弹窗"取消"；GhostDanger = 设置抽屉"删除文章" |
-| `IconButton/Ghost` · `Outline` | `IconButton` | `variant`；`icon`；`aria-label`（必填）；`size`：`sm` 28px（桌面）/ `touch` 44px（手机） | 工具栏按钮、关闭、列表行"更多操作"（`⋯`）、顶栏图标、轻提示关闭。已实现：`src/components/ui/IconButton.tsx`（图标 `ink-muted`，悬停 `surface-sunken` 底 + `ink`；Outline 1px `line-strong`） |
+| `IconButton/Ghost` · `Outline` | `IconButton` | `variant`；`icon`；`aria-label`（必填）；`size`：`sm` 28px（桌面）/ `touch` 44px（手机） | 工具栏按钮、关闭、列表行"更多操作"（`⋯`）、顶栏图标、轻提示关闭。已实现：`src/components/ui/IconButton.tsx`（图标 `ink-muted`，悬停 `surface-sunken` 底 + `ink`；Outline 1px `line-strong`；父元素可设 `--icon-button-ink` 改图标色，Toast 设为 `currentColor`） |
 | `StatusBadge/Draft` · `Published` · `Modified` | `StatusBadge` | `status`：`draft` / `published` / `modified`（已发布 · 有未发布修改）；配色见 design-tokens"文章状态配色" | 文章列表、写文章页顶栏、04 主按钮变体 |
 | `TagChip` | `TagChip` | `label` | 首页标签入口、设置抽屉标签输入 |
 | `Field` | `Field` | `label`；`hint?`；`error?`；`children`（输入控件） | 登录表单、设置抽屉（slug、日期）、04 校验。已实现：`src/components/ui/Field.tsx`（给唯一子控件补 id / `aria-invalid` / `aria-describedby` 与输入框样式 `FIELD_CONTROL_CLASS`；手机 16px 断点用 `md`（768px），与全站移动端定义一致） |
@@ -99,7 +99,7 @@
 | 设计稿组件 | React 组件 | Props / variant | 使用位置 |
 |-----------|-----------|----------------|---------|
 | `Alert/Error` | `Alert` | `tone`：`error`；`children` | 登录页"凭据错误"。已实现：`src/components/ui/Alert.tsx` |
-| `Toast/Error` · `Success` · `Warning` · `Undo` | `Toast` | `tone`：`error`（常驻、可关闭）/ `warning`（常驻、可关闭，`warn-soft` 底 + `warn` 图标与字，`role="status"`）/ `success`（4 秒自动消失）；`action?`（`{ label, onClick }`，传了即 `/Undo` 形态：文字后一个文字按钮"撤销"，6 秒消失）；规则见 design-tokens"轻提示" | 04 校验与错误提示；实况照片降级提示（warning）；文章列表删除后的"已删除《标题》· 撤销" |
+| `Toast/Error` · `Success` · `Warning` · `Undo` | `Toast` | `tone`：`error`（常驻、可关闭）/ `warning`（常驻、可关闭，`warn-soft` 底 + `warn` 图标与字，`role="status"`）/ `success`（4 秒自动消失）；`action?`（`{ label, onClick }`，传了即 `/Undo` 形态：文字后一个文字按钮"撤销"，6 秒消失）；规则见 design-tokens"轻提示" | 04 校验与错误提示；实况照片降级提示（warning）；文章列表删除后的"已删除《标题》· 撤销"。已实现（不含 `action`，Sprint 2）：`src/components/ui/Toast.tsx`（`ToastProvider` + `useToast().show()`，页面底部居中堆叠） |
 | `ConfirmDialog/Danger` · `Default` | `ConfirmDialog` | `tone`：`danger`（删除）/ `default`（撤回）；`icon`；`title`；`description`；`confirmLabel` | 04 删除确认、撤回确认 |
 | `EmptyState` | `EmptyState` | `icon`；`title`；`description`；`action?` | 文章列表空状态 |
 | `RestoreBanner` | `RestoreBanner` | `savedAt`；`onRestore`；`onDiscard` | 写文章页顶栏下方 |
@@ -345,6 +345,7 @@
 | 项 | 现状 | 建议 |
 |----|------|------|
 | `IconButton` 圆角 | 编辑器工具栏、轻提示关闭按钮的实例覆盖为 4px，其余为 `radius`（8px） | 实现时统一为 `radius` |
+| 轻提示关闭按钮尺寸 | 设计稿为 24×24、图标 14px | 实现用 `IconButton` `sm`（28×28、图标 16px），满足桌面可点区域 ≥ 28px（design-tokens"焦点与交互"） |
 | 06 首页稿 | 网站地图已改为参考 pseudoyu（首页自我介绍、文章列表在 `/posts`），06 稿仍是"简介 + 标签 + 文章列表"；顶栏已换成新 `SiteNav` | F-002 design-ui 时拆为首页（自我介绍）与 `/posts`（`HomeTags` / `HomePosts` 随之改名） |
 | `PostCard` 边框 | 参考站是 1px 虚线，Pencil 不支持虚线描边，设计稿画成实线 | 实现时用 `border-dashed`，颜色 `line-strong` |
 | 视图切换选中项字重 | 套用 `SegmentedItem/Selected` 后从 400 变为 500，与文章列表筛选一致 | 保持统一 |
