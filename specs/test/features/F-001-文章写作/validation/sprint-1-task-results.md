@@ -33,3 +33,4 @@
 | 2026-10-13 | build-confirm-dialog-component | `tests/unit/ui/confirm-dialog.test.tsx`（背景 inert；初始焦点"取消"；Tab 循环不出框；Esc / 点遮罩取消；关闭后焦点回触发按钮） | 找不到 `src/components/ui/ConfirmDialog` | 1/1 通过 | `npm test` 22/22；构建通过 | lint 0；astro check 0 错误 |
 | 2026-10-13 | build-save-indicator-component | `tests/unit/ui/save-indicator.test.tsx`（4 种状态图标 / 文案 / 颜色；saved 本地 HH:mm + tabular-nums） | 找不到 `src/components/ui/SaveIndicator` | 1/1 通过 | `npm test` 23/23 | lint 0；astro check 0 错误 |
 | 2026-10-13 | build-login-page | `tests/e2e/login.spec.ts`（[TC-US01-02] chromium + webkit：登录进入 /admin，Set-Cookie 含 HttpOnly / SameSite=Lax，本地 http 无 Secure） | 找不到账号输入框（超时） | 2/2 通过 | `npm test` 23/23；e2e 4/4 | lint 0；astro check 0 错误 |
+| 2026-10-13 | implement-slugify | `tests/unit/post/slug.test.ts`（[POST-UT-01] 5 个输入 + `isValidSlug` 拒绝用例） | 找不到 `src/domains/post/slug` | 1/1 通过 | `npm test` 24/24 | lint 0；astro check 0 错误 |
