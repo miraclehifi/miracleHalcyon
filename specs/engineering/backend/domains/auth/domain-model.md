@@ -80,7 +80,7 @@ function nextThrottleState(state: ThrottleState | null, event: 'fail' | 'success
 ## 5. 仓储接口
 
 ```ts
-interface SessionRepo {
+interface SessionRepo { // 已实现：D1SessionRepo（src/domains/auth/session-repo.ts）
   insert(s: { tokenHash: string; createdAt: Date; expiresAt: Date }): Promise<void>;
   findValid(tokenHash: string, now: Date): Promise<AdminSession | null>; // 过期则顺带删除并返回 null
   delete(tokenHash: string): Promise<void>;

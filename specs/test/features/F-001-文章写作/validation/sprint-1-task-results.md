@@ -16,3 +16,4 @@
 | 2026-10-13 | implement-password-hashing | `tests/unit/auth/password.test.ts`（[AUTH-UT-01] 往返 / 错误密码 / 篡改 salt / iterations 非数字） | 找不到 `src/domains/auth/password` | 1/1 通过 | `npm test` 5/5 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-login-throttle-rules | `tests/unit/auth/throttle.test.ts`（[AUTH-UT-02] 1–5 次失败 / 锁定中 / 过期后 / 成功） | 找不到 `src/domains/auth/throttle` | 1/1 通过 | `npm test` 6/6 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-sanitize-next | `tests/unit/auth/next.test.ts`（[AUTH-UT-03] 规格 7 个输入 + `/adminx`） | 找不到 `src/domains/auth/next` | 1/1 通过 | `npm test` 7/7 | lint 0；astro check 0 错误 |
+| 2026-10-13 | implement-session-repo | `tests/integration/auth/session-repo.test.ts`（workerd：insert 命中 / 过期 1ms 删除 / delete 后 null） | 找不到 `src/domains/auth/session-repo` | 1/1 通过 | `npm test` 8/8 | lint 0；astro check 0 错误 |
