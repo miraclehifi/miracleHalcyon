@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 7
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,17 @@ AUTH-UT-01：`hashPassword` / `verifyPassword` 往返、错误密码、篡改 sa
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/domains/auth/password.ts`：`hashPassword`、`verifyPassword`（WebCrypto PBKDF2-SHA256，100000 次，常量时间比较）
-- [ ] 格式 `pbkdf2$<iterations>$<saltB64>$<hashB64>`
+- [x] `src/domains/auth/password.ts`：`hashPassword`、`verifyPassword`（WebCrypto PBKDF2-SHA256，100000 次，常量时间比较）
+- [x] 格式 `pbkdf2$<iterations>$<saltB64>$<hashB64>`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 常量时间比较手写（XOR 累加），Node 与 Workers 通用；格式错误、base64 损坏、iterations 超过 100000（Workers PBKDF2 上限）一律返回 false
 
 ## 依赖
 

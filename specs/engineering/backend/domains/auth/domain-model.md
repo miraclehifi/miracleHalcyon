@@ -47,7 +47,7 @@
 |--------|------|
 | `SessionToken` | 32 字节 `crypto.getRandomValues`，base64url 编码（43 字符） |
 | `TokenHash` | `SHA-256(token)` 的小写 hex（64 字符） |
-| `PasswordHash` | 字符串 `pbkdf2$<iterations>$<saltB64>$<hashB64>`；算法 PBKDF2-SHA256，iterations = 100000，salt 16 字节，hash 32 字节 |
+| `PasswordHash` | 字符串 `pbkdf2$<iterations>$<saltB64>$<hashB64>`；算法 PBKDF2-SHA256，iterations = 100000，salt 16 字节，hash 32 字节（已实现：`src/domains/auth/password.ts`；校验时 iterations > 100000 视为无效，Workers 上限） |
 | `Credentials` | `username`：1–64 字符；`password`：1–256 字符（超出直接按凭据错误处理，不做哈希） |
 | `SafeNext` | 必须以 `/admin` 开头、不以 `//` 开头、不含 `\`、不含协议；否则回退为 `/admin` |
 

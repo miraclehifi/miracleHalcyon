@@ -13,3 +13,4 @@
 | 2026-10-13 | spike-markdown-browser-worker | `tests/spike/markdown-browser.spec.ts`（Playwright chromium + `astro dev`：万字 10 代码块 20 次往返 P95 < 200ms） | 测试页不存在（等待超时） | 1/1 通过（P50 21ms，P95 25–30ms；冷 ~850ms） | `npm test` 2/2；e2e 冒烟 2/2；生产构建不含测试页 | lint 0；astro check 0 错误 |
 | 2026-10-13 | create-d1-init-migration | `tests/integration/migration.test.ts`（workerd：4 表 + 6 索引 + 4 触发器；UPDATE 后 `db_update_time` 刷新） | `no such table: posts` | 1/1 通过；`npm run db:migrate:local` 本地应用成功 | `npm test` 3/3 | lint 0；astro check 0 错误 |
 | 2026-10-13 | define-design-token-styles | `tests/unit/tokens.test.ts`（jsdom：design-tokens.md 30 个令牌亮 / 暗取值 ↔ tokens.css） | 找不到 `src/styles/tokens.css` | 1/1 通过；改错一个值时测试失败（已确认非空过） | `npm test` 4/4；e2e 冒烟 2/2 | lint 0；astro check 0 错误 |
+| 2026-10-13 | implement-password-hashing | `tests/unit/auth/password.test.ts`（[AUTH-UT-01] 往返 / 错误密码 / 篡改 salt / iterations 非数字） | 找不到 `src/domains/auth/password` | 1/1 通过 | `npm test` 5/5 | lint 0；astro check 0 错误 |
