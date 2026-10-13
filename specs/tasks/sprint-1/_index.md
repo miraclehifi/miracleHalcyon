@@ -42,7 +42,7 @@
 | 28 | [implement-post-content-normalize](implement-post-content-normalize.md) | 实现文章内容规范化与校验 | article-writing | DOMAIN | 领域层 | US-03 | implement-slugify | 3 | 低 | completed |
 | 29 | [implement-content-hash](implement-content-hash.md) | 实现内容哈希 | article-writing | DOMAIN | 领域层 | US-08 | implement-post-content-normalize | 1 | 低 | completed |
 | 30 | [implement-post-status-derivation](implement-post-status-derivation.md) | 实现发布状态派生 | article-writing | DOMAIN | 领域层 | US-07, US-08 | implement-content-hash | 2 | 低 | completed |
-| 31 | [implement-publish-validation](implement-publish-validation.md) | 实现发布校验 | article-writing | DOMAIN | 领域层 | US-08 | implement-post-content-normalize | 1 | 低 | pending |
+| 31 | [implement-publish-validation](implement-publish-validation.md) | 实现发布校验 | article-writing | DOMAIN | 领域层 | US-08 | implement-post-content-normalize | 1 | 低 | completed |
 | 32 | [implement-post-repo](implement-post-repo.md) | 实现文章仓储（D1） | article-writing | DATA | 数据层 | US-03, US-06, US-08 | create-d1-init-migration, implement-post-status-derivation | 4 | 中 | pending |
 | 33 | [implement-post-save-service](implement-post-save-service.md) | 实现新建与自动保存服务 | article-writing | DOMAIN | 领域层 | US-03, US-06 | implement-post-status-derivation, implement-post-content-normalize | 1 | 低 | pending |
 | 34 | [enforce-slug-uniqueness](enforce-slug-uniqueness.md) | 实现 slug 全站唯一校验 | article-writing | DOMAIN | 领域层 | US-03 | implement-post-save-service | 2 | 低 | pending |

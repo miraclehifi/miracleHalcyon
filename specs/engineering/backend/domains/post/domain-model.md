@@ -51,7 +51,7 @@
 ### 2.3 不变量
 
 1. 自动保存（`saveDraft`）永远不修改 `published` 和 `lastPublishedAt`（US-06 约束）
-2. `published != null` 时，`published` 满足发布校验（标题非"无标题"、slug 合法非空、正文非空白）
+2. `published != null` 时，`published` 满足发布校验（标题非"无标题"、slug 合法非空、正文非空白）（已实现：`validateForPublish`，`src/domains/post/post.ts`）
 3. 任意两篇文章之间，`{draft.slug, published.slug}` 中的非空值互不相同（slug 全站唯一，含工作稿与已发布）
 4. 读者端查询只读 `published`，永远读不到 `draft`（ADR-002）
 5. 删除是物理删除；删除后同 id 不复用（`AUTOINCREMENT`）

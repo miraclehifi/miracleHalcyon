@@ -37,3 +37,4 @@
 | 2026-10-13 | implement-post-content-normalize | `tests/unit/post/content.test.ts`（[POST-UT-02] 空白标题、标签去重、201 字摘要、11 个标签、非法 slug、多字段同时出错） | 找不到 `src/domains/post/content` | 1/1 通过 | `npm test` 25/25 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-content-hash | `tests/unit/post/content-hash.test.ts`（[POST-UT-03] 不同对象 / 键顺序同哈希；标签顺序与 6 个字段任一变化哈希不同） | 找不到 `src/domains/post/content-hash` | 1/1 通过 | `npm test` 26/26 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-post-status-derivation | `tests/unit/post/post-status.test.ts`（[POST-UT-04] 无快照 / 快照 = 工作稿 / 快照 ≠ 工作稿） | 找不到 `src/domains/post/post` | 1/1 通过 | `npm test` 27/27 | lint 0；astro check 0 错误 |
+| 2026-10-13 | implement-publish-validation | `tests/unit/post/publish-validation.test.ts`（[POST-UT-05] 标题 × slug × 正文 8 种组合） | `validateForPublish is not a function` | 1/1 通过 | `npm test` 28/28 | lint 0；astro check 0 错误 |
