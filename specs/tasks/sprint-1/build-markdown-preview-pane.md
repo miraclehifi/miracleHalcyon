@@ -37,6 +37,10 @@
 - [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
 - [ ] `npm run lint` 与 `astro check` 无错误
 
+## 实现提示
+
+- Expressive Code 在每次渲染的首个代码块内输出自带的 `<style>`（基础样式 + 主题变量）与复制按钮 `<script type="module">`（见 implement-markdown-sanitize 实现记录）。TC-US04-05 断言预览区无 `script`：需在本任务中处理（如样式 / 复制脚本提到页面级加载，预览区插入前去掉 `.expressive-code > style, .expressive-code > script`）
+
 ## 依赖
 
 [implement-markdown-code-highlight](implement-markdown-code-highlight.md), [spike-markdown-browser-worker](spike-markdown-browser-worker.md), [build-editor-page-shell](build-editor-page-shell.md)

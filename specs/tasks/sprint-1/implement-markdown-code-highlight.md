@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 51
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,19 @@ MD-UT-03：`ts` 代码块高亮、未知语言 `foo` 按纯文本输出不报错
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] Expressive Code 配置（语言白名单、主题跟随 `data-theme`）
+- [x] Expressive Code 配置（语言白名单、主题跟随 `data-theme`）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 语言白名单与 Expressive Code 配置从 `render.ts` 移到 `src/lib/markdown/ec-config.ts`
+- 主题跟随站点：亮色为基础主题，`themeCssSelector` 按主题类型生成 `[data-theme='light|dark']`（原型按主题名生成 `[data-theme='github-dark']`，与站点 `<html data-theme>` 不匹配）；系统暗色时 `@media (prefers-color-scheme: dark){:root:not([data-theme='light'])…}` 切换
+- 未知语言 / 无语言：`data-language="plaintext"`，整段一个 span（不分词，仍带亮 / 暗前景色）
+- 浏览器 spike 回归：P95 25.7ms
 
 ## 依赖
 

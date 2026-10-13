@@ -44,7 +44,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | `rehype-raw` | Markdown 中的原始 HTML 解析为 hast 后交给 sanitize（与 GitHub 一致：允许安全的原始 HTML） |
 | `rehypeAfterSanitize` | `src` 的 `data:` 只保留 `data:image/*`；sanitize 给 id 加 `user-content-` 前缀，脚注页内链接同步加前缀（remark-rehype 不再加前缀，避免双重前缀） |
 | `rehypeImageFigures` | sanitize 之后执行，只生成白名单属性（下表），因此不会引入可注入内容 |
-| `rehype-expressive-code` | Shiki 使用 JavaScript 正则引擎；语言白名单：ts、tsx、js、jsx、json、bash、shell、css、html、md、yaml、toml、sql、python、go、rust、diff；主题跟随站点亮 / 暗主题（两套主题，CSS 变量切换） |
+| `rehype-expressive-code` | Shiki 使用 JavaScript 正则引擎；语言白名单：ts、tsx、js、jsx、json、bash、shell、css、html、md、yaml、toml、sql、python、go、rust、diff；主题跟随站点亮 / 暗主题（两套主题，CSS 变量切换）。已实现：`src/lib/markdown/ec-config.ts`——github-light 为基础主题，选择器按主题类型生成 `[data-theme='light|dark']`，系统暗色经 `prefers-color-scheme` 媒体查询切换 |
 | `rehypeSourceLines` | 仅 `sourceMap: true`：块级元素加 `data-line`（源码行号，供同步滚动） |
 
 > 已实现（implement-markdown-gfm-render）：GFM 处理链与 `RenderOptions` 签名；脚注区无障碍文案为中文（标题「脚注」、回链「返回引用 N」）。
