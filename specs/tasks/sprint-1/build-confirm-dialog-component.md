@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 24
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/ui/ConfirmDialog.tsx`（tone danger / default）
+- [x] `src/components/ui/ConfirmDialog.tsx`（tone danger / default）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- Portal 到 `document.body`，打开时给 body 其余子元素设 `inert` 属性（用 setAttribute，jsdom 不反射 `inert` 属性）\n- 遮罩用 `scrim` 令牌 37%，设计稿是未令牌化的 `#2A251F` 35%，已记入 components.md"已知差异"
 
 ## 依赖
 
