@@ -98,7 +98,7 @@ interface ThrottleRepo { // 已实现：D1ThrottleRepo（src/domains/auth/thrott
 | 名称 | 说明 |
 |------|------|
 | `ADMIN_USERNAME` | 管理员账号 |
-| `ADMIN_PASSWORD_HASH` | `PasswordHash` 格式字符串，由 `npm run hash-password` 生成 |
+| `ADMIN_PASSWORD_HASH` | `PasswordHash` 格式字符串，由 `npm run hash-password` 生成（已实现：`scripts/hash-password.ts`；配置步骤见 README） |
 | `SITE_ORIGIN` | 站点 Origin（如 `https://miraclehalcyon.com`），CSRF 校验用；本地为 `http://localhost:4321` |
 
 缺少任一配置时，登录接口返回 500 `SERVER_MISCONFIGURED`，日志记录配置名（不记录值）。

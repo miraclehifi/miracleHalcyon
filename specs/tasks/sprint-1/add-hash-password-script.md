@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 16
-**状态**: pending
+**状态**: completed
 **类别**: SETUP
 **架构层级**: 基础设施
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,17 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `scripts/hash-password.ts` + `npm run hash-password`（从 stdin 读取，不回显）
-- [ ] README 写明设置 `ADMIN_USERNAME`、`ADMIN_PASSWORD_HASH`、`SITE_ORIGIN` 的步骤（`wrangler secret put`、`.dev.vars`）
+- [x] `scripts/hash-password.ts` + `npm run hash-password`（从 stdin 读取，不回显）
+- [x] README 写明设置 `ADMIN_USERNAME`、`ADMIN_PASSWORD_HASH`、`SITE_ORIGIN` 的步骤（`wrangler secret put`、`.dev.vars`）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- Node 24 原生类型剥离直接运行 `.ts`（`node scripts/hash-password.ts`），无需额外运行器\n- 终端中原始模式逐字读取、不回显；管道输入同样支持（终端交互模式未自动化测试）\n- 新建 `README.md`（项目原先没有）
 
 ## 依赖
 
