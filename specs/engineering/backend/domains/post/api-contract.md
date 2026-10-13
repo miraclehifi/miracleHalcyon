@@ -142,6 +142,8 @@
 
 ### POST /api/admin/posts/:id/unpublish
 
+> 已实现：`src/pages/api/admin/posts/[id]/unpublish.ts`。
+
 | 状态 | 体 |
 |------|----|
 | 200 | `PostView`（`status = draft`） |

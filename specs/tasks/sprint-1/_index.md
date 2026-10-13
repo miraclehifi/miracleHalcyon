@@ -56,7 +56,7 @@
 | 42 | [implement-save-post-endpoint](implement-save-post-endpoint.md) | 实现 PUT /api/admin/posts/:id | article-writing | API | 接口层 | US-03, US-06 | implement-get-post-endpoint | 1 | 低 | completed |
 | 43 | [implement-list-posts-endpoint](implement-list-posts-endpoint.md) | 实现 GET /api/admin/posts | article-writing | API | 接口层 | US-07 | implement-post-list-query, implement-create-post-endpoint | 1 | 低 | completed |
 | 44 | [implement-publish-endpoint](implement-publish-endpoint.md) | 实现 POST /api/admin/posts/:id/publish | article-writing | API | 接口层 | US-08 | implement-post-publish-service, implement-get-post-endpoint | 1 | 低 | completed |
-| 45 | [implement-unpublish-endpoint](implement-unpublish-endpoint.md) | 实现 POST /api/admin/posts/:id/unpublish | article-writing | API | 接口层 | US-08 | implement-post-unpublish-service, implement-get-post-endpoint | 1 | 低 | pending |
+| 45 | [implement-unpublish-endpoint](implement-unpublish-endpoint.md) | 实现 POST /api/admin/posts/:id/unpublish | article-writing | API | 接口层 | US-08 | implement-post-unpublish-service, implement-get-post-endpoint | 1 | 低 | completed |
 | 46 | [implement-tags-endpoint](implement-tags-endpoint.md) | 实现 GET /api/admin/tags | article-writing | API | 接口层 | US-03 | implement-tag-suggestions, implement-auth-middleware | 1 | 低 | pending |
 | 47 | [implement-public-post-detail-endpoint](implement-public-post-detail-endpoint.md) | 实现 GET /api/posts/:slug | article-writing | API | 接口层 | US-08 | implement-published-query | 0 | 低 | pending |
 | 48 | [implement-public-post-list-endpoint](implement-public-post-list-endpoint.md) | 实现 GET /api/posts | article-writing | API | 接口层 | US-08 | implement-published-query | 0 | 低 | pending |
