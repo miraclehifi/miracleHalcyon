@@ -8,3 +8,4 @@
 | 日期 | 任务 | 变更点测试 | 红 | 绿 | 影响范围回归 | Lint / 类型检查 |
 |------|------|-----------|----|----|-------------|----------------|
 | 2026-10-13 | scaffold-project-skeleton | `tests/e2e/smoke.spec.ts`（chromium、webkit） | 404 ≠ 200（2 失败） | 2/2 通过 | 无（新建代码） | lint 0；astro check 0 错误 |
+| 2026-10-13 | setup-workers-test-pool | `tests/integration/pool.test.ts`（workerd：D1 SELECT 1、R2 put/get） | 找不到 `cloudflare:workers`（未在 workerd 中运行） | 1/1 通过 | e2e 冒烟 2/2 通过 | lint 0；astro check 0 错误 |

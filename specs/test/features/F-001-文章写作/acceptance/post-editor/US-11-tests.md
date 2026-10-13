@@ -471,7 +471,7 @@
 | type | api |
 | Change History | 2026-10-12 v1.0 初始创建 |
 
-**步骤：** 在 vitest-pool-workers 中调用上传处理函数
+**步骤：** 在 Workers 测试环境（`@cloudflare/vitest-plugin`）中调用上传处理函数
 
 **预期结果：** 返回 5xx；R2 中没有图片和视频；`images` 表没有新行
 

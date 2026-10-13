@@ -41,7 +41,7 @@ graph TB
 | 编辑器 | 原生 `<textarea>` | 见 ADR-004 |
 | 图片处理（浏览器） | `heic-to`（libheif WASM，按需加载）、`mediabunny`（MOV→MP4 转封装/转码，按需加载） | 见 ADR-006 |
 | 动效组件 | React Bits：SwipeRow、AnimatedList、RefineFrame、ChromaGrid、AccordionGallery；`gsap` | 预览需与读者端一致，图片组件在 F-001 实现（§6） |
-| 测试 | Vitest + `@cloudflare/vitest-pool-workers`（D1/R2 本地模拟）；Playwright（E2E） | 写入 CLAUDE.md 命令表 |
+| 测试 | Vitest 4.1 + `@cloudflare/vitest-plugin`（原 vitest-pool-workers；D1/R2 本地模拟）；Playwright（E2E） | 写入 CLAUDE.md 命令表（✅ 已实现：setup-workers-test-pool） |
 
 ---
 
