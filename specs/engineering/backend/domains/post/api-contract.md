@@ -97,6 +97,8 @@
 
 ### GET /api/admin/posts/:id
 
+> 已实现：`src/pages/api/admin/posts/[id].ts`（`createPostHandlers().GET`）；id 只接受正整数（≤ 15 位），其余一律 404。
+
 | 状态 | 体 |
 |------|----|
 | 200 | `PostView` |

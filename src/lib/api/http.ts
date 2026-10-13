@@ -26,6 +26,12 @@ export class BadJsonError extends Error {
   readonly code = "BAD_JSON";
 }
 
+// 路由参数中的文章 id：只接受正整数，其余视为不存在（404，不暴露格式错误）
+export function parsePostId(param: string | undefined): number | null {
+  if (!param || !/^[1-9]\d{0,15}$/.test(param)) return null;
+  return Number(param);
+}
+
 // 超过上限先按 Content-Length 拒绝，再按实际长度兜底
 export async function readJson(request: Request, maxBytes = MAX_BODY_BYTES): Promise<unknown> {
   if (Number(request.headers.get("Content-Length") ?? 0) > maxBytes) throw new PayloadTooLargeError();
