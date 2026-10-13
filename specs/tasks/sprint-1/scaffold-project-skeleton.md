@@ -74,4 +74,4 @@ E2E 冒烟 `tests/e2e/smoke.spec.ts`：`npm run build && npm run preview`（`ast
 - 关闭适配器默认的 KV 会话（`session: false`，会话按 ADR-003 存 D1）和 Cloudflare Images 绑定（`imageService: "passthrough"`，图片按 ADR-005 原样输出）
 - D1 迁移目录定为 `src/db/migrations`（与架构 §6.2 一致）；`database_id` 暂为本地占位值，接入生产时替换
 - 测试结果：e2e 2/2 通过（chromium、webkit）；`npm run lint` 0 问题；`astro check` 0 错误 / 0 警告 / 0 提示；`npm run dev` 访问 `/admin/login` 200
-- 环境提示：本机 Node 22.18.0 低于 eslint-plugin-astro（≥ 22.22.3）与 undici（≥ 22.19）的引擎要求，目前运行正常，建议升级到 Node 22.22+ 或 24 LTS
+- 环境提示：开发时 Node 22.18.0 低于部分依赖的引擎要求；2026-10-13 已升级到 Node 24.21.0 LTS，全量测试通过

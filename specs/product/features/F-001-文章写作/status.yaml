@@ -33,5 +33,5 @@ checkpoint:
   completed_tasks: [scaffold-project-skeleton, setup-workers-test-pool]   # 2 / 69
   blocked_tasks: []
   test_command: "npm test（vitest 4.1：unit + workers）/ npm run test:e2e"
-  env_info: "Windows 11, Node 22.18.0（建议升级 ≥ 22.22.3）, npm 10.9.3；Astro 7.3 + @astrojs/cloudflare 14 + wrangler 4.149 + TS 6.0"
+  env_info: "Windows 11, Node 24.21.0 LTS, npm 11.19.0；Astro 7.3 + @astrojs/cloudflare 14 + wrangler 4.149 + TS 6.0 + Vitest 4.1"
   last_updated: "2026-10-13"

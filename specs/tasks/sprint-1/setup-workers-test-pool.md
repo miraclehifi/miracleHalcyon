@@ -68,5 +68,5 @@
 - **Vitest 锁定 4.1.x**：Vitest 5.0.4 配 vitest-plugin 1.4 在 Windows 上报 `File path must be a file: URL`，4.1.11 正常；等上游修复后再升级
 - 迁移：Node 侧 `readD1Migrations("src/db/migrations")` 注入为 `TEST_MIGRATIONS` 绑定，`tests/setup/apply-migrations.ts` 在每个测试文件前 `applyD1Migrations`；存储按测试文件隔离（插件默认行为）
 - 测试中用 `import { env } from "cloudflare:workers"`（`cloudflare:test` 的 `env` 已标为 deprecated）
-- 安装依赖时 npm 10.9 在解析 vite 8 → `@vitejs/devtools-vitest` → `vitest@*` 的可选 peer 链时崩溃（`edgesOut`），改用 `npx npm@11 i` 安装；已有 lockfile 时 `npm install` 正常
+- 安装依赖时 npm 10.9 在解析 vite 8 → `@vitejs/devtools-vitest` → `vitest@*` 的可选 peer 链时崩溃（`edgesOut`）；升级到 Node 24.21 / npm 11.19 后已不再出现
 - 测试结果：`npm test` 1/1 通过；`npm run test:e2e` 2/2 通过（回归）；lint 0 问题；astro check 0 错误
