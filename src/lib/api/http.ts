@@ -15,6 +15,9 @@ const FIELD_MESSAGES: Record<string, string> = {
   summary: "摘要不能超过 200 字",
   body: "正文不能超过 200,000 字",
   publishedAt: "发布日期格式不正确",
+  status: "状态只能是 all、draft 或 published",
+  page: "页码必须是正整数",
+  q: "搜索词不能超过 100 字",
 };
 const PUBLISH_FIELD_NAMES: Record<string, string> = { title: "标题", slug: "slug", body: "正文" };
 

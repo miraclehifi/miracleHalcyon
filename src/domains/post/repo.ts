@@ -72,14 +72,14 @@ interface PostRow {
 const COLUMNS =
   "id, title, slug, tags, summary, body, published_at, draft_hash, pub_title, pub_slug, pub_tags, pub_summary, pub_body, pub_published_at, pub_hash, last_published_at, created_at, updated_at";
 
-// 标题包含匹配（不区分大小写）：转义 LIKE 的 \ % _
-const TITLE_FILTER = "(?1 = '' OR title LIKE '%' || ?1 || '%' ESCAPE '\\')";
+// 标题包含匹配（ASCII 不区分大小写）。用 instr 而不是 LIKE：D1 限制 LIKE 模式 ≤ 50 字节，
+// 100 字的搜索词（中文每字 3 字节）会报 "pattern too complex"；instr 也不需要转义 % _ \
+const TITLE_FILTER = "(?1 = '' OR instr(lower(title), lower(?1)) > 0)";
 const STATUS_FILTER: Record<ListStatus, string> = {
   all: "1 = 1",
   draft: "pub_hash IS NULL",
   published: "pub_hash IS NOT NULL", // 含有未发布修改的
 };
-const escapeLike = (value: string) => value.replace(/[\\%_]/g, (char) => `\\${char}`);
 
 // 工作稿与快照标签合并为 (文章, 标签) 对（UNION 去重：同一篇的两份内容只算一次）；按小写分组计文章数，
 // 显示写法取出现次数最多的那种
@@ -190,19 +190,18 @@ export class D1PostRepo implements PostRepo {
   }
 
   async list({ status, q, page, pageSize }: ListQuery): Promise<{ rows: PostSummary[]; total: number; counts: StatusCounts }> {
-    const pattern = escapeLike(q);
     const [list, totals, counts] = await this.db.batch([
       this.db
         .prepare(
           `SELECT id, title, tags, draft_hash, pub_hash, updated_at FROM posts WHERE ${TITLE_FILTER} AND ${STATUS_FILTER[status]} ` +
             "ORDER BY updated_at DESC, id DESC LIMIT ?2 OFFSET ?3",
         )
-        .bind(pattern, pageSize, (page - 1) * pageSize),
-      this.db.prepare(`SELECT COUNT(*) AS n FROM posts WHERE ${TITLE_FILTER} AND ${STATUS_FILTER[status]}`).bind(pattern),
+        .bind(q, pageSize, (page - 1) * pageSize),
+      this.db.prepare(`SELECT COUNT(*) AS n FROM posts WHERE ${TITLE_FILTER} AND ${STATUS_FILTER[status]}`).bind(q),
       // 分段控件的数量：只应用 q，不应用 status
       this.db
         .prepare(`SELECT COUNT(*) AS total, COALESCE(SUM(pub_hash IS NULL), 0) AS draft, COALESCE(SUM(pub_hash IS NOT NULL), 0) AS published FROM posts WHERE ${TITLE_FILTER}`)
-        .bind(pattern),
+        .bind(q),
     ]);
     const rows = (list.results as Pick<PostRow, "id" | "title" | "tags" | "draft_hash" | "pub_hash" | "updated_at">[]).map((row) => ({
       id: row.id,
