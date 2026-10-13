@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 19
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/ui/Field.tsx`
+- [x] `src/components/ui/Field.tsx`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 尺寸取设计稿：标签 13px / 500 / `ink-muted`，间距 6，输入框 9×12（手机 13×12、16px），说明 12px `ink-faint`，错误时描边与说明变 `danger`\n- 手机字号断点用 `md:`（768px）而非令牌文档示例中的 `sm:`（640px），与全站 `< 768px` 移动端定义一致
 
 ## 依赖
 

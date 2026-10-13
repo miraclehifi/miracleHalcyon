@@ -26,7 +26,7 @@
 | `IconButton/Ghost` · `Outline` | `IconButton` | `variant`；`icon`；`aria-label`（必填）；`size`：`sm` 28px（桌面）/ `touch` 44px（手机） | 工具栏按钮、关闭、列表行"更多操作"（`⋯`）、顶栏图标、轻提示关闭。已实现：`src/components/ui/IconButton.tsx`（图标 `ink-muted`，悬停 `surface-sunken` 底 + `ink`；Outline 1px `line-strong`） |
 | `StatusBadge/Draft` · `Published` · `Modified` | `StatusBadge` | `status`：`draft` / `published` / `modified`（已发布 · 有未发布修改）；配色见 design-tokens"文章状态配色" | 文章列表、写文章页顶栏、04 主按钮变体 |
 | `TagChip` | `TagChip` | `label` | 首页标签入口、设置抽屉标签输入 |
-| `Field` | `Field` | `label`；`hint?`；`error?`；`children`（输入控件） | 登录表单、设置抽屉（slug、日期）、04 校验 |
+| `Field` | `Field` | `label`；`hint?`；`error?`；`children`（输入控件） | 登录表单、设置抽屉（slug、日期）、04 校验。已实现：`src/components/ui/Field.tsx`（给唯一子控件补 id / `aria-invalid` / `aria-describedby` 与输入框样式 `FIELD_CONTROL_CLASS`；手机 16px 断点用 `md`（768px），与全站移动端定义一致） |
 | `SearchInput` | `SearchInput` | `placeholder`；`value`；`onChange`；手机端字号 16px | 文章列表 |
 | `SegmentedItem/Selected` · `Default` | `SegmentedControl` + `SegmentedControl.Item` | Item：`selected`；`icon?`；`count?`；`children` | 文章列表状态筛选（带数量）、写文章页视图切换（带图标） |
 | `TabItem/Selected` · `Default` | `Tabs` + `Tabs.Item` | Item：`selected`；`children`；`role="tab"` | 写文章页（移动）编辑 / 预览 |
