@@ -9,7 +9,7 @@
 ## 1. 职责与边界
 
 - 负责：文章新建、自动保存（工作稿）、slug 规则与唯一性、发布 / 发布更新 / 撤回、删除、后台列表与计数、标签补全；对外（F-002）提供已发布只读查询
-- 不负责：Markdown 渲染（`markdown` 模块）、图片存储（`media`，正文只含 URL 字符串）、读者缓存实现（F-002 实现 `onPublicationChanged`）
+- 不负责：Markdown 渲染（`markdown` 模块）、图片存储（`media`，正文只含 URL 字符串）、读者页重建（F-002 实现 `onPublicationChanged`，调用 Deploy Hook）
 
 ## 2. 聚合：Post
 
@@ -111,8 +111,8 @@ interface PublicationHooks { onPublicationChanged(e: PublicationChange): Promise
 
 - `DraftInput` = `PostContent` 的全部字段（客户端每次发送整份）；服务端负责规范化（标题空 → `无标题`、标签去重等）
 - `PostView` = API 中的文章对象（见 api-contract §2）
-- 钩子调用失败只记录日志，不让发布失败（读者缓存最终由 F-002 的 TTL 兜底）
-- `publish` 中 `prevSlug` = 发布前快照的 slug（发布更新改了 slug 时，F-002 需要让旧地址失效）
+- 钩子调用失败只记录日志，不让发布失败（作者可在 Cloudflare 控制台手动重建）
+- `publish` 中 `prevSlug` = 发布前快照的 slug（发布更新改了 slug 时，重建后旧地址不再生成页面）
 
 **slug 冲突检查**（`saveDraft` / `create` / `publish` 都执行）：
 `SELECT 1 FROM posts WHERE id != ? AND (slug = ? OR pub_slug = ?)`，命中 → 409 `SLUG_TAKEN`，整份保存不生效。
@@ -181,3 +181,4 @@ interface PostRepo {
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-13 | 1.1 | `onPublicationChanged` 用途改为触发读者页重建（ADR-001 修订） | miraclehifi |

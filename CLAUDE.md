@@ -12,7 +12,7 @@ miracleHalcyon 是一个个人技术博客兼作品集，读者端阅读体验�
 
 | 层 | 选型 |
 |----|------|
-| 框架 | Astro 7 + `@astrojs/react` + `@astrojs/cloudflare`（读者页预渲染/缓存，写作页 SSR） |
+| 框架 | Astro 7 + `@astrojs/react` + `@astrojs/cloudflare`（读者页构建时预渲染、发布后重建，写作页 SSR） |
 | 数据 | Cloudflare D1（文章）+ R2（图片） |
 | 认证 | 单管理员账号密码登录 |
 | 样式 | Tailwind CSS 4 + `@tailwindcss/typography` |

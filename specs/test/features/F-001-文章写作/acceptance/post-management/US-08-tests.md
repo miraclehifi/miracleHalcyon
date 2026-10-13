@@ -3,7 +3,7 @@
 **US ID**: US-08
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/post-management/US-08-publish-post/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/post-management/US-08-publish-post/behaviors.md)
-**最后更新**: 2026-10-10
+**最后更新**: 2026-10-13
 **Version Tag**: v1.0
 
 > 验收规格（非可执行代码）。占位接口，**接口路径以 design-domain API 契约为准**：
@@ -28,7 +28,7 @@
 | TC-US08-06 | SC-PUBLISH-05 | 撤回为草稿，读者不可见，内容保留 | P0 | e2e |
 | TC-US08-07 | SC-PUBLISH-06 | 读者端列表与详情永不暴露草稿/未发布修改 | P0 | security |
 | TC-US08-08 | SC-PUBLISH-06 | 读者端绕过尝试（错误猜测） | P1 | security |
-| TC-US08-09 | SC-PUBLISH-07 | 发布/更新/撤回后 10 秒内缓存失效 | P0 | performance |
+| TC-US08-09 | SC-PUBLISH-07 | 发布/更新/撤回后触发重建，5 分钟内可见 | P0 | performance |
 | TC-US08-10 | SC-PUBLISH-09 | 发布前先保存未保存内容 | P0 | e2e |
 | TC-US08-11 | SC-PUBLISH-10 | 发布失败状态不变并提示 | P1 | e2e |
 | TC-US08-12 | SC-PUBLISH-10 | 更新/撤回失败状态不变（错误猜测） | P2 | api |
@@ -306,22 +306,22 @@
 
 ---
 
-### TC-US08-09: 发布/更新/撤回后 10 秒内缓存失效
+### TC-US08-09: 发布/更新/撤回后触发重建，5 分钟内可见
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US08-09 |
 | covers | SC-PUBLISH-07 |
-| Scenario | BH-07 发布/更新/撤回后读者缓存失效 |
+| Scenario | BH-07 发布/更新/撤回后触发读者页重建 |
 | Priority | P0 |
 | Version Tag | v1.0 |
-| Automation Feasibility | ✅ 适合自动化（预发布环境，需真实边缘缓存） |
+| Automation Feasibility | ✅ 适合自动化（预发布环境，需真实 Workers Builds 重建） |
 | type | performance |
-| Change History | 2026-10-10 v1.0 初始创建；2026-10-12 v1.1 观察页面由首页 `/` 改为文章列表页 `/posts`（网站地图调整） |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-12 v1.1 观察页面由首页 `/` 改为文章列表页 `/posts`（网站地图调整）；2026-10-13 v1.2 读者页改为构建时预渲染，时限 10 秒 → 重建完成（≤ 5 分钟） |
 
 **前置条件：**
 - 【数据前置】草稿 P1（slug `cache-p1`）；已发布 dirty P2（slug `cache-p2`，已发布 "V1"，编辑 "V2"）；已发布 clean P3（slug `cache-p3`）
-- 【环境前置】预发布环境；先以读者身份访问 `/posts`、`/posts/cache-p2`、`/posts/cache-p3` 各两次，确认命中缓存（响应头如 `cf-cache-status: HIT` 或等效标识）
+- 【环境前置】预发布环境（已配置 Workers Builds Deploy Hook）；先以读者身份访问 `/posts`、`/posts/cache-p2`、`/posts/cache-p3`，确认为旧状态的静态页
 
 **测试数据：**
 
@@ -331,13 +331,14 @@
 | b | 更新 P2 | `/posts`、`/posts/cache-p2` | 文章页正文 "V2"；文章列表标题/摘要为最新 |
 | c | 撤回 P3 | `/posts`、`/posts/cache-p3` | 文章列表不含 P3；文章页 404 |
 
-**步骤：** 执行操作并记录 T0（接口返回时刻）；之后每 1s 轮询观察页面（附 cache-busting 无关的普通请求），记录首次看到最新状态的时刻 T1
+**步骤：** 执行操作并记录 T0（接口返回时刻）；确认 Workers Builds 出现一次 `build_trigger_source: "deploy_hook"` 的构建；之后每 10s 轮询观察页面（普通请求），记录首次看到最新状态的时刻 T1
 
 **预期结果：**
-- 10 秒内读者访问文章列表页与该文章页看到最新状态（T1 − T0 ≤ 10s，三个子用例均满足）
-- 达到最新状态后不再回退到旧内容（继续轮询 10s 验证）
+- 每次操作触发一次重建
+- 重建完成后读者访问文章列表页与该文章页看到最新状态（T1 − T0 ≤ 5 分钟，三个子用例均满足）
+- 达到最新状态后不再回退到旧内容（继续轮询 1 分钟验证）
 
-**清理：** `resetPosts()`；清除缓存
+**清理：** `resetPosts()`；触发一次重建
 
 ---
 
@@ -742,13 +743,13 @@ await expect(page.getByTestId('post-status-badge')).toHaveText('已发布');
 | 策略 | 用途 | 说明 |
 |------|------|------|
 | Factory `createPost({ status: 'draft' \| 'published', publishedContent, draftContent, title, slug, publishedAt, updatedAt })` | 全部 TC | 直接写测试 D1，可同时指定"已发布内容"与"编辑内容"以构造 clean/dirty；createPosts(N, …) 批量 |
-| Factory `resetPosts()` | 清理 | 清空 post 及其已发布副本；预发布环境同时清除读者缓存 |
+| Factory `resetPosts()` | 清理 | 清空 post 及其已发布副本；预发布环境同时触发读者页重建 |
 | Fixture `adminSession`（只读共享） | 认证 | 测试管理员凭据经 Secrets 注入，Playwright storageState 复用；禁止生产账号 |
 | Fixture `readerClient` | 读者端 | 无 Cookie 的 HTTP 客户端，用于读者可见性断言 |
 | 冻结时钟 | TC-US08-03 | 服务端时间可注入（或测试环境变量），保证"今天"确定 |
 | 故障注入 / 路由拦截 | TC-US08-11, 12, 18 | 前端用 `page.route`；接口层用测试环境故障开关 |
 
-- 缓存类 TC（TC-US08-09）只在预发布环境（真实 Cloudflare 缓存）执行；本地仅验证失效调用被触发
+- 重建类 TC（TC-US08-09）只在预发布环境（真实 Workers Builds）执行；本地仅验证 `onPublicationChanged` 被调用
 
 ---
 
@@ -767,7 +768,7 @@ await expect(page.getByTestId('post-status-badge')).toHaveText('已发布');
 | SC-PUBLISH-09 | BH-09 | AC-1 | TC-US08-10 |
 | SC-PUBLISH-10 | BH-10 | — | TC-US08-11, 12 |
 
-**NFR 覆盖**：授权 401（TC-US08-14）、CSRF（TC-US08-15）、写接口 P95（TC-US08-16）、缓存失效（TC-US08-09）
+**NFR 覆盖**：授权 401（TC-US08-14）、CSRF（TC-US08-15）、写接口 P95（TC-US08-16）、读者页重建（TC-US08-09）
 
 **Gap 分析**：behaviors.md SC-ID 共 10 个（SC-PUBLISH-01 ~ 10），全部被 `covers` 引用。**Gap: 无**
 
@@ -787,3 +788,4 @@ await expect(page.getByTestId('post-status-badge')).toHaveText('已发布');
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-10 | v1.1 | 按钮名"更新"改为"发布更新"；撤回入口为设置抽屉（design-ui 界面审阅） | miraclehifi |
+| 2026-10-13 | v1.2 | TC-US08-09 改为验证重建触发与 5 分钟内可见（读者页构建时预渲染） | miraclehifi |

@@ -111,7 +111,7 @@ scaffold-project-skeleton → setup-workers-test-pool → spike-markdown-workers
 | 影响 | 本 Sprint 处理 |
 |------|---------------|
 | F-002 读取已发布文章 | `implement-published-query`、公开 `/api/posts` 两个端点 |
-| 读者缓存失效钩子 | `implement-post-publish-service` 中提供 `PublicationHooks` 空实现 |
+| 读者页重建钩子 | `implement-post-publish-service` 中提供 `PublicationHooks` 空实现（F-002 实现为调用 Deploy Hook） |
 
 ## Sprint 目标
 

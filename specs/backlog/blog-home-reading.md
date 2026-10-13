@@ -84,6 +84,7 @@
 ## 影响分析
 
 - **依赖项**: [article-writing.md](article-writing.md)（post Domain）
+- **渲染方式（已定）**: 读者页构建时预渲染，发布等操作通过 Deploy Hook 触发重建；待 design-arch 验证的事项见 [reader-build-time-prerender.md](reader-build-time-prerender.md)
 - **跨 Feature**: 文章列表的封面图需要 F-001 新增"封面"字段（post 数据模型 + 写文章页设置抽屉上传，复用 US-05 图片上传能力），待在 F-001 内走需求变更；参考站的评论区属 F-004（Giscus）；阅读数 / 在读人数 / 喜欢需要新的数据能力，不在 F-002 当前范围内，是否纳入待 define-feature 决策
 
 ## 估算

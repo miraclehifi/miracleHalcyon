@@ -21,7 +21,7 @@
 |-------|--------|------|----------|------|
 | TC-US09-01 | SC-DELETE-01 | 从列表左滑删除（全滑 / 抽屉"删除"） | P0 | e2e |
 | TC-US09-02 | SC-DELETE-02 | 从写文章页（含未保存修改）删除后回到列表 | P0 | e2e |
-| TC-US09-03 | SC-DELETE-04 | 删除已发布（clean / dirty）文章后读者 404 且缓存失效 | P0 | performance |
+| TC-US09-03 | SC-DELETE-04 | 删除已发布（clean / dirty）文章后读者 404 且触发重建 | P0 | performance |
 | TC-US09-04 | SC-DELETE-05 | 重复删除 / 不存在 id → 404，其他数据不受影响 | P1 | api |
 | TC-US09-05 | SC-DELETE-06 | 删除接口 500 时提示且文章保留 | P1 | e2e |
 | TC-US09-06 | SC-DELETE-01, SC-DELETE-04 | 状态转换：任意状态 → deleted；deleted 上的操作被拒 | P0 | api |
@@ -116,16 +116,16 @@
 
 **前置条件：**
 - 【数据前置】已发布 clean 文章 slug `old-post`；已发布 dirty 文章 slug `old-dirty`（已发布 "D1"，编辑 "D2"）
-- 【环境前置】预发布环境；先以读者身份访问 `/posts`、`/posts/old-post`、`/posts/old-dirty` 使其进入缓存
+- 【环境前置】预发布环境（已配置 Workers Builds Deploy Hook）；确认 `/posts`、`/posts/old-post`、`/posts/old-dirty` 为已发布状态的静态页
 
-**步骤：** 分别删除两篇；记录 T0；每 1s 轮询读者接口与页面
+**步骤：** 分别删除两篇；记录 T0；读者接口立即检查，页面每 10s 轮询
 
 **预期结果：**
 - 读者端按 slug "old-post" 读取返回不存在（`old-dirty` 同样，已发布内容与未发布修改都不可读）
-- 读者缓存失效：10 秒内文章列表页 `/posts` 不再列出、文章页返回 404（10s 沿用 US-08 SC-PUBLISH-07 约定）
+- 触发读者页重建：重建完成后（≤ 5 分钟，沿用 US-08 SC-PUBLISH-07 约定）文章列表页 `/posts` 不再列出、文章页返回 404
 - 删除后可用同一 slug 新建文章（slug 被释放，以 design-domain 确认）
 
-**清理：** `resetPosts()`；清除缓存
+**清理：** `resetPosts()`；触发一次重建
 
 ---
 
@@ -575,7 +575,7 @@ expect(deleteCalls).toBe(0);
 | SC-DELETE-08 | BH-08 | AC-4 | TC-US09-15 |
 | SC-DELETE-09 | BH-09 | AC-4 | TC-US09-16 |
 
-**NFR 覆盖**：授权 401（TC-US09-07）、CSRF（TC-US09-08）、缓存失效（TC-US09-03）、XSS 边界（TC-US09-10）
+**NFR 覆盖**：授权 401（TC-US09-07）、CSRF（TC-US09-08）、读者页重建（TC-US09-03）、XSS 边界（TC-US09-10）
 
 **Gap 分析**：behaviors.md SC-ID 共 9 个（SC-DELETE-01 ~ 09），全部被 `covers` 引用。**Gap: 无**
 
@@ -595,3 +595,4 @@ expect(deleteCalls).toBe(0);
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-12 | v1.1 | 列表删除改为左滑 / 全滑 + 6 秒撤销：改写 TC-01、05、13；确认框类 TC-10~12 限定写文章页；新增 TC-14（撤销）、15（离开页面 / 连续删除）、16（滑动交互）（[Backlog](../../../../../backlog/swipe-row-actions.md)） | miraclehifi |
+| 2026-10-13 | v1.2 | TC-03：缓存失效改为触发重建，5 分钟内可见（[Backlog](../../../../../backlog/reader-build-time-prerender.md)） | miraclehifi |

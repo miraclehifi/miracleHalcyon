@@ -24,7 +24,7 @@
 
 ## 唯一测试（红 → 绿）
 
-[TC-US08 发布草稿](../../test/features/F-001-文章写作/acceptance/post-management/US-08-tests.md)：草稿点"发布"→ 先保存再发布 → 徽标变"已发布"、提示"已发布，读者 10 秒内可见"；`GET /api/posts/:slug` 返回 200
+[TC-US08 发布草稿](../../test/features/F-001-文章写作/acceptance/post-management/US-08-tests.md)：草稿点"发布"→ 先保存再发布 → 徽标变"已发布"、提示"已发布，几分钟后读者可见"；`GET /api/posts/:slug` 返回 200
 
 ## DoD（完成定义）
 

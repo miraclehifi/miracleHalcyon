@@ -59,7 +59,7 @@ Then 确认框关闭，文章仍在
 Given 已发布文章 slug 为 "old-post"
 When 我删除它
 Then 读者端按 slug "old-post" 读取返回不存在
-  And 读者缓存失效
+  And 触发读者页重建
 ```
 
 ## BH-05: 删除不存在的文章返回 404

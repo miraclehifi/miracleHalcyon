@@ -1,6 +1,6 @@
 # F-001 文章写作 — 架构设计
 
-**最后更新**: 2026-10-12
+**最后更新**: 2026-10-13
 **状态**: approved（2026-10-12）
 
 > 输入：[feature-scope.md](../../../../product/features/F-001-文章写作/feature-scope.md)、[stories/_index.md](../../../../product/features/F-001-文章写作/stories/_index.md)、[全局 NFR](../../../../product/nfr.md)、UI 规格（[site-map](../../../../ui/site-map.md)、[components](../../../../ui/components.md)、[pages/](../../../../ui/pages/)）、[article-image-display Backlog](../../../../backlog/article-image-display.md)
@@ -34,7 +34,7 @@ graph TB
 
 | 层级 | 技术 | 说明 |
 |------|------|------|
-| 框架 | Astro 7 + `@astrojs/cloudflare`，`output: 'server'` | `/admin/**` 与 `/api/**` 均 `prerender = false`；读者页的预渲染/缓存策略由 F-002 定 |
+| 框架 | Astro 7 + `@astrojs/cloudflare`，`output: 'server'` | `/admin/**` 与 `/api/**` 均 `prerender = false`；读者页构建时预渲染（ADR-001 修订），细节由 F-002 定 |
 | 交互 | React 19（Astro islands，`client:load`） | 每个后台页面 = 一个 `.astro` 外壳 + 一个页面级 island |
 | 样式 | Tailwind CSS 4 + `@tailwindcss/typography` | 令牌来自 [design-tokens.md](../../../../ui/design-tokens.md) |
 | Markdown | unified：`remark-parse` → `remark-gfm` → `remark-rehype` → `rehype-sanitize` → `rehype-expressive-code` → 自定义图片插件 | 同构模块，见 ADR-001 |
@@ -64,7 +64,7 @@ graph LR
     API[/api/admin/*/] --> post
     API --> media
     post -.引用 URL 字符串.-> media
-    post -->|onPublicationChanged 钩子| Cache[读者缓存失效<br/>F-002 实现]
+    post -->|onPublicationChanged 钩子| Rebuild[触发读者页重建<br/>Deploy Hook，F-002 实现]
     Preview[MarkdownPreview] --> markdown
     ReaderF002[F-002 读者页] --> markdown
     ReaderF002 -->|只读 PublishedPost| post
@@ -77,8 +77,8 @@ graph LR
 | `auth` | middleware → 全部 `/admin/**`、`/api/admin/**` | Open Host Service | 只暴露 `getSession(cookie)`；业务 Domain 不感知认证 |
 | `media` | `post` | 无直接调用 | 正文里只存图片 URL；删除文章不删图片（US-09 约束） |
 | `post` | F-002 | Customer-Supplier | 只读接口 `listPublished / getPublishedBySlug / listTags`，只返回已发布快照 |
-| `post` | 读者缓存（F-002） | 钩子 | `onPublicationChanged({ slug, prevSlug })`：发布/发布更新/撤回/删除后调用；F-001 内为空实现 |
-| `markdown` | 后台预览、F-002 | Shared Kernel | 同一份代码，浏览器（Web Worker）与 Worker SSR 两处运行 |
+| `post` | 读者页重建（F-002） | 钩子 | `onPublicationChanged({ slug, prevSlug })`：发布/发布更新/撤回/删除后调用；F-001 内为空实现 |
+| `markdown` | 后台预览、F-002 | Shared Kernel | 同一份代码，浏览器（Web Worker）与读者页构建时两处运行 |
 
 **铁律落实**：每个 Domain 只访问自己的表（`auth`：`sessions`、`login_attempts`；`post`：`posts`；`media`：`images`），跨 Domain 只通过函数接口。
 
@@ -265,7 +265,7 @@ src/
 | `post` 只读接口 | F-002 只能用 `published-query.ts`，读不到工作稿 |
 | 渲染规则 | F-002 使用 `src/lib/markdown`，不得另写渲染 |
 | 图片组件 | `ArticleImage`、`LiveBadge`、`ImageGallery` 由 F-001 实现；`Lightbox` 仍归 F-002 |
-| 缓存失效 | F-002 实现 `onPublicationChanged`；"10 秒内可见"由 F-002 的缓存策略保证 |
+| 读者页重建 | 读者页构建时预渲染；F-002 实现 `onPublicationChanged` 为调用 Workers Builds Deploy Hook，重建完成后可见（P95 ≤ 5 分钟） |
 
 ### 8.2 范围变更（本阶段决策：实况照片 / 宽图 / 组图 F-001 全做）
 
@@ -300,3 +300,4 @@ src/
 | 2026-10-12 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-13 | 1.1 | design-domain 回写：认证路径改为 `/api/admin/login`、`/api/admin/logout`（与验收用例一致）；新增读者只读接口分组；详细契约见 `backend/domains/*/api-contract.md` | miraclehifi |
 | 2026-10-13 | 1.2 | 框架由 Astro 5 改为 Astro 7（作者决定，implement 开始时）| miraclehifi |
+| 2026-10-13 | 1.3 | 读者页改为构建时预渲染，缓存失效钩子改为触发重建（ADR-001 修订） | miraclehifi |
