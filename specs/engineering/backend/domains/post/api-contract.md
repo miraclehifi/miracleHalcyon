@@ -81,6 +81,8 @@
 
 ### POST /api/admin/posts
 
+> 已实现：`src/pages/api/admin/posts/index.ts`（`createCreatePostHandler`）；请求解析与错误映射在 `src/lib/api/http.ts`：类型错误与领域校验错误合并为一次 `VALIDATION_FAILED`，`message` 为各字段提示以"；"拼接；JSON 无法解析 → 400；请求体 > 1MB → 413。
+
 **请求**：`DraftInput`（全部可选，缺省按空值处理）
 
 ```json
