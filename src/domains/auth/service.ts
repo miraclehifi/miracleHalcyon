@@ -1,4 +1,5 @@
 // AuthService（auth domain-model §4）
+import { sha256, sha256Hex } from "../../lib/crypto";
 import { verifyPassword, type PasswordHash } from "./password";
 import type { AdminSession, SessionRepo } from "./session-repo";
 import { isLocked, nextThrottleState } from "./throttle";
@@ -29,13 +30,9 @@ export interface AuthDeps {
   verify?: typeof verifyPassword;
 }
 
-async function sha256(value: string): Promise<Uint8Array> {
-  return new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
-}
-
 // TokenHash：SHA-256(token) 小写 hex
-export async function hashToken(token: string): Promise<string> {
-  return Array.from(await sha256(token), (b) => b.toString(16).padStart(2, "0")).join("");
+export function hashToken(token: string): Promise<string> {
+  return sha256Hex(token);
 }
 
 // SessionToken：32 字节随机数 base64url（43 字符）

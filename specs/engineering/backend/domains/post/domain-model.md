@@ -46,7 +46,7 @@
 | body | string | GFM Markdown 原文；≤ 200,000 字符 |
 | publishedAt | 日期? | 作者填写的"发布日期"；新建默认当天（由前端按作者本地日期填入） |
 
-`contentHash(c)` = SHA-256（规范化 JSON：上表 6 个字段按固定顺序）。
+`contentHash(c)` = SHA-256（规范化 JSON：上表 6 个字段按固定顺序）。已实现：`src/domains/post/content-hash.ts`（标签顺序计入哈希）。
 
 ### 2.3 不变量
 
