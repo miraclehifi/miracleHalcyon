@@ -61,7 +61,7 @@ Then 编辑区显示刚才写的完整内容
 Given 我在新建文章页，标题为空
 When 我输入正文并停止 2 秒
 Then 创建一篇标题为"无标题"的草稿
-  And 地址栏变为 /admin/posts/{id}/edit
+  And 地址栏变为 /admin/posts/{id}
 ```
 
 ## BH-05: 空白新建页不产生草稿

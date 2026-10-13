@@ -70,7 +70,7 @@
 | 56 | [add-post-list-search](add-post-list-search.md) | 文章列表标题搜索 | article-writing | FRONTEND | 表现层 | US-07 | add-post-list-status-filter | 1 | 低 | completed |
 | 57 | [add-post-list-pagination](add-post-list-pagination.md) | 文章列表分页 | article-writing | FRONTEND | 表现层 | US-07 | add-post-list-search | 1 | 低 | completed |
 | 58 | [add-post-list-empty-states](add-post-list-empty-states.md) | 文章列表空状态与无结果 | article-writing | FRONTEND | 表现层 | US-07 | add-post-list-pagination | 0 | 低 | completed |
-| 59 | [build-editor-page-shell](build-editor-page-shell.md) | 实现写文章页框架与加载 | article-writing | FRONTEND | 表现层 | US-03 | implement-get-post-endpoint, build-status-badge-component, build-icon-button-component | 3 | 中 | pending |
+| 59 | [build-editor-page-shell](build-editor-page-shell.md) | 实现写文章页框架与加载 | article-writing | FRONTEND | 表现层 | US-03 | implement-get-post-endpoint, build-status-badge-component, build-icon-button-component | 3 | 中 | completed |
 | 60 | [build-markdown-editor-pane](build-markdown-editor-pane.md) | 实现编辑区（标题 + 源码区 + 底栏） | article-writing | FRONTEND | 表现层 | US-03 | build-editor-page-shell | 1 | 低 | pending |
 | 61 | [build-post-settings-drawer](build-post-settings-drawer.md) | 实现设置抽屉（slug 跟随、摘要、日期） | article-writing | FRONTEND | 表现层 | US-03 | build-editor-page-shell, build-field-component, implement-slugify | 2 | 低 | pending |
 | 62 | [build-tag-input](build-tag-input.md) | 实现标签输入与补全 | article-writing | FRONTEND | 表现层 | US-03 | build-post-settings-drawer, implement-tags-endpoint | 0 | 低 | pending |

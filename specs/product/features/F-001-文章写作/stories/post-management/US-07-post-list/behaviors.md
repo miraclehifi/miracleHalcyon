@@ -35,7 +35,7 @@ Then 列表依次显示 A、B、C
 ```gherkin
 Given 列表中有文章 A
 When 我点击 A 的标题
-Then 进入 /admin/posts/{A.id}/edit
+Then 进入 /admin/posts/{A.id}
 ```
 
 ## BH-03: 点击"新建文章"进入空白写文章页

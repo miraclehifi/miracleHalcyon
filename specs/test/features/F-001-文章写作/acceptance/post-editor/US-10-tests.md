@@ -126,7 +126,7 @@
 **前置条件：** `postFactory({body:"写作是思考"})` 创建文章 P
 
 **步骤：**
-1. 打开 `/admin/posts/:idP/edit`，在源码区选中"思考"
+1. 打开 `/admin/posts/:idP`，在源码区选中"思考"
 2. 点击工具栏"加粗"
 3. 按 `Mod+Z`
 

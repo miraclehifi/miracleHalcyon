@@ -498,7 +498,7 @@
 
 **步骤：** 对每种 Cookie 分别调用：
 1. `POST /api/admin/posts`、`PUT /api/admin/posts/:idP`、`GET /api/admin/posts/:idP`、`GET /api/admin/tags`
-2. 浏览器访问 `/admin/posts/new`、`/admin/posts/:idP/edit`、`/admin/posts/nope/edit`
+2. 浏览器访问 `/admin/posts/new`、`/admin/posts/:idP`、`/admin/posts/nope`
 
 **预期结果：**
 - 步骤 1 全部 401，响应体不含文章数据；文章 P 未被修改
@@ -552,7 +552,7 @@
 
 **步骤：**
 1. `PUT /api/admin/posts/:idP` 提交上述数据（注：标签值若不满足标签规则被拒属可接受结果）
-2. 浏览器打开 `/admin/posts/:idP/edit`，监听 `page.on('dialog')`
+2. 浏览器打开 `/admin/posts/:idP`，监听 `page.on('dialog')`
 
 **预期结果：**
 - API 原样存储或按规则拒绝，不在服务端执行/转义破坏数据
@@ -650,13 +650,13 @@ await expect(page.getByTestId('post-status')).toHaveText('草稿');
 
 **预期结果：**
 - 浏览器默认"保存网页"对话框未出现（快捷键被拦截）
-- 地址栏变为 `/admin/posts/{id}/edit`（`{id}` 非空）
+- 地址栏变为 `/admin/posts/{id}`（`{id}` 非空）
 - 通过 `GET /api/admin/posts/{id}` 校验 `status` = `draft`，字段与输入一致
 
 **playwright_hint：**
 ```ts
 await page.keyboard.press('ControlOrMeta+S');
-await expect(page).toHaveURL(/\/admin\/posts\/[^/]+\/edit$/);
+await expect(page).toHaveURL(/\/admin\/posts\/\d+$/);
 ```
 
 **清理：** 删除该文章
@@ -678,7 +678,7 @@ await expect(page).toHaveURL(/\/admin\/posts\/[^/]+\/edit$/);
 
 **前置条件：** 【数据前置】`postFactory({title:"旧标题", body:"旧正文", tags:["astro"], summary:"旧摘要"})` 创建文章 P，随后再 `PUT` 将 body 改为 `旧正文-v2`（验证取最新）
 
-**步骤：** 访问 `/admin/posts/:idP/edit`
+**步骤：** 访问 `/admin/posts/:idP`
 
 **预期结果：** 标题显示"旧标题"；编辑区内容为"旧正文-v2"；标签块"astro"；摘要"旧摘要"；slug 为 Factory 生成值
 
@@ -755,7 +755,7 @@ await expect(page.getByLabel('slug')).toHaveValue('my-post');
 
 **预期结果：**
 - 步骤 1：slug 输入框为空，并显示提示"请填写英文 slug"
-- 步骤 2：保存成功（URL 变为 `/admin/posts/{id}/edit`），状态仍为"草稿"
+- 步骤 2：保存成功（URL 变为 `/admin/posts/{id}`），状态仍为"草稿"
 
 **playwright_hint：**
 ```ts
@@ -925,7 +925,7 @@ await expect(page.getByTestId('tag-chip')).toHaveText(['cloudflare']);
 |------|------|
 | TC-ID | TC-US03-26 |
 | covers | SC-POSTINFO-11 |
-| Scenario | 访问 `/admin/posts/nope/edit` |
+| Scenario | 访问 `/admin/posts/nope` |
 | Priority | P1 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ |
@@ -935,20 +935,20 @@ await expect(page.getByTestId('tag-chip')).toHaveText(['cloudflare']);
 **前置条件：** 【数据前置】id `nope` 不存在；【环境前置】已登录
 
 **步骤：**
-1. 访问 `/admin/posts/nope/edit`
-2. 点击"返回列表"
+1. 访问 `/admin/posts/nope`
+2. 点击"返回文章列表"
 
 **预期结果：**
-- 步骤 1：HTTP 状态 404；页面显示"文章不存在"与"返回列表"按钮；不渲染编辑表单
-- 步骤 2：跳转至 `/admin/posts`
+- 步骤 1：HTTP 状态 404；页面显示"文章不存在或已被删除"与"返回文章列表"链接；不渲染编辑表单
+- 步骤 2：跳转至 `/admin`
 
 **playwright_hint：**
 ```ts
-const resp = await page.goto('/admin/posts/nope/edit');
+const resp = await page.goto('/admin/posts/nope');
 expect(resp?.status()).toBe(404);
 await expect(page.getByText('文章不存在')).toBeVisible();
-await page.getByRole('button', { name: '返回列表' }).click();
-await expect(page).toHaveURL(/\/admin\/posts$/);
+await page.getByRole('link', { name: '返回文章列表' }).click();
+await expect(page).toHaveURL(/\/admin$/);
 ```
 
 **清理：** 无
@@ -992,3 +992,4 @@ await expect(page).toHaveURL(/\/admin\/posts$/);
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | AI（design-acceptance） |
+| 2026-10-13 | v1.1 | 与 design-ui 对齐（build-editor-page-shell）：编辑页路由 `/admin/posts/:id`（去掉 `/edit`）；不存在时文案"文章不存在或已被删除"、链接"返回文章列表"回到 `/admin` | miraclehifi |

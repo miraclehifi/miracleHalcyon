@@ -61,7 +61,7 @@
 
 **前置条件：**
 - 【数据前置】Factory 创建草稿：title `Hello Astro`、slug `hello-astro`、body `# Hi\n正文 V1`、published_at `2026-10-01`
-- 【环境前置】已登录，打开 `/admin/posts/{id}/edit`，状态栏"已保存"
+- 【环境前置】已登录，打开 `/admin/posts/{id}`，状态栏"已保存"
 
 **步骤：**
 1. 点击"发布"

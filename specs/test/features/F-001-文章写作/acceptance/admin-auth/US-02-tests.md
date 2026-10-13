@@ -101,7 +101,7 @@
 - 【数据前置】每组新登录；Factory 预建文章 `tc-us02-02`（ID 记为 `{id}`）
 - 【环境前置】浏览器上下文已登录
 
-**测试数据**（等价类，参数化起始页）：`/admin`；`/admin/posts/new`（未输入任何内容）；`/admin/posts/{id}/edit`（未修改）
+**测试数据**（等价类，参数化起始页）：`/admin`；`/admin/posts/new`（未输入任何内容）；`/admin/posts/{id}`（未修改）
 
 **步骤**
 1. 打开起始页
@@ -443,7 +443,7 @@
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ |
 | type | ui-interaction |
-| playwright_hint | `await page.getByRole('button', { name: '登出' }).click(); const dlg = page.getByRole('dialog'); await expect(dlg).toContainText('有未保存的修改，确定登出吗？'); await dlg.getByRole('button', { name: '取消' }).click(); await expect(page).toHaveURL(/\/admin\/posts\/.+\/edit/)`（若采用原生 `confirm()`，改用 `page.once('dialog', d => { expect(d.message()).toBe('有未保存的修改，确定登出吗？'); d.dismiss(); })`） |
+| playwright_hint | `await page.getByRole('button', { name: '登出' }).click(); const dlg = page.getByRole('dialog'); await expect(dlg).toContainText('有未保存的修改，确定登出吗？'); await dlg.getByRole('button', { name: '取消' }).click(); await expect(page).toHaveURL(/\/admin\/posts\/\d+/)`（若采用原生 `confirm()`，改用 `page.once('dialog', d => { expect(d.message()).toBe('有未保存的修改，确定登出吗？'); d.dismiss(); })`） |
 | Change History | 2026-10-10 v1.0 初始创建 |
 
 **前置条件**

@@ -40,7 +40,7 @@ Given 我在新建文章的写文章页
 When 我输入标题"Hello Astro"、标签"astro"、摘要和正文
   And 保存（自动保存或 Ctrl/Cmd+S）
 Then 文章以草稿状态写入数据库
-  And 地址栏变为 /admin/posts/{id}/edit
+  And 地址栏变为 /admin/posts/{id}
 ```
 
 ## BH-03: 打开已有文章显示最新保存内容
@@ -137,6 +137,6 @@ Then 只剩 "cloudflare"
 
 ```gherkin
 Given 不存在 id 为 "nope" 的文章
-When 我访问 /admin/posts/nope/edit
+When 我访问 /admin/posts/nope
 Then 显示"文章不存在"与"返回列表"按钮
 ```

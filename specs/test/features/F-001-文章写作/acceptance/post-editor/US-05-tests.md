@@ -97,7 +97,7 @@
 **测试数据：** `shot-200k.png`（204,800 B，MIME `image/png`，剪贴板无文件名）
 
 **步骤：**
-1. 打开 `/admin/posts/{id}/edit`，光标置于正文 `第一段` 之后并回车
+1. 打开 `/admin/posts/{id}`，光标置于正文 `第一段` 之后并回车
 2. 派发 paste 事件，载荷为 `shot-200k.png`
 3. 等待 `POST /api/admin/images` 响应
 

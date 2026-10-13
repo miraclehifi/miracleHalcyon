@@ -222,7 +222,7 @@
 | type | security |
 | Change History | 2026-10-10 v1.0 初始创建 |
 
-**前置条件：** 【数据前置】`postFactory({body:""})` 创建文章 P；【环境前置】已登录，打开 `/admin/posts/:idP/edit`，视口 1280×800
+**前置条件：** 【数据前置】`postFactory({body:""})` 创建文章 P；【环境前置】已登录，打开 `/admin/posts/:idP`，视口 1280×800
 
 **测试数据：** `xss-payloads.json` 全部载荷拼接为一篇正文
 
@@ -500,7 +500,7 @@ await editor.press('Backspace'); await expect(ph).toBeVisible();
 **测试数据：** 视口宽度 768 与 1280（高 800）
 
 **步骤（每个宽度各执行一遍）：**
-1. 打开 `/admin/posts/:idP/edit`
+1. 打开 `/admin/posts/:idP`
 2. 点击视图切换"仅编辑"
 3. 点击"仅预览"
 4. 切回并排视图

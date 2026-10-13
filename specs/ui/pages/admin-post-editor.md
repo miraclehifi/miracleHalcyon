@@ -178,6 +178,8 @@
 
 ## 页面状态
 
+> 已实现（Sprint 1，build-editor-page-shell）：`src/pages/admin/posts/new.astro`、`[id].astro`（SSR 读取，不存在返回 404）、`src/components/admin/editor/PostEditorPage.tsx`、`EditorTopBar.tsx`；视图切换在 Sprint 2 接入。
+
 | 状态 | 表现 |
 |------|------|
 | 新建 | 空表单，徽标"草稿"，保存状态不显示（直到第一次保存），设置抽屉打开 |

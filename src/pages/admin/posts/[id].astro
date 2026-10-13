@@ -1,0 +1,30 @@
+---
+// 写文章页 · 编辑（admin-post-editor.md，US-03）：服务端读取工作稿；id 非法或文章不存在 → 404
+import { env } from "cloudflare:workers";
+import { PostEditorPage } from "../../../components/admin/editor/PostEditorPage";
+import { D1PostRepo } from "../../../domains/post/repo";
+import { createPostService } from "../../../domains/post/service";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { parsePostId } from "../../../lib/api/http";
+
+export const prerender = false;
+
+const id = parsePostId(Astro.params.id);
+const post = id === null ? null : await createPostService({ repo: new D1PostRepo(env.DB) }).getForEdit(id);
+if (!post) Astro.response.status = 404;
+---
+
+<BaseLayout title={post ? `${post.title || "无标题"} · 编辑` : "文章不存在 · miracleHalcyon 后台"}>
+  {
+    post ? (
+      <PostEditorPage client:load initial={post} />
+    ) : (
+      <main class="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
+        <p class="text-title font-semibold text-ink">文章不存在或已被删除</p>
+        <a href="/admin" class="text-ui text-ink underline underline-offset-4 hover:text-ink-muted">
+          返回文章列表
+        </a>
+      </main>
+    )
+  }
+</BaseLayout>

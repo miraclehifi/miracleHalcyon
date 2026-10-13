@@ -89,7 +89,7 @@
 **测试数据：** 输入 T1
 
 **步骤：**
-1. 打开 `/admin/posts/{id}/edit`，在正文输入 T1
+1. 打开 `/admin/posts/{id}`，在正文输入 T1
 2. `page.clock.runFor(2000)`，等待保存响应
 3. `GET /api/admin/posts/{id}`
 
@@ -288,7 +288,7 @@
 
 **步骤：**
 1. 输入正文，等待状态栏显示"已保存"
-2. `page.close()`，新开 page 打开 `/admin/posts/{id}/edit`
+2. `page.close()`，新开 page 打开 `/admin/posts/{id}`
 
 **预期结果：**
 - 编辑区内容与步骤 1 输入逐字符一致
@@ -324,7 +324,7 @@
 **预期结果：**
 - 发起 1 次 `POST /api/admin/posts`，返回新 id
 - DB 新增 1 篇文章（总数 N+1），`title` = `无标题`，`status` = 草稿，`body` = T1
-- 地址栏变为 `/admin/posts/{id}/edit`（`history.replaceState`，页面不刷新，编辑区光标与内容保留）
+- 地址栏变为 `/admin/posts/{id}`（`history.replaceState`，页面不刷新，编辑区光标与内容保留）
 - 标题仅空格时同样保存为 `无标题`
 
 **清理：** 删除新建文章
@@ -493,7 +493,7 @@
 **测试数据：** 见前置条件（本地比服务端新 1 分钟）
 
 **步骤：**
-1. 打开 `/admin/posts/{id}/edit`
+1. 打开 `/admin/posts/{id}`
 2. 点击"恢复"
 
 **预期结果：**

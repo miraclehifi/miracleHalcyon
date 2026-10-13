@@ -1,0 +1,11 @@
+---
+// 写文章页 · 新建（admin-post-editor.md，US-03）：空表单；首次自动保存后地址换成 /admin/posts/:id
+import { PostEditorPage } from "../../../components/admin/editor/PostEditorPage";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+export const prerender = false;
+---
+
+<BaseLayout title="新建文章 · miracleHalcyon 后台">
+  <PostEditorPage client:load initial={null} />
+</BaseLayout>
