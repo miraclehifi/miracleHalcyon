@@ -2,7 +2,7 @@
 
 **最后更新**: 2026-10-10
 
-> 个人技术博客兼作品集。Astro 5 + React 19 + Cloudflare（D1 / R2）。
+> 个人技术博客兼作品集。Astro 7 + React 19 + Cloudflare（D1 / R2）。
 
 ## 产品
 

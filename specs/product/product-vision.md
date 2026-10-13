@@ -1,6 +1,6 @@
 # miracleHalcyon
 
-**最后更新**: 2026-10-10
+**最后更新**: 2026-10-13
 **状态**: approved
 
 ---
@@ -49,7 +49,7 @@
 ## 5. 全局约束
 
 ### 技术约束
-- 框架：Astro 5（SSR 混合模式，`@astrojs/cloudflare` 适配器）+ React 19 + TypeScript
+- 框架：Astro 7（SSR 混合模式，`@astrojs/cloudflare` 适配器）+ React 19 + TypeScript
 - 样式：Tailwind CSS 4 + `@tailwindcss/typography`
 - 部署：Cloudflare（Pages / Workers）
 - 数据存储：文章与元数据存 Cloudflare D1，图片存 Cloudflare R2
@@ -87,3 +87,4 @@
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-13 | 1.1 | 框架改为 Astro 7 | miraclehifi |

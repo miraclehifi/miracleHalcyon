@@ -1,18 +1,18 @@
 # CLAUDE.md - miracleHalcyon
 
-**最后更新**: 2026-10-10
+**最后更新**: 2026-10-13
 
 ---
 
 ## 项目概述
 
-miracleHalcyon 是一个个人技术博客兼作品集，读者端阅读体验优先，作者可登录后在线写作。基于 Astro 5（SSR 混合模式）+ React 19 + TypeScript，部署在 Cloudflare。
+miracleHalcyon 是一个个人技术博客兼作品集，读者端阅读体验优先，作者可登录后在线写作。基于 Astro 7（SSR 混合模式）+ React 19 + TypeScript，部署在 Cloudflare。
 
 > 产品定义详见 [specs/product/product-vision.md](specs/product/product-vision.md)
 
 | 层 | 选型 |
 |----|------|
-| 框架 | Astro 5 + `@astrojs/react` + `@astrojs/cloudflare`（读者页预渲染/缓存，写作页 SSR） |
+| 框架 | Astro 7 + `@astrojs/react` + `@astrojs/cloudflare`（读者页预渲染/缓存，写作页 SSR） |
 | 数据 | Cloudflare D1（文章）+ R2（图片） |
 | 认证 | 单管理员账号密码登录 |
 | 样式 | Tailwind CSS 4 + `@tailwindcss/typography` |
@@ -33,8 +33,10 @@ miracleHalcyon 是一个个人技术博客兼作品集，读者端阅读体验�
 | 安装依赖 | `npm install` |
 | 开发服务器 | `npm run dev` |
 | 构建 | `npm run build` |
-| 测试 | <!-- 待定 --> |
-| Lint | <!-- 待定 --> |
+| 预览构建产物 | `npm run preview`（workerd 本地运行） |
+| 生成绑定类型 | `npm run cf-typegen`（改 wrangler.jsonc 后执行） |
+| 测试 | `npm test`（单元 / 集成，Vitest；`setup-workers-test-pool` 后可用）、`npm run test:e2e`（Playwright：chromium + webkit，自动 build + `astro preview`） |
+| Lint / 类型检查 | `npm run lint`、`npm run check`（astro check） |
 
 ---
 
@@ -77,3 +79,4 @@ specs/
 | 日期 | 版本 | 变更内容 |
 |------|------|----------|
 | 2026-10-10 | 1.0 | 初始版本，SDD 框架接入，确定技术栈 |
+| 2026-10-13 | 1.1 | 框架升级为 Astro 7（作者决定用最新版） |

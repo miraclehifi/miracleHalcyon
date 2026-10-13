@@ -12,7 +12,7 @@
 
 | # | Task | 名称 | 来源 PBI | 类别 | 架构层级 | US | 依赖 | 被依赖数 | 不确定性 | 状态 |
 |---|------|------|---------|------|---------|----|------|---------|---------|------|
-| 1 | [scaffold-project-skeleton](scaffold-project-skeleton.md) | 搭建 Astro + Cloudflare 项目骨架 | article-writing | SETUP | 基础设施 | — | — | 3 | 中 | pending |
+| 1 | [scaffold-project-skeleton](scaffold-project-skeleton.md) | 搭建 Astro + Cloudflare 项目骨架 | article-writing | SETUP | 基础设施 | — | — | 3 | 中 | completed |
 | 2 | [setup-workers-test-pool](setup-workers-test-pool.md) | 配置 Workers 单元 / 集成测试环境 | article-writing | SETUP | 基础设施 | — | scaffold-project-skeleton | 7 | 中 | pending |
 | 3 | [spike-markdown-workers-runtime](spike-markdown-workers-runtime.md) | 验证：Expressive Code 在 Workers 中运行 | article-writing | SETUP | 基础设施 | US-04 | setup-workers-test-pool | 2 | 高 | pending |
 | 4 | [spike-markdown-browser-worker](spike-markdown-browser-worker.md) | 验证：浏览器 Web Worker 渲染性能 | article-writing | SETUP | 基础设施 | US-04 | spike-markdown-workers-runtime | 1 | 高 | pending |

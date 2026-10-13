@@ -1,6 +1,6 @@
 feature: F-001
 name: "文章写作"
-status: planning
+status: in_progress
 created: 2026-10-10
 updated: 2026-10-13
 backlog: specs/backlog/article-writing.md
@@ -14,15 +14,24 @@ phases:
   architecture: done
   domain_design: done   # domain_model / api_contract / data_model: self-checked
   task_planning: done   # self-checked；Sprint 1 共 69 个任务（specs/tasks/sprint-1/）
-  implementation: pending
+  implementation: in_progress
   validation: pending
-current_phase: task_planning   # 等待作者确认 Sprint 1 任务（approvals.tasks）
+current_phase: implementation
 blockers: []
 notes: "范围决策：含文章管理列表与删除；仅支持 GFM Markdown（不支持 MDX）；不做版本历史、定时发布、图片库；2026-10-12 新增 US-10 format-toolbar（工具栏格式快捷键 + WarmTooltip 悬停提示，backlog/editor-warm-tooltip.md）"
 approvals:
   requirements: true
   ui_design: true
   design: true   # 2026-10-12 架构审批通过
-  tasks: false
+  tasks: true   # 2026-10-13 作者"开始开发"确认 Sprint 1
   release: false
 has_ui_changes: true
+checkpoint:
+  sprint: sprint-1
+  current_task: setup-workers-test-pool
+  current_phase: red
+  completed_tasks: [scaffold-project-skeleton]   # 1 / 69
+  blocked_tasks: []
+  test_command: "npm test / npm run test:e2e"
+  env_info: "Windows 11, Node 22.18.0（建议升级 ≥ 22.22.3）, npm 10.9.3；Astro 7.3 + @astrojs/cloudflare 14 + wrangler 4.149 + TS 6.0"
+  last_updated: "2026-10-13"

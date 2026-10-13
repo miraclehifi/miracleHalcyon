@@ -34,7 +34,7 @@ graph TB
 
 | 层级 | 技术 | 说明 |
 |------|------|------|
-| 框架 | Astro 5 + `@astrojs/cloudflare`，`output: 'server'` | `/admin/**` 与 `/api/**` 均 `prerender = false`；读者页的预渲染/缓存策略由 F-002 定 |
+| 框架 | Astro 7 + `@astrojs/cloudflare`，`output: 'server'` | `/admin/**` 与 `/api/**` 均 `prerender = false`；读者页的预渲染/缓存策略由 F-002 定 |
 | 交互 | React 19（Astro islands，`client:load`） | 每个后台页面 = 一个 `.astro` 外壳 + 一个页面级 island |
 | 样式 | Tailwind CSS 4 + `@tailwindcss/typography` | 令牌来自 [design-tokens.md](../../../../ui/design-tokens.md) |
 | Markdown | unified：`remark-parse` → `remark-gfm` → `remark-rehype` → `rehype-sanitize` → `rehype-expressive-code` → 自定义图片插件 | 同构模块，见 ADR-001 |
@@ -242,7 +242,7 @@ src/
 
 ---
 
-## 7. 部署与项目骨架
+## 7. 部署与项目骨架（✅ 骨架已实现：scaffold-project-skeleton）
 
 | 环境 | 用途 | 绑定 |
 |------|------|------|
@@ -250,7 +250,8 @@ src/
 | Preview | 分支推送自动构建 | 预览用 D1/R2 |
 | Production | `main` 推送自动构建 | 生产 D1（Time Travel 开启）、R2；Secrets |
 
-- `wrangler.jsonc` 声明 `DB`（D1）、`MEDIA`（R2）绑定；迁移用 `wrangler d1 migrations`
+- `wrangler.jsonc` 声明 `DB`（D1）、`MEDIA`（R2）绑定；迁移用 `wrangler d1 migrations`，目录 `src/db/migrations`（✅ 已实现）
+- 适配器关闭 KV 会话（`session: false`）与 Cloudflare Images（`imageService: "passthrough"`），分别由 ADR-003、ADR-005 覆盖
 - 备份：GitHub Actions 每周 `wrangler d1 export` 上传为 artifact（NFR §3），可手动触发
 
 ---
@@ -298,3 +299,4 @@ src/
 |------|------|----------|------|
 | 2026-10-12 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-13 | 1.1 | design-domain 回写：认证路径改为 `/api/admin/login`、`/api/admin/logout`（与验收用例一致）；新增读者只读接口分组；详细契约见 `backend/domains/*/api-contract.md` | miraclehifi |
+| 2026-10-13 | 1.2 | 框架由 Astro 5 改为 Astro 7（作者决定，implement 开始时）| miraclehifi |
