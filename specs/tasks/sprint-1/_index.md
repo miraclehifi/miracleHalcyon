@@ -48,7 +48,7 @@
 | 34 | [enforce-slug-uniqueness](enforce-slug-uniqueness.md) | 实现 slug 全站唯一校验 | article-writing | DOMAIN | 领域层 | US-03 | implement-post-save-service | 2 | 低 | completed |
 | 35 | [implement-post-publish-service](implement-post-publish-service.md) | 实现发布与发布更新服务 | article-writing | DOMAIN | 领域层 | US-08 | enforce-slug-uniqueness, implement-publish-validation | 2 | 中 | completed |
 | 36 | [implement-post-unpublish-service](implement-post-unpublish-service.md) | 实现撤回服务 | article-writing | DOMAIN | 领域层 | US-08 | implement-post-publish-service | 1 | 低 | completed |
-| 37 | [implement-post-list-query](implement-post-list-query.md) | 实现后台列表查询（D1） | article-writing | DATA | 数据层 | US-07 | implement-post-repo | 1 | 低 | pending |
+| 37 | [implement-post-list-query](implement-post-list-query.md) | 实现后台列表查询（D1） | article-writing | DATA | 数据层 | US-07 | implement-post-repo | 1 | 低 | completed |
 | 38 | [implement-tag-suggestions](implement-tag-suggestions.md) | 实现标签补全查询（D1） | article-writing | DATA | 数据层 | US-03 | implement-post-repo | 1 | 低 | pending |
 | 39 | [implement-published-query](implement-published-query.md) | 实现已发布只读查询（D1） | article-writing | DATA | 数据层 | US-08 | implement-post-repo | 2 | 低 | pending |
 | 40 | [implement-create-post-endpoint](implement-create-post-endpoint.md) | 实现 POST /api/admin/posts | article-writing | API | 接口层 | US-03, US-06 | implement-post-repo, enforce-slug-uniqueness, implement-auth-middleware | 2 | 低 | pending |

@@ -1,7 +1,7 @@
 // 单元测试用内存文章仓储，行为与 D1PostRepo 一致
 import type { PostContent } from "../../../src/domains/post/content";
 import type { Post, PostId } from "../../../src/domains/post/post";
-import type { NewPostRow, PostRepo } from "../../../src/domains/post/repo";
+import type { ListQuery, NewPostRow, PostRepo, PostSummary, StatusCounts } from "../../../src/domains/post/repo";
 
 export class MemoryPostRepo implements PostRepo {
   rows = new Map<PostId, Post>();
@@ -34,5 +34,22 @@ export class MemoryPostRepo implements PostRepo {
   async slugTaken(slug: string, exceptId: PostId = 0): Promise<boolean> {
     if (slug === "") return false;
     return [...this.rows.values()].some((p) => p.id !== exceptId && (p.draft.slug === slug || p.published?.slug === slug));
+  }
+
+  async list({ status, q, page, pageSize }: ListQuery): Promise<{ rows: PostSummary[]; total: number; counts: StatusCounts }> {
+    const matched = [...this.rows.values()].filter((p) => p.draft.title.toLowerCase().includes(q.toLowerCase()));
+    const filtered = matched
+      .filter((p) => status === "all" || (status === "draft") === (p.pubHash === null))
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime() || b.id - a.id);
+    const rows = filtered.slice((page - 1) * pageSize, page * pageSize).map((p) => ({
+      id: p.id,
+      title: p.draft.title,
+      tags: p.draft.tags,
+      draftHash: p.draftHash,
+      pubHash: p.pubHash,
+      updatedAt: p.updatedAt,
+    }));
+    const draft = matched.filter((p) => p.pubHash === null).length;
+    return { rows, total: filtered.length, counts: { all: matched.length, draft, published: matched.length - draft } };
   }
 }

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 37
-**状态**: pending
+**状态**: completed
 **类别**: DATA
 **架构层级**: 数据层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,17 @@ POST-UT-10：25 篇混合状态下的计数口径、排序、`q` 中 `%` `_` 转
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `PostRepo.list`（筛选、搜索、分页、counts、total）
-- [ ] `PostService.list`
+- [x] `PostRepo.list`（筛选、搜索、分页、counts、total）
+- [x] `PostService.list`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 仓储 `list` 返回 `PostSummary`（不读正文，正文最长 20 万字符），domain-model §6 已注明\n- 加强了 `_` 转义用例（`1_0` 不转义会命中两篇）\n- LoginForm 的 `FormEvent`（@types/react 已弃用）改为 `SubmitEvent`
 
 ## 依赖
 

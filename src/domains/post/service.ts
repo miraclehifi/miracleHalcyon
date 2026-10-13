@@ -1,10 +1,10 @@
-// PostService（post domain-model §4）：新建、自动保存、读取、发布、撤回；删除 / 列表等由后续任务补充
+// PostService（post domain-model §4）：新建、自动保存、读取、列表、发布、撤回；删除 / 标签补全由后续任务补充
 import { normalizeContent, type DraftInput, type PostContent } from "./content";
 import { contentHash } from "./content-hash";
 import { MissingFieldsError, NotFoundError, NotPublishedError, SlugTakenError } from "./errors";
 import { noopHooks, type PublicationChange, type PublicationHooks } from "./hooks";
 import { deriveStatus, validateForPublish, type Post, type PostId, type PostStatus } from "./post";
-import type { PostRepo } from "./repo";
+import type { ListStatus, PostRepo, PostSummary, StatusCounts } from "./repo";
 
 // API 中的文章对象（post api-contract §2）：内容取工作稿
 export interface PostView {
@@ -32,6 +32,30 @@ export function toPostView(post: Post): PostView {
     createdAt: post.createdAt.toISOString(),
     updatedAt: post.updatedAt.toISOString(),
   };
+}
+
+// 后台列表项（post api-contract §2 PostListItem）
+export interface PostListItem {
+  id: string;
+  title: string;
+  status: PostStatus;
+  hasUnpublishedChanges: boolean;
+  tags: string[];
+  updatedAt: string;
+}
+
+export interface PostListResult {
+  items: PostListItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  counts: StatusCounts;
+}
+
+export const PAGE_SIZE = 20;
+
+function toListItem(row: PostSummary): PostListItem {
+  return { id: String(row.id), title: row.title, ...deriveStatus(row), tags: row.tags, updatedAt: row.updatedAt.toISOString() };
 }
 
 export interface PostServiceDeps {
@@ -115,6 +139,12 @@ export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) 
       await repo.setPublished(id, null, null, null);
       await notify({ kind: "unpublished", slug: post.published.slug });
       return toPostView(await load(id));
+    },
+
+    // 列表（§6）：超出页码返回空 items，不报错
+    async list({ status, q, page }: { status: ListStatus; q: string; page: number }): Promise<PostListResult> {
+      const { rows, total, counts } = await repo.list({ status, q: q.trim(), page, pageSize: PAGE_SIZE });
+      return { items: rows.map(toListItem), page, pageSize: PAGE_SIZE, total, counts };
     },
 
     async getForEdit(id: PostId): Promise<PostView | null> {

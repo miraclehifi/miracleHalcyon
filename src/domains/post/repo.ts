@@ -1,4 +1,4 @@
-// PostRepo（post domain-model §5，data-model posts 表）；delete / list / tags 由后续任务补充
+// PostRepo（post domain-model §5，data-model posts 表）；delete / tags 由后续任务补充
 import type { PostContent } from "./content";
 import type { Post, PostId } from "./post";
 
@@ -8,12 +8,38 @@ export interface NewPostRow {
   createdAt: Date; // 同时作为首次 updatedAt
 }
 
+export type ListStatus = "all" | "draft" | "published";
+
+export interface ListQuery {
+  status: ListStatus;
+  q: string; // 已去首尾空白；空串 = 不过滤
+  page: number;
+  pageSize: number;
+}
+
+// 列表只取需要的列，不读正文
+export interface PostSummary {
+  id: PostId;
+  title: string;
+  tags: string[];
+  draftHash: string;
+  pubHash: string | null;
+  updatedAt: Date;
+}
+
+export interface StatusCounts {
+  all: number;
+  draft: number;
+  published: number;
+}
+
 export interface PostRepo {
   insert(row: NewPostRow): Promise<PostId>;
   get(id: PostId): Promise<Post | null>;
   updateDraft(id: PostId, content: PostContent, draftHash: string, now: Date): Promise<boolean>; // false = 不存在
   setPublished(id: PostId, content: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean>;
   slugTaken(slug: string, exceptId?: PostId): Promise<boolean>;
+  list(query: ListQuery): Promise<{ rows: PostSummary[]; total: number; counts: StatusCounts }>;
 }
 
 interface PostRow {
@@ -39,6 +65,15 @@ interface PostRow {
 
 const COLUMNS =
   "id, title, slug, tags, summary, body, published_at, draft_hash, pub_title, pub_slug, pub_tags, pub_summary, pub_body, pub_published_at, pub_hash, last_published_at, created_at, updated_at";
+
+// 标题包含匹配（不区分大小写）：转义 LIKE 的 \ % _
+const TITLE_FILTER = "(?1 = '' OR title LIKE '%' || ?1 || '%' ESCAPE '\\')";
+const STATUS_FILTER: Record<ListStatus, string> = {
+  all: "1 = 1",
+  draft: "pub_hash IS NULL",
+  published: "pub_hash IS NOT NULL", // 含有未发布修改的
+};
+const escapeLike = (value: string) => value.replace(/[\\%_]/g, (char) => `\\${char}`);
 
 const toDate = (value: string | null) => (value === null ? null : new Date(value));
 
@@ -132,5 +167,36 @@ export class D1PostRepo implements PostRepo {
       .bind(exceptId, slug, slug)
       .first<{ hit: number }>();
     return row !== null;
+  }
+
+  async list({ status, q, page, pageSize }: ListQuery): Promise<{ rows: PostSummary[]; total: number; counts: StatusCounts }> {
+    const pattern = escapeLike(q);
+    const [list, totals, counts] = await this.db.batch([
+      this.db
+        .prepare(
+          `SELECT id, title, tags, draft_hash, pub_hash, updated_at FROM posts WHERE ${TITLE_FILTER} AND ${STATUS_FILTER[status]} ` +
+            "ORDER BY updated_at DESC, id DESC LIMIT ?2 OFFSET ?3",
+        )
+        .bind(pattern, pageSize, (page - 1) * pageSize),
+      this.db.prepare(`SELECT COUNT(*) AS n FROM posts WHERE ${TITLE_FILTER} AND ${STATUS_FILTER[status]}`).bind(pattern),
+      // 分段控件的数量：只应用 q，不应用 status
+      this.db
+        .prepare(`SELECT COUNT(*) AS total, COALESCE(SUM(pub_hash IS NULL), 0) AS draft, COALESCE(SUM(pub_hash IS NOT NULL), 0) AS published FROM posts WHERE ${TITLE_FILTER}`)
+        .bind(pattern),
+    ]);
+    const rows = (list.results as Pick<PostRow, "id" | "title" | "tags" | "draft_hash" | "pub_hash" | "updated_at">[]).map((row) => ({
+      id: row.id,
+      title: row.title,
+      tags: JSON.parse(row.tags) as string[],
+      draftHash: row.draft_hash,
+      pubHash: row.pub_hash,
+      updatedAt: new Date(row.updated_at),
+    }));
+    const count = counts.results[0] as { total: number; draft: number; published: number };
+    return {
+      rows,
+      total: (totals.results[0] as { n: number }).n,
+      counts: { all: count.total, draft: count.draft, published: count.published },
+    };
   }
 }

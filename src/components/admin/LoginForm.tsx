@@ -1,6 +1,6 @@
 // 登录表单（admin-login.md，US-01）：账号或密码为空时按钮禁用（BH-05）；提交中禁用并显示"登录中…"（BH-10）
 // 失败后显示错误提示条（role="alert"）、清空密码并把焦点放回密码框；成功后跳到已由 SSR 清洗过的 next
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import { Alert } from "../ui/Alert";
 import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
@@ -42,7 +42,7 @@ export function LoginForm({ next }: { next: string }) {
     requestAnimationFrame(() => passwordRef.current?.focus());
   };
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);

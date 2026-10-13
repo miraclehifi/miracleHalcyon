@@ -139,6 +139,8 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 
 ## 6. 列表查询（US-07）
 
+> 已实现：`PostService.list` + `D1PostRepo.list`（一个 D1 `batch` 取列表、total、counts）。仓储返回 `PostSummary`（只含列表所需列，不读正文），而非 §5 写的完整 `Post`。
+
 | 参数 | 规则 |
 |------|------|
 | `status` | `all`（默认）/ `draft` / `published`；`published` 包含有未发布修改的 |
