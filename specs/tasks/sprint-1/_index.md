@@ -31,7 +31,7 @@
 | 17 | [build-button-component](build-button-component.md) | 实现 Button（SpecularButton） | article-writing | FRONTEND | 表现层 | — | define-design-token-styles | 3 | 中 | completed |
 | 18 | [build-icon-button-component](build-icon-button-component.md) | 实现 IconButton | article-writing | FRONTEND | 表现层 | — | define-design-token-styles | 3 | 低 | completed |
 | 19 | [build-field-component](build-field-component.md) | 实现 Field | article-writing | FRONTEND | 表现层 | — | define-design-token-styles | 2 | 低 | completed |
-| 20 | [build-alert-component](build-alert-component.md) | 实现 Alert | article-writing | FRONTEND | 表现层 | US-01 | define-design-token-styles | 1 | 低 | pending |
+| 20 | [build-alert-component](build-alert-component.md) | 实现 Alert | article-writing | FRONTEND | 表现层 | US-01 | define-design-token-styles | 1 | 低 | completed |
 | 21 | [build-toast-component](build-toast-component.md) | 实现 Toast 与提示队列 | article-writing | FRONTEND | 表现层 | US-08 | build-icon-button-component | 1 | 低 | pending |
 | 22 | [build-status-badge-component](build-status-badge-component.md) | 实现 StatusBadge | article-writing | FRONTEND | 表现层 | US-07, US-08 | define-design-token-styles | 2 | 低 | pending |
 | 23 | [build-segmented-control-component](build-segmented-control-component.md) | 实现 SegmentedControl | article-writing | FRONTEND | 表现层 | US-07 | define-design-token-styles | 1 | 低 | pending |

@@ -98,7 +98,7 @@
 
 | 设计稿组件 | React 组件 | Props / variant | 使用位置 |
 |-----------|-----------|----------------|---------|
-| `Alert/Error` | `Alert` | `tone`：`error`；`children` | 登录页"凭据错误" |
+| `Alert/Error` | `Alert` | `tone`：`error`；`children` | 登录页"凭据错误"。已实现：`src/components/ui/Alert.tsx` |
 | `Toast/Error` · `Success` · `Warning` · `Undo` | `Toast` | `tone`：`error`（常驻、可关闭）/ `warning`（常驻、可关闭，`warn-soft` 底 + `warn` 图标与字，`role="status"`）/ `success`（4 秒自动消失）；`action?`（`{ label, onClick }`，传了即 `/Undo` 形态：文字后一个文字按钮"撤销"，6 秒消失）；规则见 design-tokens"轻提示" | 04 校验与错误提示；实况照片降级提示（warning）；文章列表删除后的"已删除《标题》· 撤销" |
 | `ConfirmDialog/Danger` · `Default` | `ConfirmDialog` | `tone`：`danger`（删除）/ `default`（撤回）；`icon`；`title`；`description`；`confirmLabel` | 04 删除确认、撤回确认 |
 | `EmptyState` | `EmptyState` | `icon`；`title`；`description`；`action?` | 文章列表空状态 |

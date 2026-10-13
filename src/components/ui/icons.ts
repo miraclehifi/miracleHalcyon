@@ -1,8 +1,9 @@
 // 图标注册表：组件的 icon 属性用 lucide 图标名（与设计稿一致），只打包这里登记的图标
-import { ArrowLeft, Ellipsis, Feather, History, PenLine, Settings2, SquarePen, Trash2, Undo2, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, CircleAlert, Ellipsis, Feather, History, PenLine, Settings2, SquarePen, Trash2, Undo2, X, type LucideIcon } from "lucide-react";
 
 export const ICONS = {
   "arrow-left": ArrowLeft,
+  "circle-alert": CircleAlert,
   ellipsis: Ellipsis,
   feather: Feather,
   history: History,
