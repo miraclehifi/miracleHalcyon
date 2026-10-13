@@ -162,7 +162,7 @@
 
 ### GET /api/posts?page=&tag=
 
-**200** `{ "items": [PublishedPostSummary], "page": 1, "pageSize": 20, "total": 18 }`；按 `publishedAt DESC, lastPublishedAt DESC` 排序。
+**200** `{ "items": [PublishedPostSummary], "page": 1, "pageSize": 20, "total": 18 }`；按 `publishedAt DESC, lastPublishedAt DESC` 排序。`page` 规则同后台列表（非法 → 400）；`tag` 不区分大小写；其他参数忽略。已实现：`src/pages/api/posts/index.ts`。
 
 ### GET /api/posts/:slug
 

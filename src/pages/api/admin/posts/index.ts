@@ -4,7 +4,7 @@ import { env } from "cloudflare:workers";
 import { ValidationError } from "../../../../domains/post/errors";
 import { D1PostRepo, type ListStatus } from "../../../../domains/post/repo";
 import { createPostService } from "../../../../domains/post/service";
-import { errorResponse, parseDraftInput, QUERY_MAX, readJson } from "../../../../lib/api/http";
+import { errorResponse, isPageParam, parseDraftInput, QUERY_MAX, readJson } from "../../../../lib/api/http";
 
 export const prerender = false;
 
@@ -22,7 +22,7 @@ function parseListQuery(params: URLSearchParams): { status: ListStatus; q: strin
   const q = params.get("q") ?? "";
   const invalid = [
     !STATUSES.includes(status) && "status",
-    !/^[1-9]\d{0,8}$/.test(pageText) && "page",
+    !isPageParam(pageText) && "page",
     [...q].length > QUERY_MAX && "q",
   ].filter((field): field is string => Boolean(field));
   if (invalid.length > 0) throw new ValidationError(invalid);
