@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 49
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,18 @@ MD-UT-01：标题、列表、表格、任务列表、删除线、自动链接、
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `renderMarkdown(source)` 完整处理链（不含图片插件与 sourceMap）
+- [x] `renderMarkdown(source)` 完整处理链（不含图片插件与 sourceMap）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `renderMarkdown(source, opts?)` 加 `RenderOptions`（`sourceMap` 暂不生效，由后续任务实现）
+- 脚注无障碍文案改中文：标题「脚注」、回链「返回引用 N」（remark-rehype 默认英文）
+- 快照为手写期望文件 `tests/unit/markdown/__snapshots__/gfm.html`
 
 ## 依赖
 
