@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 28
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@ POST-UT-02：空白标题 → `无标题`、标签去重、201 字摘要 / 11 �
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/domains/post/content.ts`：`normalizeContent(input) → PostContent`
+- [x] `src/domains/post/content.ts`：`normalizeContent(input) → PostContent`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 一次报出全部出错字段（契约 `error.fields` 为数组）；新增 `src/domains/post/errors.ts`（`ValidationError`）
 
 ## 依赖
 

@@ -35,6 +35,8 @@
 
 ### 2.2 PostContent（值对象，不可变）
 
+> 已实现：`normalizeContent`（`src/domains/post/content.ts`）；校验失败抛 `ValidationError`（`fields` 按 title、slug、tags、summary、body、publishedAt 顺序列出全部出错字段），字符数按 Unicode 码点计。
+
 | 字段 | 类型 | 规则 |
 |------|------|------|
 | title | string | 去首尾空白；空则存为 `无标题`；≤ 200 字符 |

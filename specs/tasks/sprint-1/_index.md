@@ -39,7 +39,7 @@
 | 25 | [build-save-indicator-component](build-save-indicator-component.md) | 实现 SaveIndicator | article-writing | FRONTEND | 表现层 | US-06 | define-design-token-styles | 1 | 低 | completed |
 | 26 | [build-login-page](build-login-page.md) | 实现登录页 | article-writing | FRONTEND | 表现层 | US-01 | implement-login-endpoint, build-button-component, build-field-component, build-alert-component | 0 | 低 | completed |
 | 27 | [implement-slugify](implement-slugify.md) | 实现 slugify | article-writing | DOMAIN | 领域层 | US-03 | setup-workers-test-pool | 2 | 低 | completed |
-| 28 | [implement-post-content-normalize](implement-post-content-normalize.md) | 实现文章内容规范化与校验 | article-writing | DOMAIN | 领域层 | US-03 | implement-slugify | 3 | 低 | pending |
+| 28 | [implement-post-content-normalize](implement-post-content-normalize.md) | 实现文章内容规范化与校验 | article-writing | DOMAIN | 领域层 | US-03 | implement-slugify | 3 | 低 | completed |
 | 29 | [implement-content-hash](implement-content-hash.md) | 实现内容哈希 | article-writing | DOMAIN | 领域层 | US-08 | implement-post-content-normalize | 1 | 低 | pending |
 | 30 | [implement-post-status-derivation](implement-post-status-derivation.md) | 实现发布状态派生 | article-writing | DOMAIN | 领域层 | US-07, US-08 | implement-content-hash | 2 | 低 | pending |
 | 31 | [implement-publish-validation](implement-publish-validation.md) | 实现发布校验 | article-writing | DOMAIN | 领域层 | US-08 | implement-post-content-normalize | 1 | 低 | pending |
