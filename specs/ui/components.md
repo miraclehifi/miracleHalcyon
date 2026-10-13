@@ -30,7 +30,7 @@
 | `SearchInput` | `SearchInput` | `placeholder`；`value`；`onChange`；手机端字号 16px | 文章列表 |
 | `SegmentedItem/Selected` · `Default` | `SegmentedControl` + `SegmentedControl.Item` | 容器：`value`；`onChange`；`aria-label`（单选组 `radiogroup`，← / → 切换）。Item：`value`；`icon?`；`count?`（`tabular-nums`）；`children`；`selected` 由容器 `value` 推导（对应设计稿 `/Selected`） | 文章列表状态筛选（带数量）、写文章页视图切换（带图标）。已实现：`src/components/ui/SegmentedControl.tsx` |
 | `TabItem/Selected` · `Default` | `Tabs` + `Tabs.Item` | Item：`selected`；`children`；`role="tab"` | 写文章页（移动）编辑 / 预览 |
-| `SaveIndicator/Saved` · `Saving` · `Unsaved` · `Failed` | `SaveIndicator` | `state`：`saved` / `saving` / `unsaved` / `failed`；`savedAt?` | 写文章页顶栏（桌面、移动）、04 保存状态 |
+| `SaveIndicator/Saved` · `Saving` · `Unsaved` · `Failed` | `SaveIndicator` | `state`：`saved` / `saving` / `unsaved` / `failed`；`savedAt?` | 写文章页顶栏（桌面、移动）、04 保存状态。已实现：`src/components/ui/SaveIndicator.tsx`（`role="status"`；保存中图标旋转，减弱动效时停止） |
 | `Pagination` | `Pagination` | `page`；`pageSize`；`total`；手机端页码可点区域 44px | 文章列表 |
 | `Menu` · `MenuItem/Default` · `/Checked` · `/Disabled` | `Menu` + `Menu.Item` + `Menu.Separator` | Item：`type`：`action` / `checkbox` / `radio`（对应 `menuitem` / `menuitemcheckbox` / `menuitemradio`）；`checked?`；`disabled?`（`aria-disabled`，仍可聚焦，配 `Tooltip` 说明原因）；`children`。容器 `surface` 底、1px `line` 边、`radius`、阴影同悬停提示，内边距 4px；Item 高 32px（触屏 44px），左右内边距 12px，`text-ui`，选中时 ✓ 在右侧（`ink-muted`），悬停 / 键盘高亮底 `surface-sunken`，禁用 `ink-faint`。`/Checked`、`/Disabled` 对应 `checked`、`disabled`，**不是 variant** | 写文章页 `ImageMenu` |
 | `Popover` | `Popover` | `anchor`；`side`：`top` / `bottom`；`title`；`children`；非模态 `role="dialog"`，Esc / 点外部关闭，焦点回到触发元素；`surface` 底、1px `line` 边、12px 圆角、阴影同弹窗 | 写文章页"图片写法"说明 |

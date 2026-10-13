@@ -36,7 +36,7 @@
 | 22 | [build-status-badge-component](build-status-badge-component.md) | 实现 StatusBadge | article-writing | FRONTEND | 表现层 | US-07, US-08 | define-design-token-styles | 2 | 低 | completed |
 | 23 | [build-segmented-control-component](build-segmented-control-component.md) | 实现 SegmentedControl | article-writing | FRONTEND | 表现层 | US-07 | define-design-token-styles | 1 | 低 | completed |
 | 24 | [build-confirm-dialog-component](build-confirm-dialog-component.md) | 实现 ConfirmDialog | article-writing | FRONTEND | 表现层 | US-08 | build-button-component | 1 | 低 | completed |
-| 25 | [build-save-indicator-component](build-save-indicator-component.md) | 实现 SaveIndicator | article-writing | FRONTEND | 表现层 | US-06 | define-design-token-styles | 1 | 低 | pending |
+| 25 | [build-save-indicator-component](build-save-indicator-component.md) | 实现 SaveIndicator | article-writing | FRONTEND | 表现层 | US-06 | define-design-token-styles | 1 | 低 | completed |
 | 26 | [build-login-page](build-login-page.md) | 实现登录页 | article-writing | FRONTEND | 表现层 | US-01 | implement-login-endpoint, build-button-component, build-field-component, build-alert-component | 0 | 低 | pending |
 | 27 | [implement-slugify](implement-slugify.md) | 实现 slugify | article-writing | DOMAIN | 领域层 | US-03 | setup-workers-test-pool | 2 | 低 | pending |
 | 28 | [implement-post-content-normalize](implement-post-content-normalize.md) | 实现文章内容规范化与校验 | article-writing | DOMAIN | 领域层 | US-03 | implement-slugify | 3 | 低 | pending |
