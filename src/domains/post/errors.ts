@@ -6,3 +6,11 @@ export class ValidationError extends Error {
     this.name = "ValidationError";
   }
 }
+
+export class NotFoundError extends Error {
+  readonly code = "POST_NOT_FOUND";
+  constructor(readonly id: number) {
+    super(`POST_NOT_FOUND: ${id}`);
+    this.name = "NotFoundError";
+  }
+}

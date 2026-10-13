@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 33
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -30,12 +30,16 @@ POST-UT-07：已发布文章 `saveDraft` 新内容后 `published`、`lastPublish
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `PostService.create`、`saveDraft`、`getForEdit`（规范化 → 写工作稿 + draft_hash）
+- [x] `PostService.create`、`saveDraft`、`getForEdit`（规范化 → 写工作稿 + draft_hash）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `toPostView` 把聚合转为契约的 `PostView`（id 字符串、ISO 时间）；新增 `NotFoundError`（POST_NOT_FOUND）\n- 内存仓储 `tests/unit/post/memory-post-repo.ts` 供后续服务测试复用
 
 ## 依赖
 

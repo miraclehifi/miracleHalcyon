@@ -90,7 +90,7 @@
 ## 4. 领域服务
 
 ```ts
-interface PostService {
+interface PostService { // 已实现 create / saveDraft / getForEdit：createPostService（src/domains/post/service.ts）
   create(input: DraftInput, now: Date): Promise<PostView>;                 // US-03/06 首次保存
   saveDraft(id: PostId, input: DraftInput, now: Date): Promise<PostView>;  // US-03/06，整份覆盖工作稿
   getForEdit(id: PostId): Promise<PostView | null>;

@@ -39,3 +39,4 @@
 | 2026-10-13 | implement-post-status-derivation | `tests/unit/post/post-status.test.ts`（[POST-UT-04] 无快照 / 快照 = 工作稿 / 快照 ≠ 工作稿） | 找不到 `src/domains/post/post` | 1/1 通过 | `npm test` 27/27 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-publish-validation | `tests/unit/post/publish-validation.test.ts`（[POST-UT-05] 标题 × slug × 正文 8 种组合） | `validateForPublish is not a function` | 1/1 通过 | `npm test` 28/28 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-post-repo | `tests/integration/post/post-repo.test.ts`（workerd：insert/get 往返含标签 JSON；updateDraft 不动 pub_*；setPublished 写入 / 清空；slugTaken 6 种情况） | 找不到 `src/domains/post/repo` | 1/1 通过 | `npm test` 29/29 | lint 0；astro check 0 错误 |
+| 2026-10-13 | implement-post-save-service | `tests/unit/post/save-service.test.ts`（[POST-UT-07] 内存仓储：已发布文章保存后快照与 lastPublishedAt 不变、hasUnpublishedChanges=true；不存在 → NotFoundError） | 找不到 `src/domains/post/service` | 1/1 通过 | `npm test` 30/30 | lint 0；astro check 0 错误 |
