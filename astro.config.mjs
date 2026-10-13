@@ -14,7 +14,7 @@ const spikeRoutes = {
   hooks: {
     "astro:config:setup": ({ command, injectRoute }) => {
       if (command !== "dev") return;
-      injectRoute({ pattern: "/admin/_spike-markdown", entrypoint: "./src/pages/admin/_spike-markdown.astro" });
+      injectRoute({ pattern: "/_spike/markdown", entrypoint: "./src/pages/admin/_spike-markdown.astro" });
     },
   },
 };

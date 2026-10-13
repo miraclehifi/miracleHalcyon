@@ -1,0 +1,5 @@
+# 复制为 .dev.vars（已 gitignore）后填写；生产用 `wrangler secret put <NAME>`
+ADMIN_USERNAME=admin
+# npm run hash-password 生成
+ADMIN_PASSWORD_HASH=
+SITE_ORIGIN=http://localhost:4321

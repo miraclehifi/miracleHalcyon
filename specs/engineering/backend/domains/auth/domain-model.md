@@ -104,6 +104,8 @@ interface ThrottleRepo { // 已实现：D1ThrottleRepo（src/domains/auth/thrott
 
 ## 7. Middleware 行为（`src/middleware.ts`）
 
+> 已实现：`createAuthMiddleware(deps)` + `onRequest`（env 取自 `cloudflare:workers`）。非 GET/HEAD 请求先校验 Origin（`/admin/**` 页面与 `/api/admin/**` 都校验）；`SITE_ORIGIN` 缺失时非 GET 请求返回 500 `SERVER_MISCONFIGURED`（无法校验来源即拒绝写操作）。
+
 | 请求 | 无效会话 | Origin 不符（非 GET/HEAD） |
 |------|---------|--------------------------|
 | `/admin/login` | 放行 | — |

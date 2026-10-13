@@ -20,3 +20,4 @@
 | 2026-10-13 | implement-throttle-repo | `tests/integration/auth/throttle-repo.test.ts`（workerd：upsert 两次取最新 / delete 后 null） | 找不到 `src/domains/auth/throttle-repo` | 1/1 通过 | `npm test` 9/9 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-auth-login-service | `tests/unit/auth/login-service.test.ts`（[AUTH-UT-04] 内存仓储：正确凭据 / 错误密码 / 错误账号 / 锁定中正确密码） | 找不到 `src/domains/auth/service` | 1/1 通过 | `npm test` 10/10 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-auth-session-check | `tests/unit/auth/session-check.test.ts`（[AUTH-UT-05] 有效 / 过期 1ms 删除 / 未知 / undefined） | `getSession is not a function` | 1/1 通过 | `npm test` 11/11（login 测试改用共享内存仓储后仍通过） | lint 0；astro check 0 错误 |
+| 2026-10-13 | implement-auth-middleware | `tests/integration/auth/middleware.test.ts`（[AUTH-UT-07] workerd：4 类请求 × 有 / 无会话 × Origin 同源 / 异源 / 缺失 = 24 组合） | 找不到 `src/middleware` | 1/1 通过 | `npm test` 12/12；e2e 冒烟 2/2；`test:spike` 通过（路由改为 `/_spike/markdown`） | lint 0；astro check 0 错误 |

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 14
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,17 @@ AUTH-UT-07（workers 集成）：4 类请求 × 有 / 无会话 × Origin 同源
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/middleware.ts`：页面 302、接口 401、非 GET 校验 Origin（缺失时用 Referer）、已登录访问登录页 302 到 `sanitizeNext(next)`
-- [ ] `Astro.locals.session` 类型声明
+- [x] `src/middleware.ts`：页面 302、接口 401、非 GET 校验 Origin（缺失时用 Referer）、已登录访问登录页 302 到 `sanitizeNext(next)`
+- [x] `Astro.locals.session` 类型声明
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `createAuthMiddleware(deps)` 可注入 `getSession` / `siteOrigin` / `now`，测试直接调用；`onRequest` 负责从 env 装配\n- `SITE_ORIGIN` 缺失时非 GET 请求返回 500 `SERVER_MISCONFIGURED`（domain-model §7 已补）\n- 新增 `src/lib/api/errors.ts`（统一错误体）、`.dev.vars.example`\n- spike 测试页路由由 `/admin/_spike-markdown` 改为 `/_spike/markdown`，避开 `/admin` 的登录保护
 
 ## 依赖
 

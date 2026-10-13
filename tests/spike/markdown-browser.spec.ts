@@ -11,7 +11,7 @@ interface SpikeApi {
 }
 
 test("Web Worker 渲染 10,000 字含 10 个代码块，P95 < 200ms", async ({ page }) => {
-  await page.goto("/admin/_spike-markdown");
+  await page.goto("/_spike/markdown");
   await page.waitForFunction(() => "__spikeMarkdown" in window);
 
   const stats = await page.evaluate(
