@@ -2,6 +2,7 @@
 
 **最后更新**: 2026-10-13
 **状态**: self-checked
+**迁移**: `src/db/migrations/0001_init.sql`（已实现）
 **存储**: Cloudflare D1（SQLite）
 
 > 审计列：DDL 规则原文是 MySQL 写法（`DATETIME(3)` + `ON UPDATE`）。SQLite 没有 `ON UPDATE`，等价实现为 `TEXT` 默认值 + `AFTER UPDATE` 触发器；值为 UTC，格式 `yyyy-MM-dd HH:mm:ss.SSS`，仅供数据库运维使用，禁止用于业务。

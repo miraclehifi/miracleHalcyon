@@ -2,6 +2,7 @@
 
 **最后更新**: 2026-10-13
 **状态**: self-checked
+**迁移**: `src/db/migrations/0001_init.sql`（已实现）
 **存储**: Cloudflare D1（SQLite）+ R2
 
 > 审计列的 SQLite 写法说明见 [auth/data-model.md](../auth/data-model.md) 开头。

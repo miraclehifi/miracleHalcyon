@@ -19,4 +19,4 @@
 | 错误体 | `{ "error": { "code": "SLUG_TAKEN", "message": "slug 已存在，请换一个" } }`；`message` 为可直接展示的中文 |
 | 时间、枚举、ID | 见 [shared-field-formats.md](../../shared-field-formats.md) |
 | 审计列 | 每张表含 `db_create_time`、`db_update_time`（D1/SQLite 版写法见各 data-model，MySQL 规则在 SQLite 上的等价实现） |
-| 迁移 | `migrations/NNNN_{name}.sql`，`wrangler d1 migrations apply` |
+| 迁移 | `src/db/migrations/NNNN_{name}.sql`，`wrangler d1 migrations apply`（本地：`npm run db:migrate:local`） |

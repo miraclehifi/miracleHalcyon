@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 5
-**状态**: pending
+**状态**: completed
 **类别**: DATA
 **架构层级**: 数据层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -11,7 +11,7 @@
 ## 意图声明
 
 - **改动意图**: 创建 D1 初始迁移
-- **影响范围**: `migrations/0001_init.sql`, `tests/integration/migration.test.ts`, `package.json`
+- **影响范围**: `src/db/migrations/0001_init.sql`, `tests/integration/migration.test.ts`, `package.json`
 - **不变量**: 不改变依赖任务（setup-workers-test-pool）已通过的测试结果
 
 ## 产品需求来源
@@ -29,13 +29,18 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `migrations/0001_init.sql` 包含 auth、post、media 三个 data-model 中的全部 DDL（原样）
-- [ ] `npm run db:migrate:local` 脚本可用
+- [x] `src/db/migrations/0001_init.sql` 包含 auth、post、media 三个 data-model 中的全部 DDL（原样）
+- [x] `npm run db:migrate:local` 脚本可用
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 迁移目录沿用 setup-workers-test-pool 已配置的 `src/db/migrations`（wrangler.jsonc `migrations_dir`、vitest `readD1Migrations`，与 feature-architecture 目录结构一致）；原计划写的 `migrations/` 已同步改正
+- 迁移 SQL 由三份 data-model.md 的 sql 代码块原样拼接
 
 ## 依赖
 
@@ -43,7 +48,7 @@
 
 ## 影响的文件
 
-- `migrations/0001_init.sql`
+- `src/db/migrations/0001_init.sql`
 - `tests/integration/migration.test.ts`
 - `package.json`
 

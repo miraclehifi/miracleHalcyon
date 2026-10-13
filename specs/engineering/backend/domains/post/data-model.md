@@ -69,7 +69,7 @@ END;
 
 ## 迁移
 
-`migrations/0001_init.sql`：本文件与 auth、media 的全部建表语句。
+`src/db/migrations/0001_init.sql`（已实现）：本文件与 auth、media 的全部建表语句；本地执行 `npm run db:migrate:local`。
 
 ---
 

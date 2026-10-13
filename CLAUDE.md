@@ -35,6 +35,7 @@ miracleHalcyon 是一个个人技术博客兼作品集，读者端阅读体验�
 | 构建 | `npm run build` |
 | 预览构建产物 | `npm run preview`（workerd 本地运行） |
 | 生成绑定类型 | `npm run cf-typegen`（改 wrangler.jsonc 后执行） |
+| 本地 D1 迁移 | `npm run db:migrate:local`（迁移在 `src/db/migrations/`） |
 | 测试 | `npm test`（Vitest 4.1：`unit` jsdom + `workers` workerd/D1/R2）、`npm run test:e2e`（Playwright：chromium + webkit，自动 build + `astro preview`）、`npm run test:spike`（spike 测试页，chromium + `astro dev`） |
 | Lint / 类型检查 | `npm run lint`、`npm run check`（astro check） |
 
