@@ -17,7 +17,7 @@
 | 3 | [spike-markdown-workers-runtime](spike-markdown-workers-runtime.md) | 验证：Expressive Code 在 Workers 中运行 | article-writing | SETUP | 基础设施 | US-04 | setup-workers-test-pool | 2 | 高 | completed |
 | 4 | [spike-markdown-browser-worker](spike-markdown-browser-worker.md) | 验证：浏览器 Web Worker 渲染性能 | article-writing | SETUP | 基础设施 | US-04 | spike-markdown-workers-runtime | 1 | 高 | completed |
 | 5 | [create-d1-init-migration](create-d1-init-migration.md) | 创建 D1 初始迁移 | article-writing | DATA | 数据层 | — | setup-workers-test-pool | 3 | 低 | completed |
-| 6 | [define-design-token-styles](define-design-token-styles.md) | 实现设计令牌（亮 / 暗主题） | article-writing | FRONTEND | 表现层 | — | scaffold-project-skeleton | 7 | 低 | pending |
+| 6 | [define-design-token-styles](define-design-token-styles.md) | 实现设计令牌（亮 / 暗主题） | article-writing | FRONTEND | 表现层 | — | scaffold-project-skeleton | 7 | 低 | completed |
 | 7 | [implement-password-hashing](implement-password-hashing.md) | 实现 PBKDF2 密码哈希与校验 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 2 | 中 | pending |
 | 8 | [implement-login-throttle-rules](implement-login-throttle-rules.md) | 实现登录限流状态规则 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 1 | 低 | pending |
 | 9 | [implement-sanitize-next](implement-sanitize-next.md) | 实现登录回跳地址清洗 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 1 | 低 | pending |

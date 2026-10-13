@@ -5,6 +5,7 @@
 
 > 全站（后台 F-001 + 读者端 F-002）共用。风格参考 [潮流周刊 tw93](https://weekly.tw93.fun/posts/284)（见 [Backlog](../backlog/restyle-tw93-reference.md)）；设计稿变量在 [admin.pen](admin.pen)，实现时映射为 Tailwind CSS 4 `@theme` 变量。
 > 主题：亮色 / 暗色，默认跟随系统（见 [全局 NFR](../product/nfr.md) §4）。
+> **实现**（已实现，`src/styles/tokens.css`）：颜色用 `light-dark()` 定义，`<html data-theme="light|dark">` 强制主题；Tailwind 类名 = 令牌名（`bg-surface`、`text-ink-muted`、`font-body`、`text-caption`），圆角 `rounded-control`（8px）/ `rounded-card`（12px），版心 `max-w-prose`（864px）；Tailwind 默认色板已移除。webfont 加载（`unicode-range` 分片）尚未实现，当前只有字体栈。
 > 气质：像纸质读物，靠字体与留白撑起质感。**不使用**渐变、卡片阴影、emoji 装饰图标。例外：文字按钮 `Button` 的边缘流光 + 柔和投影（见下文"按钮质感"）；组图手风琴的底部渐变、面板投影与 3D 倾斜（见下文"组图手风琴"）；灯箱层叠卡片的投影与 3D 倾斜（见下文"灯箱层叠"）；组图网格卡片的浅渐变底与轻投影（见下文"组图网格"）；图片加载中的斜向扫光（见下文"图片加载"）；悬停提示的投影与弹出 / 滑动动效（见下文"悬停提示"）。
 
 ## 颜色
@@ -206,3 +207,4 @@
 | 2026-10-12 | 过渡例外补后台列表行滑动；轻提示补"带撤销"一类（6 秒、悬停暂停）（[Backlog](../backlog/swipe-row-actions.md)） | miraclehifi |
 | 2026-10-12 | 新增"悬停提示"：写文章页图标按钮采用 React Bits WarmTooltip，反色配色；阴影、过渡规则补提示例外（[Backlog](../backlog/editor-warm-tooltip.md)） | miraclehifi |
 | 2026-10-13 | 轻提示新增警示类（`warn-soft`，常驻）（F-001 US-11） | miraclehifi |
+| 2026-10-13 | 补实现说明：令牌已落地到 `src/styles/tokens.css`，Tailwind 类名映射 | miraclehifi |

@@ -1,2 +1,19 @@
 @import "tailwindcss";
+@import "./tokens.css";
 @plugin "@tailwindcss/typography";
+
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-ui);
+    line-height: var(--text-ui--line-height);
+  }
+
+  /* 焦点环：仅键盘焦点显示（design-tokens.md"焦点与交互"） */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}

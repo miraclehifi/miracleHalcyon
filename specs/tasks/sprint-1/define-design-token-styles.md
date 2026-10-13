@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 6
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,14 +29,21 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/styles/tokens.css` 定义全部颜色、圆角、字体、字号令牌
-- [ ] Tailwind 4 `@theme` 映射令牌（`bg-surface`、`text-ink-muted` 等）
-- [ ] 主题默认跟随系统
+- [x] `src/styles/tokens.css` 定义全部颜色、圆角、字体、字号令牌
+- [x] Tailwind 4 `@theme` 映射令牌（`bg-surface`、`text-ink-muted` 等）
+- [x] 主题默认跟随系统
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 颜色用 `light-dark()` + `color-scheme`，一处定义亮暗两值；Tailwind 内置 Lightning CSS 会编译成按 `color-scheme` 切换的变量（兼容旧浏览器）
+- `@theme inline` 映射，`--color-*: initial` 移除默认色板，防止组件写死颜色
+- 测试直接解析 design-tokens.md 的表格作为期望值（文档改了值而 CSS 没跟上时测试会失败）
+- 未覆盖：webfont 分片加载（不在本任务 DoD 内，暂无对应任务）
 
 ## 依赖
 
