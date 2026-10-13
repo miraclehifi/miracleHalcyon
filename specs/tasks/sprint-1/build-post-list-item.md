@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 53
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,18 @@ UT（frontend-unit-tests §2）：标题链接 `href=/admin/posts/:id` 且伪元
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/admin/PostListItem.tsx`（外框同 PostCard 虚线；左滑抽屉与 `⋯` 交互留到 Sprint 2）
+- [x] `src/components/admin/PostListItem.tsx`（外框同 PostCard 虚线；左滑抽屉与 `⋯` 交互留到 Sprint 2）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `PostListItem({ post, active, now?, timeZone? })`：数据类型直接用接口的 `PostListItem`（`src/domains/post/service.ts`）；`active` 时双层虚线错位（上层左上、下层右下各 4px），减弱动效时无过渡
+- Sprint 1 不渲染"更多操作" `⋯`：抽屉与操作在 Sprint 2（US-09）接入，避免出现点了没反应的按钮
+- UT-10 修正：链接为 `/admin/posts/{id}`（原写 `/edit`，与 site-map 不一致）；行内不显示标签（2026-10-10 卡片精简后的规格）
 
 ## 依赖
 

@@ -42,7 +42,7 @@
 
 | UT-ID | 类 | 用例 | 预期 | covers |
 |------|------|------|------|------|
-| UT-10 | R | 传入 3 条文章 | 按传入顺序渲染行；每行显示标题（链接到 `/admin/posts/{id}/edit`）、状态标记、标签、更新时间 | SC-POSTLIST-01, SC-POSTLIST-02 |
+| UT-10 | R | 传入 3 条文章 | 按传入顺序渲染行；每行显示标题（链接到 `/admin/posts/{id}`，伪元素扩到整行；无标题显示斜体"无标题"）、状态标记、更新时间（不显示标签） | SC-POSTLIST-01, SC-POSTLIST-02 |
 | UT-11 | R | `items=[]` 且无筛选条件 | 显示插画/图标、"还没有文章"和"写第一篇"按钮 | SC-POSTLIST-06 |
 | UT-12 | R | `items=[]` 且有筛选条件 | 显示"没有匹配的文章"与"清除筛选"；点击触发 `onClearFilters` | SC-POSTLIST-07 |
 | UT-13 | R | `error` 状态 | 显示"加载失败"与"重试"；点击触发 `onRetry`；不显示空状态 | SC-POSTLIST-09 |
