@@ -28,7 +28,7 @@
 | `TagChip` | `TagChip` | `label` | 首页标签入口、设置抽屉标签输入 |
 | `Field` | `Field` | `label`；`hint?`；`error?`；`children`（输入控件） | 登录表单、设置抽屉（slug、日期）、04 校验。已实现：`src/components/ui/Field.tsx`（给唯一子控件补 id / `aria-invalid` / `aria-describedby` 与输入框样式 `FIELD_CONTROL_CLASS`；手机 16px 断点用 `md`（768px），与全站移动端定义一致） |
 | `SearchInput` | `SearchInput` | `placeholder`；`value`；`onChange`；手机端字号 16px | 文章列表 |
-| `SegmentedItem/Selected` · `Default` | `SegmentedControl` + `SegmentedControl.Item` | Item：`selected`；`icon?`；`count?`；`children` | 文章列表状态筛选（带数量）、写文章页视图切换（带图标） |
+| `SegmentedItem/Selected` · `Default` | `SegmentedControl` + `SegmentedControl.Item` | 容器：`value`；`onChange`；`aria-label`（单选组 `radiogroup`，← / → 切换）。Item：`value`；`icon?`；`count?`（`tabular-nums`）；`children`；`selected` 由容器 `value` 推导（对应设计稿 `/Selected`） | 文章列表状态筛选（带数量）、写文章页视图切换（带图标）。已实现：`src/components/ui/SegmentedControl.tsx` |
 | `TabItem/Selected` · `Default` | `Tabs` + `Tabs.Item` | Item：`selected`；`children`；`role="tab"` | 写文章页（移动）编辑 / 预览 |
 | `SaveIndicator/Saved` · `Saving` · `Unsaved` · `Failed` | `SaveIndicator` | `state`：`saved` / `saving` / `unsaved` / `failed`；`savedAt?` | 写文章页顶栏（桌面、移动）、04 保存状态 |
 | `Pagination` | `Pagination` | `page`；`pageSize`；`total`；手机端页码可点区域 44px | 文章列表 |

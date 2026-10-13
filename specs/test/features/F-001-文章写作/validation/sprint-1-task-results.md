@@ -29,3 +29,4 @@
 | 2026-10-13 | build-alert-component | `tests/unit/ui/alert.test.tsx`（tone=error：role=alert、`bg-danger-soft`、`text-danger`、circle-alert 图标） | 找不到 `src/components/ui/Alert` | 1/1 通过 | `npm test` 18/18 | lint 0；astro check 0 错误 |
 | 2026-10-13 | build-toast-component | `tests/unit/ui/toast.test.tsx`（fake timers：success 4s 消失 + status；error alert / warning status 常驻；× 关闭） | 找不到 `src/components/ui/Toast` | 1/1 通过 | `npm test` 19/19；构建通过 | lint 0；astro check 0 错误 |
 | 2026-10-13 | build-status-badge-component | `tests/unit/ui/status-badge.test.tsx`（三种文案与配色；`badgeStatus` 推导） | 找不到 `src/components/ui/StatusBadge` | 1/1 通过 | `npm test` 20/20 | lint 0；astro check 0 错误 |
+| 2026-10-13 | build-segmented-control-component | `tests/unit/ui/segmented-control.test.tsx`（radiogroup；roving tabindex；← / → 循环切换、焦点跟随、onChange；count tabular-nums） | 找不到 `src/components/ui/SegmentedControl` | 1/1 通过 | `npm test` 21/21 | lint 0；astro check 0 错误 |
