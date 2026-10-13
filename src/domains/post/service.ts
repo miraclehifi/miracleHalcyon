@@ -1,7 +1,7 @@
 // PostService（post domain-model §4）：新建、自动保存、读取；发布 / 撤回等由后续任务补充
 import { normalizeContent, type DraftInput } from "./content";
 import { contentHash } from "./content-hash";
-import { NotFoundError } from "./errors";
+import { NotFoundError, SlugTakenError } from "./errors";
 import { deriveStatus, type Post, type PostId, type PostStatus } from "./post";
 import type { PostRepo } from "./repo";
 
@@ -44,9 +44,15 @@ export function createPostService({ repo }: PostServiceDeps) {
     return post;
   }
 
+  // slug 全站唯一（不变量 3）：他人的工作稿或快照占用时整份不保存
+  async function assertSlugFree(slug: string, exceptId?: PostId): Promise<void> {
+    if (await repo.slugTaken(slug, exceptId)) throw new SlugTakenError(slug);
+  }
+
   return {
     async create(input: DraftInput, now: Date): Promise<PostView> {
       const draft = normalizeContent(input);
+      await assertSlugFree(draft.slug);
       const id = await repo.insert({ draft, draftHash: await contentHash(draft), createdAt: now });
       return toPostView(await load(id));
     },
@@ -54,6 +60,8 @@ export function createPostService({ repo }: PostServiceDeps) {
     // 整份覆盖工作稿；永远不改已发布快照（不变量 1）
     async saveDraft(id: PostId, input: DraftInput, now: Date): Promise<PostView> {
       const draft = normalizeContent(input);
+      await load(id); // 先确认存在：不存在的文章应得到 POST_NOT_FOUND 而不是 SLUG_TAKEN
+      await assertSlugFree(draft.slug, id);
       if (!(await repo.updateDraft(id, draft, await contentHash(draft), now))) throw new NotFoundError(id);
       return toPostView(await load(id));
     },

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 34
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@ POST-UT-09：与他人工作稿冲突、与他人快照冲突 → `SLUG_TAKEN`�
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `create` / `saveDraft` / `publish` 前调用 `slugTaken`；冲突时整份不保存
+- [x] `create` / `saveDraft` / `publish` 前调用 `slugTaken`；冲突时整份不保存
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `publish` 的 slug 检查在 implement-post-publish-service 中实现（本任务时发布服务尚不存在）\n- 回归发现：不存在的文章 `saveDraft` 会先命中 slug 冲突，改为先确认存在
 
 ## 依赖
 

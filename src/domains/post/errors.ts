@@ -14,3 +14,11 @@ export class NotFoundError extends Error {
     this.name = "NotFoundError";
   }
 }
+
+export class SlugTakenError extends Error {
+  readonly code = "SLUG_TAKEN";
+  constructor(readonly slug: string) {
+    super(`SLUG_TAKEN: ${slug}`);
+    this.name = "SlugTakenError";
+  }
+}

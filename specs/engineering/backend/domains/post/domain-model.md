@@ -117,7 +117,7 @@ interface PublicationHooks { onPublicationChanged(e: PublicationChange): Promise
 - `publish` 中 `prevSlug` = 发布前快照的 slug（发布更新改了 slug 时，重建后旧地址不再生成页面）
 
 **slug 冲突检查**（`saveDraft` / `create` / `publish` 都执行）：
-`SELECT 1 FROM posts WHERE id != ? AND (slug = ? OR pub_slug = ?)`，命中 → 409 `SLUG_TAKEN`，整份保存不生效。
+`SELECT 1 FROM posts WHERE id != ? AND (slug = ? OR pub_slug = ?)`，命中 → 409 `SLUG_TAKEN`，整份保存不生效。已实现于 `create` / `saveDraft`（`SlugTakenError`；`saveDraft` 先确认文章存在再查 slug）；`publish` 随发布服务实现。
 
 ## 5. 仓储接口
 
