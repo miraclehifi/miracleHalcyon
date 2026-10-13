@@ -129,7 +129,7 @@
 
 ### POST /api/admin/posts/:id/publish
 
-无请求体。发布草稿或发布更新。
+无请求体。发布草稿或发布更新。已实现：`src/pages/api/admin/posts/[id]/publish.ts`。
 
 | 状态 | 体 | 说明 |
 |------|----|------|
