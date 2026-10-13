@@ -3,14 +3,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PostEditorPage } from "../../../src/components/admin/editor/PostEditorPage";
 import type { PostView } from "../../../src/domains/post/service";
 
+// jsdom 没有 Web Worker：预览区的渲染 Worker 换成空实现（预览由 E2E 覆盖）
+class StubWorker {
+  addEventListener() {}
+  postMessage() {}
+  terminate() {}
+}
+
 // [UT-30][UT-33][UT-34][UT-35][UT-38][SC-POSTINFO-01/04/05/06/09] 设置抽屉（admin-post-editor.md"设置抽屉"，editor module-spec §4）
 beforeEach(() => {
+  vi.stubGlobal("Worker", StubWorker);
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date(2026, 9, 10, 9, 0)); // 本地时间 2026-10-10 09:00
 });
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
 const post = (overrides: Partial<PostView>): PostView => ({

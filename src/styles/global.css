@@ -17,3 +17,36 @@
     outline-offset: 2px;
   }
 }
+
+/* 文章区排版（design-tokens.md"字体"）：@tailwindcss/typography 的颜色与字体换成站点令牌；后台预览与读者端共用。
+   不放进 @layer：需覆盖插件在 utilities 层设置的 --tw-prose-* */
+.prose {
+  --tw-prose-body: var(--color-ink);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-lead: var(--color-ink-muted);
+  --tw-prose-links: var(--color-ink); /* 正文链接与正文同色，hover 用强调色 */
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-counters: var(--color-ink-faint);
+  --tw-prose-bullets: var(--color-ink-faint);
+  --tw-prose-hr: var(--color-line);
+  --tw-prose-quotes: var(--color-ink-muted);
+  --tw-prose-quote-borders: var(--color-line-strong);
+  --tw-prose-captions: var(--color-ink-muted);
+  --tw-prose-kbd: var(--color-ink);
+  --tw-prose-code: var(--color-ink);
+  --tw-prose-th-borders: var(--color-line-strong);
+  --tw-prose-td-borders: var(--color-line);
+  font-family: var(--font-prose);
+  font-size: var(--text-body);
+  line-height: 1.8;
+  letter-spacing: 0.14px;
+
+  :where(h1, h2, h3, h4):not(:where(.not-prose *)) {
+    font-family: var(--font-prose-heading);
+    font-weight: 700;
+  }
+
+  :where(a):not(:where(.not-prose *)):hover {
+    color: var(--color-accent);
+  }
+}

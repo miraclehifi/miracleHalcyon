@@ -1,6 +1,6 @@
 // 写文章页（admin-post-editor.md，US-03 / US-06）：状态容器 + 布局。文章由页面 SSR 传入（新建为 null）
 // 桌面三栏：编辑 | 预览 | 设置抽屉（340px）；< 1024px 只显示编辑区，抽屉浮在内容上方
-// 任何字段变化都交给自动保存（停止输入 2 秒后保存；Ctrl / ⌘ + S 立即保存）；预览渲染、发布由后续任务接入
+// 任何字段变化都交给自动保存（停止输入 2 秒后保存；Ctrl / ⌘ + S 立即保存）；预览在 Web Worker 中渲染（MarkdownPreview）；发布由后续任务接入
 import { useEffect, useState } from "react";
 import type { DraftInput } from "../../../domains/post/content";
 import type { PostStatus } from "../../../domains/post/post";
@@ -15,6 +15,7 @@ import { SaveIndicator, type SaveState } from "../../ui/SaveIndicator";
 import { badgeStatus } from "../../ui/StatusBadge";
 import { EditorTopBar } from "./EditorTopBar";
 import { MarkdownEditor } from "./MarkdownEditor";
+import { MarkdownPreview } from "./MarkdownPreview";
 import { PostSettingsDrawer } from "./PostSettingsDrawer";
 import { TagInput } from "./TagInput";
 
@@ -126,8 +127,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
           <MarkdownEditor title={draft.title} body={draft.body} onTitleChange={onTitleChange} onBodyChange={(body) => update({ body })} />
         </section>
         <section aria-label="预览" className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 max-lg:hidden">
-          <p className="text-caption tracking-[1px] text-ink-faint">预览</p>
-          <h1 className="mt-4 font-prose-heading text-display font-bold text-ink">{draft.title || "无标题"}</h1>
+          <MarkdownPreview title={draft.title} body={draft.body} />
         </section>
         {settingsOpen && (
           <PostSettingsDrawer
