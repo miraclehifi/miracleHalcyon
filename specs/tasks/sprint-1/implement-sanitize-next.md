@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 9
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@ AUTH-UT-03：`sanitizeNext` 7 个输入的输出
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/domains/auth/next.ts`：`sanitizeNext`
+- [x] `src/domains/auth/next.ts`：`sanitizeNext`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 收紧 SafeNext：`/admin` 后只能接 `/ ? #` 或结束（`/adminx` 回退）；同时拒绝控制字符（浏览器会丢弃制表符 / 换行）；domain-model 同步
 
 ## 依赖
 

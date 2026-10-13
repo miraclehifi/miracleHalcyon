@@ -20,7 +20,7 @@
 | 6 | [define-design-token-styles](define-design-token-styles.md) | 实现设计令牌（亮 / 暗主题） | article-writing | FRONTEND | 表现层 | — | scaffold-project-skeleton | 7 | 低 | completed |
 | 7 | [implement-password-hashing](implement-password-hashing.md) | 实现 PBKDF2 密码哈希与校验 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 2 | 中 | completed |
 | 8 | [implement-login-throttle-rules](implement-login-throttle-rules.md) | 实现登录限流状态规则 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 1 | 低 | completed |
-| 9 | [implement-sanitize-next](implement-sanitize-next.md) | 实现登录回跳地址清洗 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 1 | 低 | pending |
+| 9 | [implement-sanitize-next](implement-sanitize-next.md) | 实现登录回跳地址清洗 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 1 | 低 | completed |
 | 10 | [implement-session-repo](implement-session-repo.md) | 实现会话仓储（D1） | article-writing | DATA | 数据层 | US-01 | create-d1-init-migration | 1 | 低 | pending |
 | 11 | [implement-throttle-repo](implement-throttle-repo.md) | 实现限流仓储（D1） | article-writing | DATA | 数据层 | US-01 | create-d1-init-migration | 1 | 低 | pending |
 | 12 | [implement-auth-login-service](implement-auth-login-service.md) | 实现登录服务 | article-writing | DOMAIN | 领域层 | US-01 | implement-password-hashing, implement-login-throttle-rules | 1 | 中 | pending |
