@@ -30,6 +30,8 @@ export function parseMarks(url: string): { wide: boolean; live: boolean; accordi
 
 ## 2. 处理链
 
+> 原型已实现（spike-markdown-workers-runtime）：remark-parse → remark-gfm → remark-rehype → 语言白名单 → rehype-expressive-code；其余步骤由后续任务补齐。
+
 ```
 remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype
   → rehype-sanitize(schema) → [rehypeImageFigures] → rehype-expressive-code → [rehypeSourceLines?] → rehype-stringify
@@ -81,8 +83,8 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype
 
 | 指标 | 目标 | 验证 |
 |------|------|------|
-| 浏览器 Web Worker 渲染 10,000 字含 10 个代码块 | P95 < 200ms（留 100ms 给传输与挂载，满足 US-04 的 300ms） | Sprint 1 spike |
-| Worker 打包体积 | 在 Workers 付费版限额（压缩后 10MB）内，且后台 chunk 不进入读者页 | spike |
+| 浏览器 Web Worker 渲染 10,000 字含 10 个代码块 | P95 < 200ms（留 100ms 给传输与挂载，满足 US-04 的 300ms） | Sprint 1 spike（spike-markdown-browser-worker） |
+| Worker 打包体积 | 在 Workers 付费版限额（压缩后 10MB）内，且后台 chunk 不进入读者页 | ✅ 已验证：合并构建 gzip 2,299 KiB（[ADR-001 验证结果](../../../features/F-001-文章写作/architecture/adr/ADR-001-isomorphic-markdown.md)） |
 
 ## 6. 单元测试规格
 

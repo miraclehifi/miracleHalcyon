@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 3
-**状态**: pending
+**状态**: completed
 **类别**: SETUP
 **架构层级**: 基础设施
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -11,7 +11,7 @@
 ## 意图声明
 
 - **改动意图**: 验证：Expressive Code 在 Workers 中运行
-- **影响范围**: `src/lib/markdown/render.ts`, `tests/spike/markdown-workers.test.ts`, `specs/…/ADR-001-isomorphic-markdown.md`
+- **影响范围**: `src/lib/markdown/render.ts`, `tests/spike/markdown-workers.test.ts`, `vitest.config.ts`, `specs/…/ADR-001-isomorphic-markdown.md`
 - **不变量**: 不改变依赖任务（setup-workers-test-pool）已通过的测试结果
 
 ## 产品需求来源
@@ -29,14 +29,22 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/lib/markdown/render.ts` 最小原型：remark-parse → remark-gfm → remark-rehype → rehype-expressive-code（Shiki JavaScript 正则引擎、语言白名单）
-- [ ] `wrangler deploy --dry-run --outdir dist-check` 后 worker 压缩体积 ≤ 10MB，数值记录到 ADR-001"验证结果"
-- [ ] 结论写入 ADR-001：通过 → 状态保持 Accepted；不通过 → 启用 ADR-001 退路并通知作者
+- [x] `src/lib/markdown/render.ts` 最小原型：remark-parse → remark-gfm → remark-rehype → rehype-expressive-code（Shiki JavaScript 正则引擎、语言白名单）
+- [x] `wrangler deploy --dry-run --outdir dist-check` 后 worker 压缩体积 ≤ 10MB，数值记录到 ADR-001"验证结果"
+- [x] 结论写入 ADR-001：通过 → 状态保持 Accepted；不通过 → 启用 ADR-001 退路并通知作者
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 执行记录（2026-10-13）
+
+- 红：`Cannot find module '../../src/lib/markdown/render'`
+- 绿：1/1 通过（workerd）。workerd 本地计时器在 CPU 运算期间会前进（3e7 次循环测得 15ms），耗时断言有效
+- 结论：**通过**，ADR-001 保持 Accepted；体积与耗时数据见 ADR-001"验证结果"
+- 计划外改动：`vitest.config.ts` workers 项目纳入 `tests/spike/`；顶层 `resolve.alias` 修正测试环境中 postcss → `nanoid/non-secure` 的 CJS 解析
+- 新增依赖：unified 11、remark-parse 11、remark-gfm 4、remark-rehype 11、rehype-stringify 10、rehype-expressive-code 0.44、unist-util-visit 5；dev：@types/hast
 
 ## 依赖
 

@@ -1,9 +1,15 @@
 import { cloudflareTest, readD1Migrations } from "@cloudflare/vitest-plugin";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 const MIGRATIONS_DIR = "src/db/migrations";
 
 export default defineConfig({
+  resolve: {
+    // postcss（Expressive Code 依赖）是 CJS，require("nanoid/non-secure") 在测试模块回退中
+    // 会解析到 ESM 入口而得到 undefined；只影响测试环境，wrangler 打包不受影响
+    alias: { "nanoid/non-secure": fileURLToPath(import.meta.resolve("nanoid/non-secure")).replace(/\.js$/, ".cjs") },
+  },
   test: {
     projects: [
       {
@@ -26,7 +32,7 @@ export default defineConfig({
         ],
         test: {
           name: "workers",
-          include: ["tests/integration/**/*.test.ts"],
+          include: ["tests/integration/**/*.test.ts", "tests/spike/**/*.test.ts"],
           setupFiles: ["tests/setup/apply-migrations.ts"],
         },
       },
