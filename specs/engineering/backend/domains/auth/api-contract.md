@@ -9,6 +9,8 @@
 
 ## POST /api/admin/login
 
+> 已实现：`src/pages/api/admin/login.ts`（`createLoginHandler`）；Cookie 在 `src/lib/api/session-cookie.ts`。空字符串账号 / 密码按"缺字段"返回 400。
+
 登录。middleware 对此路径不校验会话，但校验 Origin。
 
 **请求**（`application/json`）

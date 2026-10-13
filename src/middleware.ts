@@ -7,8 +7,8 @@ import type { AdminSession } from "./domains/auth/session-repo";
 import { D1SessionRepo } from "./domains/auth/session-repo";
 import { D1ThrottleRepo } from "./domains/auth/throttle-repo";
 import { forbiddenOrigin, serverMisconfigured, unauthenticated } from "./lib/api/errors";
+import { SESSION_COOKIE } from "./lib/api/session-cookie";
 
-export const SESSION_COOKIE = "mh_session";
 const LOGIN_PAGE = "/admin/login";
 const LOGIN_API = "/api/admin/login";
 const SAFE_METHODS = new Set(["GET", "HEAD"]);

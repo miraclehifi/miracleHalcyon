@@ -11,7 +11,8 @@ const PASSWORD_MAX = 256;
 
 export type LoginResult =
   | { ok: true; token: string; expiresAt: Date }
-  | { ok: false; code: "INVALID_CREDENTIALS" | "RATE_LIMITED" };
+  | { ok: false; code: "INVALID_CREDENTIALS" }
+  | { ok: false; code: "RATE_LIMITED"; lockedUntil: Date };
 
 export interface LoginInput {
   ip: string;
@@ -66,7 +67,8 @@ export function createAuthService(deps: AuthDeps) {
 
   return {
     async login({ ip, username, password, now }: LoginInput): Promise<LoginResult> {
-      if (isLocked(await deps.throttles.get(ip), now)) return { ok: false, code: "RATE_LIMITED" };
+      const throttle = await deps.throttles.get(ip);
+      if (throttle?.lockedUntil && isLocked(throttle, now)) return { ok: false, code: "RATE_LIMITED", lockedUntil: throttle.lockedUntil };
       if (!credentialsInRange(username, password)) return recordFailure(ip, now); // 超长不做哈希
 
       // 无论账号是否正确都比对一次密码，避免时序差异泄露账号是否存在

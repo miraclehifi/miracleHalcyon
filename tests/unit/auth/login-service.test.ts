@@ -55,7 +55,7 @@ describe("AuthService.login", () => {
       },
       wrongPassword: { result: { ok: false, code: "INVALID_CREDENTIALS" }, throttle: { failCount: 1, lockedUntil: null }, sessions: 0 },
       wrongUser: { result: { ok: false, code: "INVALID_CREDENTIALS" }, verified: 1, throttle: { failCount: 1, lockedUntil: null } },
-      locked: { result: { ok: false, code: "RATE_LIMITED" }, verified: 0, throttle: LOCKED, sessions: 0 },
+      locked: { result: { ok: false, code: "RATE_LIMITED", lockedUntil: LOCKED.lockedUntil }, verified: 0, throttle: LOCKED, sessions: 0 },
     });
   });
 });

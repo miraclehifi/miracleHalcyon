@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 15
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,14 +29,18 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/pages/api/admin/login.ts`
-- [ ] 本地 http 环境 Cookie 去掉 `Secure`
-- [ ] 日志不含密码与 token
+- [x] `src/pages/api/admin/login.ts`
+- [x] 本地 http 环境 Cookie 去掉 `Secure`
+- [x] 日志不含密码与 token
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `login` 的 `RATE_LIMITED` 结果带 `lockedUntil`（供 `Retry-After`），AUTH-UT-04 期望与 domain-model 签名同步\n- 空字符串账号 / 密码按缺字段返回 400；配置缺失只记录配置名\n- 新增 `src/lib/api/session-cookie.ts`（middleware 复用 `SESSION_COOKIE`）
 
 ## 依赖
 
