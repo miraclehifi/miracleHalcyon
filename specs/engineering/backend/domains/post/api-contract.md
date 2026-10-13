@@ -106,7 +106,7 @@
 
 ### PUT /api/admin/posts/:id
 
-自动保存。请求体为完整 `DraftInput`（六个字段都必须出现，缺字段 → 400，防止部分覆盖丢数据）。请求体中的 `status`、`id`、`hasUnpublishedChanges` 等字段一律忽略（不能通过保存改变发布状态，US-06 约束）。
+自动保存。请求体为完整 `DraftInput`（六个字段都必须出现，缺字段 → 400，防止部分覆盖丢数据）。已实现（`createPostHandlers().PUT`）；缺字段的 `message` 为"请求缺少字段：{字段名}"。请求体中的 `status`、`id`、`hasUnpublishedChanges` 等字段一律忽略（不能通过保存改变发布状态，US-06 约束）。
 
 | 状态 | 体 |
 |------|----|

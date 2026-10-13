@@ -26,9 +26,12 @@ export class BadJsonError extends Error {
   readonly code = "BAD_JSON";
 }
 
+// PUT 必须带齐六个字段（防止部分覆盖丢数据），缺字段单独提示
+export class IncompleteDraftError extends ValidationError {}
+
 // 路由参数中的文章 id：只接受正整数，其余视为不存在（404，不暴露格式错误）
 export function parsePostId(param: string | undefined): number | null {
-  if (!param || !/^[1-9]\d{0,15}$/.test(param)) return null;
+  if (!param || !/^[1-9]\d{0,14}$/.test(param)) return null; // ≤ 15 位，在 JS 安全整数范围内
   return Number(param);
 }
 
@@ -68,6 +71,8 @@ export function parseDraftInput(raw: unknown, { requireAll }: { requireAll: bool
     if (FIELD_TYPES[field](body[field])) input[field] = body[field];
     else invalid.add(field);
   }
+  const absent = requireAll ? DRAFT_FIELDS.filter((field) => !(field in body)) : [];
+  if (absent.length > 0) throw new IncompleteDraftError(absent);
   const draft = input as unknown as DraftInput;
   try {
     normalizeContent(draft);
@@ -81,6 +86,10 @@ export function parseDraftInput(raw: unknown, { requireAll }: { requireAll: bool
 
 // 领域错误 → 错误体；其他错误原样抛出（500）
 export function errorResponse(error: unknown): Response {
+  if (error instanceof IncompleteDraftError) {
+    const message = `请求缺少字段：${error.fields.join("、")}`;
+    return Response.json({ error: { code: error.code, message, fields: error.fields } }, { status: 400 });
+  }
   if (error instanceof ValidationError) {
     const message = error.fields.map((field) => FIELD_MESSAGES[field] ?? `${field} 不符合要求`).join("；");
     return Response.json({ error: { code: error.code, message, fields: error.fields } }, { status: 400 });

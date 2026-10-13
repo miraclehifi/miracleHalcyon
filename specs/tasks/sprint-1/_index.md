@@ -53,7 +53,7 @@
 | 39 | [implement-published-query](implement-published-query.md) | 实现已发布只读查询（D1） | article-writing | DATA | 数据层 | US-08 | implement-post-repo | 2 | 低 | completed |
 | 40 | [implement-create-post-endpoint](implement-create-post-endpoint.md) | 实现 POST /api/admin/posts | article-writing | API | 接口层 | US-03, US-06 | implement-post-repo, enforce-slug-uniqueness, implement-auth-middleware | 2 | 低 | completed |
 | 41 | [implement-get-post-endpoint](implement-get-post-endpoint.md) | 实现 GET /api/admin/posts/:id | article-writing | API | 接口层 | US-03 | implement-create-post-endpoint | 4 | 低 | completed |
-| 42 | [implement-save-post-endpoint](implement-save-post-endpoint.md) | 实现 PUT /api/admin/posts/:id | article-writing | API | 接口层 | US-03, US-06 | implement-get-post-endpoint | 1 | 低 | pending |
+| 42 | [implement-save-post-endpoint](implement-save-post-endpoint.md) | 实现 PUT /api/admin/posts/:id | article-writing | API | 接口层 | US-03, US-06 | implement-get-post-endpoint | 1 | 低 | completed |
 | 43 | [implement-list-posts-endpoint](implement-list-posts-endpoint.md) | 实现 GET /api/admin/posts | article-writing | API | 接口层 | US-07 | implement-post-list-query, implement-create-post-endpoint | 1 | 低 | pending |
 | 44 | [implement-publish-endpoint](implement-publish-endpoint.md) | 实现 POST /api/admin/posts/:id/publish | article-writing | API | 接口层 | US-08 | implement-post-publish-service, implement-get-post-endpoint | 1 | 低 | pending |
 | 45 | [implement-unpublish-endpoint](implement-unpublish-endpoint.md) | 实现 POST /api/admin/posts/:id/unpublish | article-writing | API | 接口层 | US-08 | implement-post-unpublish-service, implement-get-post-endpoint | 1 | 低 | pending |

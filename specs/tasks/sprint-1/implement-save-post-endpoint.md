@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 42
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -30,12 +30,16 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/pages/api/admin/posts/[id].ts`（PUT）
+- [x] `src/pages/api/admin/posts/[id].ts`（PUT）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 缺字段用 `IncompleteDraftError` 单独提示（\"请求缺少字段：body\"），避免误用字段长度提示\n- 顺带修正上一任务 `parsePostId` 的位数上限（15 位）
 
 ## 依赖
 
