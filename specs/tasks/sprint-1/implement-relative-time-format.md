@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 52
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,17 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/lib/format/relative-time.ts`
+- [x] `src/lib/format/relative-time.ts`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `formatRelativeTime(date, now, timeZone?)`：1 小时规则优先于日历日（跨零点 20 分钟前仍为"20 分钟前"）；不足 1 分钟或时钟偏差导致的未来时间显示"1 分钟前"（规格未定义 0 分钟，避免出现"0 分钟前"）
+- 日历日用 `Intl.DateTimeFormat` 按时区计算，缺省为浏览器时区；测试固定 Asia/Shanghai
 
 ## 依赖
 
