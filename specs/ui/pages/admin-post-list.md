@@ -89,6 +89,8 @@
 
 ## 页面状态
 
+> 已实现（Sprint 1 主干，build-post-list-page）：`src/pages/admin/index.astro`（SSR 首屏）+ `src/components/admin/PostListPage.tsx`——默认、加载中骨架、错误重试；筛选、搜索、分页、空状态由后续任务接入。
+
 | 状态 | 表现 |
 |------|------|
 | 默认 | 按更新时间倒序 |

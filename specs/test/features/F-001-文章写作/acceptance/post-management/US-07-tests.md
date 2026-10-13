@@ -9,10 +9,9 @@
 > 验收规格（非可执行代码），由 behaviors.md 的 Given-When-Then 生成。
 > 接口路径为占位，**接口路径以 design-domain API 契约为准**：
 > - 列表：`GET /api/admin/posts?status=&q=&page=`
-> - 页面：`/admin`（列表）、`/admin/posts/new`、`/admin/posts/:id/edit`
+> - 页面：`/admin`（列表）、`/admin/posts/new`、`/admin/posts/:id`
 >
-> 状态标记文案按 behaviors.md：`草稿` / `已发布` / `已发布 · 有修改`。
-> 注：US-06 BH-08 写作页文案为"已发布 · 有修改"，两处文案差异留待 design-ui 统一，本文件按 US-07 behaviors 断言。
+> 状态标记文案按 design-ui 统一后的 `StatusBadge`：`草稿` / `已发布` / `已发布 · 有未发布修改`。列表行为卡片（`<li>` 内 `PostListItem`），只显示标题、状态、更新时间，不显示标签（admin-post-list.md"列表行"）。
 
 ---
 
@@ -72,12 +71,12 @@
 
 **步骤：**
 1. 访问 `/admin`
-2. 读取列表行顺序、每行状态标记、标题、标签、更新时间
+2. 读取列表行顺序、每行状态标记、标题、更新时间
 
 **预期结果：**
 - 列表依次显示 A、B、C
-- 状态标记分别为"草稿"、"已发布"、"已发布 · 有修改"
-- 每行显示标题、标签、更新时间
+- 状态标记分别为"草稿"、"已发布"、"已发布 · 有未发布修改"
+- 每行显示标题、状态、更新时间（不显示标签）
 
 **清理：** Factory 清空 post 表
 
@@ -428,15 +427,15 @@
 
 **预期结果：**
 - 第 1/2/3 行标题为"草稿 A"/"已发布 B"/"已发布 C"
-- 状态标记分别为"草稿"、"已发布"、"已发布 · 有修改"
-- 每行显示标题、标签、更新时间
+- 状态标记分别为"草稿"、"已发布"、"已发布 · 有未发布修改"
+- 每行显示标题、状态、更新时间（不显示标签）
 
 **playwright_hint：**
 ```ts
-const rows = page.getByRole('row').filter({ has: page.getByRole('link') });
+const rows = page.getByRole('listitem').filter({ has: page.getByRole('link') });
 await expect(rows.nth(0)).toContainText('草稿 A');
 await expect(rows.nth(0)).toContainText('草稿');
-await expect(rows.nth(2)).toContainText('已发布 · 有修改');
+await expect(rows.nth(2)).toContainText('已发布 · 有未发布修改');
 ```
 
 **清理：** 清空 post 表
@@ -460,12 +459,12 @@ await expect(rows.nth(2)).toContainText('已发布 · 有修改');
 
 **步骤：** 访问 `/admin`，点击 A 的标题
 
-**预期结果：** 进入 `/admin/posts/{A.id}/edit`
+**预期结果：** 进入 `/admin/posts/{A.id}`
 
 **playwright_hint：**
 ```ts
 await page.getByRole('link', { name: '草稿 A' }).click();
-await expect(page).toHaveURL(`/admin/posts/${a.id}/edit`);
+await expect(page).toHaveURL(`/admin/posts/${a.id}`);
 ```
 
 **清理：** 清空 post 表
@@ -495,7 +494,7 @@ await expect(page).toHaveURL(`/admin/posts/${a.id}/edit`);
 
 **playwright_hint：**
 ```ts
-await page.getByRole('link', { name: '新建文章' }).click();
+await page.getByRole('button', { name: '新建文章' }).click();
 await expect(page).toHaveURL('/admin/posts/new');
 ```
 
@@ -533,7 +532,7 @@ await expect(page).toHaveURL('/admin/posts/new');
 await page.getByRole('tab', { name: '草稿' }).click(); // 或 combobox selectOption
 await expect(page).toHaveURL(/status=draft/);
 await page.reload();
-await expect(page.getByRole('row').filter({ hasText: '草稿' })).toHaveCount(2);
+await expect(page.getByRole('listitem').filter({ hasText: '草稿' })).toHaveCount(2);
 ```
 
 **清理：** 清空 post 表
@@ -671,7 +670,7 @@ await expect(page.getByRole('searchbox')).toHaveValue('');
 ```ts
 await expect(page.getByRole('navigation', { name: /分页/ }).getByRole('link')).toContainText(['1','2','3']);
 await page.getByRole('link', { name: '3', exact: true }).click();
-await expect(page.locator('tbody tr')).toHaveCount(5);
+await expect(page.getByRole('listitem')).toHaveCount(5);
 await expect(page.getByRole('link', { name: '3', exact: true })).toHaveAttribute('aria-current', 'page');
 ```
 
@@ -692,24 +691,25 @@ await expect(page.getByRole('link', { name: '3', exact: true })).toHaveAttribute
 | type | ui-interaction |
 | Change History | 2026-10-10 v1.0 初始创建 |
 
-**前置条件：** 【数据前置】3 篇文章；【环境前置】已登录；Playwright 拦截列表接口首个请求返回 500
+**前置条件：** 【数据前置】3 篇文章；【环境前置】已登录；Playwright 拦截首屏之后的第一个列表请求返回 500（首屏数据由 SSR 读取，浏览器拦截不到）
 
 **步骤：**
-1. 进入列表页
+1. 进入列表页，切换到"草稿"筛选（触发列表请求，被拦截）
 2. 取消拦截后点击"重试"
 
 **预期结果：**
 - 显示"加载失败"与"重试"按钮，不显示空状态
-- 点击"重试"且接口恢复后列表正常显示 3 篇
+- 点击"重试"且接口恢复后列表正常显示（草稿筛选结果）
 - 另测网络中断（`route.abort()`）表现相同
 
 **playwright_hint：**
 ```ts
-await page.route('**/api/admin/posts*', r => r.fulfill({ status: 500 }), { times: 1 });
 await page.goto('/admin');
+await page.route('**/api/admin/posts*', r => r.fulfill({ status: 500 }), { times: 1 });
+await page.getByRole('radio', { name: /草稿/ }).click();
 await expect(page.getByText('加载失败')).toBeVisible();
 await page.getByRole('button', { name: '重试' }).click();
-await expect(page.locator('tbody tr')).toHaveCount(3);
+await expect(page.getByRole('listitem')).not.toHaveCount(0);
 ```
 
 **清理：** `page.unroute`；清空 post 表
@@ -763,3 +763,4 @@ await expect(page.locator('tbody tr')).toHaveCount(3);
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
+| 2026-10-13 | v1.1 | 与 design-ui 对齐（build-post-list-page）：状态文案"已发布 · 有未发布修改"；行为卡片列表（`listitem`），不显示标签；编辑页路由 `/admin/posts/:id`；"新建文章"为按钮；TC-20 改为拦截首屏之后的列表请求（首屏 SSR） | miraclehifi |

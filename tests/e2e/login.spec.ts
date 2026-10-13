@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { PASSWORD, USERNAME } from "./support/admin";
 
 // [TC-US01-02][SC-LOGIN-01] 浏览器中正确凭据登录进入 /admin（测试账号见 wrangler.jsonc env.e2e）
-const USERNAME = "test-admin";
-const PASSWORD = "Test-Passw0rd!";
 
 test("[TC-US01-02] 正确凭据登录后进入 /admin 并获得 HttpOnly 会话 Cookie", async ({ page, baseURL }) => {
   await page.goto("/admin/login");

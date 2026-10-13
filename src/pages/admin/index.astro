@@ -1,0 +1,25 @@
+---
+// 文章列表页（admin-post-list.md，US-07）：会话已由 middleware 校验；首屏数据在服务端读取
+import { env } from "cloudflare:workers";
+import { AdminHeader } from "../../components/admin/AdminHeader";
+import { PostListPage } from "../../components/admin/PostListPage";
+import { D1PostRepo } from "../../domains/post/repo";
+import { createPostService, type PostListResult } from "../../domains/post/service";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export const prerender = false;
+
+const service = createPostService({ repo: new D1PostRepo(env.DB) });
+let initial: PostListResult | null = null;
+try {
+  initial = await service.list({ status: "all", q: "", page: 1 });
+} catch (error) {
+  console.error("文章列表首屏读取失败", error); // 页面显示"加载失败"，由用户重试
+}
+const renderedAt = new Date().toISOString();
+---
+
+<BaseLayout title="文章 · miracleHalcyon 后台">
+  <AdminHeader client:load />
+  <PostListPage client:load initial={initial} renderedAt={renderedAt} />
+</BaseLayout>
