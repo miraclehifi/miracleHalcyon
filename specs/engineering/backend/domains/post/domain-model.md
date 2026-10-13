@@ -101,7 +101,7 @@ interface PostService { // 已实现 create / saveDraft / getForEdit：createPos
   suggestTags(q: string): Promise<TagSuggestion[]>;                         // US-03-6
 }
 
-interface PublishedPostQuery {   // F-002 只读接口（published-query.ts）
+interface PublishedPostQuery {   // F-002 只读接口（published-query.ts，已实现：D1PublishedPostQuery；tag 过滤与标签统计不区分大小写）
   listPublished(q: { page: number; pageSize: number; tag?: string }): Promise<{ items: PublishedPostSummary[]; total: number }>;
   getPublishedBySlug(slug: string): Promise<PublishedPost | null>;
   listPublishedTags(): Promise<{ name: string; count: number }[]>;

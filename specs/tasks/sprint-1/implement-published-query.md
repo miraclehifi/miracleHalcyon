@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 39
-**状态**: pending
+**状态**: completed
 **类别**: DATA
 **架构层级**: 数据层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,12 @@ POST-UT-11：草稿查不到；有修改的已发布文章返回快照内容而�
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/domains/post/published-query.ts`：`listPublished`、`getPublishedBySlug`、`listPublishedTags`
+- [x] `src/domains/post/published-query.ts`：`listPublished`、`getPublishedBySlug`、`listPublishedTags`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
 
 ## 依赖
 
