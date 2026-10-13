@@ -5,9 +5,7 @@ import { jsonError } from "./errors";
 
 export const MAX_BODY_BYTES = 1024 * 1024; // PUT / POST 请求体上限 1MB
 export const QUERY_MAX = 100; // 列表搜索与标签补全的 q 上限（字）
-
-// 列表页码：正整数，≤ 9 位
-export const isPageParam = (text: string) => /^[1-9]\d{0,8}$/.test(text);
+export { isPageParam } from "../admin/list-query"; // 与列表页 URL 解析共用同一规则
 
 type DraftField = keyof DraftInput;
 const DRAFT_FIELDS: DraftField[] = ["title", "slug", "tags", "summary", "body", "publishedAt"];

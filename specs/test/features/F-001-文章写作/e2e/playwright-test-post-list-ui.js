@@ -1,4 +1,4 @@
-// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、20（acceptance/post-management/US-07-tests.md）
+// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、15、20（acceptance/post-management/US-07-tests.md）
 // 由 implement（build-post-list-page）生成，verify 阶段执行：bash playwright-test-post-list-ui.sh
 // 前置：服务已用 CLOUDFLARE_ENV=e2e 构建并运行（测试账号见 wrangler.jsonc env.e2e），本地 D1 已迁移
 // 数据：经接口创建，标题带本次运行的唯一前缀，只断言这几篇（本地 D1 可能已有其他文章）
@@ -90,6 +90,23 @@ const rowsOf = (page, prefix) => page.getByRole("listitem").filter({ hasText: pr
     await page.waitForURL(/\/admin\/posts\/new$/);
     await page.goto(`${TARGET_URL}/admin`);
     check((await totalOf()) === before, `进入新建页后文章总数从 ${before} 变为 ${await totalOf()}`);
+  });
+
+  await run("[SC-POSTLIST-04] TC-US07-15 选择\"草稿\"筛选，URL 同步、刷新保持；选回\"全部\"移除参数", async ({ page, api }) => {
+    const p = `${PREFIX}-15`;
+    for (const name of ["D1", "D2"]) await api.create(`${p} ${name}`);
+    for (const name of ["P1", "P2", "P3"]) await api.publish(await api.create(`${p} ${name}`, `${p}-${name}`.toLowerCase(), name));
+    await page.goto(`${TARGET_URL}/admin`);
+    await page.waitForSelector("astro-island:not([ssr])");
+    await page.getByRole("radio", { name: /^草稿/ }).click();
+    await page.waitForURL(/\?status=draft$/);
+    await page.reload();
+    await rowsOf(page, p).first().waitFor();
+    check((await rowsOf(page, p).count()) === 2, `草稿筛选应显示本次 2 篇草稿，实际 ${await rowsOf(page, p).count()}`);
+    check((await page.getByRole("listitem").filter({ hasText: "已发布" }).count()) === 0, "草稿筛选下出现了已发布文章");
+    await page.getByRole("radio", { name: /^全部/ }).click();
+    await page.waitForURL(/\/admin$/);
+    await page.waitForFunction((prefix) => [...document.querySelectorAll("li")].filter((li) => li.textContent.includes(prefix)).length === 5, p);
   });
 
   // 首屏数据由 SSR 读取，浏览器无法拦截；改为拦截首屏之后的列表请求（切换"草稿"筛选，add-post-list-status-filter 接入后可用）
