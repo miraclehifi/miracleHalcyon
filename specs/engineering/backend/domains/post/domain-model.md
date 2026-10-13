@@ -144,7 +144,7 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 | 参数 | 规则 |
 |------|------|
 | `status` | `all`（默认）/ `draft` / `published`；`published` 包含有未发布修改的 |
-| `q` | 去首尾空白；对工作稿标题做不区分大小写的包含匹配（`LIKE '%' \|\| ? \|\| '%' ESCAPE '\'`，转义 `%`、`_`、`\`）；空串等于不过滤 |
+| `q` | 去首尾空白；对工作稿标题做不区分大小写（ASCII）的包含匹配：`instr(lower(title), lower(?)) > 0`。不用 LIKE：D1 限制 LIKE 模式 ≤ 50 字节，100 字中文搜索词会报 "pattern too complex"；instr 也无需转义 `%`、`_`、`\`；空串等于不过滤 |
 | `page` | 正整数，默认 1；超出范围返回空 `items`（不报错），前端回到最后一页 |
 | `pageSize` | 固定 20 |
 | 排序 | `updated_at DESC, id DESC` |

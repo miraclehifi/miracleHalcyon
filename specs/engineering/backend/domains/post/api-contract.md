@@ -66,6 +66,8 @@
 
 ### GET /api/admin/posts
 
+> 已实现：`createListPostsHandler`（`src/pages/api/admin/posts/index.ts`）。
+
 | 查询参数 | 规则 |
 |---------|------|
 | `status` | `all`（默认）/ `draft` / `published`；其他值 → 400 `VALIDATION_FAILED` |
