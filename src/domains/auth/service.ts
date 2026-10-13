@@ -1,6 +1,6 @@
 // AuthService（auth domain-model §4）
 import { verifyPassword, type PasswordHash } from "./password";
-import type { SessionRepo } from "./session-repo";
+import type { AdminSession, SessionRepo } from "./session-repo";
 import { isLocked, nextThrottleState } from "./throttle";
 import type { ThrottleRepo } from "./throttle-repo";
 
@@ -81,6 +81,11 @@ export function createAuthService(deps: AuthDeps) {
       const expiresAt = new Date(now.getTime() + SESSION_TTL_MS);
       await deps.sessions.insert({ tokenHash: await hashToken(token), createdAt: now, expiresAt });
       return { ok: true, token, expiresAt };
+    },
+
+    async getSession(token: string | undefined, now: Date): Promise<AdminSession | null> {
+      if (!token) return null;
+      return deps.sessions.findValid(await hashToken(token), now);
     },
   };
 }

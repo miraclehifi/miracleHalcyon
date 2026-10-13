@@ -58,9 +58,9 @@
 ```ts
 interface AuthService {
   login(input: { ip: string; username: string; password: string; now: Date }):
-    Promise<{ ok: true; token: string; expiresAt: Date }
+    Promise<{ ok: true; token: string; expiresAt: Date }   // 已实现
            | { ok: false; code: 'INVALID_CREDENTIALS' | 'RATE_LIMITED' }>;
-  getSession(token: string | undefined, now: Date): Promise<AdminSession | null>;
+  getSession(token: string | undefined, now: Date): Promise<AdminSession | null>; // 已实现
   logout(token: string | undefined): Promise<void>; // 幂等
 }
 

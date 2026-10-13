@@ -1,9 +1,8 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { hashPassword, verifyPassword } from "../../../src/domains/auth/password";
 import { createAuthService, hashToken } from "../../../src/domains/auth/service";
-import type { AdminSession, SessionRepo } from "../../../src/domains/auth/session-repo";
 import type { ThrottleState } from "../../../src/domains/auth/throttle";
-import type { ThrottleRepo } from "../../../src/domains/auth/throttle-repo";
+import { MemorySessionRepo, MemoryThrottleRepo } from "./memory-repos";
 
 // [AUTH-UT-04] AuthService.login（内存仓储）
 const USERNAME = "halcyon";
@@ -12,20 +11,6 @@ const IP = "203.0.113.7";
 const NOW = new Date("2026-10-13T00:00:00.000Z");
 const LOCKED: ThrottleState = { failCount: 0, lockedUntil: new Date("2026-10-13T00:10:00.000Z") };
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60_000;
-
-class MemorySessionRepo implements SessionRepo {
-  rows = new Map<string, AdminSession>();
-  async insert(s: AdminSession) { this.rows.set(s.tokenHash, s); }
-  async findValid(tokenHash: string) { return this.rows.get(tokenHash) ?? null; }
-  async delete(tokenHash: string) { this.rows.delete(tokenHash); }
-}
-
-class MemoryThrottleRepo implements ThrottleRepo {
-  rows = new Map<string, ThrottleState>();
-  async get(ip: string) { return this.rows.get(ip) ?? null; }
-  async put(ip: string, s: ThrottleState) { this.rows.set(ip, s); }
-  async delete(ip: string) { this.rows.delete(ip); }
-}
 
 let adminPasswordHash: string;
 beforeAll(async () => {

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 13
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@ AUTH-UT-05：`getSession` 有效 / 过期 / 未知 token / undefined
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `AuthService.getSession`：sha256 → `findValid`
+- [x] `AuthService.getSession`：sha256 → `findValid`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 内存仓储抽到 `tests/unit/auth/memory-repos.ts`，过期惰性删除行为与 D1 实现一致
 
 ## 依赖
 
