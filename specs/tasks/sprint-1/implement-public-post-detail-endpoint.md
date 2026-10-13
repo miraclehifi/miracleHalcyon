@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 47
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/pages/api/posts/[slug].ts`（公开，不经会话校验）
+- [x] `src/pages/api/posts/[slug].ts`（公开，不经会话校验）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 直接用 `D1PublishedPostQuery.getPublishedBySlug`，不经 `PostService`；404 体也带 `Cache-Control: no-store`
 
 ## 依赖
 

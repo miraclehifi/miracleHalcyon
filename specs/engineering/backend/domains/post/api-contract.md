@@ -171,6 +171,8 @@
 | 200 | `PublishedPost` |
 | 404 | `POST_NOT_FOUND`（草稿、已撤回、已删除、slug 大小写不符都返回 404） |
 
+已实现：`src/pages/api/posts/[slug].ts`（读 `D1PublishedPostQuery.getPublishedBySlug`）。
+
 ## 5. 错误码汇总
 
 | code | HTTP | message |

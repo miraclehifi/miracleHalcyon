@@ -58,7 +58,7 @@
 | 44 | [implement-publish-endpoint](implement-publish-endpoint.md) | 实现 POST /api/admin/posts/:id/publish | article-writing | API | 接口层 | US-08 | implement-post-publish-service, implement-get-post-endpoint | 1 | 低 | completed |
 | 45 | [implement-unpublish-endpoint](implement-unpublish-endpoint.md) | 实现 POST /api/admin/posts/:id/unpublish | article-writing | API | 接口层 | US-08 | implement-post-unpublish-service, implement-get-post-endpoint | 1 | 低 | completed |
 | 46 | [implement-tags-endpoint](implement-tags-endpoint.md) | 实现 GET /api/admin/tags | article-writing | API | 接口层 | US-03 | implement-tag-suggestions, implement-auth-middleware | 1 | 低 | completed |
-| 47 | [implement-public-post-detail-endpoint](implement-public-post-detail-endpoint.md) | 实现 GET /api/posts/:slug | article-writing | API | 接口层 | US-08 | implement-published-query | 0 | 低 | pending |
+| 47 | [implement-public-post-detail-endpoint](implement-public-post-detail-endpoint.md) | 实现 GET /api/posts/:slug | article-writing | API | 接口层 | US-08 | implement-published-query | 0 | 低 | completed |
 | 48 | [implement-public-post-list-endpoint](implement-public-post-list-endpoint.md) | 实现 GET /api/posts | article-writing | API | 接口层 | US-08 | implement-published-query | 0 | 低 | pending |
 | 49 | [implement-markdown-gfm-render](implement-markdown-gfm-render.md) | 实现 GFM 渲染 | article-writing | DOMAIN | 领域层 | US-04 | spike-markdown-workers-runtime | 1 | 低 | pending |
 | 50 | [implement-markdown-sanitize](implement-markdown-sanitize.md) | 实现 Markdown XSS 过滤 | article-writing | DOMAIN | 领域层 | US-04 | implement-markdown-gfm-render | 1 | 低 | pending |
