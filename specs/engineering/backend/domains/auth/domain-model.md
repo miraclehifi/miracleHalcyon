@@ -85,7 +85,7 @@ interface SessionRepo { // 已实现：D1SessionRepo（src/domains/auth/session-
   findValid(tokenHash: string, now: Date): Promise<AdminSession | null>; // 过期则顺带删除并返回 null
   delete(tokenHash: string): Promise<void>;
 }
-interface ThrottleRepo {
+interface ThrottleRepo { // 已实现：D1ThrottleRepo（src/domains/auth/throttle-repo.ts）
   get(ip: string): Promise<ThrottleState | null>;
   put(ip: string, s: ThrottleState): Promise<void>;
   delete(ip: string): Promise<void>;

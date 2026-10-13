@@ -22,7 +22,7 @@
 | 8 | [implement-login-throttle-rules](implement-login-throttle-rules.md) | 实现登录限流状态规则 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 1 | 低 | completed |
 | 9 | [implement-sanitize-next](implement-sanitize-next.md) | 实现登录回跳地址清洗 | article-writing | DOMAIN | 领域层 | US-01 | setup-workers-test-pool | 1 | 低 | completed |
 | 10 | [implement-session-repo](implement-session-repo.md) | 实现会话仓储（D1） | article-writing | DATA | 数据层 | US-01 | create-d1-init-migration | 1 | 低 | completed |
-| 11 | [implement-throttle-repo](implement-throttle-repo.md) | 实现限流仓储（D1） | article-writing | DATA | 数据层 | US-01 | create-d1-init-migration | 1 | 低 | pending |
+| 11 | [implement-throttle-repo](implement-throttle-repo.md) | 实现限流仓储（D1） | article-writing | DATA | 数据层 | US-01 | create-d1-init-migration | 1 | 低 | completed |
 | 12 | [implement-auth-login-service](implement-auth-login-service.md) | 实现登录服务 | article-writing | DOMAIN | 领域层 | US-01 | implement-password-hashing, implement-login-throttle-rules | 1 | 中 | pending |
 | 13 | [implement-auth-session-check](implement-auth-session-check.md) | 实现会话校验 | article-writing | DOMAIN | 领域层 | US-01 | implement-auth-login-service | 1 | 低 | pending |
 | 14 | [implement-auth-middleware](implement-auth-middleware.md) | 实现认证与 Origin 校验中间件 | article-writing | API | 接口层 | US-01 | implement-auth-session-check, implement-session-repo, implement-sanitize-next | 3 | 中 | pending |
