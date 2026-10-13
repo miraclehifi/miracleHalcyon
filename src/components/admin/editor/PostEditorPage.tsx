@@ -1,12 +1,13 @@
 // 写文章页（admin-post-editor.md，US-03）：状态容器 + 布局。文章由页面 SSR 传入（新建为 null）
 // 桌面三栏：编辑 | 预览 | 设置抽屉（340px）；< 1024px 只显示编辑区，抽屉浮在内容上方
-// 编辑区细节、设置字段、预览渲染、自动保存、发布由后续任务接入
+// 设置字段、预览渲染、自动保存、发布由后续任务接入
 import { useState } from "react";
 import type { PostView } from "../../../domains/post/service";
 import { Button } from "../../ui/Button";
 import { IconButton } from "../../ui/IconButton";
 import { badgeStatus } from "../../ui/StatusBadge";
 import { EditorTopBar } from "./EditorTopBar";
+import { MarkdownEditor } from "./MarkdownEditor";
 
 export interface PostEditorPageProps {
   initial: PostView | null; // null：新建
@@ -43,20 +44,12 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
         primaryAction={<Button disabled>{status === "draft" ? "发布" : "发布更新"}</Button>}
       />
       <div className="relative flex min-h-0 flex-1">
-        <section aria-label="编辑" className="flex min-w-0 flex-1 flex-col gap-[18px] border-r border-line px-9 pt-7 max-lg:border-r-0 max-md:px-4 max-md:pt-4">
-          <input
-            aria-label="标题"
-            placeholder="无标题"
-            value={draft.title}
-            onChange={(event) => update({ title: event.target.value })}
-            className="w-full bg-transparent text-display font-semibold text-ink outline-none placeholder:text-ink-faint max-md:text-[26px]"
-          />
-          <textarea
-            aria-label="正文"
-            value={draft.body}
-            onChange={(event) => update({ body: event.target.value })}
-            spellCheck={false}
-            className="min-h-0 w-full flex-1 resize-none bg-transparent font-mono text-ui leading-[1.5] text-ink outline-none max-md:text-base"
+        <section aria-label="编辑" className="flex min-w-0 flex-1 flex-col border-r border-line px-9 pt-7 max-lg:border-r-0 max-md:px-4 max-md:pt-4">
+          <MarkdownEditor
+            title={draft.title}
+            body={draft.body}
+            onTitleChange={(title) => update({ title })}
+            onBodyChange={(body) => update({ body })}
           />
         </section>
         <section aria-label="预览" className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 max-lg:hidden">
