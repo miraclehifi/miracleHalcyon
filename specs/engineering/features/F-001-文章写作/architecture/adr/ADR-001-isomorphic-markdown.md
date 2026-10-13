@@ -18,7 +18,7 @@ US-04 要求预览在 300ms 内更新，并且与读者端（F-002）渲染完�
 
 ## 验证结果（Worker 侧，2026-10-13，spike-markdown-workers-runtime）
 
-**结论：通过**，Worker SSR 技术上可行。但长文热渲染约 60ms CPU，超出免费版 10ms 上限，作者据此决定读者页改为构建时渲染（见"决策"），Worker SSR 降为退路。浏览器侧（万字 < 300ms）由 `spike-markdown-browser-worker` 验证。
+**结论：通过**，Worker SSR 技术上可行。但长文热渲染约 60ms CPU，超出免费版 10ms 上限，作者据此决定读者页改为构建时渲染（见"决策"），Worker SSR 降为退路。浏览器侧见下节。
 
 原型：`src/lib/markdown/render.ts`（remark-parse → remark-gfm → remark-rehype → 语言白名单 → rehype-expressive-code 0.44，Shiki 4.5 JavaScript 正则引擎，github-dark / github-light 双主题）。
 
@@ -37,6 +37,24 @@ US-04 要求预览在 300ms 内更新，并且与读者端（F-002）渲染完�
 - 热渲染长文约 60ms CPU，超出 Workers 免费版 10ms CPU 上限；边缘缓存未命中时请求会失败，缓存兜不住 → 读者页 Worker SSR 需要**付费版**。已改为构建时渲染，渲染模块不再进入线上 Worker 包。
 - `@expressive-code/plugin-shiki` 静态引入 `shiki/langs`，全部语法都会进包（原始体积大头）；语言白名单只能在运行时生效（非白名单语言降级为纯文本）。如需瘦身，可在构建时把 `shiki/langs` 别名到只含白名单的模块（可选优化，不阻塞）。
 - 测试环境：postcss（Expressive Code 依赖）在 vitest-plugin 的 CJS 回退中 `require("nanoid/non-secure")` 会拿到 ESM 入口，`vitest.config.ts` 顶层用 `resolve.alias` 指向其 `.cjs` 入口；生产打包不受影响。
+
+## 验证结果（浏览器侧，2026-10-13，spike-markdown-browser-worker）
+
+**结论：通过**，P95 远低于 200ms 预算。
+
+原型：`src/lib/markdown/worker.ts`（Vite `?worker`，收 `{ seq, source }` 回 `{ seq, html }`）；测试页 `src/pages/admin/_spike-markdown.astro` 仅 dev 注入路由；`npm run test:spike`（Playwright chromium + `astro dev`）。夹具 `tests/fixtures/markdown/long-10k.md`：10,160 个汉字，10 个代码块（10 种语言），含表格、任务列表、脚注。
+
+| 项目 | 结果 | 判定 |
+|------|------|------|
+| 往返耗时（含 postMessage），20 次，每次改动一个字符 | P50 21–22ms，**P95 25–30ms** | ✅ < 200ms |
+| 冷启动（首次渲染，含加载 10 种语法） | 约 850ms（dev 未打包模块；首次进入写文章页预热可覆盖） | — |
+| 浏览器 chunk：worker 入口（Vite 生产打包） | 682 KiB / **gzip 176 KiB** | ✅ |
+| 浏览器 chunk：全部（含按需加载的语法 / 主题） | 312 个文件，11,199 KiB / gzip 2,020 KiB，只加载用到的语言 | — |
+
+**发现与约束**：
+
+- `decode-named-character-reference`（remark-parse 依赖）在 `browser` 条件下解析到 `index.dom.js`，模块顶层访问 `document`，Web Worker 中直接报错。`astro.config.mjs` 用 `vite.resolve.alias` 指向与 Node / workerd 相同的 `index.js`，同构输出不受影响。
+- dev 模式下 Worker 的依赖不会被启动扫描发现，首次加载时触发预构建并重载页面；渲染依赖已加入 `vite.optimizeDeps.include`。
 
 ## 后果
 - 正面：预览不依赖网络，延迟最低；只有一份渲染规则。

@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:spike": "playwright test -c playwright.spike.config.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.4",

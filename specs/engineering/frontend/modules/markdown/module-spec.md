@@ -76,14 +76,14 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype
 
 | 环境 | 加载方式 |
 |------|---------|
-| 后台预览 | `src/lib/markdown/worker.ts` 作为 Web Worker（Vite `?worker`）；主线程发送 `{ seq, source }`，只采用最新 `seq` 的结果；首次进入写文章页预热 |
+| 后台预览 | `src/lib/markdown/worker.ts` 作为 Web Worker（Vite `?worker`，已实现）；主线程发送 `{ seq, source }`，只采用最新 `seq` 的结果；首次进入写文章页预热。Worker 中无 `document`：`decode-named-character-reference` 经 alias 使用非 DOM 入口（见 `astro.config.mjs`） |
 | F-002 构建时 | 预渲染页面中直接 import；不进入线上 Worker 包 |
 
 ## 5. 性能目标
 
 | 指标 | 目标 | 验证 |
 |------|------|------|
-| 浏览器 Web Worker 渲染 10,000 字含 10 个代码块 | P95 < 200ms（留 100ms 给传输与挂载，满足 US-04 的 300ms） | Sprint 1 spike（spike-markdown-browser-worker） |
+| 浏览器 Web Worker 渲染 10,000 字含 10 个代码块 | P95 < 200ms（留 100ms 给传输与挂载，满足 US-04 的 300ms） | ✅ 实测 P95 25–30ms（含传输），worker 入口 chunk gzip 176 KiB（[ADR-001 验证结果](../../../features/F-001-文章写作/architecture/adr/ADR-001-isomorphic-markdown.md)） |
 | Worker 打包体积 | 渲染模块不进入线上 Worker 包（读者页构建时渲染）；后台 chunk 不进入读者页 | 若退回 Worker SSR：已验证在付费版 10MB 限额内，合并构建 gzip 2,299 KiB（[ADR-001 验证结果](../../../features/F-001-文章写作/architecture/adr/ADR-001-isomorphic-markdown.md)） |
 
 ## 6. 单元测试规格
@@ -105,3 +105,4 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-13 | 1.1 | spike 结果回写；F-002 使用方式改为构建时预渲染（ADR-001 修订） | miraclehifi |
+| 2026-10-13 | 1.2 | 浏览器 Web Worker spike 结果回写；worker.ts 已实现 | miraclehifi |

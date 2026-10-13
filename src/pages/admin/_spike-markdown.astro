@@ -1,0 +1,38 @@
+---
+// spike-markdown-browser-worker 测试页：仅 dev 注入路由（astro.config 的 spikeRoutes），不进生产构建
+export const prerender = false;
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>spike · markdown worker</title>
+  </head>
+  <body>
+    <script>
+      import MarkdownWorker from "../../lib/markdown/worker.ts?worker";
+      import type { RenderRequest, RenderResponse } from "../../lib/markdown/worker";
+
+      const worker = new MarkdownWorker();
+      const pending = new Map<number, (html: string) => void>();
+      let seq = 0;
+
+      worker.addEventListener("message", (event: MessageEvent<RenderResponse>) => {
+        pending.get(event.data.seq)?.(event.data.html);
+        pending.delete(event.data.seq);
+      });
+
+      // 往返计时：含 postMessage 传输，比纯渲染时间更严格
+      function render(source: string): Promise<{ html: string; ms: number }> {
+        const start = performance.now();
+        const request: RenderRequest = { seq: ++seq, source };
+        return new Promise((resolve) => {
+          pending.set(request.seq, (html) => resolve({ html, ms: performance.now() - start }));
+          worker.postMessage(request);
+        });
+      }
+
+      Object.assign(window, { __spikeMarkdown: { render } });
+    </script>
+  </body>
+</html>
