@@ -122,7 +122,7 @@ interface PublicationHooks { onPublicationChanged(e: PublicationChange): Promise
 ## 5. 仓储接口
 
 ```ts
-interface PostRepo {
+interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / slugTaken：D1PostRepo（src/domains/post/repo.ts）
   insert(p: NewPostRow): Promise<PostId>;
   get(id: PostId): Promise<Post | null>;
   updateDraft(id: PostId, c: PostContent, draftHash: string, now: Date): Promise<boolean>;   // false = 不存在
