@@ -18,3 +18,4 @@
 | 2026-10-13 | implement-sanitize-next | `tests/unit/auth/next.test.ts`（[AUTH-UT-03] 规格 7 个输入 + `/adminx`） | 找不到 `src/domains/auth/next` | 1/1 通过 | `npm test` 7/7 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-session-repo | `tests/integration/auth/session-repo.test.ts`（workerd：insert 命中 / 过期 1ms 删除 / delete 后 null） | 找不到 `src/domains/auth/session-repo` | 1/1 通过 | `npm test` 8/8 | lint 0；astro check 0 错误 |
 | 2026-10-13 | implement-throttle-repo | `tests/integration/auth/throttle-repo.test.ts`（workerd：upsert 两次取最新 / delete 后 null） | 找不到 `src/domains/auth/throttle-repo` | 1/1 通过 | `npm test` 9/9 | lint 0；astro check 0 错误 |
+| 2026-10-13 | implement-auth-login-service | `tests/unit/auth/login-service.test.ts`（[AUTH-UT-04] 内存仓储：正确凭据 / 错误密码 / 错误账号 / 锁定中正确密码） | 找不到 `src/domains/auth/service` | 1/1 通过 | `npm test` 10/10 | lint 0；astro check 0 错误 |

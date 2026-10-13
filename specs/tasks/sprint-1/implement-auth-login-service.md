@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 12
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,17 @@ AUTH-UT-04：内存仓储下正确凭据 / 错误密码 / 错误账号 / 锁定�
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/domains/auth/service.ts`：`login`（限流 → 账号常量时间比较 → 总是执行 verifyPassword → 写会话 / 写限流）
-- [ ] token 32 字节 base64url；库中只存 sha256
+- [x] `src/domains/auth/service.ts`：`login`（限流 → 账号常量时间比较 → 总是执行 verifyPassword → 写会话 / 写限流）
+- [x] token 32 字节 base64url；库中只存 sha256
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 服务以工厂 `createAuthService(deps)` 提供，`verify` 可注入（测试用 spy 断言锁定期不比对密码）\n- 超长凭据（username > 64 / password > 256）按失败计数，不做哈希
 
 ## 依赖
 

@@ -71,7 +71,7 @@ function sanitizeNext(next: string | null): string;
 function nextThrottleState(state: ThrottleState | null, event: 'fail' | 'success', now: Date): ThrottleState | null;
 ```
 
-**login 流程**：
+**login 流程**（已实现：`createAuthService().login`，`src/domains/auth/service.ts`；账号比较两边 SHA-256 摘要，耗时与长度无关；`Credentials` 超长按失败计数、不做哈希）：
 1. 读 throttle → 锁定中返回 `RATE_LIMITED`
 2. username 常量时间比较 `ADMIN_USERNAME`；无论 username 是否正确，都执行一次 `verifyPassword`，避免时序差异泄露账号是否存在
 3. 失败 → `nextThrottleState(fail)` 写回 → `INVALID_CREDENTIALS`（第 5 次失败本身返回 `INVALID_CREDENTIALS`，第 6 次起才返回 `RATE_LIMITED`）
