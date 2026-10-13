@@ -1,11 +1,12 @@
 // 文章列表页（admin-post-list.md，US-07）：首屏数据由页面 SSR 传入；筛选同步到 URL，之后的数据经接口拉取
-// 加载中：无数据时骨架，有旧数据时保留并降低不透明度；失败显示"加载失败 / 重试"。搜索、分页、空状态由后续任务接入
+// 加载中：无数据时骨架，有旧数据时保留并降低不透明度；失败显示"加载失败 / 重试"。分页、空状态由后续任务接入
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListStatus } from "../../domains/post/repo";
 import type { PostListResult } from "../../domains/post/service";
 import { buildListQuery, parseListQuery, type ListQueryState } from "../../lib/admin/list-query";
 import { useHydrated } from "../../lib/dom/hydration";
 import { Button } from "../ui/Button";
+import { SearchInput } from "../ui/SearchInput";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { PageHeader } from "./PageHeader";
 import { PostListItem } from "./PostListItem";
@@ -19,6 +20,7 @@ export interface PostListPageProps {
 // 首次渲染与 SSR 用同一基准与时区，避免水合不一致；水合后换成当前时间与浏览器时区
 const RENDER_TIME_ZONE = "Asia/Shanghai";
 const SKELETON_ROWS = 5;
+const SEARCH_DEBOUNCE_MS = 300;
 const STATUS_TABS: { value: ListStatus; label: string }[] = [
   { value: "all", label: "全部" },
   { value: "draft", label: "草稿" },
@@ -39,6 +41,7 @@ async function fetchPosts(query: ListQueryState): Promise<PostListResult> {
 
 export function PostListPage({ initial, query: initialQuery, renderedAt }: PostListPageProps) {
   const [query, setQuery] = useState(initialQuery);
+  const [searchText, setSearchText] = useState(initialQuery.q);
   const [state, setState] = useState<LoadState>({ data: initial, loading: false, error: initial === null });
   const latest = useRef(0); // 只采用最新一次请求的结果
   const hydrated = useHydrated();
@@ -61,17 +64,32 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
     const onPopState = () => {
       const next = parseListQuery(window.location.search);
       setQuery(next);
+      setSearchText(next.q);
       void load(next);
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, [load]);
 
-  const navigate = (next: ListQueryState) => {
-    setQuery(next);
-    window.history.pushState(null, "", `/admin${buildListQuery(next)}`);
-    void load(next);
-  };
+  // 搜索输入用 replaceState，避免每次停顿都留下一条历史记录
+  const navigate = useCallback(
+    (next: ListQueryState, { replace = false } = {}) => {
+      setQuery(next);
+      const url = `/admin${buildListQuery(next)}`;
+      if (replace) window.history.replaceState(null, "", url);
+      else window.history.pushState(null, "", url);
+      void load(next);
+    },
+    [load],
+  );
+
+  // 停止输入 300ms 后按标题搜索，回到第 1 页
+  useEffect(() => {
+    const q = searchText.trim();
+    if (q === query.q) return;
+    const timer = window.setTimeout(() => navigate({ ...query, q, page: 1 }, { replace: true }), SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [searchText, query, navigate]);
 
   const { data, loading, error } = state;
   const counts = data?.counts;
@@ -95,6 +113,7 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
             </SegmentedControl.Item>
           ))}
         </SegmentedControl>
+        <SearchInput placeholder="搜索标题" value={searchText} onChange={setSearchText} maxLength={100} className="w-[280px] max-md:w-full" />
       </div>
       {error && (
         <div role="alert" className="flex flex-col items-center gap-3 py-16 text-center">

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 56
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,19 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/ui/SearchInput.tsx`（手机字号 16px）
-- [ ] `PostListPage` 接入搜索
+- [x] `src/components/ui/SearchInput.tsx`（手机字号 16px）
+- [x] `PostListPage` 接入搜索
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `SearchInput`（`src/components/ui/SearchInput.tsx`）：受控、`type=search`（searchbox 角色），无可见 label 时以 placeholder 作 `aria-label`；手机 16px / 桌面 14px；焦点环加在外框；图标 `search` 登记到 icons.ts
+- `PostListPage`：输入停止 300ms 后搜索并回到第 1 页，`replaceState` 写入 `?q=`（不为每次停顿留历史）；筛选切换仍 `pushState`；前进 / 后退同步搜索框；`maxLength=100` 与接口上限一致
+- E2E 断言连续输入只发 1 次列表请求；UI 脚本补 TC-US07-16
 
 ## 依赖
 

@@ -1,4 +1,4 @@
-// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、15、20（acceptance/post-management/US-07-tests.md）
+// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、15、16、20（acceptance/post-management/US-07-tests.md）
 // 由 implement（build-post-list-page）生成，verify 阶段执行：bash playwright-test-post-list-ui.sh
 // 前置：服务已用 CLOUDFLARE_ENV=e2e 构建并运行（测试账号见 wrangler.jsonc env.e2e），本地 D1 已迁移
 // 数据：经接口创建，标题带本次运行的唯一前缀，只断言这几篇（本地 D1 可能已有其他文章）
@@ -107,6 +107,16 @@ const rowsOf = (page, prefix) => page.getByRole("listitem").filter({ hasText: pr
     await page.getByRole("radio", { name: /^全部/ }).click();
     await page.waitForURL(/\/admin$/);
     await page.waitForFunction((prefix) => [...document.querySelectorAll("li")].filter((li) => li.textContent.includes(prefix)).length === 5, p);
+  });
+
+  await run("[SC-POSTLIST-05] TC-US07-16 搜索框输入后只显示标题包含关键字的文章（不区分大小写）", async ({ page, api }) => {
+    const token = `${PREFIX}s16`.toLowerCase();
+    for (const title of [`${token}astro 一`, `${token}ASTRO 二`, `${token}react`, `${token}vue`, `${token}css`]) await api.create(title);
+    await page.goto(`${TARGET_URL}/admin`);
+    await page.waitForSelector("astro-island:not([ssr])");
+    await page.getByRole("searchbox", { name: "搜索标题" }).pressSequentially(`${token}Astro`, { delay: 40 });
+    await page.waitForURL((url) => url.searchParams.get("q") === `${token}Astro`);
+    await page.waitForFunction(() => document.querySelectorAll("li").length === 2);
   });
 
   // 首屏数据由 SSR 读取，浏览器无法拦截；改为拦截首屏之后的列表请求（切换"草稿"筛选，add-post-list-status-filter 接入后可用）
