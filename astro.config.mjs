@@ -35,7 +35,7 @@ export default defineConfig({
     },
     // dev：Web Worker 的依赖不会被启动扫描发现，首次加载时触发预构建会重载页面
     optimizeDeps: {
-      include: ["rehype-expressive-code", "rehype-stringify", "remark-gfm", "remark-parse", "remark-rehype", "unified", "unist-util-visit"],
+      include: ["rehype-expressive-code", "rehype-raw", "rehype-sanitize", "rehype-stringify", "remark-gfm", "remark-parse", "remark-rehype", "unified", "unist-util-visit"],
     },
   },
 });

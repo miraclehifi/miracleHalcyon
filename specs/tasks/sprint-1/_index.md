@@ -61,7 +61,7 @@
 | 47 | [implement-public-post-detail-endpoint](implement-public-post-detail-endpoint.md) | 实现 GET /api/posts/:slug | article-writing | API | 接口层 | US-08 | implement-published-query | 0 | 低 | completed |
 | 48 | [implement-public-post-list-endpoint](implement-public-post-list-endpoint.md) | 实现 GET /api/posts | article-writing | API | 接口层 | US-08 | implement-published-query | 0 | 低 | completed |
 | 49 | [implement-markdown-gfm-render](implement-markdown-gfm-render.md) | 实现 GFM 渲染 | article-writing | DOMAIN | 领域层 | US-04 | spike-markdown-workers-runtime | 1 | 低 | completed |
-| 50 | [implement-markdown-sanitize](implement-markdown-sanitize.md) | 实现 Markdown XSS 过滤 | article-writing | DOMAIN | 领域层 | US-04 | implement-markdown-gfm-render | 1 | 低 | pending |
+| 50 | [implement-markdown-sanitize](implement-markdown-sanitize.md) | 实现 Markdown XSS 过滤 | article-writing | DOMAIN | 领域层 | US-04 | implement-markdown-gfm-render | 1 | 低 | completed |
 | 51 | [implement-markdown-code-highlight](implement-markdown-code-highlight.md) | 实现代码高亮（亮 / 暗主题） | article-writing | DOMAIN | 领域层 | US-04 | implement-markdown-sanitize | 1 | 中 | pending |
 | 52 | [implement-relative-time-format](implement-relative-time-format.md) | 实现列表相对时间格式 | article-writing | FRONTEND | 表现层 | US-07 | scaffold-project-skeleton | 1 | 低 | pending |
 | 53 | [build-post-list-item](build-post-list-item.md) | 实现 PostListItem（静态卡片） | article-writing | FRONTEND | 表现层 | US-07 | build-status-badge-component, implement-relative-time-format, build-icon-button-component | 1 | 低 | pending |

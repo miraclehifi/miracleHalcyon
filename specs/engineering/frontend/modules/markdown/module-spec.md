@@ -33,19 +33,22 @@ export function parseMarks(url: string): { wide: boolean; live: boolean; accordi
 > 原型已实现（spike-markdown-workers-runtime）：remark-parse → remark-gfm → remark-rehype → 语言白名单 → rehype-expressive-code；其余步骤由后续任务补齐。
 
 ```
-remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype
-  → rehype-sanitize(schema) → [rehypeImageFigures] → rehype-expressive-code → [rehypeSourceLines?] → rehype-stringify
+remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDangerousHtml) → rehype-raw
+  → rehype-sanitize(schema) → rehypeAfterSanitize → [rehypeImageFigures] → rehype-expressive-code → [rehypeSourceLines?] → rehype-stringify
 ```
 
 | 步骤 | 说明 |
 |------|------|
 | `remarkImageGroups` | 段落子节点只有 image 和空白文本，且 image ≥ 2 → 标记为组图；每 9 张切一组，剩 1 张退化为单图；首张带 `#accordion` 且组内 3–7 张 → accordion，否则 grid |
 | `rehype-sanitize` | 基于 GitHub schema：去掉 `script`、`style`、所有 `on*` 属性、`javascript:`/`data:`（`img` 的 `data:image/*` 除外）链接；保留代码块 `class="language-*"` |
+| `rehype-raw` | Markdown 中的原始 HTML 解析为 hast 后交给 sanitize（与 GitHub 一致：允许安全的原始 HTML） |
+| `rehypeAfterSanitize` | `src` 的 `data:` 只保留 `data:image/*`；sanitize 给 id 加 `user-content-` 前缀，脚注页内链接同步加前缀（remark-rehype 不再加前缀，避免双重前缀） |
 | `rehypeImageFigures` | sanitize 之后执行，只生成白名单属性（下表），因此不会引入可注入内容 |
 | `rehype-expressive-code` | Shiki 使用 JavaScript 正则引擎；语言白名单：ts、tsx、js、jsx、json、bash、shell、css、html、md、yaml、toml、sql、python、go、rust、diff；主题跟随站点亮 / 暗主题（两套主题，CSS 变量切换） |
 | `rehypeSourceLines` | 仅 `sourceMap: true`：块级元素加 `data-line`（源码行号，供同步滚动） |
 
 > 已实现（implement-markdown-gfm-render）：GFM 处理链与 `RenderOptions` 签名；脚注区无障碍文案为中文（标题「脚注」、回链「返回引用 N」）。
+> 已实现（implement-markdown-sanitize）：`src/lib/markdown/sanitize-schema.ts`。注意：Expressive Code 在每个代码块内输出自带的 `<style>` 与复制按钮 `<script type="module">`，预览区（TC-US04-05 断言无 script）需处理。
 
 ## 3. 图片输出结构
 

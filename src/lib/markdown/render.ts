@@ -1,11 +1,14 @@
 import type { Element, Root } from "hast";
 import rehypeExpressiveCode, { type RehypeExpressiveCodeOptions } from "rehype-expressive-code";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype, { type Options as RemarkRehypeOptions } from "remark-rehype";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
+import { rehypeAfterSanitize, sanitizeSchema } from "./sanitize-schema";
 
 export interface RenderOptions {
   sourceMap?: boolean; // 预览传 true：输出源码位置属性（由后续任务实现）
@@ -24,8 +27,10 @@ const LANGUAGE_WHITELIST = new Set([
 ]);
 const LANGUAGE_CLASS_PREFIX = "language-";
 
-// 脚注区的无障碍文案（屏幕阅读器读出），站点为中文
+// Markdown 中的原始 HTML 先解析（rehype-raw）再统一过滤；脚注区的无障碍文案为中文（屏幕阅读器读出）
 const remarkRehypeOptions: RemarkRehypeOptions = {
+  allowDangerousHtml: true,
+  clobberPrefix: "", // id 前缀统一由 sanitize 加（见 sanitize-schema.ts）
   footnoteLabel: "脚注",
   footnoteBackLabel: (referenceIndex, rereferenceIndex) =>
     `返回引用 ${referenceIndex + 1}${rereferenceIndex > 1 ? `-${rereferenceIndex}` : ""}`,
@@ -52,6 +57,9 @@ const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
   .use(remarkRehype, remarkRehypeOptions)
+  .use(rehypeRaw)
+  .use(rehypeSanitize, sanitizeSchema)
+  .use(rehypeAfterSanitize)
   .use(rehypeLanguageWhitelist)
   .use(rehypeExpressiveCode, expressiveCodeOptions)
   .use(rehypeStringify);
