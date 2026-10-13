@@ -4,6 +4,7 @@ import { MissingFieldsError, NotFoundError, NotPublishedError, SlugTakenError, V
 import { jsonError } from "./errors";
 
 export const MAX_BODY_BYTES = 1024 * 1024; // PUT / POST 请求体上限 1MB
+export const QUERY_MAX = 100; // 列表搜索与标签补全的 q 上限（字）
 
 type DraftField = keyof DraftInput;
 const DRAFT_FIELDS: DraftField[] = ["title", "slug", "tags", "summary", "body", "publishedAt"];

@@ -4,7 +4,7 @@ import { env } from "cloudflare:workers";
 import { ValidationError } from "../../../../domains/post/errors";
 import { D1PostRepo, type ListStatus } from "../../../../domains/post/repo";
 import { createPostService } from "../../../../domains/post/service";
-import { errorResponse, parseDraftInput, readJson } from "../../../../lib/api/http";
+import { errorResponse, parseDraftInput, QUERY_MAX, readJson } from "../../../../lib/api/http";
 
 export const prerender = false;
 
@@ -14,7 +14,6 @@ export interface PostsHandlerDeps {
 }
 
 const STATUSES: ListStatus[] = ["all", "draft", "published"];
-const Q_MAX = 100;
 
 // 查询参数：status 默认 all，page 默认 1，q 可选；不合法 → 400
 function parseListQuery(params: URLSearchParams): { status: ListStatus; q: string; page: number } {
@@ -24,7 +23,7 @@ function parseListQuery(params: URLSearchParams): { status: ListStatus; q: strin
   const invalid = [
     !STATUSES.includes(status) && "status",
     !/^[1-9]\d{0,8}$/.test(pageText) && "page",
-    [...q].length > Q_MAX && "q",
+    [...q].length > QUERY_MAX && "q",
   ].filter((field): field is string => Boolean(field));
   if (invalid.length > 0) throw new ValidationError(invalid);
   return { status, q, page: Number(pageText) };

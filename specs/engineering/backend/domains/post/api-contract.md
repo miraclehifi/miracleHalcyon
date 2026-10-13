@@ -154,7 +154,7 @@
 
 返回所有文章（工作稿 + 快照）中出现过的标签，按不区分大小写的包含匹配过滤，按使用次数降序、名称升序，最多 10 个。`q` 为空时返回最常用的 10 个。`count` 为使用该标签的文章数（同一篇的工作稿与快照只算一次）；大小写不同的写法合并，`name` 取出现最多的写法。已实现：`PostService.suggestTags` / `D1PostRepo.tags`。
 
-**200** `{ "tags": [{ "name": "Astro", "count": 5 }] }`
+**200** `{ "tags": [{ "name": "Astro", "count": 5 }] }`；`q` > 100 字 → 400 `VALIDATION_FAILED`。已实现：`src/pages/api/admin/tags.ts`。
 
 ## 4. 公开端点（读者只读）
 
