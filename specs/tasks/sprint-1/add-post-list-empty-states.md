@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 58
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,21 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/ui/EmptyState.tsx`
-- [ ] `PostListPage` 两种空态
+- [x] `src/components/ui/EmptyState.tsx`
+- [x] `PostListPage` 两种空态
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `EmptyState`（`src/components/ui/EmptyState.tsx`）：图标 32px + 标题 + 说明在 `role="status"` 区域，操作在外
+- 没有任何文章（`counts.all = 0` 且无关键字）：羽毛图标、"还没有文章"、"写下第一篇，草稿会自动保存"、主按钮"写第一篇"，筛选行用 `hidden` 隐藏（分页本就不显示）
+- 筛选无结果：按 admin-post-list.md 写明条件——有关键字"没有标题包含“xyz”的草稿文章"，只有状态筛选"还没有草稿文章"；文字按钮"清除筛选"清空搜索框并回到 `/admin`
+- 唯一测试用组件测试（jsdom）：共享本地 D1 无法保证空库，E2E 不可行；UI 脚本补 TC-US07-18，TC-17 注明由组件测试覆盖
+- US-07-tests.md v1.2、frontend-unit-tests UT-11 / UT-12 与页面规格对齐（原"没有匹配的文章"）；US-07 在 Sprint 1 的范围（列表、筛选、搜索、分页、空态）已完成，入场动效在 Sprint 2
 
 ## 依赖
 

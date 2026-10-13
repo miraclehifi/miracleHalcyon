@@ -12,7 +12,7 @@
 | US-04 markdown-preview | | | | ● | ● | | `renderMarkdown`（Web Worker）、同步滚动 |
 | US-05 image-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`、`GET /img/*` |
 | US-06 autosave-draft | ○ | ● | | | ● | | `POST/PUT /api/admin/posts`、自动保存状态机、本地暂存 |
-| US-07 post-list | ○ | ● | | | | | `GET /api/admin/posts` |
+| US-07 post-list | ○ | ● | | | | | `GET /api/admin/posts`（已实现，Sprint 1；列表页 `/admin` 已实现） |
 | US-08 publish-post | ○ | ● | | | ● | | `POST /api/admin/posts/:id/publish`、`/unpublish`、`GET /api/posts[/:slug]` |
 | US-09 delete-post | ○ | ● | | | | | `DELETE /api/admin/posts/:id` |
 | US-10 format-toolbar | | | | | ● | | `applyFormat`、`applyEdit` |

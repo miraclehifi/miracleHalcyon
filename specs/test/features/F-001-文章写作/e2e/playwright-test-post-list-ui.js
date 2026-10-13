@@ -1,4 +1,4 @@
-// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、15、16、19、20（acceptance/post-management/US-07-tests.md）
+// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、15、16、18、19、20（TC-17 需空库，由 tests/unit/admin/post-list-empty.test.tsx 覆盖）（acceptance/post-management/US-07-tests.md）
 // 由 implement（build-post-list-page）生成，verify 阶段执行：bash playwright-test-post-list-ui.sh
 // 前置：服务已用 CLOUDFLARE_ENV=e2e 构建并运行（测试账号见 wrangler.jsonc env.e2e），本地 D1 已迁移
 // 数据：经接口创建，标题带本次运行的唯一前缀，只断言这几篇（本地 D1 可能已有其他文章）
@@ -132,6 +132,18 @@ const rowsOf = (page, prefix) => page.getByRole("listitem").filter({ hasText: pr
     await page.waitForFunction(() => document.querySelectorAll("li").length === 3);
     check((await pager.getByRole("link", { name: "2", exact: true }).getAttribute("aria-current")) === "page", "当前页应为 aria-current=page");
     check((await pager.getByText("下一页").getAttribute("aria-disabled")) === "true", "末页\"下一页\"应禁用");
+  });
+
+  await run("[SC-POSTLIST-07] TC-US07-18 搜索无结果写明条件，\"清除筛选\"回到默认视图", async ({ page }) => {
+    const missing = `${PREFIX}none`;
+    await page.goto(`${TARGET_URL}/admin?status=draft&q=${missing}`);
+    await page.waitForSelector("astro-island:not([ssr])");
+    const text = await page.getByRole("status").textContent();
+    check(text === `没有标题包含“${missing}”的草稿文章`, `无结果文案不符：${text}`);
+    await page.getByRole("button", { name: "清除筛选" }).click();
+    await page.waitForURL(/\/admin$/);
+    check((await page.getByRole("searchbox", { name: "搜索标题" }).inputValue()) === "", "清除后搜索框应为空");
+    check((await page.getByRole("radio", { checked: true }).textContent()).startsWith("全部"), "清除后应选中\"全部\"");
   });
 
   // 首屏数据由 SSR 读取，浏览器无法拦截；改为拦截首屏之后的列表请求（切换"草稿"筛选，add-post-list-status-filter 接入后可用）

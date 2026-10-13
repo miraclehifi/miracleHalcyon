@@ -44,7 +44,7 @@
 |------|------|------|------|------|
 | UT-10 | R | 传入 3 条文章 | 按传入顺序渲染行；每行显示标题（链接到 `/admin/posts/{id}`，伪元素扩到整行；无标题显示斜体"无标题"）、状态标记、更新时间（不显示标签） | SC-POSTLIST-01, SC-POSTLIST-02 |
 | UT-11 | R | `items=[]` 且无筛选条件 | 显示插画/图标、"还没有文章"和"写第一篇"按钮 | SC-POSTLIST-06 |
-| UT-12 | R | `items=[]` 且有筛选条件 | 显示"没有匹配的文章"与"清除筛选"；点击触发 `onClearFilters` | SC-POSTLIST-07 |
+| UT-12 | R | `items=[]` 且有筛选条件 | 写明条件（有关键字"没有标题包含“xyz”的草稿文章"，只有状态筛选"还没有草稿文章"）并显示"清除筛选"；点击后清空搜索、回到 `/admin` 并重新拉取 | SC-POSTLIST-07 |
 | UT-13 | R | `error` 状态 | 显示"加载失败"与"重试"；点击触发 `onRetry`；不显示空状态 | SC-POSTLIST-09 |
 | UT-14 | R | `loading` 状态 | 显示骨架/加载指示，列表区 `aria-busy="true"` | SC-POSTLIST-09 |
 | UT-15 | S | 纯函数 `parseListQuery(search)` | `?status=draft&q=astro&page=2` → `{status:'draft', q:'astro', page:2}`；`status=foo` → `all`；`page` 为 `0`/`-1`/`abc`/`1.5` → 1；q 首尾空格去除 | SC-POSTLIST-04, SC-POSTLIST-08 |

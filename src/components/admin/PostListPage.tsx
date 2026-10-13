@@ -1,11 +1,13 @@
 // 文章列表页（admin-post-list.md，US-07）：首屏数据由页面 SSR 传入；筛选同步到 URL，之后的数据经接口拉取
-// 加载中：无数据时骨架，有旧数据时保留并降低不透明度；失败显示"加载失败 / 重试"。空状态由后续任务接入
+// 加载中：无数据时骨架，有旧数据时保留并降低不透明度；失败显示"加载失败 / 重试"
+// 空：没有任何文章时显示 EmptyState 并隐藏筛选行；筛选无结果时写明条件并提供"清除筛选"
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListStatus } from "../../domains/post/repo";
 import type { PostListResult } from "../../domains/post/service";
-import { buildListQuery, parseListQuery, type ListQueryState } from "../../lib/admin/list-query";
+import { buildListQuery, DEFAULT_LIST_QUERY, parseListQuery, type ListQueryState } from "../../lib/admin/list-query";
 import { useHydrated } from "../../lib/dom/hydration";
 import { Button } from "../ui/Button";
+import { EmptyState } from "../ui/EmptyState";
 import { Pagination } from "../ui/Pagination";
 import { SearchInput } from "../ui/SearchInput";
 import { SegmentedControl } from "../ui/SegmentedControl";
@@ -27,6 +29,15 @@ const STATUS_TABS: { value: ListStatus; label: string }[] = [
   { value: "draft", label: "草稿" },
   { value: "published", label: "已发布" },
 ];
+
+const STATUS_NOUN: Record<ListStatus, string> = { all: "文章", draft: "草稿文章", published: "已发布文章" };
+
+// 筛选无结果的说明：有关键字时写明关键字，只有状态筛选时写明状态
+function noResultText({ status, q }: ListQueryState): string {
+  return q ? `没有标题包含“${q}”的${STATUS_NOUN[status]}` : `还没有${STATUS_NOUN[status]}`;
+}
+
+const goToNewPost = () => window.location.assign("/admin/posts/new");
 
 interface LoadState {
   data: PostListResult | null;
@@ -92,8 +103,15 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
     return () => window.clearTimeout(timer);
   }, [searchText, query, navigate]);
 
+  const clearFilters = () => {
+    setSearchText("");
+    navigate(DEFAULT_LIST_QUERY);
+  };
+
   const { data, loading, error } = state;
   const counts = data?.counts;
+  const noPostsAtAll = !error && data !== null && counts?.all === 0 && query.q === "";
+  const noResults = !error && data !== null && !noPostsAtAll && data.items.length === 0 && data.total === 0;
 
   return (
     <main className="mx-auto flex w-full max-w-[896px] flex-col gap-6 py-10 max-lg:max-w-[calc(100%-64px)] max-md:max-w-none max-md:px-4 max-md:py-6">
@@ -101,12 +119,12 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
         title="文章"
         meta={counts ? `共 ${counts.all} 篇` : undefined}
         action={
-          <Button icon="pen-line" onClick={() => window.location.assign("/admin/posts/new")}>
+          <Button icon="pen-line" onClick={goToNewPost}>
             新建文章
           </Button>
         }
       />
-      <div className="flex items-center justify-between gap-3 max-md:flex-col max-md:items-stretch">
+      <div hidden={noPostsAtAll} className="flex items-center justify-between gap-3 max-md:flex-col max-md:items-stretch">
         <SegmentedControl aria-label="按状态筛选" value={query.status} onChange={(status) => navigate({ ...query, status: status as ListStatus, page: 1 })}>
           {STATUS_TABS.map(({ value, label }) => (
             <SegmentedControl.Item key={value} value={value} count={counts?.[value]}>
@@ -124,7 +142,25 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
           </Button>
         </div>
       )}
-      {!error && data && (
+      {noPostsAtAll && (
+        <EmptyState
+          icon="feather"
+          title="还没有文章"
+          description="写下第一篇，草稿会自动保存"
+          action={<Button onClick={goToNewPost}>写第一篇</Button>}
+        />
+      )}
+      {noResults && (
+        <div className="flex flex-col items-center gap-2 py-12 text-center">
+          <p role="status" className="text-ui text-ink-muted">
+            {noResultText(query)}
+          </p>
+          <button type="button" onClick={clearFilters} className="cursor-pointer text-ui text-ink underline underline-offset-4 hover:text-ink-muted">
+            清除筛选
+          </button>
+        </div>
+      )}
+      {!error && data && !noPostsAtAll && !noResults && (
         <ul aria-busy={loading || undefined} className={`flex flex-col gap-5 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}>
           {data.items.map((post) => (
             <li key={post.id}>

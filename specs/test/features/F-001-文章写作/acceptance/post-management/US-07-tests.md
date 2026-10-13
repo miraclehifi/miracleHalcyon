@@ -589,17 +589,19 @@ await expect(page.getByRole('link', { name: /astro/i })).toHaveCount(2);
 
 **预期结果：**
 - 显示插画/图标、"还没有文章"和"写第一篇"按钮
-- 不显示分页控件、不显示"没有匹配的文章"
+- 不显示筛选行、分页控件与"清除筛选"
 - 点击"写第一篇"进入 `/admin/posts/new`
 
 **playwright_hint：**
 ```ts
 await expect(page.getByText('还没有文章')).toBeVisible();
-await page.getByRole('link', { name: '写第一篇' }).click();
+await page.getByRole('button', { name: '写第一篇' }).click();
 await expect(page).toHaveURL('/admin/posts/new');
 ```
 
 **清理：** 无
+
+> 自动化：共享的本地 D1 无法保证空库，由组件测试 `tests/unit/admin/post-list-empty.test.tsx` 覆盖（UT-11）
 
 ---
 
@@ -624,14 +626,14 @@ await expect(page).toHaveURL('/admin/posts/new');
 3. 另测：仅选筛选"草稿"但无草稿时
 
 **预期结果：**
-- 显示"没有匹配的文章"与"清除筛选"按钮（区别于空状态"还没有文章"）
+- 写明条件（admin-post-list.md"页面状态"）：搜索 `xyz` 时显示"没有标题包含“xyz”的文章"（有状态筛选时为"…的草稿文章 / 已发布文章"），并显示"清除筛选"（区别于空状态"还没有文章"）
 - 点击"清除筛选"后搜索框清空、筛选回到"全部"、显示 3 篇，URL 无查询参数
-- 状态筛选无结果时同样显示"没有匹配的文章"
+- 只有状态筛选、无结果时显示"还没有草稿文章 / 已发布文章"
 
 **playwright_hint：**
 ```ts
 await page.getByRole('searchbox').fill('xyz');
-await expect(page.getByText('没有匹配的文章')).toBeVisible();
+await expect(page.getByRole('status')).toHaveText('没有标题包含“xyz”的文章');
 await page.getByRole('button', { name: '清除筛选' }).click();
 await expect(page.getByRole('searchbox')).toHaveValue('');
 ```
@@ -764,3 +766,4 @@ await expect(page.getByRole('listitem')).not.toHaveCount(0);
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-13 | v1.1 | 与 design-ui 对齐（build-post-list-page）：状态文案"已发布 · 有未发布修改"；行为卡片列表（`listitem`），不显示标签；编辑页路由 `/admin/posts/:id`；"新建文章"为按钮；TC-20 改为拦截首屏之后的列表请求（首屏 SSR） | miraclehifi |
+| 2026-10-13 | v1.2 | TC-17 / TC-18 文案按 admin-post-list.md"页面状态"（筛选无结果写明条件）；TC-17 自动化改由组件测试覆盖 | miraclehifi |
