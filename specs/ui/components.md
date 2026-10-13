@@ -38,7 +38,7 @@
 
 ### 按钮质感参数
 
-`Button` 内部渲染 React Bits `SpecularButton`（文件 `SpecularButton.tsx`，只供 `Button` 使用，页面不直接引用）。尺寸、圆角、焦点环沿用本表与 design-tokens，不用 SpecularButton 自带的 `size` 和焦点样式。图标按钮 `IconButton`、`OverlayButton` 不使用。
+`Button` 内部渲染 React Bits `SpecularButton`（文件 `SpecularButton.tsx`，只供 `Button` 使用，页面不直接引用）。**已实现**：`src/components/ui/Button.tsx`、`src/components/vendor/react-bits/SpecularButton.tsx`（对上游的改动见文件头）；尺寸取设计稿：内边距 8 × 16、高 34、图标 16px、间距 6、`text-ui` 字重 500。`lineColor` / `baseColor` 运行时由令牌解析，随主题切换。尺寸、圆角、焦点环沿用本表与 design-tokens，不用 SpecularButton 自带的 `size` 和焦点样式。图标按钮 `IconButton`、`OverlayButton` 不使用。
 
 6 个变体同一套参数，按主题切换（变体只在设计稿中区分用途与是否带图标，不再区分颜色）：
 

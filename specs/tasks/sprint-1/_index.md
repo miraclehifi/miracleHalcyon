@@ -28,7 +28,7 @@
 | 14 | [implement-auth-middleware](implement-auth-middleware.md) | 实现认证与 Origin 校验中间件 | article-writing | API | 接口层 | US-01 | implement-auth-session-check, implement-session-repo, implement-sanitize-next | 3 | 中 | completed |
 | 15 | [implement-login-endpoint](implement-login-endpoint.md) | 实现 POST /api/admin/login | article-writing | API | 接口层 | US-01 | implement-auth-middleware, implement-throttle-repo | 1 | 低 | completed |
 | 16 | [add-hash-password-script](add-hash-password-script.md) | 提供生成管理员密码哈希的脚本 | article-writing | SETUP | 基础设施 | US-01 | implement-password-hashing | 0 | 低 | completed |
-| 17 | [build-button-component](build-button-component.md) | 实现 Button（SpecularButton） | article-writing | FRONTEND | 表现层 | — | define-design-token-styles | 3 | 中 | pending |
+| 17 | [build-button-component](build-button-component.md) | 实现 Button（SpecularButton） | article-writing | FRONTEND | 表现层 | — | define-design-token-styles | 3 | 中 | completed |
 | 18 | [build-icon-button-component](build-icon-button-component.md) | 实现 IconButton | article-writing | FRONTEND | 表现层 | — | define-design-token-styles | 3 | 低 | pending |
 | 19 | [build-field-component](build-field-component.md) | 实现 Field | article-writing | FRONTEND | 表现层 | — | define-design-token-styles | 2 | 低 | pending |
 | 20 | [build-alert-component](build-alert-component.md) | 实现 Alert | article-writing | FRONTEND | 表现层 | US-01 | define-design-token-styles | 1 | 低 | pending |
