@@ -18,5 +18,30 @@
       "binding": "MEDIA",
       "bucket_name": "miracle-halcyon-media"
     }
-  ]
+  ],
+  "env": {
+    // E2E 测试环境：Playwright 以 CLOUDFLARE_ENV=e2e 构建（playwright.config.ts）
+    // 测试账号 test-admin / Test-Passw0rd!，只在本地 E2E 使用；生产凭据走 wrangler secret
+    "e2e": {
+      "vars": {
+        "ADMIN_USERNAME": "test-admin",
+        "ADMIN_PASSWORD_HASH": "pbkdf2$100000$aai1VtWTV1GY0X3g/W3u2Q==$PXBmyEhEJ4FHopP7TuyHh+GnuCuJ2LmrYEvzBzkZZpc=",
+        "SITE_ORIGIN": "http://localhost:4321"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "miracle-halcyon",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "src/db/migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "miracle-halcyon-media"
+        }
+      ]
+    }
+  }
 }

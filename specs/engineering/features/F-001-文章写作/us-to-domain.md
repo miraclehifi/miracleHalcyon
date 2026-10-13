@@ -6,7 +6,7 @@
 
 | US | auth | post | media | markdown | editor | media-upload | 主要接口 |
 |----|:----:|:----:|:-----:|:--------:|:------:|:------------:|---------|
-| US-01 admin-login | ● | | | | | | `POST /api/admin/login`、middleware |
+| US-01 admin-login | ● | | | | | | `POST /api/admin/login`、middleware（已实现，Sprint 1） |
 | US-02 admin-logout | ● | | | | | | `POST /api/admin/logout` |
 | US-03 edit-post-info | ○ | ● | | | ● | | `POST/GET/PUT /api/admin/posts[/:id]`、`GET /api/admin/tags`、`slugify` |
 | US-04 markdown-preview | | | | ● | ● | | `renderMarkdown`（Web Worker）、同步滚动 |

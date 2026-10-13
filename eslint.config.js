@@ -12,4 +12,10 @@ export default defineConfig(
   astro.configs.recommended,
   reactHooks.configs.flat.recommended,
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
+  // verify 阶段的 Playwright 验收脚本由 playwright-skill 的 run.js 以 CommonJS 执行
+  {
+    files: ["specs/**/e2e/*.js"],
+    languageOptions: { sourceType: "commonjs" },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
 );

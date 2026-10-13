@@ -1,12 +1,23 @@
 ---
-// 占位页：登录表单由 build-login-page 任务实现
+// 登录页（admin-login.md，US-01）；已登录访问由 middleware 302 到 next
+import { LoginForm } from "../../components/admin/LoginForm";
+import { sanitizeNext } from "../../domains/auth/next";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export const prerender = false;
+
+const next = sanitizeNext(Astro.url.searchParams.get("next"));
 ---
 
 <BaseLayout title="登录 · miracleHalcyon">
-  <main>
-    <h1>登录</h1>
+  <main class="flex min-h-dvh justify-center px-4 pt-[20vh] md:items-center md:pt-0">
+    <div class="flex w-full max-w-[360px] flex-col gap-8">
+      <header class="flex flex-col gap-2">
+        <h1 class="text-display font-semibold text-ink">miracleHalcyon</h1>
+        <p class="text-ui text-ink-muted">作者后台 · 请登录后继续</p>
+      </header>
+      <LoginForm client:load next={next} />
+      <a href="/" class="self-start text-meta text-ink-faint hover:text-ink">← 返回博客首页</a>
+    </div>
   </main>
 </BaseLayout>
