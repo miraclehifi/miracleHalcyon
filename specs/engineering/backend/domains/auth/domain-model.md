@@ -29,6 +29,8 @@
 
 ### 2.2 LoginThrottle（聚合根，按 IP）
 
+> 状态规则已实现：`src/domains/auth/throttle.ts`（`nextThrottleState`、`isLocked`）
+
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | ip | string | `CF-Connecting-IP`；本地开发取 `127.0.0.1` |
