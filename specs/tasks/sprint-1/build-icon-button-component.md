@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 18
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/ui/IconButton.tsx`（variant ghost / outline，lucide 图标）
+- [x] `src/components/ui/IconButton.tsx`（variant ghost / outline，lucide 图标）
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 设计稿未画悬停态，按令牌补：悬停 `surface-sunken` 底 + `ink` 图标，0.2s 颜色过渡\n- 图标注册表新增 `x`、`ellipsis`
 
 ## 依赖
 
