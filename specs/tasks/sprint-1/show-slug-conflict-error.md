@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 65
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,18 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 409 `SLUG_TAKEN` → Field error + 打开抽屉
+- [x] 409 `SLUG_TAKEN` → Field error + 打开抽屉
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 自动保存控制器新增 `onError` 回调（每次保存失败调用），`useAutosave` 透传；`PostEditorPage` 收到 `SLUG_TAKEN` 时把服务端提示交给 `PostSettingsDrawer` 的 `slugError`（Field 红色描边 + `aria-invalid`），并自动打开设置抽屉；改 slug 后清除错误
+- 顺带修正 `useAutosave`：控制器改为第一次 `edit / flush` 时创建（不再在 effect 里创建），水合后、effect 运行前的输入和 Ctrl / ⌘ + S 不会丢；新建文章首次保存后记下 id，重建控制器时沿用（避免重复 POST）
+- `editor-autosave.spec.ts` 的 TC-US03-18 改为断言 1 秒内发出 POST（证明是快捷键而非 2 秒防抖），不再限制完成时间，避免并行负载下误报
 
 ## 依赖
 

@@ -61,6 +61,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const [slugTouched, setSlugTouched] = useState(() => initial !== null && initial.slug !== slugify(initial.title));
   // 抽屉默认：新建时打开（方便填信息），编辑已有文章时关闭；不跨文章记忆
   const [settingsOpen, setSettingsOpen] = useState(initial === null);
+  const [slugError, setSlugError] = useState<string | undefined>(); // 服务端 409 SLUG_TAKEN，改 slug 后清除
   const hydrated = useHydrated();
   // 发布日期默认浏览器本地的今天；服务端不知道作者时区，水合前留空
   const publishedAt = draft.publishedAt ?? (hydrated ? localDate(new Date()) : "");
@@ -70,6 +71,11 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
     getContent: (): DraftInput => ({ ...draft, publishedAt: publishedAt || null }),
     onCreated: (id) => window.history.replaceState(null, "", `/admin/posts/${id}`), // 不刷新，光标与内容保留
     onSaved: (post) => setServer({ status: post.status, hasUnpublishedChanges: post.hasUnpublishedChanges }),
+    onError: (error) => {
+      if (error.code !== "SLUG_TAKEN") return;
+      setSlugError(error.message ?? "slug 已存在，请换一个");
+      setSettingsOpen(true); // 自动打开设置抽屉，让作者看到字段错误
+    },
   });
   const { edit, flush } = autosave;
   const unsaved = autosave.status === "dirty" || autosave.status === "saving" || autosave.status === "failed";
@@ -99,6 +105,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const onTitleChange = (title: string) => update(slugTouched ? { title } : { title, slug: slugify(title) });
   const onSlugChange = (slug: string) => {
     setSlugTouched(true);
+    setSlugError(undefined);
     update({ slug });
   };
 
@@ -126,6 +133,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
           <PostSettingsDrawer
             slug={draft.slug}
             slugTitleFallback={draft.title.trim() !== "" && slugify(draft.title) === ""}
+            slugError={slugError}
             tagsField={<TagInput tags={draft.tags} onChange={(tags) => update({ tags })} />}
             summary={draft.summary}
             publishedAt={publishedAt}

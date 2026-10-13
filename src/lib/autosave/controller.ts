@@ -26,6 +26,7 @@ export interface AutosaveOptions {
   onChange?(state: AutosaveState): void;
   onCreated?(id: string): void;
   onSaved?(post: PostView): void;
+  onError?(error: SaveError): void; // 每次保存失败调用（如 409 时打开设置抽屉）
   fetch?: typeof fetch;
   delayMs?: number;
 }
@@ -97,6 +98,7 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
 
   function fail(error: SaveError): false {
     set({ status: "failed", error });
+    options.onError?.(error);
     if (isRetryable(error)) {
       attempts++;
       retryTimer = setTimeout(save, Math.min(RETRY_BASE_MS * 2 ** (attempts - 1), RETRY_MAX_MS));

@@ -26,7 +26,10 @@ test("[TC-US03-18] Ctrl/Cmd+S 立即保存", async ({ page }) => {
   await page.goto("/admin/posts/new");
   await page.waitForSelector("astro-island:not([ssr])");
   await page.getByRole("textbox", { name: "正文" }).fill("立即保存");
+  // 请求在 1 秒内发出（自动保存的防抖是 2 秒），证明是快捷键触发；完成时间不设限，避免并行负载下误报
+  const request = page.waitForRequest((r) => r.method() === "POST" && new URL(r.url()).pathname === "/api/admin/posts", { timeout: 1000 });
   await page.keyboard.press("ControlOrMeta+s");
-  await expect(page).toHaveURL(/\/admin\/posts\/\d+$/, { timeout: 1500 });
+  await request;
+  await expect(page).toHaveURL(/\/admin\/posts\/\d+$/);
   await expect(page.getByRole("banner").getByRole("status")).toHaveText(/^已保存/);
 });
