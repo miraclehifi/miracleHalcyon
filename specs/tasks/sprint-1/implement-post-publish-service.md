@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 35
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,17 @@ POST-UT-06：草稿发布；publishedAt 为空补当天；已发布无修改再�
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `PostService.publish`
-- [ ] `src/domains/post/hooks.ts`：`PublicationHooks` 接口 + 空实现（F-002 实现）；钩子失败只记日志
+- [x] `PostService.publish`
+- [x] `src/domains/post/hooks.ts`：`PublicationHooks` 接口 + 空实现（F-002 实现）；钩子失败只记日志
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- slug 检查与写快照是两次调用，未放进同一个 D1 batch（domain-model §5 的设想）；单作者场景下风险极低，`pub_slug` 部分唯一索引兜底同列重复。如需严格原子性可改为带 NOT EXISTS 条件的单条 UPDATE\n- 补的 `publishedAt` 为 UTC 当天（规格未定时区，作为兜底）
 
 ## 依赖
 

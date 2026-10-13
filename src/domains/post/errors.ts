@@ -22,3 +22,11 @@ export class SlugTakenError extends Error {
     this.name = "SlugTakenError";
   }
 }
+
+export class MissingFieldsError extends Error {
+  readonly code = "MISSING_FIELDS";
+  constructor(readonly fields: ("title" | "slug" | "body")[]) {
+    super(`MISSING_FIELDS: ${fields.join(", ")}`);
+    this.name = "MissingFieldsError";
+  }
+}

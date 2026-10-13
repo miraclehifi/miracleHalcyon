@@ -1,8 +1,9 @@
-// PostService（post domain-model §4）：新建、自动保存、读取；发布 / 撤回等由后续任务补充
-import { normalizeContent, type DraftInput } from "./content";
+// PostService（post domain-model §4）：新建、自动保存、读取、发布；撤回 / 删除 / 列表等由后续任务补充
+import { normalizeContent, type DraftInput, type PostContent } from "./content";
 import { contentHash } from "./content-hash";
-import { NotFoundError, SlugTakenError } from "./errors";
-import { deriveStatus, type Post, type PostId, type PostStatus } from "./post";
+import { MissingFieldsError, NotFoundError, SlugTakenError } from "./errors";
+import { noopHooks, type PublicationChange, type PublicationHooks } from "./hooks";
+import { deriveStatus, validateForPublish, type Post, type PostId, type PostStatus } from "./post";
 import type { PostRepo } from "./repo";
 
 // API 中的文章对象（post api-contract §2）：内容取工作稿
@@ -35,9 +36,22 @@ export function toPostView(post: Post): PostView {
 
 export interface PostServiceDeps {
   repo: PostRepo;
+  hooks?: PublicationHooks;
 }
 
-export function createPostService({ repo }: PostServiceDeps) {
+// 发布时 publishedAt 为空的兜底：取 UTC 当天（新建时前端已按作者本地日期填入）
+const utcDate = (now: Date) => now.toISOString().slice(0, 10);
+
+export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) {
+  // 钩子失败只记日志，不让发布失败（作者可在 Cloudflare 控制台手动重建）
+  async function notify(change: PublicationChange): Promise<void> {
+    try {
+      await hooks.onPublicationChanged(change);
+    } catch (error) {
+      console.error("onPublicationChanged failed", change.kind, change.slug, error);
+    }
+  }
+
   async function load(id: PostId): Promise<Post> {
     const post = await repo.get(id);
     if (!post) throw new NotFoundError(id);
@@ -63,6 +77,34 @@ export function createPostService({ repo }: PostServiceDeps) {
       await load(id); // 先确认存在：不存在的文章应得到 POST_NOT_FOUND 而不是 SLUG_TAKEN
       await assertSlugFree(draft.slug, id);
       if (!(await repo.updateDraft(id, draft, await contentHash(draft), now))) throw new NotFoundError(id);
+      return toPostView(await load(id));
+    },
+
+    // 发布与发布更新共用；已发布且无修改时幂等（不更新时间、不触发钩子）
+    async publish(id: PostId, now: Date): Promise<PostView> {
+      const post = await load(id);
+      const { status, hasUnpublishedChanges } = deriveStatus(post);
+      if (status === "published" && !hasUnpublishedChanges) return toPostView(post);
+
+      const check = validateForPublish(post.draft);
+      if (!check.ok) throw new MissingFieldsError(check.missing);
+      await assertSlugFree(post.draft.slug, id);
+
+      let draft: PostContent = post.draft;
+      let draftHash = post.draftHash;
+      if (draft.publishedAt === null) {
+        draft = { ...draft, publishedAt: utcDate(now) };
+        draftHash = await contentHash(draft);
+        await repo.updateDraft(id, draft, draftHash, now); // 补的日期同时写回工作稿
+      }
+      await repo.setPublished(id, draft, draftHash, now);
+
+      const prevSlug = post.published?.slug;
+      await notify(
+        prevSlug === undefined
+          ? { kind: "published", slug: draft.slug }
+          : { kind: "updated", slug: draft.slug, ...(prevSlug !== draft.slug && { prevSlug }) },
+      );
       return toPostView(await load(id));
     },
 

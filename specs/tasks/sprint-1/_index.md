@@ -46,7 +46,7 @@
 | 32 | [implement-post-repo](implement-post-repo.md) | 实现文章仓储（D1） | article-writing | DATA | 数据层 | US-03, US-06, US-08 | create-d1-init-migration, implement-post-status-derivation | 4 | 中 | completed |
 | 33 | [implement-post-save-service](implement-post-save-service.md) | 实现新建与自动保存服务 | article-writing | DOMAIN | 领域层 | US-03, US-06 | implement-post-status-derivation, implement-post-content-normalize | 1 | 低 | completed |
 | 34 | [enforce-slug-uniqueness](enforce-slug-uniqueness.md) | 实现 slug 全站唯一校验 | article-writing | DOMAIN | 领域层 | US-03 | implement-post-save-service | 2 | 低 | completed |
-| 35 | [implement-post-publish-service](implement-post-publish-service.md) | 实现发布与发布更新服务 | article-writing | DOMAIN | 领域层 | US-08 | enforce-slug-uniqueness, implement-publish-validation | 2 | 中 | pending |
+| 35 | [implement-post-publish-service](implement-post-publish-service.md) | 实现发布与发布更新服务 | article-writing | DOMAIN | 领域层 | US-08 | enforce-slug-uniqueness, implement-publish-validation | 2 | 中 | completed |
 | 36 | [implement-post-unpublish-service](implement-post-unpublish-service.md) | 实现撤回服务 | article-writing | DOMAIN | 领域层 | US-08 | implement-post-publish-service | 1 | 低 | pending |
 | 37 | [implement-post-list-query](implement-post-list-query.md) | 实现后台列表查询（D1） | article-writing | DATA | 数据层 | US-07 | implement-post-repo | 1 | 低 | pending |
 | 38 | [implement-tag-suggestions](implement-tag-suggestions.md) | 实现标签补全查询（D1） | article-writing | DATA | 数据层 | US-03 | implement-post-repo | 1 | 低 | pending |
