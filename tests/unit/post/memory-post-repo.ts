@@ -1,7 +1,7 @@
 // 单元测试用内存文章仓储，行为与 D1PostRepo 一致
 import type { PostContent } from "../../../src/domains/post/content";
 import type { Post, PostId } from "../../../src/domains/post/post";
-import type { ListQuery, NewPostRow, PostRepo, PostSummary, StatusCounts } from "../../../src/domains/post/repo";
+import type { ListQuery, NewPostRow, PostRepo, PostSummary, StatusCounts, TagSuggestion } from "../../../src/domains/post/repo";
 
 export class MemoryPostRepo implements PostRepo {
   rows = new Map<PostId, Post>();
@@ -51,5 +51,10 @@ export class MemoryPostRepo implements PostRepo {
     }));
     const draft = matched.filter((p) => p.pubHash === null).length;
     return { rows, total: filtered.length, counts: { all: matched.length, draft, published: matched.length - draft } };
+  }
+
+  // 标签补全只在 D1 集成测试中验证（tests/integration/post/tags-query.test.ts）
+  async tags(): Promise<TagSuggestion[]> {
+    return [];
   }
 }

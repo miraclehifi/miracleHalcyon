@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 38
-**状态**: pending
+**状态**: completed
 **类别**: DATA
 **架构层级**: 数据层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,16 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `PostRepo.tags`、`PostService.suggestTags`
+- [x] `PostRepo.tags`、`PostService.suggestTags`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- 规格未明确的两点按以下处理并写回契约：计数按文章（同一篇工作稿与快照只算一次）；大小写写法合并，显示出现最多的写法\n- 聚合全部在一条 SQL（CTE）中完成
 
 ## 依赖
 

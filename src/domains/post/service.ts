@@ -1,10 +1,10 @@
-// PostService（post domain-model §4）：新建、自动保存、读取、列表、发布、撤回；删除 / 标签补全由后续任务补充
+// PostService（post domain-model §4）：新建、自动保存、读取、列表、发布、撤回、标签补全；删除由后续任务补充
 import { normalizeContent, type DraftInput, type PostContent } from "./content";
 import { contentHash } from "./content-hash";
 import { MissingFieldsError, NotFoundError, NotPublishedError, SlugTakenError } from "./errors";
 import { noopHooks, type PublicationChange, type PublicationHooks } from "./hooks";
 import { deriveStatus, validateForPublish, type Post, type PostId, type PostStatus } from "./post";
-import type { ListStatus, PostRepo, PostSummary, StatusCounts } from "./repo";
+import type { ListStatus, PostRepo, PostSummary, StatusCounts, TagSuggestion } from "./repo";
 
 // API 中的文章对象（post api-contract §2）：内容取工作稿
 export interface PostView {
@@ -53,6 +53,7 @@ export interface PostListResult {
 }
 
 export const PAGE_SIZE = 20;
+export const TAG_SUGGESTIONS = 10;
 
 function toListItem(row: PostSummary): PostListItem {
   return { id: String(row.id), title: row.title, ...deriveStatus(row), tags: row.tags, updatedAt: row.updatedAt.toISOString() };
@@ -145,6 +146,11 @@ export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) 
     async list({ status, q, page }: { status: ListStatus; q: string; page: number }): Promise<PostListResult> {
       const { rows, total, counts } = await repo.list({ status, q: q.trim(), page, pageSize: PAGE_SIZE });
       return { items: rows.map(toListItem), page, pageSize: PAGE_SIZE, total, counts };
+    },
+
+    // 标签补全（US-03-6）：q 为空时返回最常用的 10 个
+    suggestTags(q: string): Promise<TagSuggestion[]> {
+      return repo.tags(q.trim(), TAG_SUGGESTIONS);
     },
 
     async getForEdit(id: PostId): Promise<PostView | null> {

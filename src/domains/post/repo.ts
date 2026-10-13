@@ -1,4 +1,4 @@
-// PostRepo（post domain-model §5，data-model posts 表）；delete / tags 由后续任务补充
+// PostRepo（post domain-model §5，data-model posts 表）；delete 由后续任务补充
 import type { PostContent } from "./content";
 import type { Post, PostId } from "./post";
 
@@ -33,6 +33,11 @@ export interface StatusCounts {
   published: number;
 }
 
+export interface TagSuggestion {
+  name: string;
+  count: number;
+}
+
 export interface PostRepo {
   insert(row: NewPostRow): Promise<PostId>;
   get(id: PostId): Promise<Post | null>;
@@ -40,6 +45,7 @@ export interface PostRepo {
   setPublished(id: PostId, content: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean>;
   slugTaken(slug: string, exceptId?: PostId): Promise<boolean>;
   list(query: ListQuery): Promise<{ rows: PostSummary[]; total: number; counts: StatusCounts }>;
+  tags(q: string, limit: number): Promise<TagSuggestion[]>;
 }
 
 interface PostRow {
@@ -74,6 +80,20 @@ const STATUS_FILTER: Record<ListStatus, string> = {
   published: "pub_hash IS NOT NULL", // 含有未发布修改的
 };
 const escapeLike = (value: string) => value.replace(/[\\%_]/g, (char) => `\\${char}`);
+
+// 工作稿与快照标签合并为 (文章, 标签) 对（UNION 去重：同一篇的两份内容只算一次）；按小写分组计文章数，
+// 显示写法取出现次数最多的那种
+const TAGS_SQL = `
+WITH pairs AS (
+  SELECT p.id, j.value AS v FROM posts p, json_each(p.tags) j
+  UNION
+  SELECT p.id, j.value FROM posts p, json_each(p.pub_tags) j WHERE p.pub_tags IS NOT NULL
+),
+matched AS (SELECT id, v FROM pairs WHERE ?1 = '' OR instr(lower(v), lower(?1)) > 0),
+spellings AS (SELECT lower(v) AS k, v, COUNT(*) AS uses FROM matched GROUP BY v),
+groups AS (SELECT lower(v) AS k, COUNT(DISTINCT id) AS count FROM matched GROUP BY lower(v))
+SELECT (SELECT v FROM spellings s WHERE s.k = g.k ORDER BY uses DESC, v ASC LIMIT 1) AS name, g.count
+FROM groups g ORDER BY g.count DESC, g.k ASC LIMIT ?2`;
 
 const toDate = (value: string | null) => (value === null ? null : new Date(value));
 
@@ -198,5 +218,10 @@ export class D1PostRepo implements PostRepo {
       total: (totals.results[0] as { n: number }).n,
       counts: { all: count.total, draft: count.draft, published: count.published },
     };
+  }
+
+  async tags(q: string, limit: number): Promise<TagSuggestion[]> {
+    const { results } = await this.db.prepare(TAGS_SQL).bind(q, limit).all<TagSuggestion>();
+    return results;
   }
 }
