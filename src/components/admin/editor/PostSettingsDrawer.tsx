@@ -1,5 +1,5 @@
 // PostSettingsDrawer（admin-post-editor.md"设置抽屉"）：Slug、标签、摘要、发布日期
-// 受控组件：字段值与 slug 跟随规则由 PostEditorPage 管理；标签输入、撤回 / 删除由后续任务接入
+// 受控组件：字段值与 slug 跟随规则由 PostEditorPage 管理（标签输入由其传入）；撤回 / 删除由后续任务接入
 import type { ReactNode } from "react";
 import { isValidSlug } from "../../../domains/post/slug";
 import { Field, FIELD_CONTROL_CLASS } from "../../ui/Field";

@@ -1,6 +1,6 @@
 // 写文章页（admin-post-editor.md，US-03）：状态容器 + 布局。文章由页面 SSR 传入（新建为 null）
 // 桌面三栏：编辑 | 预览 | 设置抽屉（340px）；< 1024px 只显示编辑区，抽屉浮在内容上方
-// 标签、预览渲染、自动保存、发布由后续任务接入
+// 预览渲染、自动保存、发布由后续任务接入
 import { useState } from "react";
 import { slugify } from "../../../domains/post/slug";
 import type { PostView } from "../../../domains/post/service";
@@ -11,6 +11,7 @@ import { badgeStatus } from "../../ui/StatusBadge";
 import { EditorTopBar } from "./EditorTopBar";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { PostSettingsDrawer } from "./PostSettingsDrawer";
+import { TagInput } from "./TagInput";
 
 export interface PostEditorPageProps {
   initial: PostView | null; // null：新建
@@ -69,6 +70,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
           <PostSettingsDrawer
             slug={draft.slug}
             slugTitleFallback={draft.title.trim() !== "" && slugify(draft.title) === ""}
+            tagsField={<TagInput tags={draft.tags} onChange={(tags) => update({ tags })} />}
             summary={draft.summary}
             publishedAt={publishedAt}
             onSlugChange={onSlugChange}
