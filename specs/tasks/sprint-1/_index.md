@@ -72,7 +72,7 @@
 | 58 | [add-post-list-empty-states](add-post-list-empty-states.md) | 文章列表空状态与无结果 | article-writing | FRONTEND | 表现层 | US-07 | add-post-list-pagination | 0 | 低 | completed |
 | 59 | [build-editor-page-shell](build-editor-page-shell.md) | 实现写文章页框架与加载 | article-writing | FRONTEND | 表现层 | US-03 | implement-get-post-endpoint, build-status-badge-component, build-icon-button-component | 3 | 中 | completed |
 | 60 | [build-markdown-editor-pane](build-markdown-editor-pane.md) | 实现编辑区（标题 + 源码区 + 底栏） | article-writing | FRONTEND | 表现层 | US-03 | build-editor-page-shell | 1 | 低 | completed |
-| 61 | [build-post-settings-drawer](build-post-settings-drawer.md) | 实现设置抽屉（slug 跟随、摘要、日期） | article-writing | FRONTEND | 表现层 | US-03 | build-editor-page-shell, build-field-component, implement-slugify | 2 | 低 | pending |
+| 61 | [build-post-settings-drawer](build-post-settings-drawer.md) | 实现设置抽屉（slug 跟随、摘要、日期） | article-writing | FRONTEND | 表现层 | US-03 | build-editor-page-shell, build-field-component, implement-slugify | 2 | 低 | completed |
 | 62 | [build-tag-input](build-tag-input.md) | 实现标签输入与补全 | article-writing | FRONTEND | 表现层 | US-03 | build-post-settings-drawer, implement-tags-endpoint | 0 | 低 | pending |
 | 63 | [implement-autosave-controller](implement-autosave-controller.md) | 实现自动保存状态机 | article-writing | FRONTEND | 表现层 | US-06 | setup-workers-test-pool | 1 | 中 | pending |
 | 64 | [wire-autosave-to-editor](wire-autosave-to-editor.md) | 写文章页接入自动保存 | article-writing | FRONTEND | 表现层 | US-06 | implement-autosave-controller, build-markdown-editor-pane, build-post-settings-drawer, build-save-indicator-component, implement-save-post-endpoint | 2 | 中 | pending |

@@ -82,7 +82,7 @@
 | UT-35 | R | 中文标题 slug 为空 | slug 输入框为空并提示"请填写英文 slug" | SC-POSTINFO-06 |
 | UT-36 | S | 纯函数 `validateSlug(s)` | `hello-astro`、`a1` 合法；`Hello World!`、`a_b`、`a b`、`中文`、空串 非法 → "仅允许小写字母、数字和连字符"；`-a`/`a-`/`a--b` 以 design-domain 为准 | SC-POSTINFO-07 |
 | UT-37 | R | props `slugError="slug 已存在"` | slug 输入框下显示该文案 | SC-POSTINFO-08 |
-| UT-38 | S | 摘要计数器边界 | 0/200、199/200、200/200 正常色；201 时显示红色 "201/200" 与"摘要不能超过 200 字"；中文与 emoji 按字符（grapheme）计数 | SC-POSTINFO-09 |
+| UT-38 | S | 摘要计数器边界 | 0/200、199/200、200/200 正常色；201 时显示红色 "201/200" 与"摘要不能超过 200 字"；中文与 emoji 按码位计数（与服务端校验一致，build-post-settings-drawer 决定）；超过 200 后不能再变长 | SC-POSTINFO-09 |
 | UT-39 | S | TagInput 回车添加 | 输入 `cloudflare` 回车 → 新增标签块；重复标签不重复添加；空白输入不添加；首尾空格去除 | SC-POSTINFO-10 |
 | UT-40 | S | TagInput 自动补全 | `suggestions=['astro','react']`，输入 `as` → 下拉仅显示 `astro`；选中后加入标签块并清空输入；已选标签不再出现在建议中 | SC-POSTINFO-10 |
 | UT-41 | S | TagInput 删除 | 点击 `astro` 上 × → 只剩其他标签；输入框为空时 Backspace 删除最后一个 | SC-POSTINFO-10 |
