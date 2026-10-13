@@ -56,7 +56,7 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 
 | 项 | 规则 |
 |----|------|
-| 渲染触发 | 源码变化后 debounce 150ms → Web Worker；只采用最新 seq 的结果 |
+| 渲染触发 | 源码变化即发给 Web Worker（不 debounce）；渲染中又有输入时只保留最后一次，上一次完成后再发，只采用最新 seq 的结果（长文连续输入不排队）。已实现：`src/components/admin/editor/MarkdownPreview.tsx` |
 | 注入 | `innerHTML` 替换正文容器，然后按 `ImageRef` 挂载：`[data-article-image]` → `ArticleImage`、`[data-gallery]` → `ImageGallery`、占位 → 上传占位块 |
 | 复用 | `reconcileIslands`：以 `src + marks` 为键复用已挂载的 React root（保持加载状态），新增的挂载、消失的 `unmount`（UT-140） |
 | 同步滚动 | 源码 textarea 用隐藏镜像元素算出每行的 `offsetTop`；预览按 `data-line` 建立映射；两侧滚动按行插值，带 50ms 互斥锁防止回声 |
