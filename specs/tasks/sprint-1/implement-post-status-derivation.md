@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 30
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -30,12 +30,16 @@ POST-UT-04：无快照 / 快照 = 工作稿 / 快照 ≠ 工作稿 三种情况�
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/domains/post/post.ts`：`Post` 类型、`deriveStatus`
+- [x] `src/domains/post/post.ts`：`Post` 类型、`deriveStatus`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `deriveStatus` 只比较已存的哈希，同步纯函数；StatusBadge 改为引用领域的 `PostStatus` 类型
 
 ## 依赖
 

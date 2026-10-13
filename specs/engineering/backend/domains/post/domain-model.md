@@ -24,7 +24,7 @@
 | createdAt | 时间戳 | — |
 | updatedAt | 时间戳 | 最近一次工作稿保存时间（列表排序用） |
 
-**派生属性**
+**派生属性**（已实现：`deriveStatus`，`src/domains/post/post.ts`，比较库中存的 `draft_hash` / `pub_hash`）
 
 | 名称 | 规则 |
 |------|------|

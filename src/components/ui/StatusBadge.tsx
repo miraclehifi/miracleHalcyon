@@ -1,5 +1,6 @@
 // StatusBadge（components.md"基础组件"，design-tokens"文章状态配色"）
-export type PostStatus = "draft" | "published";
+import type { PostStatus } from "../../domains/post/post";
+
 export type BadgeStatus = "draft" | "published" | "modified"; // modified = 已发布 · 有未发布修改
 
 const STATUSES: Record<BadgeStatus, { label: string; className: string; dot: string }> = {
