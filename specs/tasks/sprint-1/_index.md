@@ -74,7 +74,7 @@
 | 60 | [build-markdown-editor-pane](build-markdown-editor-pane.md) | 实现编辑区（标题 + 源码区 + 底栏） | article-writing | FRONTEND | 表现层 | US-03 | build-editor-page-shell | 1 | 低 | completed |
 | 61 | [build-post-settings-drawer](build-post-settings-drawer.md) | 实现设置抽屉（slug 跟随、摘要、日期） | article-writing | FRONTEND | 表现层 | US-03 | build-editor-page-shell, build-field-component, implement-slugify | 2 | 低 | completed |
 | 62 | [build-tag-input](build-tag-input.md) | 实现标签输入与补全 | article-writing | FRONTEND | 表现层 | US-03 | build-post-settings-drawer, implement-tags-endpoint | 0 | 低 | completed |
-| 63 | [implement-autosave-controller](implement-autosave-controller.md) | 实现自动保存状态机 | article-writing | FRONTEND | 表现层 | US-06 | setup-workers-test-pool | 1 | 中 | pending |
+| 63 | [implement-autosave-controller](implement-autosave-controller.md) | 实现自动保存状态机 | article-writing | FRONTEND | 表现层 | US-06 | setup-workers-test-pool | 1 | 中 | completed |
 | 64 | [wire-autosave-to-editor](wire-autosave-to-editor.md) | 写文章页接入自动保存 | article-writing | FRONTEND | 表现层 | US-06 | implement-autosave-controller, build-markdown-editor-pane, build-post-settings-drawer, build-save-indicator-component, implement-save-post-endpoint | 2 | 中 | pending |
 | 65 | [show-slug-conflict-error](show-slug-conflict-error.md) | 显示 slug 冲突错误 | article-writing | FRONTEND | 表现层 | US-03 | wire-autosave-to-editor | 0 | 低 | pending |
 | 66 | [build-markdown-preview-pane](build-markdown-preview-pane.md) | 实现实时预览区 | article-writing | FRONTEND | 表现层 | US-04 | implement-markdown-code-highlight, spike-markdown-browser-worker, build-editor-page-shell | 0 | 中 | pending |

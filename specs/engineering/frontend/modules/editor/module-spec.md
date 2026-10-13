@@ -50,6 +50,8 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 离开拦截 | `dirty`/`saving`/`failed` 时注册 `beforeunload` |
 | 发布前 | 点击发布 / 发布更新时先 flush（立即保存并等待），再调用 `/publish` |
 
+> 已实现（Sprint 1）：`src/lib/autosave/controller.ts`（状态机）+ `useAutosave.ts`；本地暂存、恢复判断、401 跳转、离开拦截在 Sprint 2 接入。
+
 ## 3. 预览（`MarkdownPreview`）
 
 | 项 | 规则 |
