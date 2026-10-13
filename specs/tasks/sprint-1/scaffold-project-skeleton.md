@@ -75,3 +75,4 @@ E2E 冒烟 `tests/e2e/smoke.spec.ts`：`npm run build && npm run preview`（`ast
 - D1 迁移目录定为 `src/db/migrations`（与架构 §6.2 一致）；`database_id` 暂为本地占位值，接入生产时替换
 - 测试结果：e2e 2/2 通过（chromium、webkit）；`npm run lint` 0 问题；`astro check` 0 错误 / 0 警告 / 0 提示；`npm run dev` 访问 `/admin/login` 200
 - 环境提示：开发时 Node 22.18.0 低于部分依赖的引擎要求；2026-10-13 已升级到 Node 24.21.0 LTS，全量测试通过
+- 2026-10-13 补充：`.gitignore` 按类分组补全（环境变量、日志 / 缓存、覆盖率、编辑器 / 系统文件、`CLAUDE.local.md`、`.claude/settings.local.json`）
