@@ -1,7 +1,7 @@
-// PostService（post domain-model §4）：新建、自动保存、读取、发布；撤回 / 删除 / 列表等由后续任务补充
+// PostService（post domain-model §4）：新建、自动保存、读取、发布、撤回；删除 / 列表等由后续任务补充
 import { normalizeContent, type DraftInput, type PostContent } from "./content";
 import { contentHash } from "./content-hash";
-import { MissingFieldsError, NotFoundError, SlugTakenError } from "./errors";
+import { MissingFieldsError, NotFoundError, NotPublishedError, SlugTakenError } from "./errors";
 import { noopHooks, type PublicationChange, type PublicationHooks } from "./hooks";
 import { deriveStatus, validateForPublish, type Post, type PostId, type PostStatus } from "./post";
 import type { PostRepo } from "./repo";
@@ -105,6 +105,15 @@ export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) 
           ? { kind: "published", slug: draft.slug }
           : { kind: "updated", slug: draft.slug, ...(prevSlug !== draft.slug && { prevSlug }) },
       );
+      return toPostView(await load(id));
+    },
+
+    // 撤回：清空快照与 lastPublishedAt，工作稿（含未发布修改）保持不变（US-08 S11）
+    async unpublish(id: PostId): Promise<PostView> {
+      const post = await load(id);
+      if (!post.published) throw new NotPublishedError(id);
+      await repo.setPublished(id, null, null, null);
+      await notify({ kind: "unpublished", slug: post.published.slug });
       return toPostView(await load(id));
     },
 

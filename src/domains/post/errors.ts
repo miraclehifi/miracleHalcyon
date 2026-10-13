@@ -30,3 +30,11 @@ export class MissingFieldsError extends Error {
     this.name = "MissingFieldsError";
   }
 }
+
+export class NotPublishedError extends Error {
+  readonly code = "NOT_PUBLISHED";
+  constructor(readonly id: number) {
+    super(`NOT_PUBLISHED: ${id}`);
+    this.name = "NotPublishedError";
+  }
+}

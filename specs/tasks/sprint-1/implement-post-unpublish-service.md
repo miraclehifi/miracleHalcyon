@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 36
-**状态**: pending
+**状态**: completed
 **类别**: DOMAIN
 **架构层级**: 领域层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,12 @@ POST-UT-08：有修改的已发布文章撤回后工作稿为修改后内容、�
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `PostService.unpublish`
+- [x] `PostService.unpublish`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
 
 ## 依赖
 

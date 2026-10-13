@@ -72,7 +72,7 @@
 | `publish` | 任意存在的文章；工作稿通过发布校验 | `published = draft'`（`draft'` = 工作稿，若 publishedAt 为空则补当天并同时写回工作稿），`lastPublishedAt = now` |
 | `publish`（已发布且无修改） | — | 幂等：返回当前状态，不更新时间、不触发钩子 |
 | `unpublish` | `status == 'published'` | `published = null`，`lastPublishedAt = null`；工作稿保持（含未发布修改）（US-08 S11） |
-| `unpublish`（草稿） | — | 409 `NOT_PUBLISHED` |
+| `unpublish`（草稿） | — | 409 `NOT_PUBLISHED`（已实现：`NotPublishedError`；撤回成功触发 `unpublished` 钩子） |
 | `delete` | 存在 | 删除整行；若曾发布则触发钩子 |
 
 ## 3. 值对象
