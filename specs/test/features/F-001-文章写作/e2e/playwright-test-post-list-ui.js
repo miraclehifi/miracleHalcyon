@@ -1,4 +1,4 @@
-// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、15、16、20（acceptance/post-management/US-07-tests.md）
+// F-001 US-07 文章列表 UI 交互验收：TC-US07-12、13、14、15、16、19、20（acceptance/post-management/US-07-tests.md）
 // 由 implement（build-post-list-page）生成，verify 阶段执行：bash playwright-test-post-list-ui.sh
 // 前置：服务已用 CLOUDFLARE_ENV=e2e 构建并运行（测试账号见 wrangler.jsonc env.e2e），本地 D1 已迁移
 // 数据：经接口创建，标题带本次运行的唯一前缀，只断言这几篇（本地 D1 可能已有其他文章）
@@ -117,6 +117,21 @@ const rowsOf = (page, prefix) => page.getByRole("listitem").filter({ hasText: pr
     await page.getByRole("searchbox", { name: "搜索标题" }).pressSequentially(`${token}Astro`, { delay: 40 });
     await page.waitForURL((url) => url.searchParams.get("q") === `${token}Astro`);
     await page.waitForFunction(() => document.querySelectorAll("li").length === 2);
+  });
+
+  await run("[SC-POSTLIST-08] TC-US07-19 分页：23 篇分 2 页，当前页 aria-current，首末页禁用上 / 下一页", async ({ page, api }) => {
+    const token = `${PREFIX}p19`.toLowerCase();
+    for (let i = 1; i <= 23; i++) await api.create(`${token} 第 ${i} 篇`);
+    await page.goto(`${TARGET_URL}/admin?q=${token}`);
+    await page.waitForSelector("astro-island:not([ssr])");
+    const pager = page.getByRole("navigation", { name: "分页" });
+    check((await page.getByRole("listitem").count()) === 20, "第 1 页应显示 20 篇");
+    check((await pager.getByText("上一页").getAttribute("aria-disabled")) === "true", "第 1 页\"上一页\"应禁用");
+    await pager.getByRole("link", { name: "2", exact: true }).click();
+    await page.waitForURL((url) => url.searchParams.get("page") === "2");
+    await page.waitForFunction(() => document.querySelectorAll("li").length === 3);
+    check((await pager.getByRole("link", { name: "2", exact: true }).getAttribute("aria-current")) === "page", "当前页应为 aria-current=page");
+    check((await pager.getByText("下一页").getAttribute("aria-disabled")) === "true", "末页\"下一页\"应禁用");
   });
 
   // 首屏数据由 SSR 读取，浏览器无法拦截；改为拦截首屏之后的列表请求（切换"草稿"筛选，add-post-list-status-filter 接入后可用）

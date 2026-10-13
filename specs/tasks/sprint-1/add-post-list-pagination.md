@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 57
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,20 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/components/ui/Pagination.tsx`
-- [ ] `PostListPage` 接入 `?page=`
+- [x] `src/components/ui/Pagination.tsx`
+- [x] `PostListPage` 接入 `?page=`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `Pagination`（`src/components/ui/Pagination.tsx`）：`page / pageSize / total / href / onNavigate`；页码与上 / 下一页是真实链接（带修饰键时交给浏览器），普通点击走客户端加载并回到页顶；首末页的上 / 下一页渲染为 `aria-disabled` 文本；只有 1 页时不渲染（UT-19）；手机可点区域 44px；`getPageCount` 同文件导出（UT-18）
+- 页码全部显示、可换行（规格未定义页数很多时的折叠规则，个人博客每页 20 篇，页数有限）
+- 筛选用例改为带唯一关键字搜索，分段数量随关键字精确断言（原写法与并行的分页用例造数据冲突，全量 E2E 时偶发失败）
+- 过程记录：shell 循环连续两次跑 `test:e2e` 时第二次全部失败（上一次的 preview 尚未退出被复用），单独 / 间隔运行 3 次均 12/12，与代码无关
 
 ## 依赖
 

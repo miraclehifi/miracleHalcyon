@@ -1,11 +1,12 @@
 // 文章列表页（admin-post-list.md，US-07）：首屏数据由页面 SSR 传入；筛选同步到 URL，之后的数据经接口拉取
-// 加载中：无数据时骨架，有旧数据时保留并降低不透明度；失败显示"加载失败 / 重试"。分页、空状态由后续任务接入
+// 加载中：无数据时骨架，有旧数据时保留并降低不透明度；失败显示"加载失败 / 重试"。空状态由后续任务接入
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListStatus } from "../../domains/post/repo";
 import type { PostListResult } from "../../domains/post/service";
 import { buildListQuery, parseListQuery, type ListQueryState } from "../../lib/admin/list-query";
 import { useHydrated } from "../../lib/dom/hydration";
 import { Button } from "../ui/Button";
+import { Pagination } from "../ui/Pagination";
 import { SearchInput } from "../ui/SearchInput";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { PageHeader } from "./PageHeader";
@@ -131,6 +132,18 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
             </li>
           ))}
         </ul>
+      )}
+      {!error && data && (
+        <Pagination
+          page={query.page}
+          pageSize={data.pageSize}
+          total={data.total}
+          href={(page) => `/admin${buildListQuery({ ...query, page })}`}
+          onNavigate={(page) => {
+            navigate({ ...query, page });
+            window.scrollTo({ top: 0 });
+          }}
+        />
       )}
       {!error && !data && loading && (
         <ul aria-busy="true" aria-label="正在加载文章" className="flex flex-col gap-5">

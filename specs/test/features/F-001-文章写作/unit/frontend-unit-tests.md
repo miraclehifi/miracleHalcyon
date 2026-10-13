@@ -50,7 +50,7 @@
 | UT-15 | S | 纯函数 `parseListQuery(search)` | `?status=draft&q=astro&page=2` → `{status:'draft', q:'astro', page:2}`；`status=foo` → `all`；`page` 为 `0`/`-1`/`abc`/`1.5` → 1；q 首尾空格去除 | SC-POSTLIST-04, SC-POSTLIST-08 |
 | UT-16 | S | 纯函数 `buildListQuery(state)` | 默认值不写入 URL（`all`、page 1、空 q）；筛选/搜索变化时 page 重置为 1 | SC-POSTLIST-04 |
 | UT-17 | S | 搜索框防抖（fake timers） | 连续输入 `a`,`as`,`ast` 在防抖期内只触发 1 次 `onSearch('ast')` | SC-POSTLIST-05 |
-| UT-18 | S | 纯函数 `getPageCount(total, 20)` 边界 | 0→0、1→1、20→1、21→2、40→2、41→3、45→3 | SC-POSTLIST-08 |
+| UT-18 | S | 纯函数 `getPageCount(total, 20)`（`src/components/ui/Pagination.tsx`）边界 | 0→0、1→1、20→1、21→2、40→2、41→3、45→3 | SC-POSTLIST-08 |
 | UT-19 | R | Pagination `totalPages<=1` | 不渲染分页控件 | SC-POSTLIST-08 |
 | UT-20 | R | Pagination 第 1 / 末页 | "上一页"/"下一页"分别禁用；当前页 `aria-current="page"` | SC-POSTLIST-08 |
 | UT-21 | A | 列表语义与导航 | 表格有表头；筛选控件有可访问名称；分页为 `nav` 且 `aria-label` 含"分页"；搜索框 `role="searchbox"` 有 label | SC-POSTLIST-04, SC-POSTLIST-08 |
