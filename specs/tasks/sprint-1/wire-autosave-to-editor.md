@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 64
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,20 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `PostEditorPage` 把标题、正文、设置抽屉的变化交给 `useAutosave`；`SaveIndicator` 显示状态
-- [ ] 有未保存修改时注册 `beforeunload`
+- [x] `PostEditorPage` 把标题、正文、设置抽屉的变化交给 `useAutosave`；`SaveIndicator` 显示状态
+- [x] 有未保存修改时注册 `beforeunload`
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `PostEditorPage` 每次字段变化（标题、正文、slug、标签、摘要、发布日期）调用 `useAutosave().edit()`；保存时读取最新草稿，新建文章的发布日期按"今天"一并保存
+- 首次保存成功后 `history.replaceState` 换成 `/admin/posts/:id`（不刷新）；保存响应的 `status / hasUnpublishedChanges` 更新顶栏徽标（已发布文章编辑后显示"有未发布修改"）
+- 顶栏 `SaveIndicator`：idle 不显示、dirty"未保存"、saving、saved"已保存 · HH:mm"（取响应 `updatedAt`）；网络 / 服务端错误"保存失败，将自动重试"；冲突 / 校验错误只显示"未保存"，字段错误由 show-slug-conflict-error 接入
+- dirty / saving / failed 时注册 `beforeunload`；Ctrl / ⌘ + S 立即保存（TC-US03-18，阻止浏览器另存为）
 
 ## 依赖
 
