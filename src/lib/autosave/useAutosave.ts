@@ -1,5 +1,5 @@
 // useAutosave：把自动保存控制器接到 React（状态机见 controller.ts）
-// 内容通过 getContent 回调在保存时读取，因此调用方每次编辑只需调用 edit()；edit / flush 引用稳定
+// 内容通过 getContent 回调在保存时读取，因此调用方每次编辑只需调用 edit()；edit / flush / disable / enable 引用稳定
 // 控制器在第一次 edit / flush 时创建（而不是在 effect 里）：水合后、effect 运行前的输入也不会丢
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { DraftInput } from "../../domains/post/content";
@@ -17,6 +17,8 @@ export interface UseAutosaveOptions {
 export interface UseAutosaveResult extends AutosaveState {
   edit(): void;
   flush(): Promise<boolean>;
+  disable(): Promise<void>;
+  enable(): void;
 }
 
 export function useAutosave(options: UseAutosaveOptions): UseAutosaveResult {
@@ -54,6 +56,8 @@ export function useAutosave(options: UseAutosaveOptions): UseAutosaveResult {
 
   const edit = useCallback(() => controller().edit(), [controller]);
   const flush = useCallback(() => controller().flush(), [controller]);
+  const disable = useCallback(() => controller().disable(), [controller]);
+  const enable = useCallback(() => controller().enable(), [controller]);
 
-  return { ...state, edit, flush };
+  return { ...state, edit, flush, disable, enable };
 }

@@ -48,7 +48,7 @@
 |-------|------|------|------|
 | US-07 | post-list | in_progress | 后台文章列表（含草稿），新建入口，进入编辑（Sprint 1 列表 / 筛选 / 搜索 / 分页 / 空态已实现；入场动效 Sprint 2） |
 | US-08 | publish-post | implemented | 发布、更新已发布文章、撤回为草稿 |
-| US-09 | delete-post | draft | 删除文章（列表左滑 + 撤销；写文章页二次确认） |
+| US-09 | delete-post | implemented | 删除文章（列表左滑 + 撤销；写文章页二次确认） |
 
 ---
 

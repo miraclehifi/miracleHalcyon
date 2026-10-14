@@ -193,13 +193,13 @@
 
 | UT-ID | 类 | 用例 | 预期 | covers |
 |------|------|------|------|------|
-| UT-110 | R | 删除文案 | `title="Old Post"` 渲染"删除「Old Post」？删除后无法恢复"；标题含 `<img onerror>` 时作为文本渲染 | SC-DELETE-01 |
+| UT-110 | R | 删除文案 | `title="Old Post"` 渲染标题"删除《Old Post》？"、说明"删除后无法恢复。已发布的文章读者将无法再访问。"；标题含 `<img onerror>` 时作为文本渲染 | SC-DELETE-01 |
 | UT-111 | S | 确认 / 取消回调 | "确认删除"调用 `onConfirm` 1 次；"取消"调用 `onCancel`，不调用 `onConfirm` | SC-DELETE-01, SC-DELETE-03 |
 | UT-112 | S | Esc 关闭 | 按 Esc 调用 `onCancel` | SC-DELETE-03, SC-PUBLISH-05 |
-| UT-113 | S | 确认进行中 | `onConfirm` 返回 pending Promise 时确认按钮禁用并显示加载，重复点击不再调用 | SC-DELETE-01 |
+| UT-113 | S | 确认进行中 | `onConfirm` 返回 pending Promise 时确认按钮禁用并显示加载（`aria-busy`），重复点击不再调用；"取消"禁用，Esc / 遮罩不关闭 | SC-DELETE-01 |
 | UT-114 | A | 语义 | `role="alertdialog"`、`aria-modal="true"`、`aria-labelledby`/`aria-describedby` 指向标题与说明 | SC-DELETE-01 |
 | UT-115 | A | 焦点陷阱 | 打开时焦点在"取消"（安全默认，以 design-ui 为准）；Tab/Shift+Tab 在对话框内循环，不跑到背景 | SC-DELETE-03 |
-| UT-116 | A | 焦点还原 | 关闭后焦点回到触发元素（"更多"按钮） | SC-DELETE-03, SC-PUBLISH-05 |
+| UT-116 | A | 焦点还原 | 关闭后焦点回到触发元素（写文章页"删除文章"按钮） | SC-DELETE-03, SC-PUBLISH-05 |
 
 ---
 
@@ -296,3 +296,4 @@
 | 2026-10-12 | v1.2 | 新增 §11 EditorToolbar + Tooltip（UT-117 ~ UT-125，US-10） | miraclehifi |
 | 2026-10-13 | v1.3 | 新增 §12 图片插件、§13 图片菜单、§14 照片预处理（UT-126 ~ UT-147，US-11、US-12） | miraclehifi |
 | 2026-10-14 | v1.4 | 新增 §15 列表删除的延迟提交（UT-148 ~ UT-151，US-09 撤销） | miraclehifi |
+| 2026-10-14 | v1.5 | UT-110 文案按设计稿改为"删除《标题》？"；UT-113 补充进行中不可取消；UT-116 触发元素改为"删除文章"按钮 | miraclehifi |

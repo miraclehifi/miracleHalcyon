@@ -316,7 +316,7 @@
 **步骤：** 分别在三篇的写文章页打开删除确认框；再在列表全滑删除 HTML 标题那篇
 
 **预期结果：**
-- 弹出确认框"删除「Old Post」？删除后无法恢复"
+- 弹出确认框，标题"删除《Old Post》？"，说明"删除后无法恢复。已发布的文章读者将无法再访问。"
 - HTML 标题作为纯文本显示，不执行脚本（无 dialog 事件）
 - 长标题截断或换行，不撑破对话框，"确认删除"/"取消"按钮可见
 - 对话框 `role="alertdialog"`，打开后焦点在"取消"（破坏性操作默认安全按钮）
@@ -326,7 +326,7 @@
 ```ts
 await page.goto(`/admin/posts/${oldPost.id}`);
 await page.getByRole('button', { name: '删除文章' }).click();
-await expect(page.getByRole('alertdialog')).toContainText('删除「Old Post」？删除后无法恢复');
+await expect(page.getByRole('alertdialog')).toContainText('删除后无法恢复。已发布的文章读者将无法再访问。');
 page.on('dialog', () => { throw new Error('XSS executed'); });
 ```
 
@@ -392,7 +392,7 @@ expect(deleteCalls).toBe(0);
 
 **预期结果：**
 - "确认删除"显示加载并禁用，"取消"禁用或忽略 Esc（以 design-ui 为准）
-- 只发出 1 次删除请求；最终显示"已删除"，无"删除失败"误报
+- 只发出 1 次删除请求；最终跳转到 `/admin`，无"删除失败"误报
 
 **playwright_hint：**
 ```ts
@@ -596,3 +596,4 @@ expect(deleteCalls).toBe(0);
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-12 | v1.1 | 列表删除改为左滑 / 全滑 + 6 秒撤销：改写 TC-01、05、13；确认框类 TC-10~12 限定写文章页；新增 TC-14（撤销）、15（离开页面 / 连续删除）、16（滑动交互）（[Backlog](../../../../../backlog/swipe-row-actions.md)） | miraclehifi |
 | 2026-10-13 | v1.2 | TC-03：缓存失效改为触发重建，5 分钟内可见（[Backlog](../../../../../backlog/reader-build-time-prerender.md)） | miraclehifi |
+| 2026-10-14 | v1.3 | TC-10 确认框文案按设计稿（"删除《标题》？"）；TC-12 成功后以跳转列表为准（不显示"已删除"） | miraclehifi |

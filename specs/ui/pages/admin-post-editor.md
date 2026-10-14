@@ -149,7 +149,7 @@
 
 抽屉默认：新建文章时**打开**（方便填信息），编辑已有文章时**关闭**。开合状态不跨文章记忆。
 
-> 已实现（Sprint 1）：`src/components/admin/editor/PostSettingsDrawer.tsx`——Slug、摘要、发布日期；摘要按码位计数（与服务端一致）；标签、撤回已接入；删除在 Sprint 2。
+> 已实现（Sprint 1）：`src/components/admin/editor/PostSettingsDrawer.tsx`——Slug、摘要、发布日期；摘要按码位计数（与服务端一致）；标签、撤回已接入；删除已实现（Sprint 2，`DeletePostAction`：确认中按钮加载、失败提示"删除失败，请重试"、成功后不弹离开确认直接回列表）。
 
 ## 保存状态（US-06）
 

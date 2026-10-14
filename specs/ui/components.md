@@ -100,7 +100,7 @@
 |-----------|-----------|----------------|---------|
 | `Alert/Error` | `Alert` | `tone`：`error`；`children` | 登录页"凭据错误"。已实现：`src/components/ui/Alert.tsx` |
 | `Toast/Error` · `Success` · `Warning` · `Undo` | `Toast` | `tone`：`error`（常驻、可关闭）/ `warning`（常驻、可关闭，`warn-soft` 底 + `warn` 图标与字，`role="status"`）/ `success`（4 秒自动消失）；`action?`（`{ label, onClick }`，传了即 `/Undo` 形态：文字后一个文字按钮"撤销"，6 秒消失）；规则见 design-tokens"轻提示" | 04 校验与错误提示；实况照片降级提示（warning）；文章列表删除后的"已删除《标题》· 撤销"。已实现：`src/components/ui/Toast.tsx`（`ToastProvider` + `useToast().show()`，页面底部居中堆叠）；`/Undo`（Sprint 2）：`surface` 底 + `line-strong` 边框、`trash-2` 图标、`accent` 文字按钮，不自动消失，由使用方按撤销期关闭；另有 `onHold(held)`（悬停、光标移动或焦点在提示内时为真，用于暂停计时），提示聚焦时 Ctrl/⌘+Z 等同点 action |
-| `ConfirmDialog/Danger` · `Default` | `ConfirmDialog` | `tone`：`danger`（删除）/ `default`（撤回）；`icon`；`title`；`description`；`confirmLabel` | 04 删除确认、撤回确认。已实现：`src/components/ui/ConfirmDialog.tsx`（`open`、`onConfirm`、`onCancel`） |
+| `ConfirmDialog/Danger` · `Default` | `ConfirmDialog` | `tone`：`danger`（删除）/ `default`（撤回）；`icon`；`title`；`description`；`confirmLabel` | 04 删除确认、撤回确认。已实现：`src/components/ui/ConfirmDialog.tsx`（`open`、`onConfirm`、`onCancel`；`role="alertdialog"`；`onConfirm` 返回 Promise 时确认按钮加载并禁用、不可取消） |
 | `EmptyState` | `EmptyState` | `icon`；`title`；`description`；`action?`。已实现：`src/components/ui/EmptyState.tsx`（文案在 `role="status"` 区域） | 文章列表空状态 |
 | `RestoreBanner` | `RestoreBanner` | `savedAt`；`onRestore`；`onDiscard` | 写文章页顶栏下方 |
 

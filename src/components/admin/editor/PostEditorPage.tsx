@@ -1,7 +1,7 @@
 // 写文章页（admin-post-editor.md，US-03 / US-06）：状态容器 + 布局。文章由页面 SSR 传入（新建为 null）
 // 桌面三栏：编辑 | 预览 | 设置抽屉（340px）；< 1024px 只显示编辑区，抽屉浮在内容上方
 // 任何字段变化都交给自动保存（停止输入 2 秒后保存；Ctrl / ⌘ + S 立即保存）；预览在 Web Worker 中渲染（MarkdownPreview）；
-// 发布见 PublishActions：缺少必填项时标出字段并聚焦第一个
+// 发布见 PublishActions：缺少必填项时标出字段并聚焦第一个；删除：暂停自动保存 → DELETE → 不弹离开确认，回到列表
 import { useEffect, useRef, useState } from "react";
 import type { DraftInput } from "../../../domains/post/content";
 import type { PostStatus } from "../../../domains/post/post";
@@ -18,7 +18,7 @@ import { EditorTopBar } from "./EditorTopBar";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { MarkdownPreview } from "./MarkdownPreview";
 import { PostSettingsDrawer } from "./PostSettingsDrawer";
-import { PublishActions, UnpublishAction, type RequiredField } from "./PublishActions";
+import { DeletePostAction, PublishActions, UnpublishAction, type RequiredField } from "./PublishActions";
 import { TagInput } from "./TagInput";
 
 // 发布缺少必填项时聚焦的输入框
@@ -74,6 +74,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   // 文章 id：新建文章首次保存后才有。ref 供发布时（flush 之后）读取最新值，state 供渲染
   const postIdRef = useRef(initial?.id ?? null);
   const [postId, setPostId] = useState(initial?.id ?? null);
+  const leavingRef = useRef(false); // 删除成功后跳转：不再拦截离开
   const hydrated = useHydrated();
   // 发布日期默认浏览器本地的今天；服务端不知道作者时区，水合前留空
   const publishedAt = draft.publishedAt ?? (hydrated ? localDate(new Date()) : "");
@@ -95,13 +96,15 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
       setSettingsOpen(true); // 自动打开设置抽屉，让作者看到字段错误
     },
   });
-  const { edit, flush } = autosave;
+  const { edit, flush, disable, enable } = autosave;
   const unsaved = autosave.status === "dirty" || autosave.status === "saving" || autosave.status === "failed";
 
   // 有未保存修改时离开页面 → 浏览器原生离开确认
   useEffect(() => {
     if (!unsaved) return;
-    const onBeforeUnload = (event: BeforeUnloadEvent) => event.preventDefault();
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!leavingRef.current) event.preventDefault();
+    };
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [unsaved]);
@@ -134,6 +137,10 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const onSlugTaken = (message: string) => {
     setSlugError(message);
     setSettingsOpen(true);
+  };
+  const onDeleted = () => {
+    leavingRef.current = true;
+    window.location.assign("/admin");
   };
   const onTitleChange = (title: string) => update(slugTouched ? { title } : { title, slug: slugify(title) });
   const onSlugChange = (slug: string) => {
@@ -187,6 +194,11 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               tagsField={<TagInput tags={draft.tags} onChange={(tags) => update({ tags })} />}
               unpublishAction={
                 server.status === "published" && postId !== null && <UnpublishAction postId={postId} onUnpublished={syncServer} />
+              }
+              deleteAction={
+                postId !== null && (
+                  <DeletePostAction postId={postId} title={draft.title.trim() || "无标题"} beforeDelete={disable} onDeleted={onDeleted} onFailed={enable} />
+                )
               }
               summary={draft.summary}
               publishedAt={publishedAt}

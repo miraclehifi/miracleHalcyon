@@ -52,7 +52,7 @@ test("[Sprint 1 主干] 登录后写一篇文章，发布后读者可见，撤�
   // US-08 撤回 → 读者端不可见
   await page.getByRole("button", { name: "设置" }).click();
   await page.getByRole("complementary", { name: "文章设置" }).getByRole("button", { name: "撤回为草稿" }).click();
-  await page.getByRole("dialog", { name: "撤回为草稿？" }).getByRole("button", { name: "撤回为草稿" }).click();
+  await page.getByRole("alertdialog", { name: "撤回为草稿？" }).getByRole("button", { name: "撤回为草稿" }).click();
   await expect(page.getByRole("status").filter({ hasText: "已撤回为草稿" })).toBeVisible();
   expect((await page.request.get(`/api/posts/${slug}`)).status()).toBe(404);
 });

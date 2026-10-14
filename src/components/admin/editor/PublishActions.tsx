@@ -1,7 +1,7 @@
 // PublishActions（admin-post-editor.md"主按钮随状态变化"，editor module-spec §2"发布前"、§4"发布结果"）：顶栏主按钮
 // 点击先 flush 自动保存（立即保存并等待），再 POST /publish；请求进行中按钮加载并禁用，防重复提交
 // 草稿 → "发布"；已发布 · 有未发布修改 → "发布更新"；已发布且无修改 → "发布更新"置灰。
-// UnpublishAction：设置抽屉里的"撤回为草稿"与确认框
+// UnpublishAction / DeletePostAction：设置抽屉里的"撤回为草稿""删除文章"与确认框
 import { useId, useState } from "react";
 import type { PostView } from "../../../domains/post/service";
 import { Button } from "../../ui/Button";
@@ -133,6 +133,53 @@ export function UnpublishAction({ postId, onUnpublished }: UnpublishActionProps)
         description="文章将对读者不可见，内容会保留，之后可以重新发布。"
         confirmLabel="撤回为草稿"
         onConfirm={() => void unpublish()}
+        onCancel={() => setConfirming(false)}
+      />
+    </>
+  );
+}
+
+export interface DeletePostActionProps {
+  postId: string;
+  title: string;
+  beforeDelete(): Promise<void>; // 暂停自动保存并等进行中的保存结束，避免删除后又被保存
+  onDeleted(): void; // 页面关闭离开确认并跳转列表
+  onFailed(): void; // 页面恢复自动保存
+}
+
+// 设置抽屉里的"删除文章"（新建且从未保存过时页面不渲染）：确认框确认后 DELETE；请求进行中确认框保持打开并禁用
+// 404 视为已删除（可能已在列表或其他标签页删掉）
+export function DeletePostAction({ postId, title, beforeDelete, onDeleted, onFailed }: DeletePostActionProps) {
+  const toast = useToast();
+  const [confirming, setConfirming] = useState(false);
+
+  const remove = async () => {
+    await beforeDelete();
+    try {
+      const response = await fetch(`/api/admin/posts/${postId}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 404) throw new Error(String(response.status));
+    } catch {
+      setConfirming(false);
+      toast.show({ tone: "error", message: "删除失败，请重试" });
+      onFailed();
+      return;
+    }
+    onDeleted();
+  };
+
+  return (
+    <>
+      <Button variant="ghost-danger" icon="trash-2" onClick={() => setConfirming(true)} className="self-start">
+        删除文章
+      </Button>
+      <ConfirmDialog
+        open={confirming}
+        tone="danger"
+        icon="trash-2"
+        title={`删除《${title}》？`}
+        description="删除后无法恢复。已发布的文章读者将无法再访问。"
+        confirmLabel="确认删除"
+        onConfirm={remove}
         onCancel={() => setConfirming(false)}
       />
     </>

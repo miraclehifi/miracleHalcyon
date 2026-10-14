@@ -2,6 +2,7 @@
 //   idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──成功──▶ saved
 //   保存中又编辑：完成后立即再保存；网络错误 / 5xx：failed + 退避重试（2s、4s、8s… 上限 60s；online 立即重试）
 //   409 / 400 / 401 等客户端错误：failed，不重试（401 的本地暂存与跳转在 Sprint 2）
+//   disable：删除文章期间暂停（等进行中的保存结束，之后只记录状态不发请求）；删除失败时 enable 恢复并补存
 import type { DraftInput } from "../../domains/post/content";
 import type { PostView } from "../../domains/post/service";
 
@@ -35,6 +36,8 @@ export interface AutosaveController {
   state(): AutosaveState;
   edit(): void;
   flush(): Promise<boolean>; // 立即保存并等待；成功（或无需保存）返回 true
+  disable(): Promise<void>; // 停止发请求，等进行中的保存结束
+  enable(): void;
   dispose(): void;
 }
 
@@ -66,6 +69,7 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
   let attempts = 0; // 连续失败次数，决定退避时长
   let inFlight: Promise<boolean> | null = null;
   let editedDuringSave = false;
+  let disabled = false;
 
   const set = (patch: Partial<AutosaveState>) => {
     current = { ...current, ...patch };
@@ -107,6 +111,7 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
   }
 
   function save(): Promise<boolean> {
+    if (disabled) return Promise.resolve(false);
     if (inFlight) {
       editedDuringSave = true;
       return inFlight;
@@ -116,7 +121,9 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
     set({ status: "saving" });
     inFlight = send().finally(() => {
       inFlight = null;
-      if (editedDuringSave && current.status !== "failed") void save(); // 保存中又编辑：立即再保存
+      if (!editedDuringSave || current.status === "failed") return;
+      if (disabled) set({ status: "dirty" }); // 暂停中：只记下有未保存修改，enable 后再存
+      else void save(); // 保存中又编辑：立即再保存
     });
     return inFlight;
   }
@@ -136,12 +143,23 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
       clearTimers();
       attempts = 0;
       set({ status: "dirty" });
-      debounceTimer = setTimeout(save, delayMs);
+      if (!disabled) debounceTimer = setTimeout(save, delayMs);
     },
     async flush() {
+      if (disabled) return false;
       while (inFlight) await inFlight; // 保存中又编辑时，完成后会接着再存一次，要等到最后一次
       if (current.status === "dirty" || current.status === "failed") return save();
       return true; // idle / saved：没有待保存的内容
+    },
+    async disable() {
+      disabled = true;
+      clearTimers();
+      while (inFlight) await inFlight.catch(() => false);
+    },
+    enable() {
+      disabled = false;
+      if (current.status === "dirty") debounceTimer = setTimeout(save, delayMs);
+      else if (current.status === "failed" && current.error && isRetryable(current.error)) void save();
     },
     dispose() {
       clearTimers();

@@ -1,6 +1,7 @@
 // ConfirmDialog（components.md"反馈组件"，admin-post-editor"模态框"）
 // 打开时背景 inert、焦点限制在框内、初始焦点在"取消"（防误删）；Esc 和点遮罩都等于取消；关闭后焦点回到触发元素
-import { useEffect, useId, useRef, type KeyboardEvent } from "react";
+// onConfirm 返回 Promise 时为进行中：确认按钮加载并禁用，"取消"禁用，Esc / 遮罩不关闭（防重复提交）
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "./Button";
 import { ICONS, type IconName } from "./icons";
@@ -15,7 +16,7 @@ export interface ConfirmDialogProps {
   description: string;
   confirmLabel: string;
   cancelLabel?: string;
-  onConfirm(): void;
+  onConfirm(): void | Promise<unknown>;
   onCancel(): void;
 }
 
@@ -36,8 +37,20 @@ export function ConfirmDialog({ open, tone, icon, title, description, confirmLab
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
+  const [pending, setPending] = useState(false);
   const { iconClass, confirm } = TONES[tone];
   const Icon = ICONS[icon];
+
+  const cancel = () => {
+    if (!pending) onCancel();
+  };
+  const confirmAction = () => {
+    if (pending) return;
+    const result = onConfirm();
+    if (!(result instanceof Promise)) return;
+    setPending(true);
+    void result.catch(() => {}).finally(() => setPending(false));
+  };
 
   // effect 在提交后运行，此时弹窗已挂到 body 上
   useEffect(() => {
@@ -54,7 +67,7 @@ export function ConfirmDialog({ open, tone, icon, title, description, confirmLab
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape") {
       event.preventDefault();
-      onCancel();
+      cancel();
       return;
     }
     if (event.key !== "Tab") return;
@@ -70,10 +83,10 @@ export function ConfirmDialog({ open, tone, icon, title, description, confirmLab
 
   return createPortal(
     <div ref={rootRef} className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div data-testid="confirm-dialog-scrim" className="absolute inset-0 bg-scrim/37" onClick={onCancel} />
+      <div data-testid="confirm-dialog-scrim" className="absolute inset-0 bg-scrim/37" onClick={cancel} />
       <div
         ref={dialogRef}
-        role="dialog"
+        role="alertdialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
@@ -90,10 +103,17 @@ export function ConfirmDialog({ open, tone, icon, title, description, confirmLab
           {description}
         </p>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" data-dialog-cancel onClick={onCancel}>
+          <Button variant="outline" data-dialog-cancel disabled={pending} onClick={cancel}>
             {cancelLabel}
           </Button>
-          <Button variant={confirm} onClick={onConfirm}>
+          <Button
+            variant={confirm}
+            icon={pending ? "loader" : undefined}
+            disabled={pending}
+            aria-busy={pending || undefined}
+            onClick={confirmAction}
+            className="[&_svg]:animate-spin motion-reduce:[&_svg]:animate-none"
+          >
             {confirmLabel}
           </Button>
         </div>

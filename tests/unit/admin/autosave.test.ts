@@ -77,4 +77,35 @@ describe("createAutosaveController", () => {
       states: ["dirty", "saving", "saved", "failed"],
     });
   });
+
+  // [TC-US09-02][SC-DELETE-02] 删除期间暂停：等进行中的保存结束，之后编辑 / flush 不再发请求；删除失败恢复后补存
+  it("disable 等待进行中的保存并停发请求；enable 后补存期间的修改", async () => {
+    const { fetchMock, calls } = controllableFetch();
+    const controller = createAutosaveController({ postId: "7", getContent: () => CONTENT, fetch: fetchMock });
+
+    controller.edit();
+    await tick(2000); // PUT 进行中
+    let disabled = false;
+    void controller.disable().then(() => (disabled = true));
+    await tick(0);
+    const waitsForSave = !disabled;
+    calls[0].resolve(Response.json(view("7", "2026-10-13T01:00:00.000Z")));
+    await tick(0);
+
+    controller.edit();
+    await tick(10_000);
+    const flushed = await controller.flush();
+    const whileDisabled = { disabled, calls: calls.length, status: controller.state().status, flushed };
+
+    controller.enable();
+    await tick(2000);
+    const afterEnable = { calls: calls.length, method: calls[1]?.method };
+    controller.dispose();
+
+    expect({ waitsForSave, whileDisabled, afterEnable }).toEqual({
+      waitsForSave: true,
+      whileDisabled: { disabled: true, calls: 1, status: "dirty", flushed: false },
+      afterEnable: { calls: 2, method: "PUT" },
+    });
+  });
 });

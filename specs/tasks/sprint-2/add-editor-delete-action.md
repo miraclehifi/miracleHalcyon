@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 12
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -10,7 +10,7 @@
 
 ## 意图声明
 
-- **改动意图**: 设置抽屉底部"删除文章" → 确认框（"删除「标题」？删除后无法恢复"，焦点默认在"取消"）→ `DELETE` → 关闭离开拦截并回到列表；失败时提示且文章保留
+- **改动意图**: 设置抽屉底部"删除文章" → 确认框（"删除《标题》？"+"删除后无法恢复。已发布的文章读者将无法再访问。"，焦点默认在"取消"）→ `DELETE` → 关闭离开拦截并回到列表；失败时提示且文章保留
 - **影响范围**: `PostSettingsDrawer.tsx`、`PostEditorPage.tsx`、`useAutosave.ts`（`disable()`）
 - **不变量**: 撤回为草稿等抽屉内已有操作不变（`tests/e2e/editor-unpublish.spec.ts` 保持通过）
 
@@ -34,13 +34,26 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 抽屉"删除文章"（新建未保存的文章不显示）+ 删除确认框
-- [ ] 删除成功后 `disable()` 自动保存与 `beforeunload`，跳转 `/admin`
+- [x] 抽屉"删除文章"（新建未保存的文章不显示）+ 删除确认框
+- [x] 删除成功后 `disable()` 自动保存与 `beforeunload`，跳转 `/admin`
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- `ConfirmDialog`：`role` 改为 `alertdialog`（UT-114；撤回确认框同样适用）；`onConfirm` 返回 Promise 时进入进行中——确认按钮加载并禁用（`aria-busy`），"取消"禁用，Esc / 遮罩不关闭（UT-113、TC-US09-12）
+- `DeletePostAction`（`PublishActions.tsx`，与 `UnpublishAction` 同处）：`ghost-danger` 按钮 + 删除确认框；确认后先 `beforeDelete`（页面传 `autosave.disable`），再 `DELETE`；成功（含 404，视为已被别处删除）→ `onDeleted`；失败 → 关闭确认框、常驻提示"删除失败，请重试"、`onFailed`（页面传 `autosave.enable`）
+- 自动保存控制器新增 `disable()` / `enable()`：`disable` 清计时器并等进行中的保存结束，之后编辑只标记 `dirty`、`flush` 返回 false；`enable` 时有未保存修改则重新开始 2 秒防抖，可重试的失败立即重试
+- `PostEditorPage`：新建且未保存（无 id）不渲染删除；`onDeleted` 置 `leavingRef` 让 `beforeunload` 放行，再 `location.assign('/admin')`；无标题时确认框显示"无标题"
+- 设置抽屉底部区块：撤回（仅已发布）与删除上下排列
+- 偏差：
+  - 确认框文案按设计稿（admin-post-editor"弹层与提示"）为"删除《标题》？"+"删除后无法恢复。已发布的文章读者将无法再访问。"，与 TC-US09-10 / UT-110 原写的"删除「标题」？删除后无法恢复"不同，已同步修改用例文案
+  - 删除成功直接跳转列表，不显示"已删除"提示（跳转后提示会丢失）；TC-US09-12 预期改为"跳转列表，无失败提示"
+  - WebKit 鼠标点击按钮不获得焦点，焦点还原的 E2E 用键盘打开确认框
+- 测试：`tests/unit/admin/delete-dialog.test.tsx`、`tests/unit/ui/confirm-dialog.test.tsx`（新增进行中用例，role 改 alertdialog）、`tests/unit/admin/autosave.test.ts`（disable / enable）；`tests/e2e/editor-delete.spec.ts`（TC-US09-02 / 10 / 11 / 12 / 05 + 新建不显示删除）；`editor-unpublish`、`mainline-journey` 的 dialog 查询改为 alertdialog
 
 ## 依赖
 

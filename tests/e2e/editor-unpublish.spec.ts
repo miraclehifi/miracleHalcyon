@@ -19,7 +19,7 @@ test("[TC-US08-06] 撤回为草稿后读者不可见、内容保留", async ({ p
   await page.getByRole("button", { name: "设置" }).click();
   await page.getByRole("complementary", { name: "文章设置" }).getByRole("button", { name: "撤回为草稿" }).click();
 
-  const dialog = page.getByRole("dialog", { name: "撤回为草稿？" });
+  const dialog = page.getByRole("alertdialog", { name: "撤回为草稿？" });
   await expect(dialog).toContainText("文章将对读者不可见，内容会保留，之后可以重新发布。");
   await dialog.getByRole("button", { name: "撤回为草稿" }).click();
 
