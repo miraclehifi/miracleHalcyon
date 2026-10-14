@@ -142,7 +142,7 @@
 | `gap` / `radius` | `20` / `12` | 与卡片间距、圆角一致 |
 | `key`（外层） | 筛选条件 + 页码 | 筛选、搜索、翻页后重新挂载，整页重新入场 |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
 
 | 改动 | 原因 |
 |------|------|
@@ -176,7 +176,7 @@
 | `closeOnAction` / `haptic` | `true` / `true` | — |
 | `label` | `《{标题}》` | 行的读屏名称 |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
 
 | 改动 | 原因 |
 |------|------|
@@ -221,7 +221,7 @@
 | `labels` | `{ generating: '加载中', complete: '已加载', error: '加载失败' }` | — |
 | `retryLabel` / `onRetry` | `'重试'` / 状态回到 `generating`，给 `src` 加 `?retry=n` 重新请求 | 加载失败时点击图片不打开 `Lightbox` |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
 
 | 改动 | 原因 |
 |------|------|
@@ -279,7 +279,7 @@
 | `duration` / `ease` / `stagger` | `0.6` / `"power3.out"` / `0.06` | 默认值 |
 | `showLabels` | 有任一图注时 `true` | — |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
 
 | 改动 | 原因 |
 |------|------|
