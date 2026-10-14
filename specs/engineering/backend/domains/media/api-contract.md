@@ -56,7 +56,7 @@
 
 ## GET /img/{yyyy}/{mm}/{file}
 
-公开读取。路由文件 `src/pages/img/[...key].ts`。
+公开读取。路由文件 `src/pages/img/[...key].ts`（已实现，Sprint 2 add-image-read-route）。
 
 | 情况 | 响应 |
 |------|------|

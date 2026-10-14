@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 3
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -32,13 +32,20 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/pages/img/[...key].ts` 按契约返回 200 / 304 / 206 / 404
-- [ ] 响应头含 `Cache-Control: public, max-age=31536000, immutable`、`ETag`、`X-Content-Type-Options: nosniff`、`Content-Security-Policy: default-src 'none'`
+- [x] `src/pages/img/[...key].ts` 按契约返回 200 / 304 / 206 / 404
+- [x] 响应头含 `Cache-Control: public, max-age=31536000, immutable`、`ETag`、`X-Content-Type-Options: nosniff`、`Content-Security-Policy: default-src 'none'`
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含 middleware 测试）
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含 middleware 测试）
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- `src/pages/img/[...key].ts`：`IMAGE_KEY` 正则不匹配直接 404（不访问 R2，含 `..`、大写 id、svg、非 img 目录）；`bucket.get(key, { onlyIf: request.headers, range: request.headers })` 由 R2 解析 `If-None-Match` 与 `Range`；无 body → 304；请求带 Range → 206 + `Content-Range`
+- 响应头：`Cache-Control`（与写入时同一常量 `IMMUTABLE_CACHE`）、`ETag`、`Accept-Ranges`、`X-Content-Type-Options: nosniff`、`Content-Security-Policy: default-src 'none'`
+- middleware 只处理 `/admin`、`/api/admin`，`/img/*` 天然公开，无需改动
+- 补 `tests/e2e/image-api.spec.ts`：经真实 Astro + workerd 上传后读取，确认路由参数解析正确
 
 ## 依赖
 
