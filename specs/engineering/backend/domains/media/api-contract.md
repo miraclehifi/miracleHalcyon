@@ -9,7 +9,7 @@
 
 ## POST /api/admin/images
 
-> 已实现（Sprint 2，implement-image-upload-api）：`src/pages/api/admin/images.ts`（单图；`video` 在 Sprint 3）。
+> 已实现（Sprint 2，implement-image-upload-api）：`src/pages/api/admin/images.ts`。`video` 字段已实现（Sprint 3，implement-live-photo-upload-api）；`video` 为 0 字节时 400 `VALIDATION_FAILED`（`fields: ["video"]`）。
 
 上传一张图片，或一张图片 + 一段实况视频。需要会话。
 

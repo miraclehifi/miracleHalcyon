@@ -75,7 +75,7 @@ URL = `/` + key（如 `/img/2026/10/k3j9x2m4q1_4032x3024_8a7b6c.jpg`）。
 
 ## 5. 领域服务
 
-> 已实现（Sprint 2，implement-image-upload-api）：`src/domains/media/`（`validate.ts`、`key.ts`、`repo.ts`、`service.ts`；单图，视频部分在 Sprint 3）。
+> 已实现（Sprint 2，implement-image-upload-api）：`src/domains/media/`（`validate.ts`、`key.ts`、`repo.ts`、`service.ts`）。实况视频已实现（Sprint 3，implement-live-photo-upload-api）：`sniffVideo`、`checkVideoSize`、`videoKeyFor`；写入失败按已写对象逐个删除后报 `UPLOAD_FAILED`（删除失败不掩盖原错误）。
 
 ```ts
 interface MediaService {

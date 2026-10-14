@@ -25,3 +25,6 @@ export function buildImageKey({ id, width, height, rgb, ext, now }: ImageKeyPart
 }
 
 export const keyToUrl = (key: string) => `/${key}`;
+
+// 实况视频与图片同名：去掉扩展名 + .live.mp4
+export const videoKeyFor = (imageKey: string) => imageKey.replace(/\.[a-z]+$/, ".live.mp4");

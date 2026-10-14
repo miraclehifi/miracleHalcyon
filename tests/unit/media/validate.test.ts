@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildImageKey, generateImageId } from "../../../src/domains/media/key";
-import { checkImageSize, sniffImage, validateUploadFields } from "../../../src/domains/media/validate";
-import { GIF_1X1, HTML, PDF, PNG_1X1, SVG, gif89a, jpeg, webpVp8, webpVp8l, webpVp8x } from "./image-bytes";
+import { checkImageSize, checkVideoSize, sniffImage, sniffVideo, validateUploadFields } from "../../../src/domains/media/validate";
+import { GIF_1X1, HTML, MP4, PDF, PNG_1X1, SVG, ftyp, gif89a, jpeg, webpVp8, webpVp8l, webpVp8x } from "./image-bytes";
 
 // [MEDIA-UT-01][SC-IMAGE-08] 按魔数判定类型并从文件头解析尺寸；其余一律 null
 describe("sniffImage", () => {
@@ -81,5 +81,30 @@ describe("checkImageSize", () => {
       }
     };
     expect([code(1), code(5_242_880), code(5_242_881), code(0)]).toEqual(["ok", "ok", "FILE_TOO_LARGE", "VALIDATION_FAILED"]);
+  });
+});
+
+// [MEDIA-UT-02][SC-LIVE-01] 视频按 ftyp major brand 白名单判定；未转封装的 MOV、HEIF 图片、HTML 拒绝；不解析编码
+describe("sniffVideo", () => {
+  it("isom / mp42 等 mp4 brand → true；qt MOV、heic、mif1、HTML、截断 → false", () => {
+    const accepted = ["isom", "iso2", "iso4", "iso5", "iso6", "mp41", "mp42", "avc1", "M4V "].map((brand) => sniffVideo(ftyp(brand)));
+    const rejected = [ftyp("qt  "), ftyp("heic"), ftyp("heix"), ftyp("mif1"), ftyp("msf1"), ftyp("M4A "), HTML, MP4.slice(0, 10), new Uint8Array(0)].map(sniffVideo);
+    expect({ accepted, rejected }).toEqual({ accepted: new Array(9).fill(true), rejected: new Array(9).fill(false) });
+  });
+});
+
+// [MEDIA-UT-05][SC-LIVE-06] 视频大小边界：1 B – 10 MiB；0 字节按校验失败
+describe("checkVideoSize", () => {
+  it("10,485,760 B 接受；10,485,761 B → VIDEO_TOO_LARGE；0 B → VALIDATION_FAILED video", () => {
+    const outcome = (size: number) => {
+      try {
+        checkVideoSize(size);
+        return "ok";
+      } catch (error) {
+        const { code, fields } = error as { code: string; fields?: string[] };
+        return fields ? `${code}:${fields.join()}` : code;
+      }
+    };
+    expect([outcome(1), outcome(10_485_760), outcome(10_485_761), outcome(0)]).toEqual(["ok", "ok", "VIDEO_TOO_LARGE", "VALIDATION_FAILED:video"]);
   });
 });

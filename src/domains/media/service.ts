@@ -1,12 +1,12 @@
-// media 领域服务（media domain-model §5）：校验 → 嗅探 → 生成 key → 写 R2 → 写 images；任一步失败不留残余
-// 本 Sprint 只做单图；video（实况照片）在 Sprint 3 US-11 接入
+// media 领域服务（media domain-model §5）：校验 → 嗅探 → 生成 key → 写 R2（图片，再视频）→ 写 images；任一步失败不留残余
 import { UnsupportedTypeError, UploadFailedError } from "./errors";
-import { buildImageKey, generateImageId, keyToUrl } from "./key";
+import { buildImageKey, generateImageId, keyToUrl, videoKeyFor } from "./key";
 import type { ImageRepo, MediaStore } from "./repo";
-import { checkImageSize, sniffImage, SNIFF_BYTES, validateUploadFields, type UploadFields } from "./validate";
+import { checkImageSize, checkVideoSize, sniffImage, sniffVideo, SNIFF_BYTES, validateUploadFields, VIDEO_MIME, type UploadFields } from "./validate";
 
 export interface UploadInput extends UploadFields {
   file: Blob & { name: string };
+  video?: Blob; // 有则为实况照片
   now: Date;
 }
 
@@ -42,27 +42,53 @@ export function createMediaService({ store, repo, generateId = generateImageId }
     throw new UploadFailedError("image id collision");
   }
 
+  // 写入失败时删除本次已写的对象，再报 UPLOAD_FAILED（不留半对，domain-model §2 不变量 1）；删除本身失败不掩盖原错误
+  async function rollback(written: string[], error: unknown): Promise<never> {
+    await Promise.allSettled(written.map((key) => store.delete(key)));
+    throw new UploadFailedError(error);
+  }
+
+  async function putOrRollback(written: string[], key: string, body: Uint8Array, contentType: string) {
+    try {
+      await store.put(key, body, contentType);
+      written.push(key);
+    } catch (error) {
+      await rollback(written, error);
+    }
+  }
+
   return {
-    async upload({ file, now, ...fields }: UploadInput): Promise<UploadResult> {
+    async upload({ file, video, now, ...fields }: UploadInput): Promise<UploadResult> {
       const { rgb } = validateUploadFields(fields);
       checkImageSize(file.size);
+      if (video) checkVideoSize(video.size);
       const bytes = new Uint8Array(await file.arrayBuffer());
       const image = sniffImage(bytes.subarray(0, SNIFF_BYTES));
       if (!image) throw new UnsupportedTypeError();
+      const videoBytes = video ? new Uint8Array(await video.arrayBuffer()) : null;
+      if (videoBytes && !sniffVideo(videoBytes.subarray(0, SNIFF_BYTES))) throw new UnsupportedTypeError();
 
       const key = await freshKey({ width: image.width, height: image.height, rgb, ext: image.ext, now });
+      const videoKey = videoBytes ? videoKeyFor(key) : null;
+      const written: string[] = [];
+      await putOrRollback(written, key, bytes, image.mime);
+      if (videoBytes && videoKey) await putOrRollback(written, videoKey, videoBytes, VIDEO_MIME);
       try {
-        await store.put(key, bytes, image.mime);
+        await repo.insert({
+          key,
+          mime: image.mime,
+          size: file.size,
+          width: image.width,
+          height: image.height,
+          rgb,
+          originalName: cleanOriginalName(file.name),
+          createdAt: now,
+          ...(videoBytes && videoKey && { video: { key: videoKey, size: videoBytes.length } }),
+        });
       } catch (error) {
-        throw new UploadFailedError(error);
+        await rollback(written, error);
       }
-      try {
-        await repo.insert({ key, mime: image.mime, size: file.size, width: image.width, height: image.height, rgb, originalName: cleanOriginalName(file.name), createdAt: now });
-      } catch (error) {
-        await store.delete(key);
-        throw new UploadFailedError(error);
-      }
-      return { url: keyToUrl(key), width: image.width, height: image.height, rgb, live: false, videoUrl: null };
+      return { url: keyToUrl(key), width: image.width, height: image.height, rgb, live: videoKey !== null, videoUrl: videoKey ? keyToUrl(videoKey) : null };
     },
   };
 }

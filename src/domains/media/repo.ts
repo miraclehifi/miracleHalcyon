@@ -34,6 +34,7 @@ export interface ImageRow {
   rgb: string;
   originalName: string;
   createdAt: Date;
+  video?: { key: string; size: number };
 }
 
 export interface ImageRepo {
@@ -45,8 +46,8 @@ export class D1ImageRepo implements ImageRepo {
 
   async insert(image: ImageRow): Promise<void> {
     await this.db
-      .prepare("INSERT INTO images (key, mime, size, width, height, rgb, original_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(image.key, image.mime, image.size, image.width, image.height, image.rgb, image.originalName, image.createdAt.toISOString())
+      .prepare("INSERT INTO images (key, mime, size, width, height, rgb, video_key, video_size, original_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(image.key, image.mime, image.size, image.width, image.height, image.rgb, image.video?.key ?? null, image.video?.size ?? null, image.originalName, image.createdAt.toISOString())
       .run();
   }
 }

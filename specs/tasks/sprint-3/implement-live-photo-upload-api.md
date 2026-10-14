@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 3
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 领域层 + 数据层 + 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -35,14 +35,22 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `sniffVideo` 按 domain-model §4.2 白名单判定，不解析编码
-- [ ] `upload` 第 5、6 步与回滚按 domain-model §5；视频 `contentType: video/mp4`、长缓存
-- [ ] 错误码与 api-contract 一致
+- [x] `sniffVideo` 按 domain-model §4.2 白名单判定，不解析编码
+- [x] `upload` 第 5、6 步与回滚按 domain-model §5；视频 `contentType: video/mp4`、长缓存
+- [x] 错误码与 api-contract 一致
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/unit/media/*`、`tests/integration/media/*` 通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`tests/unit/media/*`、`tests/integration/media/*` 通过；E2E `image-api`、`editor-image-paste`（chromium）通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- `validate.ts`：`sniffVideo`（偏移 4 为 `ftyp`，major brand 在白名单；不足 12 字节为 false）、`checkVideoSize`（0 字节 → `VALIDATION_FAILED` `["video"]`，> 10 MiB → `VIDEO_TOO_LARGE`）；`errors.ts` 新增 `VideoTooLargeError`；`key.ts` 新增 `videoKeyFor`
+- `service.ts`：先做全部校验（字段、图片大小、视频大小、图片魔数、视频魔数），再生成 key；写 R2 按图片、视频顺序，任何一步（含 D1 插入）失败都删除本次已写的对象后报 `UPLOAD_FAILED`；回滚用 `allSettled`，删除失败不掩盖原错误
+- `repo.ts`：插入 `video_key` / `video_size`（列已在 `0001_init.sql`，`CHECK` 约束两者同为空或同不为空）
+- 接口：`video` 不是文件 → 400 `["video"]`；只有 `video` → 沿用缺少 `file` 的 400；新增可注入的 `store`（测试用视频写入失败的仓储）
+- 带视频的未登录 / 跨站请求由 middleware 拦截（按路径，与单图相同），测试经 `createAuthMiddleware` 验证
 
 ## 依赖
 

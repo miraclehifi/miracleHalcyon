@@ -23,6 +23,14 @@ export class FileTooLargeError extends Error {
   }
 }
 
+export class VideoTooLargeError extends Error {
+  readonly code = "VIDEO_TOO_LARGE";
+  constructor(readonly size: number) {
+    super(`VIDEO_TOO_LARGE: ${size}`);
+    this.name = "VideoTooLargeError";
+  }
+}
+
 // R2 / D1 写入失败，已回滚
 export class UploadFailedError extends Error {
   readonly code = "UPLOAD_FAILED";

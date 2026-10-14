@@ -1,5 +1,5 @@
 // 上传文件校验（media domain-model §4）：按文件头魔数判定类型并解析真实尺寸，不信任扩展名与 Content-Type
-import { FileTooLargeError, MediaValidationError } from "./errors";
+import { FileTooLargeError, MediaValidationError, VideoTooLargeError } from "./errors";
 
 export type ImageMime = "image/png" | "image/jpeg" | "image/webp" | "image/gif";
 export type ImageExt = "png" | "jpg" | "webp" | "gif";
@@ -11,6 +11,8 @@ export interface SniffedImage {
 }
 
 export const IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5,242,880
+export const VIDEO_MAX_BYTES = 10 * 1024 * 1024; // 10,485,760
+export const VIDEO_MIME = "video/mp4";
 export const SNIFF_BYTES = 64 * 1024; // 只读前 64KB
 export const DIMENSION_MAX = 20000;
 export const DEFAULT_RGB = "808080";
@@ -96,6 +98,15 @@ function gif(view: DataView) {
   return { type: TYPES.gif, width: view.getUint16(6, true), height: view.getUint16(8, true) };
 }
 
+// 视频（domain-model §4.2）：偏移 4–8 为 ftyp，major brand 属于 mp4 白名单；
+// 未转封装的 MOV（qt）与 HEIF 图片等其余 brand 一律拒绝；不解析编码（HEVC 与 H.264 都接受，ADR-006）
+const VIDEO_BRANDS = new Set(["isom", "iso2", "iso4", "iso5", "iso6", "mp41", "mp42", "avc1", "M4V "]);
+
+export function sniffVideo(head: Uint8Array): boolean {
+  if (head.length < 12 || !startsWith(head, ascii("ftyp"), 4)) return false;
+  return VIDEO_BRANDS.has(String.fromCharCode(...head.subarray(8, 12)));
+}
+
 export interface UploadFields {
   rgb?: string;
   width?: string;
@@ -118,4 +129,9 @@ const isDimension = (text: string) => DIMENSION.test(text) && Number(text) <= DI
 export function checkImageSize(size: number): void {
   if (size === 0) throw new MediaValidationError(["file"]);
   if (size > IMAGE_MAX_BYTES) throw new FileTooLargeError(size);
+}
+
+export function checkVideoSize(size: number): void {
+  if (size === 0) throw new MediaValidationError(["video"]);
+  if (size > VIDEO_MAX_BYTES) throw new VideoTooLargeError(size);
 }

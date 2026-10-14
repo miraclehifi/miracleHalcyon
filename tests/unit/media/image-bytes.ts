@@ -43,3 +43,12 @@ export function gif89a(width: number, height: number): Uint8Array {
 export const SVG = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>');
 export const HTML = new TextEncoder().encode("<!doctype html><script>alert(1)</script>");
 export const PDF = new TextEncoder().encode("%PDF-1.7\n%âãÏÓ\n");
+
+// ISO BMFF：ftyp box（size 24：major brand + minor version + 2 个兼容 brand），可指定总长度（其余补 0）
+export function ftyp(brand: string, totalSize = 24): Uint8Array {
+  const header = [0, 0, 0, 24, ...ascii("ftyp"), ...ascii(brand), 0, 0, 2, 0, ...ascii(brand), ...ascii("mp41")];
+  const bytes = new Uint8Array(Math.max(totalSize, header.length));
+  bytes.set(header);
+  return bytes;
+}
+export const MP4 = ftyp("isom", 4096);
