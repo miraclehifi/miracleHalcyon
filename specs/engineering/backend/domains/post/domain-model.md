@@ -73,7 +73,7 @@
 | `publish`（已发布且无修改） | — | 幂等：返回当前状态，不更新时间、不触发钩子 |
 | `unpublish` | `status == 'published'` | `published = null`，`lastPublishedAt = null`；工作稿保持（含未发布修改）（US-08 S11） |
 | `unpublish`（草稿） | — | 409 `NOT_PUBLISHED`（已实现：`NotPublishedError`；撤回成功触发 `unpublished` 钩子） |
-| `delete` | 存在 | 删除整行；若曾发布则触发钩子 |
+| `delete` | 存在 | 删除整行；当前已发布时触发 `deleted` 钩子（快照 slug；已撤回的不再触发）。已实现（Sprint 2） |
 
 ## 3. 值对象
 

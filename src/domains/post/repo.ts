@@ -43,6 +43,7 @@ export interface PostRepo {
   get(id: PostId): Promise<Post | null>;
   updateDraft(id: PostId, content: PostContent, draftHash: string, now: Date): Promise<boolean>; // false = 不存在
   setPublished(id: PostId, content: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean>;
+  delete(id: PostId): Promise<Post | null>; // 返回被删行（用于钩子）；null = 不存在
   slugTaken(slug: string, exceptId?: PostId): Promise<boolean>;
   list(query: ListQuery): Promise<{ rows: PostSummary[]; total: number; counts: StatusCounts }>;
   tags(q: string, limit: number): Promise<TagSuggestion[]>;
@@ -144,6 +145,12 @@ export class D1PostRepo implements PostRepo {
 
   async get(id: PostId): Promise<Post | null> {
     const row = await this.db.prepare(`SELECT ${COLUMNS} FROM posts WHERE id = ?`).bind(id).first<PostRow>();
+    return row ? toPost(row) : null;
+  }
+
+  // 删除整行，返回被删行（用于发布状态钩子）；不存在返回 null
+  async delete(id: PostId): Promise<Post | null> {
+    const row = await this.db.prepare(`DELETE FROM posts WHERE id = ? RETURNING ${COLUMNS}`).bind(id).first<PostRow>();
     return row ? toPost(row) : null;
   }
 

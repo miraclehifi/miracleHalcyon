@@ -142,6 +142,14 @@ export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) 
       return toPostView(await load(id));
     },
 
+    // 删除整行（US-09）；当前已发布时触发 deleted 钩子（读者页按快照 slug 重建）。
+    // 曾发布但已撤回的文章读者端早已 404、撤回时已触发过钩子，不再触发。正文引用的图片不删
+    async delete(id: PostId): Promise<void> {
+      const removed = await repo.delete(id);
+      if (!removed) throw new NotFoundError(id);
+      if (removed.published) await notify({ kind: "deleted", slug: removed.published.slug });
+    },
+
     // 列表（§6）：超出页码返回空 items，不报错
     async list({ status, q, page }: { status: ListStatus; q: string; page: number }): Promise<PostListResult> {
       const { rows, total, counts } = await repo.list({ status, q: q.trim(), page, pageSize: PAGE_SIZE });

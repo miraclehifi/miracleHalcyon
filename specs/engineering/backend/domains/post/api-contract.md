@@ -125,6 +125,8 @@
 | 204 | — |
 | 404 | `POST_NOT_FOUND`（不删除任何数据） |
 
+已实现：`src/pages/api/admin/posts/[id].ts`（Sprint 2，implement-delete-post-api）。
+
 前端列表的延迟删除使用 `fetch(url, { method: 'DELETE', keepalive: true })`。
 
 ### POST /api/admin/posts/:id/publish

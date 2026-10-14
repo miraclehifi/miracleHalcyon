@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 8
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 领域层 + 数据层 + 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,13 +34,21 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `PostRepo.delete` 返回被删行；`PostService.delete` 调用钩子（F-001 内为空实现）
-- [ ] `DELETE /api/admin/posts/:id` 按契约返回
+- [x] `PostRepo.delete` 返回被删行；`PostService.delete` 调用钩子（F-001 内为空实现）
+- [x] `DELETE /api/admin/posts/:id` 按契约返回
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- `PostRepo.delete`（接口 + `D1PostRepo`：`DELETE … RETURNING`，一次往返拿到被删行；测试用 `MemoryPostRepo` 同步）
+- `PostService.delete`：不存在 → `NotFoundError`；**当前处于已发布状态**时触发 `{ kind: "deleted", slug: 快照 slug }`。规格原文"若曾发布则触发钩子"按此理解：曾发布但已撤回的文章读者端早已 404，撤回时已触发过钩子，无需再重建；钩子失败只记日志
+- `DELETE /api/admin/posts/:id`：204；不存在或 id 不合法（`nope`、`1 OR 1=1`、`*`、空）→ 404 `POST_NOT_FOUND`
+- 删除释放 slug（行被删除，唯一性检查自然通过）；不删除 R2 图片（media 与 post 无关联）
+- 仅后端改动，未跑 E2E（写文章页删除的 E2E 在 add-editor-delete-action）
 
 ## 依赖
 

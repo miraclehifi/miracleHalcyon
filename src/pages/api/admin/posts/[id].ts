@@ -1,4 +1,4 @@
-// /api/admin/posts/:id（post api-contract §3）：GET 读取、PUT 自动保存；DELETE 由后续任务补充。会话与 Origin 已由 middleware 校验
+// /api/admin/posts/:id（post api-contract §3）：GET 读取、PUT 自动保存、DELETE 删除。会话与 Origin 已由 middleware 校验
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { NotFoundError } from "../../../../domains/post/errors";
@@ -39,8 +39,21 @@ export function createPostHandlers({ db, now = () => new Date() }: PostHandlerDe
     }
   };
 
-  return { GET, PUT };
+  // 204 无响应体；不存在或 id 不合法 404（不删除任何数据）
+  const DELETE: APIRoute = async ({ params }) => {
+    try {
+      const id = parsePostId(params.id);
+      if (id === null) throw new NotFoundError(0);
+      await service.delete(id);
+      return new Response(null, { status: 204 });
+    } catch (error) {
+      return errorResponse(error);
+    }
+  };
+
+  return { GET, PUT, DELETE };
 }
 
 export const GET: APIRoute = (context) => createPostHandlers({ db: env.DB }).GET(context);
 export const PUT: APIRoute = (context) => createPostHandlers({ db: env.DB }).PUT(context);
+export const DELETE: APIRoute = (context) => createPostHandlers({ db: env.DB }).DELETE(context);

@@ -31,6 +31,12 @@ export class MemoryPostRepo implements PostRepo {
     return true;
   }
 
+  async delete(id: PostId): Promise<Post | null> {
+    const post = this.rows.get(id) ?? null;
+    this.rows.delete(id);
+    return post;
+  }
+
   async slugTaken(slug: string, exceptId: PostId = 0): Promise<boolean> {
     if (slug === "") return false;
     return [...this.rows.values()].some((p) => p.id !== exceptId && (p.draft.slug === slug || p.published?.slug === slug));
