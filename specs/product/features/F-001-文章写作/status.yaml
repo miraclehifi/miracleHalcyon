@@ -14,7 +14,7 @@ phases:
   architecture: done
   domain_design: done   # domain_model / api_contract / data_model: self-checked
   task_planning: done   # self-checked；Sprint 1 共 72 个任务（已关闭）；Sprint 2 共 18 个任务（2026-10-14，按功能点粒度，.claude/rules/tasks.md）；Sprint 3 共 12 个任务（2026-10-14）
-  implementation: in_progress   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18，待 code-review）；Sprint 3 进行中（2 / 12）
+  implementation: in_progress   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18，待 code-review）；Sprint 3 进行中（3 / 12）
   code_review: pending   # Sprint 1、Sprint 2 待审查（2026-10-14 作者决定延后，先做 Sprint 3）
   validation: pending
 current_phase: implementation
@@ -29,9 +29,9 @@ approvals:
 has_ui_changes: true
 checkpoint:
   sprint: sprint-3
-  current_task: add-article-image-display   # spike 等真实设备夹具（上传线 5–7 依赖它）；预览线可继续；Sprint 2 code-review 延后
+  current_task: add-article-image-display   # spike 已完成（OPPO 样本；iPhone / HEIC 延后）；Sprint 2 code-review 延后
   current_phase: implementation
-  completed_tasks: [implement-markdown-image-plugins, implement-live-photo-upload-api]   # Sprint 3
+  completed_tasks: [spike-browser-media-processing, implement-markdown-image-plugins, implement-live-photo-upload-api]   # Sprint 3
   sprint2_completed_tasks: [build-format-toolbar, implement-image-upload-api, add-image-read-route, add-image-paste-upload, add-image-drop-and-pick-upload, handle-image-upload-errors, add-icon-button-tooltips, implement-delete-post-api, add-post-list-animated-entry, add-swipe-row-delete, add-list-delete-undo, add-editor-delete-action, add-editor-view-modes, add-preview-scroll-sync, add-local-draft-restore, handle-session-expired-save, implement-logout-endpoint, add-logout-entry]   # 18 / 18（Sprint 1 的 72 个见 sprint-1/_index.md）
   blocked_tasks: []
   test_command: "npm test（vitest 4.1：unit + workers）/ npm run test:e2e（@timing 用例在 *-timing 项目最后串行；交互前 waitForHydration）/ npm run test:spike（spike：chromium + astro dev）"
