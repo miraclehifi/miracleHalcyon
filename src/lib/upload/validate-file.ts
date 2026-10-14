@@ -2,9 +2,9 @@
 // 本 Sprint 只接受静态图 png / jpg / webp / gif；heic、mov、mp4 在 Sprint 3（US-11）放开
 import { UploadError } from "./upload-client";
 
-export const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const IMAGE_MAX_BYTES = 50 * 1024 * 1024;
 export const MESSAGE_UNSUPPORTED = "仅支持 png、jpg、webp、gif";
-export const MESSAGE_TOO_LARGE = "图片不能超过 5MB";
+export const MESSAGE_TOO_LARGE = "图片不能超过 50MB";
 export const MESSAGE_FAILED = "上传失败，请重试";
 
 const MIME_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);

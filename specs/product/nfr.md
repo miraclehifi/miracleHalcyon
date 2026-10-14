@@ -42,7 +42,7 @@
 | 机密配置 | 管理员凭据、密钥通过 Cloudflare Secrets 注入，不进 git |
 | 写接口防护 | 校验 Origin 防 CSRF |
 | 内容渲染 | Markdown 渲染输出须防 XSS |
-| 图片上传 | 存储格式仅允许 png/jpg/webp/gif（禁止 svg，防 XSS），单张 ≤ 5MB；HEIC/HEIF 在浏览器端转为 JPEG 后上传；服务端按文件头校验类型 |
+| 图片上传 | 存储格式仅允许 png/jpg/webp/gif（禁止 svg，防 XSS），单张 ≤ 50MB；HEIC/HEIF 在浏览器端转为 JPEG 后上传；服务端按文件头校验类型 |
 | 实况视频 | 仅作为实况照片与静态图配对上传；存储为 mp4，单个 ≤ 10MB；MOV 在浏览器端转换后上传 |
 
 ---
@@ -83,3 +83,4 @@
 | 2026-10-10 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-12 | 1.1 | 上传限制增加 HEIC 转换与实况视频（F-001 design-arch，ADR-006） | miraclehifi |
 | 2026-10-13 | 1.2 | 读者页确定为构建时预渲染，发布后重建可见（[Backlog](../backlog/reader-build-time-prerender.md)） | miraclehifi |
+| 2026-10-14 | 1.3 | 单张图片上限 5MB → 50MB（[Backlog](../backlog/raise-image-size-limit.md)） | miraclehifi |

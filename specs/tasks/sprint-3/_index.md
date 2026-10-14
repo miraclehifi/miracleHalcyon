@@ -25,6 +25,8 @@
 | 10 | [add-single-image-menu](add-single-image-menu.md) | 单图菜单切换宽图 | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 1 | 中 | pending |
 | 11 | [add-gallery-menu](add-gallery-menu.md) | 组图菜单与手机点按 | article-writing | FRONTEND | 表现层 | US-12 | add-image-gallery-display, add-single-image-menu | 0 | 低 | pending |
 | 12 | [add-image-syntax-help](add-image-syntax-help.md) | 底栏"图片写法"说明 | article-writing | FRONTEND | 表现层 | US-12 | — | 0 | 低 | pending |
+| 13 | [raise-image-size-limit](raise-image-size-limit.md) | 图片上传上限放宽到 50MB（2026-10-14 插入） | raise-image-size-limit | API + FRONTEND | 数据 + 领域 + 接口 + 表现 | US-05 | — | 0 | 低 | completed |
+| 14 | [fix-jpeg-sniff-large-metadata](fix-jpeg-sniff-large-metadata.md) | 元数据超过 64KB 的 JPEG 可上传（Bug，2026-10-14 插入） | sniff-jpeg-large-metadata | API | 领域层 | US-05 | — | 0 | 低 | completed |
 
 共 12 个任务：spike 1、接口 / 后端 1、前端 10。执行顺序按本表序号。US-11 拆 5 个、US-12 拆 6 个，超过"一个 US 拆 1–3 个"的参考量级——两个 US 各有 25、18 条验收用例和 7、15 条单元用例，按"测试超过 5 项即拆分"拆出。
 

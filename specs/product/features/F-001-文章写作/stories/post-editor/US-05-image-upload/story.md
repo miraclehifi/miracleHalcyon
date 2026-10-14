@@ -24,9 +24,9 @@
    When 我选择本地图片
    Then 行为同上
 
-3. Given 图片超过 5MB
+3. Given 图片超过 50MB
    When 我尝试上传
-   Then 提示"图片不能超过 5MB"，不上传，占位文本被移除
+   Then 提示"图片不能超过 50MB"，不上传，占位文本被移除
 
 4. Given 文件不是 png/jpg/webp/gif（例如 svg、pdf）
    When 我尝试上传
@@ -62,3 +62,4 @@
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-14 | 1.1 | AC3 上限 5MB → 50MB（[Backlog](../../../../../../backlog/raise-image-size-limit.md)） | miraclehifi |

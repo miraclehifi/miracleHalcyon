@@ -67,11 +67,11 @@ URL = `/` + key（如 `/img/2026/10/k3j9x2m4q1_4032x3024_8a7b6c.jpg`）。
 | 规则 | 错误 |
 |------|------|
 | 图片 0 字节 | `VALIDATION_FAILED` |
-| 图片 > 5 MiB（5,242,880 B） | `FILE_TOO_LARGE`（413） |
+| 图片 > 50 MiB（52,428,800 B） | `FILE_TOO_LARGE`（413） |
 | 视频 > 10 MiB（10,485,760 B） | `VIDEO_TOO_LARGE`（413） |
 | 只有 `video` 没有 `file` | `VALIDATION_FAILED` |
 | `file` 是视频 | `UNSUPPORTED_TYPE` |
-| 请求体 > 16 MiB | `PAYLOAD_TOO_LARGE`（413，读取前按 `Content-Length` 拒绝） |
+| 请求体 > 64 MiB | `PAYLOAD_TOO_LARGE`（413，读取前按 `Content-Length` 拒绝） |
 
 ## 5. 领域服务
 
@@ -92,7 +92,7 @@ function buildImageKey(p: { id: string; w: number; h: number; rgb: string; ext: 
 
 **upload 流程**
 1. 校验字段（§4.3、`rgb` 格式、`width`/`height` 若提供须为 1–20000 的整数）
-2. `sniffImage(file 前 64KB)`；有 `video` 则 `sniffVideo`
+2. `sniffImage(整个图片字节)`（JPEG 的 SOF 可能在大段 EXIF / 厂商私有段之后，远超 64KB，如 OPPO 动态照片在第 450KB 处；扫描只沿段头跳转）；有 `video` 则 `sniffVideo(前 64KB)`
 3. 生成 key（R2 `head` 命中则重新生成，最多 3 次）
 4. `put` 图片（`httpMetadata.contentType` = 判定的 mime，`cacheControl` = `public, max-age=31536000, immutable`）
 5. 有视频则 `put` 视频（`contentType: video/mp4`）；失败 → `delete` 图片 → 500 `UPLOAD_FAILED`
@@ -125,11 +125,11 @@ interface ImageRepo {            // D1
 
 | UT-ID | 对象 | 用例 | 预期 |
 |-------|------|------|------|
-| MEDIA-UT-01 | `sniffImage` | 1×1 PNG；4032×3024 JPEG（含 EXIF APP1 在 SOF 前）；渐进式 JPEG（SOF2）；WebP 三种块；GIF89a；SVG 文本；HTML 改名；截断 JPEG；0 字节 | 前五个返回正确 mime 与尺寸；其余 null |
+| MEDIA-UT-01 | `sniffImage` | 1×1 PNG；4032×3024 JPEG（含 EXIF APP1 在 SOF 前）；SOF 前有 8 个约 64KB APP 段的 JPEG（经上传接口）；渐进式 JPEG（SOF2）；WebP 三种块；GIF89a；SVG 文本；HTML 改名；截断 JPEG；0 字节 | 前五个返回正确 mime 与尺寸；其余 null |
 | MEDIA-UT-02 | `sniffVideo` | `isom` mp4；`mp42`；`qt  ` MOV；HEIC；HTML | 前两个 true，其余 false |
 | MEDIA-UT-03 | `buildImageKey` | 固定 id 与日期（UTC 月末 23:59 跨月） | `img/2026/10/k3j9x2m4q1_4032x3024_8a7b6c.jpg`；UTC 月份正确 |
 | MEDIA-UT-04 | 字段校验 | `rgb` = `ZZZZZZ`、`../../x`；`width` = `0`、`-1`、`100000`、`12.5` | 全部 `VALIDATION_FAILED` |
-| MEDIA-UT-05 | 大小边界 | 图片 5,242,880 / 5,242,881 B；视频 10,485,760 / 10,485,761 B | 接受 / `FILE_TOO_LARGE`；接受 / `VIDEO_TOO_LARGE` |
+| MEDIA-UT-05 | 大小边界 | 图片 52,428,800 / 52,428,801 B；视频 10,485,760 / 10,485,761 B | 接受 / `FILE_TOO_LARGE`；接受 / `VIDEO_TOO_LARGE` |
 | MEDIA-UT-06 | `upload`（Workers 集成 + R2 桩） | 视频 `put` 抛错；D1 插入抛错 | 500 `UPLOAD_FAILED`；R2 与 D1 均无残留 |
 | MEDIA-UT-07 | `upload` 采用服务端尺寸 | 客户端报 4032×3024，实际 1×1 | key 中为 `1x1` |
 | MEDIA-UT-08 | `/img/*` 读取 | 存在；不存在；`..` 路径；视频 `Range: bytes=0-99` | 200 + 长缓存头；404；404；206 + `Content-Range` |
@@ -141,3 +141,5 @@ interface ImageRepo {            // D1
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-14 | 1.1 | 图片上限 5 MiB → 50 MiB，请求体上限 16 MiB → 64 MiB（[raise-image-size-limit](../../../../backlog/raise-image-size-limit.md)） | miraclehifi |
+| 2026-10-14 | 1.2 | `sniffImage` 改为扫描整个图片字节（[sniff-jpeg-large-metadata](../../../../backlog/sniff-jpeg-large-metadata.md)） | miraclehifi |

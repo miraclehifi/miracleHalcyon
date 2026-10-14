@@ -161,13 +161,13 @@
 | UT-ID | 类 | 用例 | 预期 | covers |
 |------|------|------|------|------|
 | UT-85 | S | 纯函数 `validateImageFile(file)` 类型 | png / jpeg / webp / gif → ok；svg、pdf、无扩展名、`image/svg+xml` → "仅支持 png、jpg、webp、gif" | SC-IMAGE-06 |
-| UT-86 | S | 大小边界 | 5MB−1B、5MB（5×1024×1024）→ ok；5MB+1B、6MB → "图片不能超过 5MB"；0 字节 → 拒绝（以 design-domain 为准） | SC-IMAGE-05 |
+| UT-86 | S | 大小边界 | 50MB−1B、50MB（50×1024×1024）→ ok；50MB+1B、60MB → "图片不能超过 50MB"；0 字节 → 拒绝（以 design-domain 为准） | SC-IMAGE-05 |
 | UT-87 | S | 纯函数 `insertPlaceholder(text, cursor)` | 在光标处插入占位 `![上传中…]()`，返回新文本与新光标；任务与占位按出现顺序对应（见 editor 模块规格） | SC-IMAGE-01 |
 | UT-88 | S | 纯函数 `replacePlaceholder(text, index, md)` | 替换为 `![image](/img/…/x.png)`；占位前插入了新文字时仍替换正确位置，新文字不变 | SC-IMAGE-01, SC-IMAGE-09 |
 | UT-89 | S | 纯函数 `removePlaceholder(text, index)` | 只移除该占位，其他内容（含其他图片占位）不变 | SC-IMAGE-07 |
 | UT-90 | S | 多图顺序 | a、b、c 三张以不同完成顺序 resolve，最终正文按 a、b、c 顺序各一行 | SC-IMAGE-04 |
 | UT-91 | S | 文件名→alt | `photo.jpg`→`photo`；剪贴板无名图片→`image`；alt 中 `]`、`[` 被转义 | SC-IMAGE-01, SC-IMAGE-02, SC-IMAGE-03 |
-| UT-92 | S | 校验失败不发起上传 | 6MB / svg 文件时 upload mock 调用 0 次，正文不插入内容 | SC-IMAGE-05, SC-IMAGE-06 |
+| UT-92 | S | 校验失败不发起上传 | 60MB / svg 文件时 upload mock 调用 0 次，正文不插入内容 | SC-IMAGE-05, SC-IMAGE-06 |
 | UT-93 | R | 拖放高亮 | dragenter 显示"松开以上传"，dragleave/drop 隐藏 | SC-IMAGE-02 |
 | UT-94 | A | 工具栏"插入图片" | 按钮可访问名称"插入图片"，键盘可触发 file input；错误提示 `role="alert"` | SC-IMAGE-03 |
 

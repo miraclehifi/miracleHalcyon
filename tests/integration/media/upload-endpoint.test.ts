@@ -65,11 +65,11 @@ describe("POST /api/admin/images", () => {
     });
   });
 
-  // [TC-US05-08][SC-IMAGE-05] + [TC-US05-16][SC-IMAGE-08]：服务端独立校验大小；0 字节与缺少 file 都是 400，无 5xx，R2 不新增
-  it("超过 5MB → 413 图片不能超过 5MB；0 字节 / 缺少 file → 400", async () => {
+  // [TC-US05-08][SC-IMAGE-05] + [TC-US05-16][SC-IMAGE-08]：服务端独立校验大小（50 MiB）；0 字节与缺少 file 都是 400，无 5xx，R2 不新增
+  it("超过 50MB → 413 图片不能超过 50MB；0 字节 / 缺少 file → 400", async () => {
     const before = await objectCount();
-    const over = await call(form({ bytes: new Uint8Array(5_242_881), name: "over-5mb.png", type: "image/png" }));
-    const big = await call(form({ bytes: new Uint8Array(6_291_456), name: "big-6mb.jpg", type: "image/jpeg" }));
+    const over = await call(form({ bytes: new Uint8Array(52_428_801), name: "over-50mb.png", type: "image/png" }));
+    const big = await call(form({ bytes: new Uint8Array(62_914_560), name: "big-60mb.jpg", type: "image/jpeg" }));
     const empty = await call(form({ bytes: new Uint8Array(0), name: "empty.png", type: "image/png" }));
     const missing = await call(form(undefined, { rgb: "808080" }));
 
@@ -80,7 +80,7 @@ describe("POST /api/admin/images", () => {
       missing: [missing.status, missing.body.error?.code],
       added: (await objectCount()) - before,
     }).toEqual({
-      over: [413, { code: "FILE_TOO_LARGE", message: "图片不能超过 5MB" }],
+      over: [413, { code: "FILE_TOO_LARGE", message: "图片不能超过 50MB" }],
       big: [413, "FILE_TOO_LARGE"],
       empty: [400, { code: "VALIDATION_FAILED", message: "不支持的图片格式", fields: ["file"] }],
       missing: [400, "VALIDATION_FAILED"],
@@ -114,6 +114,22 @@ describe("POST /api/admin/images", () => {
     });
   });
 
+  // [MEDIA-UT-01][SC-IMAGE-01] SOF 在 64KB 之后：手机照片（如 OPPO）在帧头前有大段 EXIF 与厂商私有 APP 段（sniff-jpeg-large-metadata）
+  it("帧头前有 8 个约 64KB APP 段的 JPEG：201，尺寸取文件头", async () => {
+    const segment = (marker: number) => {
+      const bytes = new Uint8Array(2 + 65_000);
+      bytes.set([0xff, marker, 65_000 >> 8, 65_000 & 0xff]);
+      return bytes;
+    };
+    const frame = jpeg(4096, 3072).subarray(2); // 去掉 SOI，接在 APP 段之后
+    const parts = [new Uint8Array([0xff, 0xd8]), ...[0xe1, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xeb].map(segment), frame];
+    const bytes = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+    parts.reduce((offset, p) => (bytes.set(p, offset), offset + p.length), 0);
+
+    const result = await call(form({ bytes, name: "IMG20260516172228.jpg", type: "image/jpeg" }));
+    expect([result.status, result.body.url]).toEqual([201, expect.stringMatching(/_4096x3072_808080\.jpg$/)]);
+  });
+
   // [MEDIA-UT-04] 字段不合法 → 400 并列出字段；[MEDIA-UT-06] D1 插入失败 → 500 UPLOAD_FAILED，R2 无残留
   it("rgb 不合法 400；D1 写入失败时回滚 R2", async () => {
     const invalid = await call(form(png(), { rgb: "ZZZZZZ", width: "0" }));
@@ -137,9 +153,9 @@ describe("POST /api/admin/images", () => {
     });
   });
 
-  // 请求体超过 16 MiB：按 Content-Length 直接拒绝，不读取
-  it("Content-Length 超过 16 MiB → 413 PAYLOAD_TOO_LARGE", async () => {
-    const result = await call(form(png()), { "Content-Length": String(16 * 1024 * 1024 + 1) });
+  // 请求体超过 64 MiB：按 Content-Length 直接拒绝，不读取
+  it("Content-Length 超过 64 MiB → 413 PAYLOAD_TOO_LARGE", async () => {
+    const result = await call(form(png()), { "Content-Length": String(64 * 1024 * 1024 + 1) });
     expect([result.status, result.body.error?.code]).toEqual([413, "PAYLOAD_TOO_LARGE"]);
   });
 
@@ -241,6 +257,16 @@ describe("POST /api/admin/images 实况照片", () => {
       videoAsFile: [400, "UNSUPPORTED_TYPE"],
       added: 0,
     });
+  });
+
+  // [TC-US05-06][SC-IMAGE-05] 上限本身：恰好 50 MiB 的图片 + 10 MiB 视频同一请求 201，images.size 写入 52,428,800（迁移 0002 放宽约束）
+  it("恰好 50MB 图片 + 10MB 视频：201，images 记录真实大小", async () => {
+    const big = new Uint8Array(52_428_800);
+    big.set(jpeg(4000, 3000));
+    const result = await call(liveForm({ bytes: big, name: "exact-50mb.jpg", type: "image/jpeg" }, mp4(ftyp("isom", 10_485_760))));
+    const row = await env.DB.prepare("SELECT size, video_size FROM images WHERE key = ?").bind(String(result.body.url).slice(1)).first();
+
+    expect({ status: result.status, live: result.body.live, row }).toEqual({ status: 201, live: true, row: { size: 52_428_800, video_size: 10_485_760 } });
   });
 
   // [TC-US11-15][SC-LIVE-08] + [MEDIA-UT-06]：视频写入失败删除已写图片；D1 失败删除图片与视频；R2 与 D1 无残留

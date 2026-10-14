@@ -8,7 +8,7 @@
 | BH-02 | SC-IMAGE-02 | 拖入图片上传并插入引用 | 正常 |
 | BH-03 | SC-IMAGE-03 | 工具栏选择图片上传 | 正常 |
 | BH-04 | SC-IMAGE-04 | 多张图片按顺序插入 | 边界 |
-| BH-05 | SC-IMAGE-05 | 超过 5MB 被拒绝 | 边界 |
+| BH-05 | SC-IMAGE-05 | 超过 50MB 被拒绝 | 边界 |
 | BH-06 | SC-IMAGE-06 | 不支持的格式被拒绝 | 错误 |
 | BH-07 | SC-IMAGE-07 | 上传失败移除占位并提示 | 错误 |
 | BH-08 | SC-IMAGE-08 | 服务端校验文件真实类型 | 错误 |
@@ -59,14 +59,14 @@ When 全部上传完成
 Then 正文中按 a、b、c 顺序各插入一行图片引用
 ```
 
-## BH-05: 超过 5MB 被拒绝
+## BH-05: 超过 50MB 被拒绝
 
 **SC-ID**: SC-IMAGE-05
 
 ```gherkin
-Given 我有一张 6MB 的 jpg
+Given 我有一张 60MB 的 jpg
 When 我粘贴或拖入它
-Then 显示提示"图片不能超过 5MB"
+Then 显示提示"图片不能超过 50MB"
   And 不发起上传，正文不插入任何内容
 ```
 

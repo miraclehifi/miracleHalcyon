@@ -10,7 +10,7 @@ export interface SniffedImage {
   height: number;
 }
 
-export const IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5,242,880
+export const IMAGE_MAX_BYTES = 50 * 1024 * 1024; // 52,428,800
 export const VIDEO_MAX_BYTES = 10 * 1024 * 1024; // 10,485,760
 export const VIDEO_MIME = "video/mp4";
 export const SNIFF_BYTES = 64 * 1024; // 只读前 64KB

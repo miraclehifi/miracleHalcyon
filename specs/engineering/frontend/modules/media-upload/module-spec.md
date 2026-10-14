@@ -45,8 +45,8 @@ function uploadItem(item: Item, cb: Callbacks): Promise<UploadResult>;
 | 项 | 规则 |
 |----|------|
 | 可接受的输入 | 扩展名 / MIME：png、jpg、jpeg、webp、gif、heic、heif、mov、mp4；其余 → "仅支持 png、jpg、webp、gif"（US-05） |
-| 前端大小检查 | 静态图（转换后）> 5MB → "图片不能超过 5MB"；视频（处理后）> 10MB → 丢弃视频，按普通图片上传并给 `Toast/Warning`（US-11 AC5） |
-| HEIC 输出 | JPEG 质量 0.9；转换后仍 > 5MB 时以 0.8、0.7 重试，仍超限则报错 |
+| 前端大小检查 | 静态图（转换后）> 50MB → "图片不能超过 50MB"；视频（处理后）> 10MB → 丢弃视频，按普通图片上传并给 `Toast/Warning`（US-11 AC5） |
+| HEIC 输出 | JPEG 质量 0.9；转换后仍 > 50MB 时以 0.8、0.7 重试，仍超限则报错 |
 | 视频处理 | `mediabunny` 动态 import；`VideoEncoder.isConfigSupported({ codec: 'avc1.640028', … })` 为真 → 转码 H.264、去音轨；否则只转封装，返回 `HEVC_KEPT` → `Toast/Warning`（US-11 AC8） |
 | alt | 文件名去扩展名；`[`、`]` 转义；剪贴板无名图片 → `image` |
 | 失败 | 任一步失败 → 移除占位 → `Toast/Error`（带文件名），不影响其他项 |

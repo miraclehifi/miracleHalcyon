@@ -69,9 +69,9 @@ describe("validateUploadFields", () => {
   });
 });
 
-// [MEDIA-UT-05] 大小边界：图片 1 B – 5 MiB；0 字节按校验失败
+// [MEDIA-UT-05] 大小边界：图片 1 B – 50 MiB；0 字节按校验失败
 describe("checkImageSize", () => {
-  it("5,242,880 B 接受；5,242,881 B → FILE_TOO_LARGE；0 B → VALIDATION_FAILED", () => {
+  it("52,428,800 B 接受；52,428,801 B → FILE_TOO_LARGE；0 B → VALIDATION_FAILED", () => {
     const code = (size: number) => {
       try {
         checkImageSize(size);
@@ -80,7 +80,7 @@ describe("checkImageSize", () => {
         return (error as { code: string }).code;
       }
     };
-    expect([code(1), code(5_242_880), code(5_242_881), code(0)]).toEqual(["ok", "ok", "FILE_TOO_LARGE", "VALIDATION_FAILED"]);
+    expect([code(1), code(52_428_800), code(52_428_801), code(0)]).toEqual(["ok", "ok", "FILE_TOO_LARGE", "VALIDATION_FAILED"]);
   });
 });
 

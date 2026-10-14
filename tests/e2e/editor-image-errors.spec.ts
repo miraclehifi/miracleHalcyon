@@ -26,14 +26,14 @@ const alerts = (page: Page, text: string) => page.getByRole("alert").filter({ ha
 const png = (name: string, padTo?: number): FakeFile => ({ name, type: "image/png", content: { png: [20, 20] }, padTo });
 const SVG: FakeFile = { name: "logo.svg", type: "image/svg+xml", content: { bytes: 64 } };
 
-// [TC-US05-07][SC-IMAGE-05] 5MB+1 字节（拖入）与 6MB（粘贴）前端拦截：各提示一次，不上传，正文不变（无占位）
-test("[TC-US05-07] 边界：5MB+1 字节前端拒绝", async ({ page, baseURL }) => {
+// [TC-US05-07][SC-IMAGE-05] 50MB+1 字节（拖入）与 60MB（粘贴）前端拦截：各提示一次，不上传，正文不变（无占位）
+test("[TC-US05-07] 边界：50MB+1 字节前端拒绝", async ({ page, baseURL }) => {
   const editor = await openPost(page, baseURL!, "B", "原文");
   const uploads = countUploads(page);
-  await dropFiles(page, editor, [png("over-5mb.png", 5_242_881)]);
-  await pasteFiles(page, editor, [{ name: "big-6mb.jpg", type: "image/jpeg", content: { jpeg: [20, 20] }, padTo: 6_291_456 }]);
+  await dropFiles(page, editor, [png("over-50mb.png", 52_428_801)]);
+  await pasteFiles(page, editor, [{ name: "big-60mb.jpg", type: "image/jpeg", content: { jpeg: [20, 20] }, padTo: 62_914_560 }]);
 
-  await expect(alerts(page, "图片不能超过 5MB")).toHaveCount(2);
+  await expect(alerts(page, "图片不能超过 50MB")).toHaveCount(2);
   await expect(editor).toHaveValue("原文");
   expect(uploads.value).toBe(0);
 });
@@ -63,10 +63,10 @@ test("[TC-US05-09][TC-US05-10] svg 与 pdf 被前端拒绝", async ({ page, base
 test("[TC-US05-11] 混合拖入：仅合法图片被插入", async ({ page, baseURL }) => {
   const editor = await openPost(page, baseURL!, "X", "");
   const uploads = countUploads(page);
-  await dropFiles(page, editor, [png("a.png"), png("over-5mb.png", 5_242_881), SVG, png("c.png")]);
+  await dropFiles(page, editor, [png("a.png"), png("over-50mb.png", 52_428_801), SVG, png("c.png")]);
 
   await expect(editor).toHaveValue(/^!\[a\]\(\/img\/[^)]+\)\n!\[c\]\(\/img\/[^)]+\)$/, { timeout: 10_000 });
-  await expect(alerts(page, "over-5mb.png：图片不能超过 5MB")).toBeVisible();
+  await expect(alerts(page, "over-50mb.png：图片不能超过 50MB")).toBeVisible();
   await expect(alerts(page, "logo.svg：仅支持 png、jpg、webp、gif")).toBeVisible();
   expect(uploads.value).toBe(2);
 });

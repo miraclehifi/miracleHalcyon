@@ -17,7 +17,7 @@
 
 | 字段 | 类型 | 必填 | 规则 |
 |------|------|------|------|
-| `file` | File | ✅ | png / jpg / webp / gif（按魔数判定），1 B – 5 MiB |
+| `file` | File | ✅ | png / jpg / webp / gif（按魔数判定），1 B – 50 MiB |
 | `video` | File | — | mp4（ISO BMFF，brand 白名单见 domain-model §4.2），≤ 10 MiB；有此字段即为实况照片 |
 | `rgb` | string | — | `^[0-9a-f]{6}$`，浏览器计算的主色；缺省为 `808080`（中性灰） |
 | `width` / `height` | string | — | 若提供须为 1–20000 的整数；只校验不采用（服务端以文件头为准） |
@@ -49,7 +49,7 @@
 |------|------|---------|
 | 400 | `VALIDATION_FAILED` | 缺少 `file` / 0 字节 / 只有视频 / `rgb`、`width`、`height` 不合法（`error.fields` 列出字段） |
 | 400 | `UNSUPPORTED_TYPE` | 不支持的图片格式（与 US-05 BH-08 一致；前端在上传前已按扩展名给出"仅支持 png、jpg、webp、gif"） |
-| 413 | `FILE_TOO_LARGE` | 图片不能超过 5MB |
+| 413 | `FILE_TOO_LARGE` | 图片不能超过 50MB |
 | 413 | `VIDEO_TOO_LARGE` | 实况视频不能超过 10MB |
 | 413 | `PAYLOAD_TOO_LARGE` | 上传内容过大 |
 | 500 | `UPLOAD_FAILED` | 上传失败，请重试（已回滚，无残留） |
@@ -74,3 +74,4 @@
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-14 | 1.1 | `file` 上限 5 MiB → 50 MiB（[raise-image-size-limit](../../../../backlog/raise-image-size-limit.md)） | miraclehifi |

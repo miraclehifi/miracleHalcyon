@@ -6,7 +6,7 @@
 **最后更新**: 2026-10-10
 **Version Tag**: v1.0
 
-> 验收用例从 behaviors.md 的 Given-When-Then 生成，叠加等价类、边界值、错误猜测与 NFR（nfr.md §2：上传需登录、仅 png/jpg/webp/gif、单张 ≤ 5MB）。
+> 验收用例从 behaviors.md 的 Given-When-Then 生成，叠加等价类、边界值、错误猜测与 NFR（nfr.md §2：上传需登录、仅 png/jpg/webp/gif、单张 ≤ 50MB）。
 > 接口以 [media API 契约](../../../../../engineering/backend/domains/media/api-contract.md) 为准：上传 `POST /api/admin/images`（multipart，字段 `file`，可选 `rgb`）；返回站内路径 `/img/…`。
 
 **文案说明**：前端格式拦截文案以 BH-06 为准（"仅支持 png、jpg、webp、gif"），服务端拒绝文案以 BH-08 为准（"不支持的图片格式"）。story.md AC4 写的是"不支持的图片格式"，与 BH-06 不一致，请在 design-ui 阶段统一（不阻塞本文档）。
@@ -34,9 +34,9 @@
 | `diagram.webp` | ≈ 80 KB | 合法 WebP | 工具栏选择 |
 | `anim.gif` | ≈ 30 KB | 合法 GIF | 等价类 |
 | `a.png` / `b.png` / `c.png` | 各 ≈ 10 KB，像素颜色不同 | 合法 PNG | 多张顺序 |
-| `exact-5mb.png` | 5,242,880 B | 合法 PNG | 上边界（接受） |
-| `over-5mb.png` | 5,242,881 B | 合法 PNG | 上边界 +1（拒绝） |
-| `big-6mb.jpg` | 6,291,456 B | 合法 JPEG | BH-05 原始场景 |
+| `exact-50mb.png` | 52,428,800 B | 合法 PNG | 上边界（接受） |
+| `over-50mb.png` | 52,428,801 B | 合法 PNG | 上边界 +1（拒绝） |
+| `big-60mb.jpg` | 62,914,560 B | 合法 JPEG | BH-05 原始场景 |
 | `logo.svg` | ≈ 1 KB | `<svg ...><script>alert(1)</script></svg>` | 不支持格式 + XSS 载荷 |
 | `doc.pdf` | ≈ 10 KB | 合法 PDF | 不支持格式 |
 | `fake.png` | ≈ 200 B | `<html><script>alert(1)</script></html>` 改名为 .png | Magic byte 伪造 |
@@ -54,9 +54,9 @@
 | TC-US05-03 | SC-IMAGE-03 | 工具栏选择 diagram.webp 上传 | e2e | P0 |
 | TC-US05-04 | SC-IMAGE-01, SC-IMAGE-03 | 等价类：gif 与 1x1.png 最小有效文件 | api | P1 |
 | TC-US05-05 | SC-IMAGE-04 | 多张图片乱序完成仍按 a、b、c 顺序插入 | e2e | P1 |
-| TC-US05-06 | SC-IMAGE-05 | 边界：恰好 5MB 接受 | e2e | P0 |
-| TC-US05-07 | SC-IMAGE-05 | 边界：5MB+1 字节前端拒绝 | e2e | P0 |
-| TC-US05-08 | SC-IMAGE-05 | 6MB jpg 绕过前端直调接口被拒 | api | P0 |
+| TC-US05-06 | SC-IMAGE-05 | 边界：恰好 50MB 接受 | e2e | P0 |
+| TC-US05-07 | SC-IMAGE-05 | 边界：50MB+1 字节前端拒绝 | e2e | P0 |
+| TC-US05-08 | SC-IMAGE-05 | 60MB jpg 绕过前端直调接口被拒 | api | P0 |
 | TC-US05-09 | SC-IMAGE-06 | 拖入 svg 被前端拒绝 | e2e | P0 |
 | TC-US05-10 | SC-IMAGE-06 | 工具栏选择 pdf 被前端拒绝 | e2e | P1 |
 | TC-US05-11 | SC-IMAGE-04, SC-IMAGE-05, SC-IMAGE-06 | 混合拖入：仅合法图片被插入 | e2e | P1 |
@@ -241,13 +241,13 @@
 
 ---
 
-## TC-US05-06: 边界——恰好 5MB 接受
+## TC-US05-06: 边界——恰好 50MB 接受
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US05-06 |
 | covers | SC-IMAGE-05 |
-| Scenario | 文件大小 = 5,242,880 B（上限本身）应被接受 |
+| Scenario | 文件大小 = 52,428,800 B（上限本身）应被接受 |
 | Priority | P0 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ 适合自动化 |
@@ -258,29 +258,29 @@
 - 【数据前置】空正文草稿
 - 【环境前置】已登录
 
-**测试数据：** `exact-5mb.png`（5,242,880 B）
+**测试数据：** `exact-50mb.png`（52,428,800 B）
 
 **步骤：**
-1. 拖入 `exact-5mb.png`
+1. 拖入 `exact-50mb.png`
 2. 等待上传完成
 3. 另以 API 直接上传同一文件
 
 **预期结果：**
-- 未出现"图片不能超过 5MB"
-- 正文插入 `![exact-5mb](<URL>)`；API 直传返回 2xx
-- R2 对象大小 = 5,242,880 B
+- 未出现"图片不能超过 50MB"
+- 正文插入 `![exact-50mb](<URL>)`；API 直传返回 2xx
+- R2 对象大小 = 52,428,800 B
 
 **清理：** 删除 2 个 R2 对象；删除草稿
 
 ---
 
-## TC-US05-07: 边界——5MB+1 字节前端拒绝
+## TC-US05-07: 边界——50MB+1 字节前端拒绝
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US05-07 |
 | covers | SC-IMAGE-05 |
-| Scenario | 5,242,881 B 与 6MB 文件（粘贴/拖入）在前端被拦截 |
+| Scenario | 52,428,801 B 与 60MB 文件（粘贴/拖入）在前端被拦截 |
 | Priority | P0 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ 适合自动化 |
@@ -295,15 +295,15 @@
 
 | 输入方式 | 文件 | 大小 |
 |---------|------|------|
-| 拖入 | `over-5mb.png` | 5,242,881 B |
-| 粘贴 | `big-6mb.jpg` | 6,291,456 B |
+| 拖入 | `over-50mb.png` | 52,428,801 B |
+| 粘贴 | `big-60mb.jpg` | 62,914,560 B |
 
 **步骤：**
-1. 拖入 `over-5mb.png`
-2. 粘贴 `big-6mb.jpg`
+1. 拖入 `over-50mb.png`
+2. 粘贴 `big-60mb.jpg`
 
 **预期结果：**
-- 每次均显示提示"图片不能超过 5MB"
+- 每次均显示提示"图片不能超过 50MB"
 - 上传请求计数 = 0
 - 正文仍为 `原文`，不插入任何内容（含占位文本）
 
@@ -311,13 +311,13 @@
 
 ---
 
-## TC-US05-08: 6MB jpg 绕过前端直调接口被拒
+## TC-US05-08: 60MB jpg 绕过前端直调接口被拒
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US05-08 |
 | covers | SC-IMAGE-05 |
-| Scenario | 服务端独立执行 5MB 上限校验 |
+| Scenario | 服务端独立执行 50MB 上限校验 |
 | Priority | P0 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ 适合自动化 |
@@ -327,13 +327,13 @@
 **前置条件：**
 - 【环境前置】已登录；记录 R2 测试前缀下对象数 N
 
-**测试数据：** `over-5mb.png`（5,242,881 B）、`big-6mb.jpg`（6,291,456 B）
+**测试数据：** `over-50mb.png`（52,428,801 B）、`big-60mb.jpg`（62,914,560 B）
 
 **步骤：**
 1. 分别以 multipart 调用 `POST /api/admin/images`
 
 **预期结果：**
-- 均返回 4xx（400 或 413，以 API 契约为准），错误信息为"图片不能超过 5MB"
+- 均返回 4xx（400 或 413，以 API 契约为准），错误信息为"图片不能超过 50MB"
 - R2 对象数仍为 N
 
 **清理：** 无（无新增对象）；若断言失败产生对象则删除
@@ -418,7 +418,7 @@
 - 【数据前置】空正文草稿
 - 【环境前置】已登录
 
-**测试数据：** 一次拖入 `a.png`、`over-5mb.png`、`logo.svg`、`c.png`
+**测试数据：** 一次拖入 `a.png`、`over-50mb.png`、`logo.svg`、`c.png`
 
 **步骤：**
 1. 一次 drop 拖入 4 个文件；等待上传完成
@@ -428,7 +428,7 @@
 | 文件 | 结果 |
 |------|------|
 | `a.png` | 插入 `![a](<URL>)` |
-| `over-5mb.png` | 提示"图片不能超过 5MB"，不上传 |
+| `over-50mb.png` | 提示"图片不能超过 50MB"，不上传 |
 | `logo.svg` | 提示"仅支持 png、jpg、webp、gif"，不上传 |
 | `c.png` | 插入 `![c](<URL>)`，位于 a 之后 |
 
@@ -937,7 +937,7 @@ await expect(editor).not.toContainText('上传中…');
 | SC-IMAGE-02 | BH-02 拖入图片上传 | TC-US05-02, TC-US05-20, TC-US05-22 |
 | SC-IMAGE-03 | BH-03 工具栏选择图片 | TC-US05-03, TC-US05-04 |
 | SC-IMAGE-04 | BH-04 多张按顺序插入 | TC-US05-05, TC-US05-11 |
-| SC-IMAGE-05 | BH-05 超过 5MB 拒绝 | TC-US05-06, TC-US05-07, TC-US05-08, TC-US05-11 |
+| SC-IMAGE-05 | BH-05 超过 50MB 拒绝 | TC-US05-06, TC-US05-07, TC-US05-08, TC-US05-11 |
 | SC-IMAGE-06 | BH-06 不支持格式拒绝 | TC-US05-09, TC-US05-10, TC-US05-11 |
 | SC-IMAGE-07 | BH-07 上传失败移除占位 | TC-US05-12, TC-US05-13, TC-US05-25 |
 | SC-IMAGE-08 | BH-08 服务端校验真实类型 | TC-US05-14, TC-US05-15, TC-US05-16, TC-US05-17, TC-US05-18, TC-US05-19, TC-US05-20 |
@@ -947,7 +947,7 @@ await expect(editor).not.toContainText('上传中…');
 |------------------------|--------|
 | AC1 粘贴/拖入 | TC-US05-01, TC-US05-02, TC-US05-23 |
 | AC2 工具栏 | TC-US05-03 |
-| AC3 超过 5MB | TC-US05-06, TC-US05-07, TC-US05-08 |
+| AC3 超过 50MB | TC-US05-06, TC-US05-07, TC-US05-08 |
 | AC4 不支持格式 | TC-US05-09, TC-US05-10, TC-US05-15 |
 | AC5 网络失败 | TC-US05-12, TC-US05-13 |
 | AC6 多张 | TC-US05-05, TC-US05-11 |

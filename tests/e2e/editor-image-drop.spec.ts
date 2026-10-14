@@ -88,16 +88,17 @@ test("[TC-US05-05] 多张图片乱序完成仍按顺序插入", async ({ page, b
   expect({ urls: urls.every((url) => IMAGE_URL.test(url)), uploads }).toEqual({ urls: true, uploads: 3 });
 });
 
-// [TC-US05-06][SC-IMAGE-05] 恰好 5MB（5,242,880 B）的图片可上传，存储大小一致
-test("[TC-US05-06] 边界：恰好 5MB 接受", async ({ page, baseURL }) => {
+// [TC-US05-06][SC-IMAGE-05] 恰好 50MB（52,428,800 B）的图片可上传，存储大小一致
+test("[TC-US05-06] 边界：恰好 50MB 接受", async ({ page, baseURL }) => {
   const editor = await openPost(page, baseURL!, "F", "");
   const response = page.waitForResponse((r) => r.url().endsWith("/api/admin/images"));
-  await dropOnLine(page, editor, [png("exact-5mb.png", 5_242_880)], 1);
+  await dropOnLine(page, editor, [png("exact-50mb.png", 52_428_800)], 1);
   const result = await response;
-  const { url } = (await result.json()) as { url: string };
+  // 请求体过大时 Chromium 会从 inspector 缓存驱逐响应体，result.json() 不可用：地址从正文取
+  await expect(editor).toHaveValue(/^!\[exact-50mb\]\(\/img\/[^)]+\)$/);
+  const url = (await editor.inputValue()).match(/\((\/img\/[^)]+)\)/)![1];
 
   expect(result.status()).toBe(201);
-  await expect(editor).toHaveValue(`![exact-5mb](${url})`);
-  await expect(page.getByText("图片不能超过 5MB")).toHaveCount(0);
-  expect((await (await page.request.get(url)).body()).length).toBe(5_242_880);
+  await expect(page.getByText("图片不能超过 50MB")).toHaveCount(0);
+  expect((await (await page.request.get(url)).body()).length).toBe(52_428_800);
 });

@@ -8,7 +8,7 @@ import { jsonError } from "../../../lib/api/errors";
 
 export const prerender = false;
 
-export const PAYLOAD_MAX_BYTES = 16 * 1024 * 1024;
+export const PAYLOAD_MAX_BYTES = 64 * 1024 * 1024; // 50 MiB 图片 + 10 MiB 视频 + 表单开销
 const UNSUPPORTED_MESSAGE = "不支持的图片格式";
 const FIELD_MESSAGES: Record<string, string> = {
   file: UNSUPPORTED_MESSAGE, // 缺少文件、0 字节或只有视频（TC-US05-16、TC-US11-13）
@@ -34,7 +34,7 @@ function errorResponse(error: unknown): Response {
     return Response.json({ error: { code: error.code, message, fields: error.fields } }, { status: 400 });
   }
   if (error instanceof UnsupportedTypeError) return jsonError(400, error.code, UNSUPPORTED_MESSAGE);
-  if (error instanceof FileTooLargeError) return jsonError(413, error.code, "图片不能超过 5MB");
+  if (error instanceof FileTooLargeError) return jsonError(413, error.code, "图片不能超过 50MB");
   if (error instanceof VideoTooLargeError) return jsonError(413, error.code, "实况视频不能超过 10MB");
   if (error instanceof UploadFailedError) {
     console.error("image upload failed", error.cause);

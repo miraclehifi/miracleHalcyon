@@ -63,7 +63,7 @@ export function createMediaService({ store, repo, generateId = generateImageId }
       checkImageSize(file.size);
       if (video) checkVideoSize(video.size);
       const bytes = new Uint8Array(await file.arrayBuffer());
-      const image = sniffImage(bytes.subarray(0, SNIFF_BYTES));
+      const image = sniffImage(bytes); // 整个文件：JPEG 的 SOF 可能在数百 KB 的 EXIF / 厂商私有段之后
       if (!image) throw new UnsupportedTypeError();
       const videoBytes = video ? new Uint8Array(await video.arrayBuffer()) : null;
       if (videoBytes && !sniffVideo(videoBytes.subarray(0, SNIFF_BYTES))) throw new UnsupportedTypeError();
