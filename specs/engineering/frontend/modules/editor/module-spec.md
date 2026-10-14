@@ -68,7 +68,7 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 |----|------|
 | slug 跟随 | 页面内存中的 `slugTouched` 标记，不持久化：用户编辑过 slug 输入框后为 true；打开已有文章时，`slug !== slugify(title)` 即视为改过（US-03-3） |
 | 标签补全 | 输入 debounce 200ms → `GET /api/admin/tags?q=` |
-| 发布结果 | 200 → 更新徽标与主按钮，`Toast/Success`；422 → 打开抽屉、聚焦首个缺失字段、`Toast/Error` 列出缺失项；409 → slug 字段错误 |
+| 发布结果 | 200 → 更新徽标与主按钮，`Toast/Success`；422 → 打开抽屉、聚焦首个缺失字段、`Toast/Error` 列出缺失项；409 → slug 字段错误。已实现：`src/components/admin/editor/PublishActions.tsx`（发布；发布更新置灰、撤回由后续任务接入） |
 
 ## 5. 单元测试
 

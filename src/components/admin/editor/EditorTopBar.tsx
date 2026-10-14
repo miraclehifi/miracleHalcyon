@@ -1,5 +1,5 @@
 // EditorTopBar（admin-post-editor.md"顶栏"）：← 文章 | 状态徽标 · 保存状态 …… 设置 | 主按钮
-// 保存状态、主按钮的发布动作由后续任务接入；视图切换在 Sprint 2（US-04）接入，此前固定为并排
+// 主按钮由页面传入（PublishActions）；视图切换在 Sprint 2（US-04）接入，此前固定为并排
 import type { ReactNode } from "react";
 import { Button } from "../../ui/Button";
 import { IconButton } from "../../ui/IconButton";

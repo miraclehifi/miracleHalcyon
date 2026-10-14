@@ -5,6 +5,8 @@ import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
 export interface MarkdownEditorProps {
   title: string;
   body: string;
+  titleInvalid?: boolean; // 发布时缺少该项
+  bodyInvalid?: boolean;
   onTitleChange(title: string): void;
   onBodyChange(body: string): void;
 }
@@ -18,7 +20,7 @@ export function countChars(text: string): number {
   return count;
 }
 
-export function MarkdownEditor({ title, body, onTitleChange, onBodyChange }: MarkdownEditorProps) {
+export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitleChange, onBodyChange }: MarkdownEditorProps) {
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
@@ -40,7 +42,9 @@ export function MarkdownEditor({ title, body, onTitleChange, onBodyChange }: Mar
     <div className="flex min-h-0 flex-1 flex-col gap-[18px]">
       <textarea
         ref={titleRef}
+        id="post-title"
         aria-label="标题"
+        aria-invalid={titleInvalid || undefined}
         placeholder="无标题"
         rows={1}
         value={title}
@@ -50,7 +54,9 @@ export function MarkdownEditor({ title, body, onTitleChange, onBodyChange }: Mar
       />
       <textarea
         ref={bodyRef}
+        id="post-body"
         aria-label="正文"
+        aria-invalid={bodyInvalid || undefined}
         value={body}
         onChange={(event) => onBodyChange(event.target.value)}
         spellCheck={false}

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 67
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,13 +29,22 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 主按钮"发布"（加载中禁用）；发布前 flush 自动保存
-- [ ] 422 → 打开抽屉、聚焦首个缺失字段、常驻错误"发布前请填写：…"
+- [x] 主按钮"发布"（加载中禁用）；发布前 flush 自动保存
+- [x] 422 → 打开抽屉、聚焦首个缺失字段、常驻错误"发布前请填写：…"
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `PublishActions`：点击先 `flush()` 自动保存再 `POST /publish`；请求中 `disabled` + `aria-busy` + 旋转 loader 图标，重复点击无效
+- 200 → 更新徽标与主按钮（"发布更新"），轻提示"已发布，几分钟后读者可见"（发布更新为"已发布更新"）
+- 422 → 常驻错误"发布前请填写：…"；标题 / slug / 正文输入框 `aria-invalid`（slug 显示"请填写 slug"并打开抽屉），聚焦第一个缺少的字段；改了对应字段后清除。新建且从未保存（无 id）时按三项全缺处理
+- 409 SLUG_TAKEN → slug 字段错误并打开抽屉；flush 失败或其他错误 → "发布失败，请重试"；401 跳转在 Sprint 2
+- `PostEditorPage` 包一层 `ToastProvider`；标题 / 正文 / slug 输入框加 id（`post-title` / `post-body` / `post-slug`）供聚焦
+- 422 路径另用临时 E2E 核对（chromium + webkit 通过），正式用例 TC-US08-19 未纳入本 Sprint
 
 ## 依赖
 

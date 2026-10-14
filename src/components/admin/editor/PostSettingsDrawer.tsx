@@ -56,6 +56,7 @@ export function PostSettingsDrawer(props: PostSettingsDrawerProps) {
       </div>
       <Field label="Slug（文章网址）" hint={note.hint} error={slugError ?? note.error}>
         <input
+          id="post-slug"
           value={slug}
           onChange={(event) => props.onSlugChange(event.target.value)}
           spellCheck={false}
