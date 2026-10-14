@@ -254,6 +254,15 @@
 | UT-146 | S | 占位阶段 | 占位文本的状态机：`processing` → `uploading` → 替换为引用 / 移除；配对失败时一次性移除 | SC-LIVE-05, SC-LIVE-08 |
 | UT-147 | R | `LiveBadge` 与播放 | 悬停时 `play()`，离开时 `pause()` 并把 `currentTime` 设为 0；`video` 触发 `error` 后隐藏 badge，悬停不再播放 | SC-LIVE-10, SC-LIVE-11 |
 
+## 15. 列表删除的延迟提交 `createPendingDelete`（fake timers）
+
+| UT-ID | 类 | 用例 | 预期 | covers |
+|------|------|------|------|------|
+| UT-148 | S | 6 秒到期提交 | `schedule(B)` 后推进 5999ms 未提交；推进至 6000ms 调用 commit(B) 1 次 | SC-DELETE-07 |
+| UT-149 | S | 撤销与暂停 | 3 秒时 `undo()` 返回 B，之后推进任意时间不提交；再 `schedule(B)`、`hold(true)` 10 秒不提交，`hold(false)` 后剩余时间到期提交 1 次 | SC-DELETE-07 |
+| UT-150 | S | 连续删除 | `schedule(A)` 2 秒后 `schedule(B)`：立即 commit(A)，B 在其后 6 秒提交；每条只提交 1 次 | SC-DELETE-08 |
+| UT-151 | S | 页面卸载 | 撤销期内派发 `pagehide` → 立即 commit；`dispose()` 立即提交并移除监听，之后 `pagehide` 不再提交 | SC-DELETE-08 |
+
 ---
 
 ## 覆盖说明
@@ -269,7 +278,7 @@
 | US-06 自动保存 | SC-AUTOSAVE-01, 02, 04 ~ 11 |
 | US-07 列表 | SC-POSTLIST-01 ~ 02, 04 ~ 09 |
 | US-08 发布 | SC-PUBLISH-03 ~ 05, 08 ~ 10 |
-| US-09 删除 | SC-DELETE-01 ~ 03 |
+| US-09 删除 | SC-DELETE-01 ~ 03, 07, 08 |
 | US-10 工具栏 | SC-TOOLBAR-01 ~ 05, 07 ~ 10 |
 | US-11 实况照片 | SC-LIVE-01 ~ 11, 13 |
 | US-12 图片排版 | SC-LAYOUT-01 ~ 08, 10 ~ 13 |
@@ -286,3 +295,4 @@
 | 2026-10-10 | v1.1 | 按钮名"更新"改为"发布更新"；UT-108 禁用说明以 design-ui 为准落定 | miraclehifi |
 | 2026-10-12 | v1.2 | 新增 §11 EditorToolbar + Tooltip（UT-117 ~ UT-125，US-10） | miraclehifi |
 | 2026-10-13 | v1.3 | 新增 §12 图片插件、§13 图片菜单、§14 照片预处理（UT-126 ~ UT-147，US-11、US-12） | miraclehifi |
+| 2026-10-14 | v1.4 | 新增 §15 列表删除的延迟提交（UT-148 ~ UT-151，US-09 撤销） | miraclehifi |

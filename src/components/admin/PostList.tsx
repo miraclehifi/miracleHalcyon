@@ -9,7 +9,7 @@ import { PostListItem } from "./PostListItem";
 
 export interface PostListProps {
   posts: PostListItemData[];
-  onDelete: (post: PostListItemData) => void; // 行折叠完成后调用
+  onDelete: (post: PostListItemData, index: number) => void; // 行折叠完成后调用；index 为删除前的位置（撤销时插回）
   now?: Date;
   timeZone?: string;
 }
@@ -29,13 +29,13 @@ export function PostList({ posts, onDelete, now, timeZone }: PostListProps) {
       bare
       aria-label="文章"
       items={posts}
-      renderItem={(post, _index, selected) => (
+      renderItem={(post, index, selected) => (
         <PostListItem
           post={post}
           active={selected}
           open={openId === post.id}
           onOpenChange={(open) => setOpenId((current) => (open ? post.id : current === post.id ? null : current))}
-          onDelete={() => onDelete(post)}
+          onDelete={() => onDelete(post, index)}
           now={now}
           timeZone={timeZone}
         />

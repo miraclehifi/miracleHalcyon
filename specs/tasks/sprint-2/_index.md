@@ -22,7 +22,7 @@
 | 8 | [implement-delete-post-api](implement-delete-post-api.md) | 删除文章接口 | article-writing | API | 领域 + 数据 + 接口 | US-09 | — | 2 | 低 | completed |
 | 9 | [add-post-list-animated-entry](add-post-list-animated-entry.md) | 列表入场动效与方向键选择 | animated-list | FRONTEND | 表现层 | US-07 | — | 1 | 中 | completed |
 | 10 | [add-swipe-row-delete](add-swipe-row-delete.md) | 列表行左滑操作抽屉 | swipe-row-actions | FRONTEND | 表现层 | US-09 | implement-delete-post-api, add-post-list-animated-entry | 1 | 高 | completed |
-| 11 | [add-list-delete-undo](add-list-delete-undo.md) | 列表删除撤销与延迟提交 | swipe-row-actions | FRONTEND | 表现层 | US-09 | add-swipe-row-delete | 0 | 中 | pending |
+| 11 | [add-list-delete-undo](add-list-delete-undo.md) | 列表删除撤销与延迟提交 | swipe-row-actions | FRONTEND | 表现层 | US-09 | add-swipe-row-delete | 0 | 中 | completed |
 | 12 | [add-editor-delete-action](add-editor-delete-action.md) | 写文章页"删除文章" | article-writing | FRONTEND | 表现层 | US-09 | implement-delete-post-api | 0 | 低 | pending |
 | 13 | [add-editor-view-modes](add-editor-view-modes.md) | 视图切换与窄屏 Tab | article-writing | FRONTEND | 表现层 | US-04 | — | 1 | 低 | pending |
 | 14 | [add-preview-scroll-sync](add-preview-scroll-sync.md) | 编辑区与预览同步滚动 | article-writing | FRONTEND | 表现层 | US-04 | add-editor-view-modes | 0 | 高 | pending |

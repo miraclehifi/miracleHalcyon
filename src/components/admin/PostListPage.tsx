@@ -1,16 +1,19 @@
 // 文章列表页（admin-post-list.md，US-07）：首屏数据由页面 SSR 传入；筛选同步到 URL，之后的数据经接口拉取
 // 加载中：无数据时骨架，有旧数据时保留并降低不透明度；失败显示"加载失败 / 重试"
 // 空：没有任何文章时显示 EmptyState 并隐藏筛选行；筛选无结果时写明条件并提供"清除筛选"
+// 删除（US-09，"删除与撤销"）：行折叠后本地移除，6 秒撤销期后才发删除请求（见 lib/admin/pending-delete）
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListStatus } from "../../domains/post/repo";
 import type { PostListItem as PostListItemData, PostListResult } from "../../domains/post/service";
 import { buildListQuery, DEFAULT_LIST_QUERY, parseListQuery, type ListQueryState } from "../../lib/admin/list-query";
+import { createPendingDelete, type PendingDelete } from "../../lib/admin/pending-delete";
 import { useHydrated } from "../../lib/dom/hydration";
 import { Button } from "../ui/Button";
 import { EmptyState } from "../ui/EmptyState";
 import { Pagination } from "../ui/Pagination";
 import { SearchInput } from "../ui/SearchInput";
 import { SegmentedControl } from "../ui/SegmentedControl";
+import { ToastProvider, useToast } from "../ui/Toast";
 import { PageHeader } from "./PageHeader";
 import { PostList } from "./PostList";
 
@@ -48,9 +51,27 @@ interface LoadState {
 
 // 本地移除一行：总数与对应状态的计数同步减 1
 function withoutPost(data: PostListResult, post: PostListItemData): PostListResult {
+  if (!data.items.some((item) => item.id === post.id)) return data;
   const counts = { ...data.counts, all: data.counts.all - 1, [post.status]: data.counts[post.status] - 1 };
   return { ...data, items: data.items.filter((item) => item.id !== post.id), total: data.total - 1, counts };
 }
+
+// 撤销 / 删除失败：按原下标插回，数量加回
+function withPost(data: PostListResult, post: PostListItemData, index: number): PostListResult {
+  if (data.items.some((item) => item.id === post.id)) return data;
+  const counts = { ...data.counts, all: data.counts.all + 1, [post.status]: data.counts[post.status] + 1 };
+  const items = [...data.items];
+  items.splice(Math.min(index, items.length), 0, post);
+  return { ...data, items, total: data.total + 1, counts };
+}
+
+interface Removed {
+  post: PostListItemData;
+  index: number; // 删除前在当前页的位置
+  toastId: number;
+}
+
+const postName = (post: PostListItemData) => `《${post.title.trim() || "无标题"}》`;
 
 async function fetchPosts(query: ListQueryState): Promise<PostListResult> {
   const response = await fetch(`/api/admin/posts${buildListQuery(query)}`, { headers: { Accept: "application/json" } });
@@ -58,11 +79,21 @@ async function fetchPosts(query: ListQueryState): Promise<PostListResult> {
   return (await response.json()) as PostListResult;
 }
 
-export function PostListPage({ initial, query: initialQuery, renderedAt }: PostListPageProps) {
+export function PostListPage(props: PostListPageProps) {
+  return (
+    <ToastProvider>
+      <PostListView {...props} />
+    </ToastProvider>
+  );
+}
+
+function PostListView({ initial, query: initialQuery, renderedAt }: PostListPageProps) {
   const [query, setQuery] = useState(initialQuery);
   const [searchText, setSearchText] = useState(initialQuery.q);
   const [state, setState] = useState<LoadState>({ data: initial, loadedFor: buildListQuery(initialQuery), loading: false, error: initial === null });
   const latest = useRef(0); // 只采用最新一次请求的结果
+  const waiting = useRef<PostListItemData | null>(null); // 撤销期内的一条：重新拉取的结果里也不显示
+  const pending = useRef<PendingDelete<Removed> | null>(null); // 延迟提交控制器（挂载时创建）
   const hydrated = useHydrated();
   const [mountedAt] = useState(() => new Date());
   const clock = hydrated ? { now: mountedAt } : { now: new Date(renderedAt), timeZone: RENDER_TIME_ZONE };
@@ -71,10 +102,14 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
     const seq = ++latest.current;
     setState((prev) => ({ ...prev, loading: true, error: false }));
     try {
-      const data = await fetchPosts(next);
-      if (seq === latest.current) setState({ data, loadedFor: buildListQuery(next), loading: false, error: false });
+      const fetched = await fetchPosts(next);
+      if (seq !== latest.current) return null;
+      const data = waiting.current ? withoutPost(fetched, waiting.current) : fetched;
+      setState({ data, loadedFor: buildListQuery(next), loading: false, error: false });
+      return data;
     } catch {
       if (seq === latest.current) setState((prev) => ({ ...prev, data: null, loading: false, error: true }));
+      return null;
     }
   }, []);
 
@@ -93,6 +128,7 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
   // 搜索输入用 replaceState，避免每次停顿都留下一条历史记录
   const navigate = useCallback(
     (next: ListQueryState, { replace = false } = {}) => {
+      pending.current?.flush(); // 换筛选 / 翻页前先提交待删除的一条
       setQuery(next);
       const url = `/admin${buildListQuery(next)}`;
       if (replace) window.history.replaceState(null, "", url);
@@ -101,6 +137,10 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
     },
     [load],
   );
+  const navigateRef = useRef(navigate);
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
 
   // 停止输入 300ms 后按标题搜索，回到第 1 页
   useEffect(() => {
@@ -110,16 +150,59 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
     return () => window.clearTimeout(timer);
   }, [searchText, query, navigate]);
 
-  // 删除（US-09）：行折叠后先在本地移除并更新数量，再发删除请求，完成后重新拉取当前页补位
-  // （撤销期与失败恢复见 add-list-delete-undo）
-  const deletePost = useCallback(
-    async (post: PostListItemData) => {
-      setState((prev) => (prev.data ? { ...prev, data: withoutPost(prev.data, post) } : prev));
-      await fetch(`/api/admin/posts/${post.id}`, { method: "DELETE" }).catch(() => undefined);
-      void load(query);
-    },
-    [load, query],
-  );
+  // 删除：撤销期结束（或离开页面、再删一条）才提交；keepalive 让请求在页面卸载后照常发出。
+  // 成功后重新拉取当前页补位，当前页删空时回到上一页；失败时按原位插回并常驻提示
+  const toast = useToast();
+  const queryRef = useRef(query);
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
+  useEffect(() => {
+    const commit = ({ post, index, toastId }: Removed) => {
+      if (waiting.current?.id === post.id) waiting.current = null;
+      toast.dismiss(toastId);
+      const restore = () => {
+        setState((prev) => (prev.data ? { ...prev, data: withPost(prev.data, post, index) } : prev));
+        toast.show({ tone: "error", message: `删除${postName(post)}失败，请重试` });
+      };
+      fetch(`/api/admin/posts/${post.id}`, { method: "DELETE", keepalive: true }).then(
+        (response) => {
+          if (!response.ok && response.status !== 404) return restore();
+          const current = queryRef.current;
+          void load(current).then((data) => {
+            if (data && data.items.length === 0 && current.page > 1) navigateRef.current({ ...current, page: current.page - 1 }, { replace: true });
+          });
+        },
+        () => restore(),
+      );
+    };
+    const controller = createPendingDelete<Removed>({ commit });
+    pending.current = controller;
+    return () => {
+      controller.dispose();
+      pending.current = null;
+    };
+  }, [load, toast]);
+
+  const removePost = (post: PostListItemData, index: number) => {
+    setState((prev) => (prev.data ? { ...prev, data: withoutPost(prev.data, post) } : prev));
+    const undo = () => {
+      const removed = pending.current?.undo();
+      if (!removed) return;
+      waiting.current = null;
+      toast.dismiss(removed.toastId);
+      setState((prev) => (prev.data ? { ...prev, data: withPost(prev.data, removed.post, removed.index) } : prev));
+    };
+    pending.current?.flush(); // 先提交上一条，再显示这一条的提示
+    const toastId = toast.show({
+      tone: "success",
+      message: `已删除${postName(post)}`,
+      action: { label: "撤销", onClick: undo },
+      onHold: (held) => pending.current?.hold(held),
+    });
+    waiting.current = post;
+    pending.current?.schedule({ post, index, toastId });
+  };
 
   const clearFilters = () => {
     setSearchText("");
@@ -180,7 +263,7 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
       )}
       {!error && data && !noPostsAtAll && !noResults && (
         <div aria-busy={loading || undefined} className={`transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}>
-          <PostList key={state.loadedFor} posts={data.items} onDelete={(post) => void deletePost(post)} now={clock.now} timeZone={clock.timeZone} />
+          <PostList key={state.loadedFor} posts={data.items} onDelete={removePost} now={clock.now} timeZone={clock.timeZone} />
         </div>
       )}
       {!error && data && (

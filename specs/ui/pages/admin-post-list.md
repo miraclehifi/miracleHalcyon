@@ -89,7 +89,7 @@
 
 ## 页面状态
 
-> 已实现（Sprint 1 主干，build-post-list-page）：`src/pages/admin/index.astro`（SSR 首屏）+ `src/components/admin/PostListPage.tsx`——默认、加载中骨架、错误重试；状态筛选、标题搜索、分页、两种空态已接入（URL 解析 `src/lib/admin/list-query.ts`；搜索用 `replaceState`）。行操作、删除与撤销、入场动效在 Sprint 2。
+> 已实现（Sprint 1 主干，build-post-list-page）：`src/pages/admin/index.astro`（SSR 首屏）+ `src/components/admin/PostListPage.tsx`——默认、加载中骨架、错误重试；状态筛选、标题搜索、分页、两种空态已接入（URL 解析 `src/lib/admin/list-query.ts`；搜索用 `replaceState`）。行操作、删除与撤销、入场动效已实现（Sprint 2）：`PostList.tsx`（AnimatedList + SwipeRow）；撤销期为 `src/lib/admin/pending-delete.ts`（6 秒，悬停暂停，再删一条或换筛选 / 翻页时先提交上一条，`pagehide` 时立即提交，`keepalive`）。
 
 | 状态 | 表现 |
 |------|------|
