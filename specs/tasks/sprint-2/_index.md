@@ -17,7 +17,7 @@
 | 3 | [add-image-read-route](add-image-read-route.md) | 图片读取路由 `/img/*` | article-writing | API | 接口层 | US-05 | implement-image-upload-api | 1 | 低 | completed |
 | 4 | [add-image-paste-upload](add-image-paste-upload.md) | 粘贴图片上传并插入引用 | article-writing | FRONTEND | 表现层 | US-05 | build-format-toolbar, implement-image-upload-api, add-image-read-route | 1 | 中 | completed |
 | 5 | [add-image-drop-and-pick-upload](add-image-drop-and-pick-upload.md) | 拖入与"插入图片"上传 | article-writing | FRONTEND | 表现层 | US-05 | add-image-paste-upload | 1 | 中 | completed |
-| 6 | [handle-image-upload-errors](handle-image-upload-errors.md) | 图片上传的拒绝与失败处理 | article-writing | FRONTEND | 表现层 | US-05 | add-image-drop-and-pick-upload | 0 | 低 | pending |
+| 6 | [handle-image-upload-errors](handle-image-upload-errors.md) | 图片上传的拒绝与失败处理 | article-writing | FRONTEND | 表现层 | US-05 | add-image-drop-and-pick-upload | 0 | 低 | completed |
 | 7 | [add-icon-button-tooltips](add-icon-button-tooltips.md) | 图标按钮悬停提示 | editor-warm-tooltip | FRONTEND | 表现层 | US-10 | build-format-toolbar | 0 | 中 | pending |
 | 8 | [implement-delete-post-api](implement-delete-post-api.md) | 删除文章接口 | article-writing | API | 领域 + 数据 + 接口 | US-09 | — | 2 | 低 | pending |
 | 9 | [add-post-list-animated-entry](add-post-list-animated-entry.md) | 列表入场动效与方向键选择 | animated-list | FRONTEND | 表现层 | US-07 | — | 1 | 中 | pending |

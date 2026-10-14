@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
 import { waitForHydration } from "./support/hydration";
-import { IMAGE_URL, makeFiles, type FakeFile } from "./support/images";
+import { dropFiles, IMAGE_URL, type FakeFile } from "./support/images";
 
 async function openPost(page: Page, baseURL: string, label: string, body: string) {
   await login(page);
@@ -11,23 +11,7 @@ async function openPost(page: Page, baseURL: string, label: string, body: string
   return page.getByRole("textbox", { name: "正文" });
 }
 
-// 在源码区第 line 行（从 1 开始）的最右侧派发拖放事件（落点在该行末尾之后）
-async function dropOnLine(page: Page, editor: Locator, files: FakeFile[], line: number, events = ["dragenter", "dragover", "drop"]) {
-  const handle = await makeFiles(page, files);
-  await editor.evaluate(
-    (element: HTMLTextAreaElement, { list, line, events }) => {
-      const data = new DataTransfer();
-      for (const file of list) data.items.add(file);
-      const rect = element.getBoundingClientRect();
-      const style = getComputedStyle(element);
-      const lineHeight = parseFloat(style.lineHeight);
-      const clientX = rect.right - 8;
-      const clientY = rect.top + element.clientTop + parseFloat(style.paddingTop) + lineHeight * (line - 0.5);
-      for (const type of events) element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data, clientX, clientY }));
-    },
-    { list: handle, line, events },
-  );
-}
+const dropOnLine = (page: Page, editor: Locator, files: FakeFile[], line: number, events?: string[]) => dropFiles(page, editor, files, line, events);
 
 const png = (name: string, size?: number): FakeFile => ({ name, type: "image/png", content: { png: [40, 30] }, ...(size ? { padTo: size } : {}) });
 

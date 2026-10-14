@@ -21,10 +21,12 @@ export class UploadError extends Error {
   }
 }
 
+export const UPLOAD_TIMEOUT_MS = 60_000; // 无响应超过 60 秒按失败处理
+
 export async function uploadImage(file: File, fetchImpl: typeof fetch = fetch): Promise<UploadedImage> {
   const body = new FormData();
   body.append("file", file);
-  const response = await fetchImpl("/api/admin/images", { method: "POST", body });
+  const response = await fetchImpl("/api/admin/images", { method: "POST", body, signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS) });
   if (response.ok) return (await response.json()) as UploadedImage;
   const error = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
   throw new UploadError(error?.error?.code ?? "UPLOAD_FAILED", error?.error?.message ?? "上传失败，请重试", response.status);

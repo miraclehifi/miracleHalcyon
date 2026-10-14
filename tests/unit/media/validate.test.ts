@@ -65,7 +65,7 @@ describe("validateUploadFields", () => {
     [{ width: "-1", height: "100000" }, ["width", "height"]],
     [{ height: "12.5" }, ["height"]],
   ])("%j → VALIDATION_FAILED %j", (fields, invalid) => {
-    expect(() => validateUploadFields(fields)).toThrowError(expect.objectContaining({ code: "VALIDATION_FAILED", fields: invalid }));
+    expect(() => validateUploadFields(fields)).toThrow(expect.objectContaining({ code: "VALIDATION_FAILED", fields: invalid }));
   });
 });
 

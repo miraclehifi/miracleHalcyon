@@ -57,3 +57,21 @@ export async function holdUploads(page: Page): Promise<() => void> {
   });
   return release;
 }
+
+// 在源码区第 line 行（从 1 开始）的最右侧派发拖放事件（落点在该行末尾之后）
+export async function dropFiles(page: Page, target: Locator, files: FakeFile[], line = 1, events = ["dragenter", "dragover", "drop"]) {
+  const handle = await makeFiles(page, files);
+  await target.evaluate(
+    (element, { list, line, events }) => {
+      const data = new DataTransfer();
+      for (const file of list) data.items.add(file);
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      const lineHeight = parseFloat(style.lineHeight);
+      const clientX = rect.right - 8;
+      const clientY = rect.top + element.clientTop + parseFloat(style.paddingTop) + lineHeight * (line - 0.5);
+      for (const type of events) element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data, clientX, clientY }));
+    },
+    { list: handle, line, events },
+  );
+}

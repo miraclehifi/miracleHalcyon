@@ -32,9 +32,9 @@
 
 | US ID | 名称 | 状态 | 说明 |
 |-------|------|------|------|
-| US-03 | edit-post-info | draft | 新建/编辑文章：标题、slug、标签、摘要、发布日期、正文 |
+| US-03 | edit-post-info | implemented | 新建/编辑文章：标题、slug、标签、摘要、发布日期、正文 |
 | US-04 | markdown-preview | draft | 正文 Markdown 实时预览（GFM、代码高亮） |
-| US-05 | image-upload | draft | 粘贴/拖入图片上传 R2 并插入引用 |
+| US-05 | image-upload | implemented | 粘贴/拖入图片上传 R2 并插入引用 |
 | US-06 | autosave-draft | draft | 停止输入后自动保存，显示保存状态，重开恢复 |
 | US-10 | format-toolbar | draft | 工具栏格式命令、格式快捷键、按钮悬停提示 |
 | US-11 | live-photo-upload | draft | HEIC 转换、实况照片 / 安卓动态照片配对上传 |
@@ -47,7 +47,7 @@
 | US ID | 名称 | 状态 | 说明 |
 |-------|------|------|------|
 | US-07 | post-list | in_progress | 后台文章列表（含草稿），新建入口，进入编辑（Sprint 1 列表 / 筛选 / 搜索 / 分页 / 空态已实现；入场动效 Sprint 2） |
-| US-08 | publish-post | draft | 发布、更新已发布文章、撤回为草稿 |
+| US-08 | publish-post | implemented | 发布、更新已发布文章、撤回为草稿 |
 | US-09 | delete-post | draft | 删除文章（列表左滑 + 撤销；写文章页二次确认） |
 
 ---

@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MarkdownEditor } from "../../../src/components/admin/editor/MarkdownEditor";
+import { ToastProvider } from "../../../src/components/ui/Toast";
 
 afterEach(() => {
   cleanup();
@@ -13,7 +14,7 @@ const fileDrag = () => ({ dataTransfer: { types: ["Files"], files: [] as File[],
 // [SC-IMAGE-02] UT-93：带文件拖入编辑区显示"松开以上传"，离开 / 放下后消失；拖入文字不提示
 describe("MarkdownEditor 拖放高亮", () => {
   it("dragenter 显示提示，dragleave / drop 隐藏；子元素间移动不闪烁", () => {
-    render(<MarkdownEditor title="" body="" onTitleChange={noop} onBodyChange={noop} />);
+    render(<ToastProvider><MarkdownEditor title="" body="" onTitleChange={noop} onBodyChange={noop} /></ToastProvider>);
     const area = screen.getByRole("textbox", { name: "正文" }).closest("[data-drop-zone]")!;
     const hint = () => screen.queryByText(/松开以上传/) !== null;
 
@@ -38,7 +39,7 @@ describe("MarkdownEditor 拖放高亮", () => {
 describe("MarkdownEditor 插入图片", () => {
   it("按钮触发隐藏的文件输入", () => {
     const click = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(noop);
-    render(<MarkdownEditor title="" body="" onTitleChange={noop} onBodyChange={noop} />);
+    render(<ToastProvider><MarkdownEditor title="" body="" onTitleChange={noop} onBodyChange={noop} /></ToastProvider>);
     const button = screen.getByRole("button", { name: "插入图片" });
     act(() => button.click());
     const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;

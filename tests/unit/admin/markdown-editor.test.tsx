@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { MarkdownEditor } from "../../../src/components/admin/editor/MarkdownEditor";
+import { ToastProvider } from "../../../src/components/ui/Toast";
 
 // [SC-POSTINFO-01] MarkdownEditor（admin-post-editor.md"编辑区"）：标题占位"无标题"、回车进入正文（输入法组字中不跳）、
 // 标题不含换行；底栏字数（不计空白，千分位）随输入更新
@@ -10,7 +11,11 @@ afterEach(cleanup);
 function Harness({ body = "" }: { body?: string }) {
   const [title, setTitle] = useState("");
   const [text, setText] = useState(body);
-  return <MarkdownEditor title={title} body={text} onTitleChange={setTitle} onBodyChange={setText} />;
+  return (
+    <ToastProvider>
+      <MarkdownEditor title={title} body={text} onTitleChange={setTitle} onBodyChange={setText} />
+    </ToastProvider>
+  );
 }
 
 describe("MarkdownEditor", () => {

@@ -52,6 +52,8 @@ function uploadItem(item: Item, cb: Callbacks): Promise<UploadResult>;
 | 失败 | 任一步失败 → 移除占位 → `Toast/Error`（带文件名），不影响其他项 |
 | 懒加载 | `heic-to`、`mediabunny` 只在遇到对应文件时加载；加载期间占位显示"处理中…" |
 
+> 已实现（Sprint 2，静态图）：`src/lib/upload/upload-client.ts`、`upload-queue.ts`（并发 2）、`validate-file.ts`、`use-image-uploads.ts`；HEIC、实况照片、主色在 Sprint 3。
+
 ## 4. 单元测试
 
 见 [frontend-unit-tests.md](../../../../test/features/F-001-文章写作/unit/frontend-unit-tests.md) §8（UT-85 – UT-94）、§14（UT-141 – UT-147）。

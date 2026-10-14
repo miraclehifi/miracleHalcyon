@@ -1,10 +1,11 @@
 // MarkdownEditor（components.md，admin-post-editor.md"编辑区"，ADR-004 textarea 编辑器）：标题 + 源码区 + 底栏
 // 标题是无边框大号输入（自动增高、不含换行），回车把光标移到正文；工具栏按钮与快捷键改写源码（US-10，可撤销）
-import { useLayoutEffect, useRef, useState, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent } from "react";
+import { useCallback, useLayoutEffect, useRef, useState, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent } from "react";
 import { applyEdit, applyFormat, type FormatCommand } from "../../../lib/editor/format-commands";
 import { isMacPlatform, matchShortcut } from "../../../lib/editor/shortcuts";
 import { offsetFromPoint } from "../../../lib/editor/textarea-mirror";
 import { useImageUploads } from "../../../lib/upload/use-image-uploads";
+import { useToast } from "../../ui/Toast";
 import { EditorToolbar } from "./EditorToolbar";
 
 export interface MarkdownEditorProps {
@@ -31,7 +32,9 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange });
+  const toast = useToast();
+  const showUploadError = useCallback((message: string) => toast.show({ tone: "error", message }), [toast]);
+  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange, onError: showUploadError });
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0); // dragenter / dragleave 在子元素间成对出现，计数归零才算离开
 
@@ -55,12 +58,12 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
     applyEdit(element, applyFormat(element.value, [element.selectionStart, element.selectionEnd], command));
   };
 
-  // 粘贴图片（US-05）：剪贴板里有图片文件时上传，否则照常粘贴文字
+  // 粘贴图片（US-05）：剪贴板里有文件时按图片上传（不支持的类型给出提示），否则照常粘贴文字
   const onBodyPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
-    const images = [...(event.clipboardData?.files ?? [])].filter((file) => file.type.startsWith("image/"));
-    if (images.length === 0) return;
+    const files = [...(event.clipboardData?.files ?? [])];
+    if (files.length === 0) return;
     event.preventDefault();
-    uploadFiles(images);
+    uploadFiles(files);
   };
 
   // 拖入图片（US-05）：只响应带文件的拖动；放到源码区按落点换算插入位置，放在标题等其他位置插在光标处
@@ -85,11 +88,11 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
     event.preventDefault();
     dragDepth.current = 0;
     setDragging(false);
-    const images = [...(event.dataTransfer?.files ?? [])].filter((file) => file.type.startsWith("image/"));
+    const files = [...(event.dataTransfer?.files ?? [])];
     const body = bodyRef.current;
-    if (!body || images.length === 0) return;
+    if (!body || files.length === 0) return;
     const at = event.target === body ? offsetFromPoint(body, event.clientX, event.clientY) : undefined;
-    uploadFiles(images, at);
+    uploadFiles(files, at);
   };
 
   // "插入图片"：选择文件后插在光标处
