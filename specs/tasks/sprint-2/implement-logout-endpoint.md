@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 17
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 领域层 + 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -38,13 +38,20 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `auth.logout`、`SessionRepo.delete`；`POST /api/admin/logout` 与 GET 405
-- [ ] 清除 Cookie：`mh_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`
+- [x] `auth.logout`、`SessionRepo.delete`；`POST /api/admin/logout` 与 GET 405
+- [x] 清除 Cookie：`mh_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：按新规则只跑 auth、post 集成测试（全量移到 Sprint 末，见 `.claude/rules/tasks.md`"测试执行"）
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- 前置确认（2026-10-14 作者确认）：无效会话登出返回成功。契约 401 改为 204；middleware 对 `/api/admin/logout` 不要求会话（仍校验 Origin）
+- `auth.logout(token)`：有 token 就按哈希删除（`SessionRepo.delete` 已有），只删当前会话；`clearedSessionCookie(url)` 属性与签发一致（http 无 Secure）；`methodNotAllowed`（405 + `Allow`）
+- 测试：`tests/integration/auth/logout-endpoint.test.ts`（TC-US02-01 / 05 / 17：204、两种 Cookie、会话失效、日志无 token；TC-US02-06 / 07 / 08 / 09：无 / 已登出 / 伪造 / 过期 / 空 / 超长 / 注入值与重复登出都 204，其他会话不受影响；TC-US02-11：GET 405、无 Cookie、会话仍有效；TC-US02-03 / 04 / 10：经 middleware 旧会话页面 302、5 个写接口 401，登出接口无会话放行、外域与缺失 Origin 403）
+- 回归：auth + post 集成 19 文件 25 用例；lint 0、astro check 0（首次 3 个测试类型错误已修）。全量回归按新规则在 Sprint 末跑
 
 ## 依赖
 

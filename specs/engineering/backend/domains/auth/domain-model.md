@@ -112,6 +112,7 @@ interface ThrottleRepo { // 已实现：D1ThrottleRepo（src/domains/auth/thrott
 | `/admin/login` | 放行 | — |
 | 其他 `/admin/**` 页面 | 302 → `/admin/login?next={原路径+查询}` | — |
 | `POST /api/admin/login` | 放行 | 403 `FORBIDDEN_ORIGIN` |
+| `/api/admin/logout` | 放行（登出幂等） | 403 `FORBIDDEN_ORIGIN` |
 | 其他 `/api/admin/**` | 401 `UNAUTHENTICATED`（不区分资源是否存在） | 403 `FORBIDDEN_ORIGIN` |
 
 - 有效会话访问 `/admin/login` → 302 到 `sanitizeNext(next)`

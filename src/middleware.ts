@@ -11,6 +11,7 @@ import { SESSION_COOKIE } from "./lib/api/session-cookie";
 
 const LOGIN_PAGE = "/admin/login";
 const LOGIN_API = "/api/admin/login";
+const LOGOUT_API = "/api/admin/logout"; // 无会话也放行：登出幂等（2026-10-14 作者确认）
 const SAFE_METHODS = new Set(["GET", "HEAD"]);
 
 export interface AuthMiddlewareDeps {
@@ -57,7 +58,7 @@ export function createAuthMiddleware(deps: AuthMiddlewareDeps): MiddlewareHandle
       if (!deps.siteOrigin) return reject(context.request, serverMisconfigured()); // 无法校验来源时拒绝写操作
       if (requestOrigin(context.request) !== deps.siteOrigin) return reject(context.request, forbiddenOrigin());
     }
-    if (pathname === LOGIN_API) return next();
+    if (pathname === LOGIN_API || pathname === LOGOUT_API) return next();
 
     const session = await deps.getSession(context.cookies.get(SESSION_COOKIE)?.value, now());
     context.locals.session = session;

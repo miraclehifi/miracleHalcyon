@@ -86,6 +86,11 @@ export function createAuthService(deps: AuthDeps) {
       if (!token) return null;
       return deps.sessions.findValid(await hashToken(token), now);
     },
+
+    // 只删除当前会话（其他设备的会话不受影响）；无 / 无效 token 什么也不做（登出幂等）
+    async logout(token: string | undefined): Promise<void> {
+      if (token) await deps.sessions.delete(await hashToken(token));
+    },
   };
 }
 

@@ -35,19 +35,20 @@
 
 ## POST /api/admin/logout
 
-登出。需要会话（无会话时 middleware 返回 401）。
+登出。不要求会话：middleware 对本接口只校验 Origin；无会话、会话无效或已登出也返回 204（幂等，2026-10-14 作者确认，原为 401）。只删除当前会话，其他设备的会话不受影响。
 
 | 状态 | 体 | 说明 |
 |------|----|------|
-| 204 | — | 删除服务端会话；`Set-Cookie: mh_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax` |
-| 401 | `UNAUTHENTICATED` | 无会话或已失效 |
-| 403 | `FORBIDDEN_ORIGIN` | Origin 不符 |
+| 204 | — | 删除当前会话（如有）；`Set-Cookie: mh_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`（本地 http 无 `Secure`，与签发时一致） |
+| 403 | `FORBIDDEN_ORIGIN` | Origin 不符或缺失 |
 
-`GET /api/admin/logout` → 405 `METHOD_NOT_ALLOWED`，不改变会话（防止通过图片链接等方式触发登出）。
+> 已实现：`src/pages/api/admin/logout.ts`（`createLogoutHandlers`）、`auth.logout`、`clearedSessionCookie`。
+
+`GET /api/admin/logout` → 405 `METHOD_NOT_ALLOWED`（`Allow: POST`），不改变会话、不下发 Cookie（防止通过图片链接等方式触发登出）。
 
 ## 通用 401 / 403
 
-所有 `/api/admin/**`（login 除外）：
+所有 `/api/admin/**`（login、logout 除外）：
 
 | 状态 | 体 |
 |------|----|

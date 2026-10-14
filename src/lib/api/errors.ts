@@ -5,4 +5,5 @@ export function jsonError(status: number, code: string, message: string, headers
 
 export const unauthenticated = () => jsonError(401, "UNAUTHENTICATED", "登录已过期，请重新登录");
 export const forbiddenOrigin = () => jsonError(403, "FORBIDDEN_ORIGIN", "请求来源不受信任");
+export const methodNotAllowed = (allow: string) => jsonError(405, "METHOD_NOT_ALLOWED", "不支持该请求方法", { Allow: allow });
 export const serverMisconfigured = () => jsonError(500, "SERVER_MISCONFIGURED", "服务器配置缺失，请联系管理员");

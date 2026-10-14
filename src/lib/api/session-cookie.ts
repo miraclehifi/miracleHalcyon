@@ -9,3 +9,8 @@ function attributes(url: URL): string {
 export function sessionCookie(token: string, url: URL): string {
   return `${SESSION_COOKIE}=${token}; ${attributes(url)}; Max-Age=${MAX_AGE_SECONDS}`;
 }
+
+// 清除：属性（尤其 Path）须与签发时一致，浏览器才会覆盖原 Cookie
+export function clearedSessionCookie(url: URL): string {
+  return `${SESSION_COOKIE}=; ${attributes(url)}; Max-Age=0`;
+}
