@@ -15,17 +15,19 @@
 
 ## 目标与验收
 
+> 2026-10-14：后台 `PostList` 已实现（Sprint 2 add-post-list-animated-entry）；读者端 `HomePosts` 属 F-002，届时复用同一个 vendor 组件。
+
 **目标**: 两个文章列表有统一的入场动效和键盘选择，同时保留现有卡片外观、无障碍结构、分页和触屏规则。
 
 **验收条件**:
 - [x] [components.md](../ui/components.md) 写明 `PostList`、`HomePosts` 底层使用 AnimatedList，以及参数对照和需要改的源码
 - [x] [design-tokens.md](../ui/design-tokens.md)"焦点与交互"把列表入场列为过渡的例外，并写明减弱动效时怎么降级
 - [x] [admin-post-list.md](../ui/pages/admin-post-list.md) 写明入场动画与方向键选择
-- [ ] 列表随页面滚动（不出现内部滚动条和上下渐隐），筛选、翻页后整页重新入场
-- [ ] 选中行 = `PostCard/Hover`（双层错位，边框保持 `line-strong`）；悬停、键盘聚焦、方向键都只改选中行，同一时间只有一行处于该状态
-- [ ] 焦点在列表内时 ↑ / ↓ / Home / End 把焦点移到对应卡片的标题链接；焦点不在列表内时方向键照常滚动页面
-- [ ] Tab 顺序、`<a>` + 并列 `<button>` 的结构和读屏名称与现在一致；不使用 `listbox` / `option`
-- [ ] `prefers-reduced-motion` 时只做透明度渐显，不位移、不缩放、不错开
+- [x] 列表随页面滚动（不出现内部滚动条和上下渐隐），筛选、翻页后整页重新入场
+- [x] 选中行 = `PostCard/Hover`（双层错位，边框保持 `line-strong`）；悬停、键盘聚焦、方向键都只改选中行，同一时间只有一行处于该状态
+- [x] 焦点在列表内时 ↑ / ↓ / Home / End 把焦点移到对应卡片的标题链接；焦点不在列表内时方向键照常滚动页面
+- [x] Tab 顺序、`<a>` + 并列 `<button>` 的结构和读屏名称与现在一致；不使用 `listbox` / `option`
+- [x] `prefers-reduced-motion` 时只做透明度渐显，不位移、不缩放、不错开
 
 ## 影响分析
 

@@ -127,6 +127,8 @@
 
 `PostList`（后台）、`HomePosts`（读者端 `/posts`）内部渲染 React Bits AnimatedList（TypeScript + Tailwind 版，文件 `AnimatedList.tsx`，只供这两个区块使用，页面不直接引用）。**只借动效和交互**：每行用 `renderItem` 渲染 `PostListItem` / `PostCard`，卡片外观不变；AnimatedList 自带的磨砂底板、行块、选中框都不用（[Backlog](../backlog/animated-list.md)）。
 
+已实现（后台 `PostList`，Sprint 2）：`src/components/admin/PostList.tsx`、`src/components/vendor/react-bits/AnimatedList.tsx`（另去掉 Enter / 空格选择与内部滚动跟随，见文件头）。
+
 "选中行"就是 `PostCard/Hover` 状态：`renderItem(post, index, selected)` 把 `selected` 传给卡片的 `active`，卡片不再自己响应 `:hover` / `:focus-within`，保证同一时间只有一行处于该状态。
 
 | Prop | 取值 | 说明 |

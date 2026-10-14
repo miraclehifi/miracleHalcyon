@@ -12,3 +12,15 @@ if (typeof window !== "undefined" && !window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList;
 }
+
+// jsdom 没有 ResizeObserver、CSS.supports：补空实现（列表动效等组件挂载时会用到）
+if (typeof window !== "undefined" && !("ResizeObserver" in window)) {
+  (window as unknown as { ResizeObserver: unknown }).ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+if (typeof window !== "undefined" && typeof window.CSS?.supports !== "function") {
+  (window as unknown as { CSS: { supports: () => boolean } }).CSS = { ...(window.CSS ?? {}), supports: () => false };
+}

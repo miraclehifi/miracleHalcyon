@@ -12,7 +12,7 @@ import { Pagination } from "../ui/Pagination";
 import { SearchInput } from "../ui/SearchInput";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { PageHeader } from "./PageHeader";
-import { PostListItem } from "./PostListItem";
+import { PostList } from "./PostList";
 
 export interface PostListPageProps {
   initial: PostListResult | null; // null：SSR 读取失败
@@ -41,6 +41,7 @@ const goToNewPost = () => window.location.assign("/admin/posts/new");
 
 interface LoadState {
   data: PostListResult | null;
+  loadedFor: string; // data 对应的查询（列表入场动画的 key：新数据到了才整页重新入场）
   loading: boolean;
   error: boolean;
 }
@@ -54,7 +55,7 @@ async function fetchPosts(query: ListQueryState): Promise<PostListResult> {
 export function PostListPage({ initial, query: initialQuery, renderedAt }: PostListPageProps) {
   const [query, setQuery] = useState(initialQuery);
   const [searchText, setSearchText] = useState(initialQuery.q);
-  const [state, setState] = useState<LoadState>({ data: initial, loading: false, error: initial === null });
+  const [state, setState] = useState<LoadState>({ data: initial, loadedFor: buildListQuery(initialQuery), loading: false, error: initial === null });
   const latest = useRef(0); // 只采用最新一次请求的结果
   const hydrated = useHydrated();
   const [mountedAt] = useState(() => new Date());
@@ -65,9 +66,9 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
     setState((prev) => ({ ...prev, loading: true, error: false }));
     try {
       const data = await fetchPosts(next);
-      if (seq === latest.current) setState({ data, loading: false, error: false });
+      if (seq === latest.current) setState({ data, loadedFor: buildListQuery(next), loading: false, error: false });
     } catch {
-      if (seq === latest.current) setState({ data: null, loading: false, error: true });
+      if (seq === latest.current) setState((prev) => ({ ...prev, data: null, loading: false, error: true }));
     }
   }, []);
 
@@ -161,13 +162,9 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
         </div>
       )}
       {!error && data && !noPostsAtAll && !noResults && (
-        <ul aria-busy={loading || undefined} className={`flex flex-col gap-5 transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}>
-          {data.items.map((post) => (
-            <li key={post.id}>
-              <PostListItem post={post} now={clock.now} timeZone={clock.timeZone} />
-            </li>
-          ))}
-        </ul>
+        <div aria-busy={loading || undefined} className={`transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}>
+          <PostList key={state.loadedFor} posts={data.items} now={clock.now} timeZone={clock.timeZone} />
+        </div>
       )}
       {!error && data && (
         <Pagination
