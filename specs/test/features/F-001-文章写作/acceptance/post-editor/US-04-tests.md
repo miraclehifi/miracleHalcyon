@@ -528,25 +528,25 @@ await editor.press('Backspace'); await expect(ph).toBeVisible();
 **测试数据：** 视口宽度 768 与 1280（高 800）
 
 **步骤（每个宽度各执行一遍）：**
-1. 打开 `/admin/posts/:idP`
-2. 点击视图切换"仅编辑"
-3. 点击"仅预览"
-4. 切回并排视图
+1. 打开 `/admin/posts/:idP`，确认默认视图（1280：并排；768：编辑，见 admin-post-editor"响应式"），再选"并排"
+2. 视图切换（单选组"视图"）选"编辑"
+3. 选"预览"
+4. 选回"并排"，刷新页面
 
 **预期结果：**
 - 步骤 1：编辑区与预览区均可见，预览区左边界 ≥ 编辑区右边界（左右并排），二者顶部 y 坐标相同
 - 步骤 2：预览区隐藏，编辑区宽度 ≈ 容器宽度（误差 ≤ 2px）
 - 步骤 3：编辑区隐藏，预览区可见，内容为 `h1`"保持不变"
-- 步骤 4：恢复并排；编辑区内容仍为 `# 保持不变`（切换不丢内容）
+- 步骤 4：恢复并排；编辑区内容仍为 `# 保持不变`（切换不丢内容）；刷新后仍为并排（记在 `localStorage['mh:editor:view']`）
 
 **playwright_hint：**
 ```ts
 await page.setViewportSize({ width: 768, height: 800 });
-const ed = await page.getByTestId('md-editor').boundingBox();
-const pv = await page.getByTestId('md-preview').boundingBox();
+const ed = await page.getByRole('region', { name: '编辑' }).boundingBox();
+const pv = await page.getByRole('region', { name: '预览' }).boundingBox();
 expect(pv!.x).toBeGreaterThanOrEqual(ed!.x + ed!.width - 1);
-await page.getByRole('button', { name: '仅编辑' }).click();
-await expect(page.getByTestId('md-preview')).toBeHidden();
+await page.getByRole('radiogroup', { name: '视图' }).getByRole('radio', { name: '编辑' }).click();
+await expect(page.getByRole('region', { name: '预览' })).toBeHidden();
 ```
 
 **清理：** 删除文章 P
@@ -671,3 +671,4 @@ await expect.poll(async () => {
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | AI（design-acceptance） |
 | 2026-10-14 | v1.1 | 新增 TC-US04-15（SC-PREVIEW-09 渲染失败恢复） | AI（plan-tasks 追加） |
+| 2026-10-14 | v1.2 | TC-12：768px 默认"编辑"、视图切换按设计稿为"编辑 / 并排 / 预览"单选组、刷新后保持 | miraclehifi |

@@ -1,5 +1,6 @@
 // EditorToolbar（components.md，admin-post-editor.md"工具栏与悬停提示"，US-10）：8 个格式按钮 + 竖线 + 插入图片
-// 按下时阻止默认行为，源码区不失焦、选区保留（手机上键盘不收起）；手机隐藏斜体、任务列表，可点区域 44px
+// 按下时阻止默认行为，源码区不失焦、选区保留（手机上键盘不收起）；手机隐藏斜体、任务列表，可点区域 44px，
+// 手机固定在页面底部（编辑区最后、通栏，`EditorToolbar/Mobile`；h-dvh 布局随键盘收缩，因此在键盘上方）
 // 全部按钮在一个 TooltipGroup 里，提示带快捷键键帽；桌面提示在下方，手机在上方
 import type { MouseEvent } from "react";
 import { NARROW_QUERY, useMediaQuery } from "../../../lib/dom/media";
@@ -38,14 +39,18 @@ const BUTTON_CLASS = "max-md:size-11";
 export function EditorToolbar({ onCommand, onInsertImage }: EditorToolbarProps) {
   const side = useMediaQuery(NARROW_QUERY) ? "top" : "bottom";
   return (
-    <div role="toolbar" aria-label="格式" className="-mx-1.5 flex items-center gap-0.5">
+    <div
+      role="toolbar"
+      aria-label="格式"
+      className="-mx-1.5 flex items-center gap-0.5 max-md:order-last max-md:-mx-4 max-md:justify-between max-md:border-t max-md:border-line max-md:bg-surface max-md:px-1"
+    >
       <TooltipGroup>
         {TOOLBAR_BUTTONS.map(({ command, label, icon, mobile, shortcut }) => (
           <Tooltip key={command} content={label} shortcut={shortcut} side={side} className={mobile ? undefined : "max-md:hidden"}>
             <IconButton icon={icon} aria-label={label} onMouseDown={keepFocus} onClick={() => onCommand(command)} className={BUTTON_CLASS} />
           </Tooltip>
         ))}
-        <span aria-hidden="true" className="mx-1.5 h-4 w-px bg-line" />
+        <span aria-hidden="true" className="mx-1.5 h-4 w-px bg-line max-md:hidden" />
         <Tooltip content="插入图片" side={side}>
           <IconButton icon="image-plus" aria-label="插入图片" onMouseDown={keepFocus} onClick={onInsertImage} disabled={!onInsertImage} className={BUTTON_CLASS} />
         </Tooltip>

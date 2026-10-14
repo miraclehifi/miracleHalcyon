@@ -9,7 +9,7 @@
 | US-01 admin-login | ● | | | | | | `POST /api/admin/login`、middleware（已实现，Sprint 1） |
 | US-02 admin-logout | ● | | | | | | `POST /api/admin/logout` |
 | US-03 edit-post-info | ○ | ● | | | ● | | `POST/GET/PUT /api/admin/posts[/:id]`、`GET /api/admin/tags`、`slugify` |
-| US-04 markdown-preview | | | | ● | ● | | `renderMarkdown`（Web Worker）、同步滚动 |
+| US-04 markdown-preview | | | | ● | ● | | `renderMarkdown`（Web Worker）、`useEditorView`（视图切换、窄屏 Tab，已实现 Sprint 2）、同步滚动 |
 | US-05 image-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`、`GET /img/*`（已实现，Sprint 2） |
 | US-06 autosave-draft | ○ | ● | | | ● | | `POST/PUT /api/admin/posts`、自动保存状态机、本地暂存 |
 | US-07 post-list | ○ | ● | | | | | `GET /api/admin/posts`（已实现，Sprint 1；列表页 `/admin` 已实现） |

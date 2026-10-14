@@ -1,5 +1,5 @@
 // 图标注册表：组件的 icon 属性用 lucide 图标名（与设计稿一致），只打包这里登记的图标
-import { ArrowLeft, Bold, CircleAlert, CircleCheck, CircleDot, CloudCheck, CloudOff, Code, Ellipsis, ExternalLink, Feather, Heading2, History, ImagePlus, Italic, Link, List, ListTodo, Loader, LogOut, PenLine, Search, Settings2, SquarePen, TextQuote, Trash2, TriangleAlert, Undo2, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bold, CircleAlert, CircleCheck, CircleDot, CloudCheck, CloudOff, Code, Columns2, Ellipsis, ExternalLink, Eye, Feather, Heading2, History, ImagePlus, Italic, Link, List, ListTodo, Loader, LogOut, PenLine, Search, Settings2, SquarePen, TextQuote, Trash2, TriangleAlert, Undo2, X, type LucideIcon } from "lucide-react";
 
 export const ICONS = {
   "arrow-left": ArrowLeft,
@@ -24,6 +24,8 @@ export const ICONS = {
   loader: Loader,
   "log-out": LogOut,
   "pen-line": PenLine,
+  "columns-2": Columns2,
+  eye: Eye,
   search: Search,
   "settings-2": Settings2,
   "square-pen": SquarePen,

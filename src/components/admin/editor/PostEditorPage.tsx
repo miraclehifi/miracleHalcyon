@@ -1,5 +1,6 @@
 // 写文章页（admin-post-editor.md，US-03 / US-06）：状态容器 + 布局。文章由页面 SSR 传入（新建为 null）
-// 桌面三栏：编辑 | 预览 | 设置抽屉（340px）；< 1024px 只显示编辑区，抽屉浮在内容上方
+// 桌面三栏：编辑 | 预览 | 设置抽屉（340px）；< 1024px 抽屉浮在内容上方
+// 视图：≥ 768px 顶栏分段控件 编辑 / 并排 / 预览，< 768px 顶栏下方 Tab（useEditorView）；隐藏的一栏只加 hidden，不卸载
 // 任何字段变化都交给自动保存（停止输入 2 秒后保存；Ctrl / ⌘ + S 立即保存）；预览在 Web Worker 中渲染（MarkdownPreview）；
 // 发布见 PublishActions：缺少必填项时标出字段并聚焦第一个；删除：暂停自动保存 → DELETE → 不弹离开确认，回到列表
 import { useEffect, useRef, useState } from "react";
@@ -9,10 +10,13 @@ import { slugify } from "../../../domains/post/slug";
 import type { PostView } from "../../../domains/post/service";
 import type { AutosaveState } from "../../../lib/autosave/controller";
 import { useAutosave } from "../../../lib/autosave/useAutosave";
+import { useEditorView, type NarrowTab, type ViewMode } from "../../../lib/editor/view-mode";
 import { useHydrated } from "../../../lib/dom/hydration";
 import { localDate } from "../../../lib/format/local-date";
 import { SaveIndicator, type SaveState } from "../../ui/SaveIndicator";
+import { SegmentedControl } from "../../ui/SegmentedControl";
 import { badgeStatus } from "../../ui/StatusBadge";
+import { Tabs } from "../../ui/Tabs";
 import { ToastProvider } from "../../ui/Toast";
 import { EditorTopBar } from "./EditorTopBar";
 import { MarkdownEditor } from "./MarkdownEditor";
@@ -55,6 +59,9 @@ function saveIndicatorState({ status, error }: AutosaveState): SaveState | null 
   return status === "dirty" ? "unsaved" : status;
 }
 
+const EDITOR_PANE_ID = "editor-pane";
+const PREVIEW_PANE_ID = "preview-pane";
+
 const isSaveShortcut = (event: KeyboardEvent) => (event.metaKey || event.ctrlKey) && !event.altKey && event.key.toLowerCase() === "s";
 
 export function PostEditorPage({ initial }: PostEditorPageProps) {
@@ -76,6 +83,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const [postId, setPostId] = useState(initial?.id ?? null);
   const leavingRef = useRef(false); // 删除成功后跳转：不再拦截离开
   const hydrated = useHydrated();
+  const view = useEditorView();
   // 发布日期默认浏览器本地的今天；服务端不知道作者时区，水合前留空
   const publishedAt = draft.publishedAt ?? (hydrated ? localDate(new Date()) : "");
   // 保存、发布、撤回的响应都带最新状态：更新徽标与主按钮
@@ -154,10 +162,26 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
 
   return (
     <ToastProvider>
-      <div className="flex h-dvh flex-col">
+      {/* overflow-x-clip：顶栏右端按钮的高光画布向外伸出 24px，不能撑出横向滚动 */}
+      <div className="flex h-dvh flex-col overflow-x-clip">
         <EditorTopBar
           status={status}
           saveIndicator={indicator && <SaveIndicator state={indicator} savedAt={autosave.savedAt ? new Date(autosave.savedAt) : undefined} />}
+          viewSwitch={
+            !view.narrow && (
+              <SegmentedControl aria-label="视图" value={view.mode} onChange={(mode) => view.setWideMode(mode as ViewMode)}>
+                <SegmentedControl.Item value="edit" icon="pen-line">
+                  编辑
+                </SegmentedControl.Item>
+                <SegmentedControl.Item value="split" icon="columns-2">
+                  并排
+                </SegmentedControl.Item>
+                <SegmentedControl.Item value="preview" icon="eye">
+                  预览
+                </SegmentedControl.Item>
+              </SegmentedControl>
+            )
+          }
           settingsOpen={settingsOpen}
           onToggleSettings={() => setSettingsOpen((open) => !open)}
           primaryAction={
@@ -171,8 +195,23 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
             />
           }
         />
+        {view.narrow && (
+          <Tabs aria-label="视图" value={view.mode} onChange={(tab) => view.setNarrowTab(tab as NarrowTab)}>
+            <Tabs.Item value="edit" controls={EDITOR_PANE_ID}>
+              编辑
+            </Tabs.Item>
+            <Tabs.Item value="preview" controls={PREVIEW_PANE_ID}>
+              预览
+            </Tabs.Item>
+          </Tabs>
+        )}
         <div className="relative flex min-h-0 flex-1">
-          <section aria-label="编辑" className="flex min-w-0 flex-1 flex-col border-r border-line px-9 pt-7 max-lg:border-r-0 max-md:px-4 max-md:pt-4">
+          <section
+            id={EDITOR_PANE_ID}
+            aria-label="编辑"
+            hidden={view.mode === "preview"}
+            className={`flex min-w-0 flex-1 flex-col px-9 pt-7 max-md:px-4 max-md:pt-4 ${view.mode === "split" ? "border-r border-line" : ""}`}
+          >
             <MarkdownEditor
               title={draft.title}
               body={draft.body}
@@ -183,7 +222,12 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               onUploadsChange={setUploadNames}
             />
           </section>
-          <section aria-label="预览" className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 max-lg:hidden">
+          <section
+            id={PREVIEW_PANE_ID}
+            aria-label="预览"
+            hidden={view.mode === "edit"}
+            className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 max-md:px-4 max-md:py-4"
+          >
             <MarkdownPreview title={draft.title} body={draft.body} uploadNames={uploadNames} />
           </section>
           {settingsOpen && (

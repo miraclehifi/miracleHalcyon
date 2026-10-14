@@ -102,10 +102,10 @@
 | UT-49 | R | 空正文 | PreviewPane 显示"在左侧开始写作，这里会显示预览" | SC-PREVIEW-05 |
 | UT-50 | S | 预览更新节流（fake timers） | 连续输入时渲染函数调用被节流/防抖；停止输入后 ≤ 300ms 内（推进计时器）预览为最新内容 | SC-PREVIEW-01, SC-PREVIEW-04 |
 | UT-51 | S | 万字渲染性能（基准） | 10000 字 + 20 代码块输入单次 `renderMarkdown` 耗时 < 300ms（jsdom 仅作回归基线，真实指标见验收） | SC-PREVIEW-04 |
-| UT-52 | R | 视图模式 | `viewMode='split'` 两区并排；`'edit'` 隐藏预览；`'preview'` 隐藏编辑；窄屏（`isNarrow`）渲染为 Tab，默认"编辑" | SC-PREVIEW-06, SC-PREVIEW-07 |
+| UT-52 | R | 视图模式 | `viewMode='split'` 两区并排；`'edit'` 隐藏预览；`'preview'` 隐藏编辑（只加 `hidden`，不卸载）；无记录时 ≥ 1024px 默认并排、768–1023px 默认编辑；选择记在 `mh:editor:view`，存储不可用时不报错；窄屏渲染为 Tab，默认"编辑" | SC-PREVIEW-06, SC-PREVIEW-07 |
 | UT-53 | S | 纯函数 滚动映射 `mapScrollToHeading(editorLine, headings)` | 编辑区位于第 3 个二级标题行时返回预览第 3 个二级标题锚点；无标题时按比例映射 | SC-PREVIEW-08 |
 | UT-54 | S | Ctrl/Cmd+S 快捷键 | 编辑器内按 Ctrl+S / Meta+S 调用 `onSaveNow` 且 `preventDefault` 被调用 | SC-AUTOSAVE-11 |
-| UT-55 | A | 编辑器与 Tab | 编辑区有可访问名称"正文"；Tab 切换器 `role="tablist"`，←→ 切换，选中 `aria-selected`；视图切换按钮 `aria-pressed` | SC-PREVIEW-06, SC-PREVIEW-07 |
+| UT-55 | A | 编辑器与 Tab | 编辑区有可访问名称"正文"；Tab 切换器 `role="tablist"`，←→ 切换，选中 `aria-selected`、`aria-controls` 指向面板；宽屏视图切换为单选组 `radiogroup`（"视图"，`aria-checked`） | SC-PREVIEW-06, SC-PREVIEW-07 |
 
 ---
 
@@ -296,4 +296,5 @@
 | 2026-10-12 | v1.2 | 新增 §11 EditorToolbar + Tooltip（UT-117 ~ UT-125，US-10） | miraclehifi |
 | 2026-10-13 | v1.3 | 新增 §12 图片插件、§13 图片菜单、§14 照片预处理（UT-126 ~ UT-147，US-11、US-12） | miraclehifi |
 | 2026-10-14 | v1.4 | 新增 §15 列表删除的延迟提交（UT-148 ~ UT-151，US-09 撤销） | miraclehifi |
+| 2026-10-14 | v1.6 | UT-52 补充默认视图与存储；UT-55 宽屏视图切换按设计稿改为单选组 | miraclehifi |
 | 2026-10-14 | v1.5 | UT-110 文案按设计稿改为"删除《标题》？"；UT-113 补充进行中不可取消；UT-116 触发元素改为"删除文章"按钮 | miraclehifi |

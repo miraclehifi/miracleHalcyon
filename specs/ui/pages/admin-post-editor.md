@@ -107,7 +107,7 @@
 - 处理中 / 上传中的图片显示为占位块"图片处理中… 文件名" / "图片上传中… 文件名"（已实现：`src/lib/markdown/plugins/upload-placeholder.ts` + `MarkdownPreview`）
 - 图片按读者端组件显示：`ArticleImage`（含宽图、图注、实况照片 `LiveBadge`）、`ImageGallery`（网格 / 手风琴），写法见 ADR-005；预览中点击图片不打开灯箱
 - 输入时已加载的图片保持原状，不重复播放加载动画（US-12 BH-13）
-- 已实现（Sprint 1）：Web Worker 渲染、读者端 H1 标题、文章区排版、空正文占位；视图切换、同步滚动、窄屏 Tab、图片组件在后续 Sprint
+- 已实现（Sprint 1）：Web Worker 渲染、读者端 H1 标题、文章区排版、空正文占位；视图切换、窄屏 Tab 已实现（Sprint 2，`useEditorView`）；同步滚动、图片组件在后续任务
 
 ### 图片菜单（US-12）
 
@@ -186,7 +186,7 @@
 
 ## 页面状态
 
-> 已实现（Sprint 1，build-editor-page-shell）：`src/pages/admin/posts/new.astro`、`[id].astro`（SSR 读取，不存在返回 404）、`src/components/admin/editor/PostEditorPage.tsx`、`EditorTopBar.tsx`；视图切换在 Sprint 2 接入。
+> 已实现（Sprint 1，build-editor-page-shell）：`src/pages/admin/posts/new.astro`、`[id].astro`（SSR 读取，不存在返回 404）、`src/components/admin/editor/PostEditorPage.tsx`、`EditorTopBar.tsx`；视图切换已实现（Sprint 2）。
 
 | 状态 | 表现 |
 |------|------|
@@ -202,7 +202,7 @@
 |------|------|
 | ≥ 1024px | 如上三栏；抽屉打开时编辑与预览平分剩余宽度 |
 | 768–1023px | 视图切换默认"编辑"；设置抽屉改为浮在内容上方的覆盖层（带遮罩） |
-| < 768px | 顶栏：返回图标、保存状态、设置图标按钮、主按钮（图标按钮可点区域 44×44）；视图切换换成顶栏下方的"编辑 / 预览"两个 Tab（`role="tablist"`，US-04-5）；工具栏固定在底部（键盘上方），图标精简为 H、B、链接、代码、列表、引用、插入图片，每个可点区域 44×44，长按 500ms 显示提示（在按钮上方、不显示快捷键）；设置改为底部弹出面板（最下方有"图片写法"）；编辑区底栏隐藏；预览中点按图片直接展开图片菜单；标题、源码区等所有输入框字号 16px（防 iOS 自动放大） |
+| < 768px | （已实现：Tab、工具栏贴底、无横向滚动；底部弹出的设置面板仍是右侧抽屉铺满，Sprint 3 前再定）顶栏：返回图标、保存状态、设置图标按钮、主按钮（图标按钮可点区域 44×44）；视图切换换成顶栏下方的"编辑 / 预览"两个 Tab（`role="tablist"`，US-04-5）；工具栏固定在底部（键盘上方），图标精简为 H、B、链接、代码、列表、引用、插入图片，每个可点区域 44×44，长按 500ms 显示提示（在按钮上方、不显示快捷键）；设置改为底部弹出面板（最下方有"图片写法"）；编辑区底栏隐藏；预览中点按图片直接展开图片菜单；标题、源码区等所有输入框字号 16px（防 iOS 自动放大） |
 
 ## 数据需求
 
