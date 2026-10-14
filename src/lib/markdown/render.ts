@@ -7,6 +7,7 @@ import remarkParse from "remark-parse";
 import remarkRehype, { type Options as RemarkRehypeOptions } from "remark-rehype";
 import { unified } from "unified";
 import { expressiveCodeOptions, rehypeLanguageWhitelist } from "./ec-config";
+import { rehypeImageFigures, type ImageRef } from "./plugins/image-figures";
 import { rehypeSourceLinesApply, rehypeSourceLinesMark } from "./plugins/source-lines";
 import { rehypeUploadPlaceholders } from "./plugins/upload-placeholder";
 import { rehypeAfterSanitize, sanitizeSchema } from "./sanitize-schema";
@@ -15,9 +16,12 @@ export interface RenderOptions {
   sourceMap?: boolean; // 预览传 true：顶层块输出 data-line（同步滚动）
 }
 
+export type { ImageRef } from "./plugins/image-figures";
+export { parseImageKey, parseMarks } from "./plugins/image-key";
+
 export interface RenderResult {
   html: string;
-  images: never[]; // 图片插件（ImageRef）由后续任务实现
+  images: ImageRef[]; // 预览用于挂载 ArticleImage / ImageGallery
 }
 
 // Markdown 中的原始 HTML 先解析（rehype-raw）再统一过滤；脚注区的无障碍文案为中文（屏幕阅读器读出）
@@ -37,6 +41,7 @@ const processor = unified()
   .use(rehypeSanitize, sanitizeSchema)
   .use(rehypeAfterSanitize)
   .use(rehypeUploadPlaceholders)
+  .use(rehypeImageFigures)
   .use(rehypeSourceLinesMark)
   .use(rehypeLanguageWhitelist)
   .use(rehypeExpressiveCode, expressiveCodeOptions)
@@ -45,5 +50,5 @@ const processor = unified()
 
 export async function renderMarkdown(source: string, opts: RenderOptions = {}): Promise<RenderResult> {
   const file = await processor.process({ value: source, data: { sourceMap: opts.sourceMap ?? false } });
-  return { html: String(file), images: [] };
+  return { html: String(file), images: file.data.images ?? [] };
 }

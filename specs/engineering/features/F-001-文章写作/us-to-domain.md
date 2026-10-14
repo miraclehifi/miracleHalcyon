@@ -17,7 +17,7 @@
 | US-09 delete-post | ○ | ● | | | | | `DELETE /api/admin/posts/:id`（已实现，Sprint 2：列表左滑 + 撤销、写文章页删除） |
 | US-10 format-toolbar | | | | | ● | | `applyFormat`、`applyEdit` |
 | US-11 live-photo-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`（`video`）、`GET /img/*.live.mp4` |
-| US-12 image-layout-marks | | | ○ | ● | ● | | 图片插件、`ImageMenu`、`toggleMark`、`setGalleryMode` |
+| US-12 image-layout-marks | | | ○ | ● | ● | | 图片插件（已实现，Sprint 3）、`ImageMenu`、`toggleMark`、`setGalleryMode` |
 
 ● 主要承载　○ 依赖（auth 的 ○ = 受 middleware 保护）
 

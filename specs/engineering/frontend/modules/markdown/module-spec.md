@@ -39,11 +39,11 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 
 | 步骤 | 说明 |
 |------|------|
-| `remarkImageGroups` | 段落子节点只有 image 和空白文本，且 image ≥ 2 → 标记为组图；每 9 张切一组，剩 1 张退化为单图；首张带 `#accordion` 且组内 3–7 张 → accordion，否则 grid |
+| `remarkImageGroups` | 段落子节点只有 image 和空白文本，且 image ≥ 2 → 标记为组图；每 9 张切一组，剩 1 张退化为单图；首张带 `#accordion` 且组内 3–7 张 → accordion，否则 grid。已实现：判定与 `rehypeImageFigures` 合并在 sanitize 之后的 hast 上进行（`plugins/image-figures.ts`），因为 sanitize 会去掉 remark 阶段打的 `data-*`；只处理 Markdown 语法的图片（源码偏移处为 `!`），原始 HTML 的 `<img>` 不处理；混有文字的段落中，独占一行的图片拆出为单图，行内图片保持行内 |
 | `rehype-sanitize` | 基于 GitHub schema：去掉 `script`、`style`、所有 `on*` 属性、`javascript:`/`data:`（`img` 的 `data:image/*` 除外）链接；保留代码块 `class="language-*"` |
 | `rehype-raw` | Markdown 中的原始 HTML 解析为 hast 后交给 sanitize（与 GitHub 一致：允许安全的原始 HTML） |
 | `rehypeAfterSanitize` | `src` 的 `data:` 只保留 `data:image/*`；sanitize 给 id 加 `user-content-` 前缀，脚注页内链接同步加前缀（remark-rehype 不再加前缀，避免双重前缀） |
-| `rehypeImageFigures` | sanitize 之后执行，只生成白名单属性（下表），因此不会引入可注入内容 |
+| `rehypeImageFigures` | sanitize 之后执行，只生成白名单属性（下表），因此不会引入可注入内容。已实现：`src/lib/markdown/plugins/image-figures.ts`（在上传占位之后、`rehypeSourceLines` 之前）；`parseImageKey` / `parseMarks` 在 `plugins/image-key.ts`，经 `render.ts` 导出 |
 | `rehype-expressive-code` | Shiki 使用 JavaScript 正则引擎；语言白名单：ts、tsx、js、jsx、json、bash、shell、css、html、md、yaml、toml、sql、python、go、rust、diff；主题跟随站点亮 / 暗主题（两套主题，CSS 变量切换）。已实现：`src/lib/markdown/ec-config.ts`——github-light 为基础主题，选择器按主题类型生成 `[data-theme='light|dark']`，系统暗色经 `prefers-color-scheme` 媒体查询切换 |
 | `rehypeSourceLines` | 仅 `sourceMap: true`：顶层块级元素加 `data-line`（源码起始行，供同步滚动）。已实现：`src/lib/markdown/plugins/source-lines.ts`——EC 会替换顶层 `<pre>`，故先记录后写回；开关经 `file.data.sourceMap` |
 
@@ -99,9 +99,9 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | MD-UT-01 | GFM 全集：标题、列表、表格、任务列表、删除线、自动链接、脚注 | 与快照一致 |
 | MD-UT-02 | XSS 向量集（`<script>`、`<img onerror>`、`javascript:` 链接、`<iframe>`、SVG 内联、`style`） | 输出不含可执行内容 |
 | MD-UT-03 | 代码块 `ts` 与未知语言 `foo` | 前者高亮；后者按纯文本输出，不报错 |
-| MD-UT-04 | 图片插件 | 见 [frontend-unit-tests.md](../../../../test/features/F-001-文章写作/unit/frontend-unit-tests.md) UT-126 – UT-133 |
+| MD-UT-04 | 图片插件 | 见 [frontend-unit-tests.md](../../../../test/features/F-001-文章写作/unit/frontend-unit-tests.md) UT-126 – UT-133（已实现：`tests/unit/markdown/image-plugins.test.ts`） |
 | MD-UT-05 | `sourceMap` | 每个顶层块级元素 `data-line` 与源码起始行一致；关闭时不输出（已实现：`tests/unit/editor/scroll-sync.test.ts`） |
-| MD-UT-06 | 同一输入在 Node 与 Worker 环境渲染 | 输出字节一致（同构保证） |
+| MD-UT-06 | 同一输入在 Node 与 Worker 环境渲染 | 输出字节一致（同构保证）。已实现：jsdom 单元测试写出快照 `tests/unit/markdown/__snapshots__/images-sample.html`，workerd 集成测试（`tests/integration/markdown/isomorphic.test.ts`）与之逐字节比对 |
 
 ---
 
@@ -114,3 +114,4 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | 2026-10-13 | 1.2 | 浏览器 Web Worker spike 结果回写；worker.ts 已实现 | miraclehifi |
 | 2026-10-13 | 1.3 | 预览区已实现；WebKit 首次编译语法规则的耗时与预热处理 | miraclehifi |
 | 2026-10-14 | 1.4 | `rehypeSourceLines` 已实现（顶层块，记录 / 写回两步） | miraclehifi |
+| 2026-10-14 | 1.5 | 图片插件已实现：组图判定改在 sanitize 之后进行；混有文字段落的拆分规则 | miraclehifi |
