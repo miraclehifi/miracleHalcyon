@@ -33,6 +33,9 @@ test("[Sprint 1 主干] 登录后写一篇文章，发布后读者可见，撤�
   await page.getByRole("button", { name: "文章", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
   await waitForHydration(page);
+  // 按标题搜索：并行用例（如分页）会造一批文章，把这篇挤出第 1 页
+  await page.getByRole("searchbox", { name: "搜索标题" }).fill(run);
+  await expect(page).toHaveURL(new RegExp(`[?&]q=${run}`));
   const row = page.getByRole("listitem").filter({ hasText: title });
   await expect(row).toContainText("草稿");
   await row.getByRole("link").click();

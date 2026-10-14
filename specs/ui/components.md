@@ -109,7 +109,7 @@
 | 设计稿组件 | React 组件 | Props | 使用位置 |
 |-----------|-----------|-------|---------|
 | `AdminHeader` · `AdminHeader/Mobile` | `AdminHeader` | —（站点名、"查看博客"、"登出"）；手机端两个操作只留图标。已实现：`src/components/admin/AdminHeader.tsx`（"登出"Sprint 2 接线前禁用）；同目录 `PageHeader.tsx` | 文章列表 |
-| `PostListItem` · `PostListItem/Mobile` · `/Open` · `/Mobile/Open` · `/Mobile/Commit` | `PostListItem` | `post`（`title`、`status`、`updatedAt`）；`onDelete`；`active`（由 `PostList` 传入，为真时显示悬停态，见"列表动效参数"）；`open` / `onOpenChange`（抽屉开合，由 `PostList` 控制，同一时间只开一行）；外框与 `PostCard` 一致（悬停同 `PostCard/Hover`），内容只有标题、状态徽标 + 更新时间和右侧 `IconButton/Ghost`（`⋯` 更多操作）。卡片本身是 SwipeRow 的拖动面，左滑露出抽屉"编辑 / 删除"，参数见"行滑动参数"。`/Open`（抽屉展开）、`/Mobile/Commit`（全滑、删除块铺满）是运行时状态，**不是 prop**；规则见 [admin-post-list.md](pages/admin-post-list.md)"行操作"。已实现（Sprint 1 静态卡片）：`src/components/admin/PostListItem.tsx`——外框、`active` 双层错位、标题链接、徽标 + 相对时间；SwipeRow 抽屉与 `⋯` 在 Sprint 2 接入 | 文章列表 |
+| `PostListItem` · `PostListItem/Mobile` · `/Open` · `/Mobile/Open` · `/Mobile/Commit` | `PostListItem` | `post`（`title`、`status`、`updatedAt`）；`onDelete`；`active`（由 `PostList` 传入，为真时显示悬停态，见"列表动效参数"）；`open` / `onOpenChange`（抽屉开合，由 `PostList` 控制，同一时间只开一行）；外框与 `PostCard` 一致（悬停同 `PostCard/Hover`），内容只有标题、状态徽标 + 更新时间和右侧 `IconButton/Ghost`（`⋯` 更多操作）。卡片本身是 SwipeRow 的拖动面，左滑露出抽屉"编辑 / 删除"，参数见"行滑动参数"。`/Open`（抽屉展开）、`/Mobile/Commit`（全滑、删除块铺满）是运行时状态，**不是 prop**；规则见 [admin-post-list.md](pages/admin-post-list.md)"行操作"。已实现：`src/components/admin/PostListItem.tsx`——外框、`active` 双层错位、标题链接、徽标 + 相对时间（Sprint 1）；SwipeRow 抽屉、`⋯`、全滑删除（Sprint 2）；删除后的撤销提示在 `add-list-delete-undo` 接入 | 文章列表 |
 | `ImageMenu` · `ImageMenu/Gallery` · `ImageMenu/Mobile` | `ImageMenu` | `kind`：`image` / `gallery`；`wide?`（单图）；`mode?`：`grid` / `accordion`，`count`（组图）；`onToggleWide` / `onModeChange` / `onSplit`。由触发按钮 `OverlayButton`（`size` 32）+ `Menu` 组成；`/Gallery` 对应 `kind="gallery"`，`/Mobile` 为触屏形态（菜单项 44px），**都不是 variant**；规则见 [admin-post-editor.md](pages/admin-post-editor.md)"图片菜单" | 写文章页 `MarkdownPreview` |
 | `EditorToolbar` · `EditorToolbar/Mobile` | `EditorToolbar` | `onCommand`；桌面 8 个格式按钮 + 插入图片（9 个都是 `IconButton/Ghost`，插入图片前加竖分隔线）；手机 7 个、固定在键盘上方；全部按钮包在一个 `TooltipGroup` 里，每个按钮一个 `Tooltip`（桌面 `side="bottom"`，手机 `side="top"`），名称与快捷键见 [admin-post-editor.md](pages/admin-post-editor.md)"工具栏与悬停提示" | 写文章页 |
 
@@ -168,17 +168,17 @@
 | `open` / `onOpenChange` | 由 `PostList` 控制 | 打开一行时收起其他行；筛选、翻页、滚动列表时全部收起 |
 | `direction` | `"left"` | 抽屉在右侧 |
 | `actionWidth` | `80` | 抽屉宽 160px；手机也不缩，保证可点区域 ≥ 44px |
-| `height` | 卡片实际高度：桌面 `96`、手机 `85` | 标题单行，超出省略；高度变了要同步 |
+| `height` | 卡片实际高度：桌面 `96`、手机 `85` | 标题单行，超出省略；高度变了要同步。实现上不传 prop，由 `className` 设 `--sr-h` 按断点切换 |
 | `radius` | `12` | 与卡片圆角一致 |
 | `actionColor` / 删除文字 | `danger` / `danger-ink` | — |
 | `drawerColor` / 编辑底色与文字 | `surface-sunken` / `ink` | — |
-| `rowColor` / `textColor` | `bg` / `ink` | 与 `PostCard` 底色一致 |
+| `rowColor` / `textColor` | `transparent` / `ink` | 底色 `bg` 由卡片外框自己画（与 `PostCard` 一致），拖动面不再铺底色 |
 | `commitAt` / `fullSwipe` | `0.6` / `true` | 拖过 60% 行宽删除块跃出，松手即删 |
 | `snapBounce` / `resistance` / `collapseMs` | `0.2` / `0.55` / `200` | 默认值 |
 | `closeOnAction` / `haptic` | `true` / `true` | — |
 | `label` | `《{标题}》` | 行的读屏名称 |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/SwipeRow.tsx`，上游路径为 `src/ts-tailwind/Micro/SwipeRow`，改动清单见文件头）：
 
 | 改动 | 原因 |
 |------|------|
@@ -187,11 +187,13 @@
 | 关闭且不在拖动时，裁剪容器 `overflow: visible`、抽屉 `visibility: hidden`；开始拖动或抽屉打开时才裁剪，此时 `active` 视为假（双层错位收回） | 否则双层错位的 4px 被裁掉 |
 | 根节点的 `overflow: hidden` 只在 `phase=collapsing` 时生效 | 同上 |
 | 拖动过（`moved`）的这次 pointerup 之后吞掉一次 `click`；抽屉打开时点卡片只收起，不跳转；标题链接设 `draggable="false"` | 拖完不能误进写文章页，也不出现浏览器拖链接的残影 |
+| 认定为水平拖动后才 `setPointerCapture`（原组件在 pointerdown 即捕获） | 按下即捕获时 click 的目标变成拖动面，点卡片不再跳转 |
 | action 支持 `href`：渲染为 `<a>`（"编辑"），其余仍是 `<button>` | 编辑是导航，用链接语义 |
 | 内置切换按钮改为 `IconButton/Ghost`（`ellipsis` 图标，`aria-label="《{标题}》的操作"`）：桌面卡片 `active` 或自身聚焦时显示，手机只在聚焦时显示；去掉 `e.detail !== 0` 判断，鼠标点击也能开合 | 桌面鼠标用户的入口；原组件只认键盘 |
 | 键盘打开抽屉后焦点移到"编辑"；Esc 收起并把焦点还给 `⋯`；抽屉内 Tab 顺序"编辑 → 删除" | 原组件打开后焦点不动 |
 | 播报文案中文化：`Release to 删除` → "松手删除"，`n actions revealed` → "已展开 2 个操作" | 界面语言 |
 | 去掉 `@hugeicons/*`，默认图标改 lucide `Trash2` | 项目图标统一用 lucide |
+| 速度采样时间用事件 `timeStamp`（原为 `performance.now()`） | 与 `performance.now()` 同一时间基准；满足本项目 react-hooks 纯函数检查 |
 
 ## 文章图片
 

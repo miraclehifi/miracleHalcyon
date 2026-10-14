@@ -3,7 +3,7 @@
 // 空：没有任何文章时显示 EmptyState 并隐藏筛选行；筛选无结果时写明条件并提供"清除筛选"
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListStatus } from "../../domains/post/repo";
-import type { PostListResult } from "../../domains/post/service";
+import type { PostListItem as PostListItemData, PostListResult } from "../../domains/post/service";
 import { buildListQuery, DEFAULT_LIST_QUERY, parseListQuery, type ListQueryState } from "../../lib/admin/list-query";
 import { useHydrated } from "../../lib/dom/hydration";
 import { Button } from "../ui/Button";
@@ -44,6 +44,12 @@ interface LoadState {
   loadedFor: string; // data 对应的查询（列表入场动画的 key：新数据到了才整页重新入场）
   loading: boolean;
   error: boolean;
+}
+
+// 本地移除一行：总数与对应状态的计数同步减 1
+function withoutPost(data: PostListResult, post: PostListItemData): PostListResult {
+  const counts = { ...data.counts, all: data.counts.all - 1, [post.status]: data.counts[post.status] - 1 };
+  return { ...data, items: data.items.filter((item) => item.id !== post.id), total: data.total - 1, counts };
 }
 
 async function fetchPosts(query: ListQueryState): Promise<PostListResult> {
@@ -104,6 +110,17 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
     return () => window.clearTimeout(timer);
   }, [searchText, query, navigate]);
 
+  // 删除（US-09）：行折叠后先在本地移除并更新数量，再发删除请求，完成后重新拉取当前页补位
+  // （撤销期与失败恢复见 add-list-delete-undo）
+  const deletePost = useCallback(
+    async (post: PostListItemData) => {
+      setState((prev) => (prev.data ? { ...prev, data: withoutPost(prev.data, post) } : prev));
+      await fetch(`/api/admin/posts/${post.id}`, { method: "DELETE" }).catch(() => undefined);
+      void load(query);
+    },
+    [load, query],
+  );
+
   const clearFilters = () => {
     setSearchText("");
     navigate(DEFAULT_LIST_QUERY);
@@ -163,7 +180,7 @@ export function PostListPage({ initial, query: initialQuery, renderedAt }: PostL
       )}
       {!error && data && !noPostsAtAll && !noResults && (
         <div aria-busy={loading || undefined} className={`transition-opacity duration-200 ${loading ? "opacity-50" : ""}`}>
-          <PostList key={state.loadedFor} posts={data.items} now={clock.now} timeZone={clock.timeZone} />
+          <PostList key={state.loadedFor} posts={data.items} onDelete={(post) => void deletePost(post)} now={clock.now} timeZone={clock.timeZone} />
         </div>
       )}
       {!error && data && (

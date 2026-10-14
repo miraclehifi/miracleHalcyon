@@ -19,8 +19,8 @@ const post = (overrides: Partial<PostListItemData>): PostListItemData => ({
 
 function look(data: PostListItemData) {
   const { container } = render(<PostListItem post={data} now={NOW} timeZone="Asia/Shanghai" />);
-  const link = screen.getByRole("link");
-  const text = container.textContent;
+  const link = screen.getAllByRole("link")[0]; // 抽屉里的"编辑"在关闭时 aria-hidden，不计入
+  const text = container.querySelector("article")?.textContent; // 只看卡片，不含抽屉与播报区
   cleanup();
   return {
     href: link.getAttribute("href"),

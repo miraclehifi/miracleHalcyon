@@ -1,6 +1,6 @@
 // IconButton（components.md"基础组件"）：只有图标的按钮，aria-label 必填；不使用 SpecularButton
 // 图标色默认 ink-muted；父元素可设 --icon-button-ink（如 currentColor）让它跟随所在提示的色调
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, Ref } from "react";
 import { ICONS, type IconName } from "./icons";
 
 export type IconButtonVariant = "ghost" | "outline";
@@ -12,6 +12,7 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
   variant?: IconButtonVariant;
   size?: IconButtonSize; // sm 28px（桌面）/ touch 44px（手机）；图标都是 16px
   type?: "button" | "submit" | "reset";
+  ref?: Ref<HTMLButtonElement>;
 }
 
 const BASE =

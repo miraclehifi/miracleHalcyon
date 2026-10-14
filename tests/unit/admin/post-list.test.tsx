@@ -21,7 +21,7 @@ const activeTitles = () => [...document.querySelectorAll("[data-active]")].map((
 // 悬停、键盘聚焦都只让一行处于 PostCard/Hover；指针离开且焦点不在列表内时复原
 describe("PostList", () => {
   it("同一时间只有一行处于选中态", () => {
-    render(<PostList posts={posts} now={NOW} timeZone="Asia/Shanghai" />);
+    render(<PostList posts={posts} onDelete={() => {}} now={NOW} timeZone="Asia/Shanghai" />);
     const list = screen.getByRole("list");
     const rows = screen.getAllByRole("listitem");
 
