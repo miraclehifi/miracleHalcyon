@@ -32,7 +32,7 @@
 | `TabItem/Selected` · `Default` | `Tabs` + `Tabs.Item` | 容器：`value`；`onChange`；`aria-label`（`tablist`，← / → 切换并选中）。Item：`value`；`controls`（面板 id）；`children`；`selected` 由容器 `value` 推导 | 写文章页（移动）编辑 / 预览。已实现：`src/components/ui/Tabs.tsx` |
 | `SaveIndicator/Saved` · `Saving` · `Unsaved` · `Failed` | `SaveIndicator` | `state`：`saved` / `saving` / `unsaved` / `failed`；`savedAt?` | 写文章页顶栏（桌面、移动）、04 保存状态。已实现：`src/components/ui/SaveIndicator.tsx`（`role="status"`；保存中图标旋转，减弱动效时停止） |
 | `Pagination` | `Pagination` | `page`；`pageSize`；`total`；手机端页码可点区域 44px。已实现：`src/components/ui/Pagination.tsx`（另有 `href`、`onNavigate`；页码全部显示、可换行） | 文章列表 |
-| `Menu` · `MenuItem/Default` · `/Checked` · `/Disabled` | `Menu` + `Menu.Item` + `Menu.Separator` | Item：`type`：`action` / `checkbox` / `radio`（对应 `menuitem` / `menuitemcheckbox` / `menuitemradio`）；`checked?`；`disabled?`（`aria-disabled`，仍可聚焦，配 `Tooltip` 说明原因）；`children`。容器 `surface` 底、1px `line` 边、`radius`、阴影同悬停提示，内边距 4px；Item 高 32px（触屏 44px），左右内边距 12px，`text-ui`，选中时 ✓ 在右侧（`ink-muted`），悬停 / 键盘高亮底 `surface-sunken`，禁用 `ink-faint`。`/Checked`、`/Disabled` 对应 `checked`、`disabled`，**不是 variant** | 写文章页 `ImageMenu` |
+| `Menu` · `MenuItem/Default` · `/Checked` · `/Disabled` | `Menu` + `Menu.Item` + `Menu.Separator` | Item：`type`：`action` / `checkbox` / `radio`（对应 `menuitem` / `menuitemcheckbox` / `menuitemradio`）；`checked?`；`disabled?`（`aria-disabled`，仍可聚焦，配 `Tooltip` 说明原因）；`children`。容器 `surface` 底、1px `line` 边、`radius`、阴影同悬停提示，内边距 4px；Item 高 32px（触屏 44px），左右内边距 12px，`text-ui`，选中时 ✓ 在右侧（`ink-muted`），悬停 / 键盘高亮底 `surface-sunken`，禁用 `ink-faint`。`/Checked`、`/Disabled` 对应 `checked`、`disabled`，**不是 variant** | 写文章页 `ImageMenu`；写文章页顶栏"更多"菜单（`IconButton/Ghost` `ellipsis` 触发，项：登出；04 "写文章页更多菜单"） |
 | `Popover` | `Popover` | `anchor`；`side`：`top` / `bottom`；`title`；`children`；非模态 `role="dialog"`，Esc / 点外部关闭，焦点回到触发元素；`surface` 底、1px `line` 边、12px 圆角、阴影同弹窗 | 写文章页"图片写法"说明 |
 | `Tooltip` · `Tooltip/Shortcut` | `Tooltip` + `TooltipGroup` | Tooltip：`content`；`shortcut?`（按键数组，如 `['Mod', 'B']`，`Mod` 按平台显示 `⌘` 或 `Ctrl`）；`side`：`top` / `bottom`；`children`（触发按钮，一个元素）。`/Shortcut` 对应传了 `shortcut`，**不是 variant**。`TooltipGroup` 包住一组按钮，组内共用一个提示框。底层为 WarmTooltip，参数见"悬停提示参数"。已实现：`src/components/ui/Tooltip.tsx`（另有 `className` 加在触发包裹层） | 写文章页：`EditorToolbar`、手机顶栏返回 / 设置、设置抽屉关闭 |
 
@@ -359,6 +359,7 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-14 | 写文章页顶栏新增"更多"菜单（`IconButton/Ghost` + `Menu`，项：登出），03 / 03m 顶栏最右、04 新增展开示例；不新增组件 | miraclehifi |
 | 2026-10-10 | 初始版本：admin.pen 分为组件区 / 页面区；7 个组件校正命名，新增 29 个组件，页面改为引用实例 | miraclehifi |
 | 2026-10-10 | 组件区版式整理：按"区 → 组件 → 变体"分组，变体下标 variant 名；组件与命名不变 | miraclehifi |
 | 2026-10-10 | 新增 `MenuItem`（`DropdownMenu` 子项）；`PostListItem/Mobile` 改为长按弹出菜单，去掉左滑 | miraclehifi |

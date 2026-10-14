@@ -97,7 +97,6 @@
                       "type": "frame",
                       "id": "l839S",
                       "name": "Variants",
-                      "theme": {},
                       "gap": 24,
                       "children": [
                         {
@@ -9915,6 +9914,661 @@
     },
     {
       "type": "frame",
+      "id": "TmZwv",
+      "x": 0,
+      "y": 16500,
+      "name": "页面区 · 读者端",
+      "layout": "vertical",
+      "gap": 6,
+      "children": [
+        {
+          "type": "text",
+          "id": "h3dOr",
+          "name": "Title",
+          "fill": "$ink",
+          "content": "读者端 Reader",
+          "fontFamily": "$font-body",
+          "fontSize": 20,
+          "fontWeight": "600"
+        },
+        {
+          "type": "text",
+          "id": "AxHzB",
+          "name": "Sub",
+          "fill": "$ink-muted",
+          "content": "05 文章详情（桌面 1440 / 移动 390）· 版式参考 innei.in 手记页，令牌沿用全站",
+          "fontFamily": "$font-body",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "hIYiB",
+      "x": 0,
+      "y": 16324,
+      "name": "05 文章详情 /posts/:slug",
+      "clip": true,
+      "width": 1440,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "oMm48",
+          "type": "ref",
+          "ref": "v8Pxr",
+          "name": "SiteHeader",
+          "width": "fill_container",
+          "descendants": {
+            "S29YH/vsGwx": {
+              "fill": "$accent",
+              "fontWeight": "600"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "mzHDz",
+          "name": "Body",
+          "width": "fill_container",
+          "gap": 48,
+          "padding": [
+            32,
+            50,
+            72,
+            50
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "uLiJe",
+              "name": "Paper",
+              "width": 840,
+              "cornerRadius": "$radius",
+              "stroke": "$line",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 40,
+              "padding": [
+                56,
+                45,
+                48,
+                45
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "BFTFT",
+                  "name": "ArticleHeader",
+                  "width": "fill_container",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "bottom": 1
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    0,
+                    0,
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KUh8F",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "用 Astro 搭一个能在线写作的博客",
+                      "lineHeight": 1.3,
+                      "fontFamily": "$font-prose-heading",
+                      "fontSize": 32,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Y4G16",
+                      "name": "Meta",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "dBDFg",
+                          "name": "Date",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "BLuMp",
+                              "name": "Meta 2026年10月8日 星期四",
+                              "fill": "$ink-faint",
+                              "content": "2026年10月8日 星期四",
+                              "fontFamily": "$font-prose",
+                              "fontSize": 13,
+                              "fontWeight": "normal",
+                              "fontStyle": "italic"
+                            },
+                            {
+                              "type": "text",
+                              "id": "FknSz",
+                              "name": "Meta ·",
+                              "fill": "$ink-faint",
+                              "content": "·",
+                              "fontFamily": "$font-prose",
+                              "fontSize": 13,
+                              "fontWeight": "normal",
+                              "fontStyle": "italic"
+                            },
+                            {
+                              "type": "text",
+                              "id": "leipR",
+                              "name": "Meta 约 3,200 字 · 阅读 11 分钟",
+                              "fill": "$ink-faint",
+                              "content": "约 3,200 字 · 阅读 11 分钟",
+                              "fontFamily": "$font-prose",
+                              "fontSize": 13,
+                              "fontWeight": "normal",
+                              "fontStyle": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Ey3Rh",
+                          "name": "Tags",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "id": "w4HxW",
+                              "type": "ref",
+                              "ref": "aHSje",
+                              "name": "Tag astro",
+                              "descendants": {
+                                "zawDL": {
+                                  "content": "astro"
+                                }
+                              }
+                            },
+                            {
+                              "id": "oZuvJ",
+                              "type": "ref",
+                              "ref": "aHSje",
+                              "name": "Tag cloudflare",
+                              "descendants": {
+                                "zawDL": {
+                                  "content": "cloudflare"
+                                }
+                              }
+                            },
+                            {
+                              "id": "TkR9i",
+                              "type": "ref",
+                              "ref": "aHSje",
+                              "name": "Tag 写作",
+                              "descendants": {
+                                "zawDL": {
+                                  "content": "写作"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VtpKC",
+                  "name": "ArticleContent",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZlrFS",
+                      "name": "DropCap Para",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "immv7",
+                          "name": "DropCap",
+                          "fill": "$ink",
+                          "content": "写",
+                          "lineHeight": 1,
+                          "fontFamily": "$font-prose",
+                          "fontSize": 40,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "g8MXs",
+                          "name": "Text",
+                          "fill": "$ink",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "博客这件事，我断断续续做了好几年。每次都是兴冲冲地选框架、调样式，写了三五篇就搁下了。后来想明白，问题不在工具，而在写作这件事离我太远：要开编辑器、要 commit、要等构建。",
+                          "lineHeight": 1.8,
+                          "fontFamily": "$font-prose",
+                          "fontSize": 16,
+                          "fontWeight": "normal",
+                          "letterSpacing": 0.14
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "fz8TF",
+                      "name": "Para",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "　　所以这一次，我给自己定了一个很朴素的目标：打开浏览器就能写，写完点一下就能发。读者那一侧要足够安静，安静到只剩下文字。",
+                      "lineHeight": 1.8,
+                      "fontFamily": "$font-prose",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.14
+                    },
+                    {
+                      "type": "frame",
+                      "id": "S924N",
+                      "name": "Figure",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        12,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "id": "noVaU",
+                          "type": "ref",
+                          "ref": "HjxqQ",
+                          "name": "ArticleImage/Live",
+                          "width": "fill_container"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "ig631",
+                      "name": "H2",
+                      "fill": "$ink",
+                      "content": "为什么是 Astro",
+                      "lineHeight": 1.4,
+                      "fontFamily": "$font-prose-heading",
+                      "fontSize": 24,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "f5InOY",
+                      "name": "Para",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "　　读者页面几乎全是静态内容，最适合预渲染；写作页面却需要登录、需要接口。Astro 5 的混合渲染刚好把两件事放进同一个项目里：读者页走缓存，写作页走 SSR，彼此互不打扰。",
+                      "lineHeight": 1.8,
+                      "fontFamily": "$font-prose",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.14
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LL1jX",
+                      "name": "Blockquote",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        4,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "gfSua",
+                          "name": "Mark",
+                          "fill": "$accent",
+                          "content": "“",
+                          "lineHeight": 1,
+                          "fontFamily": "$font-prose",
+                          "fontSize": 44,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "HNsqQ",
+                          "name": "Quote",
+                          "fill": "$ink-muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "工具应该让人忘记它的存在。当你开始注意到锤子的时候，往往是钉子没钉好。",
+                          "lineHeight": 1.8,
+                          "fontFamily": "$font-prose",
+                          "fontSize": 16,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "text",
+                          "id": "W4n7C",
+                          "name": "Cite",
+                          "fill": "$ink-faint",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "— 海德格尔《存在与时间》",
+                          "textAlign": "right",
+                          "fontFamily": "$font-prose",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "LYId5",
+                      "name": "Para",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "　　数据放在 Cloudflare D1，图片放 R2，整个站点跑在边缘节点上。读取一篇文章的查询只有一行：",
+                      "lineHeight": 1.8,
+                      "fontFamily": "$font-prose",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.14
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tlpjK",
+                      "name": "Code Block",
+                      "width": "fill_container",
+                      "fill": "$surface-sunken",
+                      "cornerRadius": "$radius",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": [
+                        16,
+                        20
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "jH77g",
+                          "name": "Line",
+                          "fill": "$ink",
+                          "content": "const post = await db",
+                          "lineHeight": 1.6,
+                          "fontFamily": "$font-mono",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iyVUq",
+                          "name": "Line",
+                          "fill": "$ink",
+                          "content": "  .prepare('SELECT * FROM posts WHERE slug = ? AND status = ?')",
+                          "lineHeight": 1.6,
+                          "fontFamily": "$font-mono",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "xCvwj",
+                          "name": "Line",
+                          "fill": "$ink",
+                          "content": "  .bind(slug, 'published')",
+                          "lineHeight": 1.6,
+                          "fontFamily": "$font-mono",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "g9080",
+                          "name": "Line",
+                          "fill": "$ink",
+                          "content": "  .first();",
+                          "lineHeight": 1.6,
+                          "fontFamily": "$font-mono",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "FIFW7",
+                      "name": "Para",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "　　剩下的事情，就是把写作页做得顺手一点：实时预览、拖拽上传图片、每隔几秒自动保存。这些细节我会在后面几篇里慢慢展开。",
+                      "lineHeight": 1.8,
+                      "fontFamily": "$font-prose",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.14
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "M6Xpw",
+              "name": "TableOfContents",
+              "width": 220,
+              "layout": "vertical",
+              "gap": 16,
+              "padding": [
+                120,
+                0,
+                0,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "YgK4p",
+                  "name": "Progress",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n344F6",
+                      "name": "Percent",
+                      "fill": "$ink-faint",
+                      "content": "已读 38%",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "j7eJwo",
+                      "name": "Bar",
+                      "width": "fill_container",
+                      "height": 2,
+                      "fill": "$line",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "PPjO9",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Fill",
+                          "fill": "$accent",
+                          "width": 76,
+                          "height": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mq2V6",
+                  "name": "List",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "padding": [
+                    8,
+                    0,
+                    0,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kFti0",
+                      "name": "TOC 当前",
+                      "fill": "$accent",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "为什么是 Astro",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OQjY3",
+                      "name": "TOC 数据放在哪里",
+                      "fill": "$ink-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "数据放在哪里",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "j6JPo",
+                      "name": "TOC D1 的表结构",
+                      "width": "fill_container",
+                      "padding": [
+                        0,
+                        0,
+                        0,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "DeZQI",
+                          "name": "Title",
+                          "fill": "$ink-faint",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "D1 的表结构",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L2aMJ",
+                      "name": "TOC 图片与 R2",
+                      "width": "fill_container",
+                      "padding": [
+                        0,
+                        0,
+                        0,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "VS2Mx",
+                          "name": "Title",
+                          "fill": "$ink-faint",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "图片与 R2",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "FibVw",
+                      "name": "TOC 写作页的细节",
+                      "fill": "$ink-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "写作页的细节",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "JReSt",
+                      "name": "TOC 写在最后",
+                      "fill": "$ink-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "写在最后",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "gYO8y",
+          "name": "Footer Wrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            50
+          ],
+          "children": [
+            {
+              "id": "NnX5p",
+              "type": "ref",
+              "ref": "c5X20",
+              "name": "SiteFooter",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
       "id": "VfJWG",
       "x": 1520,
       "y": 11974,
@@ -10442,6 +11096,19 @@
                   "descendants": {
                     "qYTrZ": {
                       "content": "发布更新"
+                    }
+                  }
+                },
+                {
+                  "id": "aRYju",
+                  "type": "ref",
+                  "ref": "BIEtO",
+                  "name": "More",
+                  "width": 34,
+                  "height": 34,
+                  "descendants": {
+                    "wxuvG": {
+                      "icon": "ellipsis"
                     }
                   }
                 }
@@ -11956,6 +12623,21 @@
                       "content": "发布"
                     }
                   }
+                },
+                {
+                  "id": "qOWiR",
+                  "type": "ref",
+                  "ref": "BIEtO",
+                  "name": "More",
+                  "width": 40,
+                  "height": 40,
+                  "descendants": {
+                    "wxuvG": {
+                      "icon": "ellipsis",
+                      "width": 18,
+                      "height": 18
+                    }
+                  }
                 }
               ]
             }
@@ -12204,9 +12886,10 @@
       "type": "frame",
       "id": "ZXcMB",
       "x": 0,
-      "y": 14210,
+      "y": 14216,
       "name": "04 状态与弹层",
-      "width": 1840,
+      "width": 1885,
+      "height": 1461,
       "fill": "$surface-sunken",
       "layout": "vertical",
       "gap": 32,
@@ -12825,664 +13508,9 @@
     },
     {
       "type": "frame",
-      "id": "TmZwv",
-      "x": 0,
-      "y": 15328,
-      "name": "页面区 · 读者端",
-      "layout": "vertical",
-      "gap": 6,
-      "children": [
-        {
-          "type": "text",
-          "id": "h3dOr",
-          "name": "Title",
-          "fill": "$ink",
-          "content": "读者端 Reader",
-          "fontFamily": "$font-body",
-          "fontSize": 20,
-          "fontWeight": "600"
-        },
-        {
-          "type": "text",
-          "id": "AxHzB",
-          "name": "Sub",
-          "fill": "$ink-muted",
-          "content": "05 文章详情（桌面 1440 / 移动 390）· 版式参考 innei.in 手记页，令牌沿用全站",
-          "fontFamily": "$font-body",
-          "fontSize": 14,
-          "fontWeight": "normal"
-        }
-      ]
-    },
-    {
-      "type": "frame",
-      "id": "hIYiB",
-      "x": 0,
-      "y": 15398,
-      "name": "05 文章详情 /posts/:slug",
-      "clip": true,
-      "width": 1440,
-      "fill": "$bg",
-      "layout": "vertical",
-      "children": [
-        {
-          "id": "oMm48",
-          "type": "ref",
-          "ref": "v8Pxr",
-          "name": "SiteHeader",
-          "width": "fill_container",
-          "descendants": {
-            "S29YH/vsGwx": {
-              "fill": "$accent",
-              "fontWeight": "600"
-            }
-          }
-        },
-        {
-          "type": "frame",
-          "id": "mzHDz",
-          "name": "Body",
-          "width": "fill_container",
-          "gap": 48,
-          "padding": [
-            32,
-            50,
-            72,
-            50
-          ],
-          "justifyContent": "center",
-          "children": [
-            {
-              "type": "frame",
-              "id": "uLiJe",
-              "name": "Paper",
-              "width": 840,
-              "cornerRadius": "$radius",
-              "stroke": "$line",
-              "strokeWidth": 1,
-              "layout": "vertical",
-              "gap": 40,
-              "padding": [
-                56,
-                45,
-                48,
-                45
-              ],
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "BFTFT",
-                  "name": "ArticleHeader",
-                  "width": "fill_container",
-                  "stroke": "$line",
-                  "strokeWidth": {
-                    "bottom": 1
-                  },
-                  "layout": "vertical",
-                  "gap": 16,
-                  "padding": [
-                    0,
-                    0,
-                    28,
-                    0
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "KUh8F",
-                      "name": "Title",
-                      "fill": "$ink",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "用 Astro 搭一个能在线写作的博客",
-                      "lineHeight": 1.3,
-                      "fontFamily": "$font-prose-heading",
-                      "fontSize": 32,
-                      "fontWeight": "700",
-                      "letterSpacing": 0.8
-                    },
-                    {
-                      "type": "frame",
-                      "id": "Y4G16",
-                      "name": "Meta",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "dBDFg",
-                          "name": "Date",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "BLuMp",
-                              "name": "Meta 2026年10月8日 星期四",
-                              "fill": "$ink-faint",
-                              "content": "2026年10月8日 星期四",
-                              "fontFamily": "$font-prose",
-                              "fontSize": 13,
-                              "fontWeight": "normal",
-                              "fontStyle": "italic"
-                            },
-                            {
-                              "type": "text",
-                              "id": "FknSz",
-                              "name": "Meta ·",
-                              "fill": "$ink-faint",
-                              "content": "·",
-                              "fontFamily": "$font-prose",
-                              "fontSize": 13,
-                              "fontWeight": "normal",
-                              "fontStyle": "italic"
-                            },
-                            {
-                              "type": "text",
-                              "id": "leipR",
-                              "name": "Meta 约 3,200 字 · 阅读 11 分钟",
-                              "fill": "$ink-faint",
-                              "content": "约 3,200 字 · 阅读 11 分钟",
-                              "fontFamily": "$font-prose",
-                              "fontSize": 13,
-                              "fontWeight": "normal",
-                              "fontStyle": "italic"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Ey3Rh",
-                          "name": "Tags",
-                          "gap": 6,
-                          "children": [
-                            {
-                              "id": "w4HxW",
-                              "type": "ref",
-                              "ref": "aHSje",
-                              "name": "Tag astro",
-                              "descendants": {
-                                "zawDL": {
-                                  "content": "astro"
-                                }
-                              }
-                            },
-                            {
-                              "id": "oZuvJ",
-                              "type": "ref",
-                              "ref": "aHSje",
-                              "name": "Tag cloudflare",
-                              "descendants": {
-                                "zawDL": {
-                                  "content": "cloudflare"
-                                }
-                              }
-                            },
-                            {
-                              "id": "TkR9i",
-                              "type": "ref",
-                              "ref": "aHSje",
-                              "name": "Tag 写作",
-                              "descendants": {
-                                "zawDL": {
-                                  "content": "写作"
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "VtpKC",
-                  "name": "ArticleContent",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 20,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "ZlrFS",
-                      "name": "DropCap Para",
-                      "width": "fill_container",
-                      "gap": 8,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "immv7",
-                          "name": "DropCap",
-                          "fill": "$ink",
-                          "content": "写",
-                          "lineHeight": 1,
-                          "fontFamily": "$font-prose",
-                          "fontSize": 40,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "g8MXs",
-                          "name": "Text",
-                          "fill": "$ink",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "博客这件事，我断断续续做了好几年。每次都是兴冲冲地选框架、调样式，写了三五篇就搁下了。后来想明白，问题不在工具，而在写作这件事离我太远：要开编辑器、要 commit、要等构建。",
-                          "lineHeight": 1.8,
-                          "fontFamily": "$font-prose",
-                          "fontSize": 16,
-                          "fontWeight": "normal",
-                          "letterSpacing": 0.14
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "fz8TF",
-                      "name": "Para",
-                      "fill": "$ink",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "　　所以这一次，我给自己定了一个很朴素的目标：打开浏览器就能写，写完点一下就能发。读者那一侧要足够安静，安静到只剩下文字。",
-                      "lineHeight": 1.8,
-                      "fontFamily": "$font-prose",
-                      "fontSize": 16,
-                      "fontWeight": "normal",
-                      "letterSpacing": 0.14
-                    },
-                    {
-                      "type": "frame",
-                      "id": "S924N",
-                      "name": "Figure",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "padding": [
-                        12,
-                        0
-                      ],
-                      "children": [
-                        {
-                          "id": "noVaU",
-                          "type": "ref",
-                          "ref": "HjxqQ",
-                          "name": "ArticleImage/Live",
-                          "width": "fill_container"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "ig631",
-                      "name": "H2",
-                      "fill": "$ink",
-                      "content": "为什么是 Astro",
-                      "lineHeight": 1.4,
-                      "fontFamily": "$font-prose-heading",
-                      "fontSize": 24,
-                      "fontWeight": "700",
-                      "letterSpacing": 0.8
-                    },
-                    {
-                      "type": "text",
-                      "id": "f5InOY",
-                      "name": "Para",
-                      "fill": "$ink",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "　　读者页面几乎全是静态内容，最适合预渲染；写作页面却需要登录、需要接口。Astro 5 的混合渲染刚好把两件事放进同一个项目里：读者页走缓存，写作页走 SSR，彼此互不打扰。",
-                      "lineHeight": 1.8,
-                      "fontFamily": "$font-prose",
-                      "fontSize": 16,
-                      "fontWeight": "normal",
-                      "letterSpacing": 0.14
-                    },
-                    {
-                      "type": "frame",
-                      "id": "LL1jX",
-                      "name": "Blockquote",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 6,
-                      "padding": [
-                        4,
-                        24
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "gfSua",
-                          "name": "Mark",
-                          "fill": "$accent",
-                          "content": "“",
-                          "lineHeight": 1,
-                          "fontFamily": "$font-prose",
-                          "fontSize": 44,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "HNsqQ",
-                          "name": "Quote",
-                          "fill": "$ink-muted",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "工具应该让人忘记它的存在。当你开始注意到锤子的时候，往往是钉子没钉好。",
-                          "lineHeight": 1.8,
-                          "fontFamily": "$font-prose",
-                          "fontSize": 16,
-                          "fontWeight": "normal",
-                          "fontStyle": "italic"
-                        },
-                        {
-                          "type": "text",
-                          "id": "W4n7C",
-                          "name": "Cite",
-                          "fill": "$ink-faint",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "— 海德格尔《存在与时间》",
-                          "textAlign": "right",
-                          "fontFamily": "$font-prose",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "LYId5",
-                      "name": "Para",
-                      "fill": "$ink",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "　　数据放在 Cloudflare D1，图片放 R2，整个站点跑在边缘节点上。读取一篇文章的查询只有一行：",
-                      "lineHeight": 1.8,
-                      "fontFamily": "$font-prose",
-                      "fontSize": 16,
-                      "fontWeight": "normal",
-                      "letterSpacing": 0.14
-                    },
-                    {
-                      "type": "frame",
-                      "id": "tlpjK",
-                      "name": "Code Block",
-                      "width": "fill_container",
-                      "fill": "$surface-sunken",
-                      "cornerRadius": "$radius",
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": [
-                        16,
-                        20
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "jH77g",
-                          "name": "Line",
-                          "fill": "$ink",
-                          "content": "const post = await db",
-                          "lineHeight": 1.6,
-                          "fontFamily": "$font-mono",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "iyVUq",
-                          "name": "Line",
-                          "fill": "$ink",
-                          "content": "  .prepare('SELECT * FROM posts WHERE slug = ? AND status = ?')",
-                          "lineHeight": 1.6,
-                          "fontFamily": "$font-mono",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "xCvwj",
-                          "name": "Line",
-                          "fill": "$ink",
-                          "content": "  .bind(slug, 'published')",
-                          "lineHeight": 1.6,
-                          "fontFamily": "$font-mono",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "g9080",
-                          "name": "Line",
-                          "fill": "$ink",
-                          "content": "  .first();",
-                          "lineHeight": 1.6,
-                          "fontFamily": "$font-mono",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "FIFW7",
-                      "name": "Para",
-                      "fill": "$ink",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "　　剩下的事情，就是把写作页做得顺手一点：实时预览、拖拽上传图片、每隔几秒自动保存。这些细节我会在后面几篇里慢慢展开。",
-                      "lineHeight": 1.8,
-                      "fontFamily": "$font-prose",
-                      "fontSize": 16,
-                      "fontWeight": "normal",
-                      "letterSpacing": 0.14
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "M6Xpw",
-              "name": "TableOfContents",
-              "width": 220,
-              "layout": "vertical",
-              "gap": 16,
-              "padding": [
-                120,
-                0,
-                0,
-                0
-              ],
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "YgK4p",
-                  "name": "Progress",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 8,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "n344F6",
-                      "name": "Percent",
-                      "fill": "$ink-faint",
-                      "content": "已读 38%",
-                      "fontFamily": "$font-body",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "j7eJwo",
-                      "name": "Bar",
-                      "width": "fill_container",
-                      "height": 2,
-                      "fill": "$line",
-                      "layout": "none",
-                      "children": [
-                        {
-                          "type": "rectangle",
-                          "id": "PPjO9",
-                          "x": 0,
-                          "y": 0,
-                          "name": "Fill",
-                          "fill": "$accent",
-                          "width": 76,
-                          "height": 2
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "mq2V6",
-                  "name": "List",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 10,
-                  "padding": [
-                    8,
-                    0,
-                    0,
-                    0
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "kFti0",
-                      "name": "TOC 当前",
-                      "fill": "$accent",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "为什么是 Astro",
-                      "fontFamily": "$font-body",
-                      "fontSize": 14,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "text",
-                      "id": "OQjY3",
-                      "name": "TOC 数据放在哪里",
-                      "fill": "$ink-muted",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "数据放在哪里",
-                      "fontFamily": "$font-body",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "j6JPo",
-                      "name": "TOC D1 的表结构",
-                      "width": "fill_container",
-                      "padding": [
-                        0,
-                        0,
-                        0,
-                        14
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "DeZQI",
-                          "name": "Title",
-                          "fill": "$ink-faint",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "D1 的表结构",
-                          "fontFamily": "$font-body",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "L2aMJ",
-                      "name": "TOC 图片与 R2",
-                      "width": "fill_container",
-                      "padding": [
-                        0,
-                        0,
-                        0,
-                        14
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "VS2Mx",
-                          "name": "Title",
-                          "fill": "$ink-faint",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "图片与 R2",
-                          "fontFamily": "$font-body",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "FibVw",
-                      "name": "TOC 写作页的细节",
-                      "fill": "$ink-muted",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "写作页的细节",
-                      "fontFamily": "$font-body",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "JReSt",
-                      "name": "TOC 写在最后",
-                      "fill": "$ink-muted",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "写在最后",
-                      "fontFamily": "$font-body",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "gYO8y",
-          "name": "Footer Wrap",
-          "width": "fill_container",
-          "padding": [
-            0,
-            50
-          ],
-          "children": [
-            {
-              "id": "NnX5p",
-              "type": "ref",
-              "ref": "c5X20",
-              "name": "SiteFooter",
-              "width": "fill_container"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
       "id": "fXkPW",
-      "x": 1520,
-      "y": 15398,
+      "x": 1548,
+      "y": 16314,
       "name": "05m 文章详情（移动 <768px）",
       "clip": true,
       "width": 390,
@@ -13891,8 +13919,8 @@
     {
       "type": "frame",
       "id": "NAk1M",
-      "x": 2000,
-      "y": 15398,
+      "x": 2028,
+      "y": 16314,
       "name": "06 首页 /",
       "clip": true,
       "width": 1440,
@@ -14439,8 +14467,8 @@
     {
       "type": "frame",
       "id": "H4Gej",
-      "x": 3520,
-      "y": 15398,
+      "x": 3548,
+      "y": 16314,
       "name": "06m 首页（移动 <768px）",
       "clip": true,
       "width": 390,
@@ -15619,6 +15647,137 @@
                       ]
                     }
                   ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "HgS88",
+      "x": 58,
+      "y": 15140,
+      "name": "Row 3",
+      "width": "fill_container(1)",
+      "gap": 32,
+      "children": [
+        {
+          "type": "frame",
+          "id": "FGFVw",
+          "name": "Cell 写文章页更多菜单",
+          "width": 560,
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "frame",
+              "id": "JfrV9",
+              "name": "Caption",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "n9QqIk",
+                  "name": "Text",
+                  "fill": "$ink",
+                  "content": "写文章页更多菜单（⋯ 展开）",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "d7HUoj",
+                  "name": "US",
+                  "fill": "$ink-faint",
+                  "content": "US-02",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "W0oT4Q",
+              "name": "Demo",
+              "width": "fill_container",
+              "height": 130,
+              "fill": "$bg",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                10,
+                20
+              ],
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dVr6k",
+                  "name": "Right",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "id": "MfE5e",
+                      "type": "ref",
+                      "ref": "ex3Og",
+                      "name": "Settings Toggle"
+                    },
+                    {
+                      "id": "w9ZH4",
+                      "type": "ref",
+                      "ref": "dSHzl",
+                      "name": "Publish"
+                    },
+                    {
+                      "id": "siZ2T",
+                      "type": "ref",
+                      "ref": "BIEtO",
+                      "name": "More (pressed)",
+                      "width": 34,
+                      "height": 34,
+                      "fill": "$surface-sunken",
+                      "descendants": {
+                        "wxuvG": {
+                          "icon": "ellipsis",
+                          "fill": "$ink"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "WCsdW",
+                  "type": "ref",
+                  "ref": "srTuD",
+                  "name": "Menu 更多",
+                  "width": 160,
+                  "descendants": {
+                    "RAuKa": {
+                      "enabled": false,
+                      "width": 152
+                    },
+                    "kEtY7": {
+                      "enabled": false,
+                      "width": 152
+                    },
+                    "hdIGd": {
+                      "enabled": false,
+                      "width": 152
+                    },
+                    "PRWLU": {
+                      "width": "fill_container"
+                    },
+                    "PRWLU/B6vVe": {
+                      "content": "登出"
+                    }
+                  }
                 }
               ]
             }
