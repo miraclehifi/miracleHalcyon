@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 69
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,19 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 设置抽屉"撤回为草稿"（仅已发布显示）+ 撤回确认框
+- [x] 设置抽屉"撤回为草稿"（仅已发布显示）+ 撤回确认框
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `UnpublishAction`（`PublishActions.tsx`）：次按钮"撤回为草稿"→ `ConfirmDialog`（标题"撤回为草稿？"，正文"文章将对读者不可见，内容会保留，之后可以重新发布。"，按钮"取消" / "撤回为草稿"，图标 `undo-2`）→ `POST /unpublish`；成功提示"已撤回为草稿"，失败"撤回失败，请重试"
+- `PostSettingsDrawer` 新增 `unpublishAction` 插槽（抽屉底部、分隔线上方）；`PostEditorPage` 仅已发布时传入；文章 id 另存 state 供渲染（ref 仍供发布时读取）
+- 保存、发布、撤回的响应统一经 `syncServer` 更新徽标与主按钮
+- 全量 E2E 在 30 个用例并行时偶发超时（预览 300ms、WebKit 自动保存各出现过一次），单独重复运行均通过（autosave webkit 12/12），判断为并行负载所致，留待 verify 阶段处理
 
 ## 依赖
 

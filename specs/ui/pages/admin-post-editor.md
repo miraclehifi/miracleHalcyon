@@ -54,7 +54,7 @@
 | 已发布（无修改） | 发布更新（置灰：`aria-disabled="true"`，悬停/聚焦时提示"没有未发布的修改"） | 显示 |
 | 已发布 · 有未发布修改 | 发布更新 | 显示 |
 
-> 已实现（Sprint 1）：`PublishActions`——发布、请求中加载并禁用、成功 / 失败提示、缺少必填项时标出字段并聚焦、"发布更新"置灰（悬停提示暂用 `title`，Sprint 2 换成 `Tooltip`）；撤回由后续任务接入。
+> 已实现（Sprint 1）：`PublishActions`——发布、请求中加载并禁用、成功 / 失败提示、缺少必填项时标出字段并聚焦、"发布更新"置灰（悬停提示暂用 `title`，Sprint 2 换成 `Tooltip`）；设置抽屉"撤回为草稿"+ 撤回确认框（`UnpublishAction`）。
 
 图标按钮（返回、设置、抽屉关闭、工具栏）都要有 `aria-label`（如"返回文章列表""文章设置""关闭设置"），可点区域按 [design-tokens.md](../design-tokens.md)"焦点与交互"执行：桌面 ≥ 28×28，触屏 ≥ 44×44。只有图标的按钮悬停 / 聚焦 / 长按时显示同名提示，见下方"工具栏与悬停提示"。
 
@@ -148,7 +148,7 @@
 
 抽屉默认：新建文章时**打开**（方便填信息），编辑已有文章时**关闭**。开合状态不跨文章记忆。
 
-> 已实现（Sprint 1）：`src/components/admin/editor/PostSettingsDrawer.tsx`——Slug、摘要、发布日期；摘要按码位计数（与服务端一致）；标签、撤回、删除由后续任务接入。
+> 已实现（Sprint 1）：`src/components/admin/editor/PostSettingsDrawer.tsx`——Slug、摘要、发布日期；摘要按码位计数（与服务端一致）；标签、撤回已接入；删除在 Sprint 2。
 
 ## 保存状态（US-06）
 

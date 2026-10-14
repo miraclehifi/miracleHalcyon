@@ -1,5 +1,5 @@
 // PostSettingsDrawer（admin-post-editor.md"设置抽屉"）：Slug、标签、摘要、发布日期
-// 受控组件：字段值与 slug 跟随规则由 PostEditorPage 管理（标签输入由其传入）；撤回 / 删除由后续任务接入
+// 受控组件：字段值与 slug 跟随规则由 PostEditorPage 管理（标签输入、"撤回为草稿"由其传入）；删除在 Sprint 2（US-09）
 import type { ReactNode } from "react";
 import { isValidSlug } from "../../../domains/post/slug";
 import { Field, FIELD_CONTROL_CLASS } from "../../ui/Field";
@@ -14,6 +14,7 @@ export interface PostSettingsDrawerProps {
   summary: string;
   publishedAt: string; // YYYY-MM-DD；水合前为空串
   tagsField?: ReactNode;
+  unpublishAction?: ReactNode; // 仅已发布时传入
   onSlugChange(slug: string): void;
   onSummaryChange(summary: string): void;
   onPublishedAtChange(date: string): void;
@@ -30,7 +31,7 @@ function slugNote(slug: string, fallback: boolean): { hint?: string; error?: str
 }
 
 export function PostSettingsDrawer(props: PostSettingsDrawerProps) {
-  const { slug, slugTitleFallback, slugError, summary, publishedAt, tagsField } = props;
+  const { slug, slugTitleFallback, slugError, summary, publishedAt, tagsField, unpublishAction } = props;
   const note = slugNote(slug, slugTitleFallback);
   const summaryCount = charCount(summary);
   const summaryOver = summaryCount > SUMMARY_MAX;
@@ -90,6 +91,7 @@ export function PostSettingsDrawer(props: PostSettingsDrawerProps) {
       <Field label="发布日期">
         <input type="date" value={publishedAt} onChange={(event) => props.onPublishedAtChange(event.target.value)} />
       </Field>
+      {unpublishAction && <div className="border-t border-line pt-5">{unpublishAction}</div>}
     </aside>
   );
 }

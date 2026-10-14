@@ -18,7 +18,7 @@ import { EditorTopBar } from "./EditorTopBar";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { MarkdownPreview } from "./MarkdownPreview";
 import { PostSettingsDrawer } from "./PostSettingsDrawer";
-import { PublishActions, type RequiredField } from "./PublishActions";
+import { PublishActions, UnpublishAction, type RequiredField } from "./PublishActions";
 import { TagInput } from "./TagInput";
 
 // 发布缺少必填项时聚焦的输入框
@@ -70,19 +70,24 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const [slugError, setSlugError] = useState<string | undefined>(); // 服务端 409 SLUG_TAKEN，改 slug 后清除
   const [missing, setMissing] = useState<RequiredField[]>([]); // 发布时缺少的必填项，改了对应字段后清除
   const [focusRequest, setFocusRequest] = useState<{ field: RequiredField } | null>(null);
+  // 文章 id：新建文章首次保存后才有。ref 供发布时（flush 之后）读取最新值，state 供渲染
   const postIdRef = useRef(initial?.id ?? null);
+  const [postId, setPostId] = useState(initial?.id ?? null);
   const hydrated = useHydrated();
   // 发布日期默认浏览器本地的今天；服务端不知道作者时区，水合前留空
   const publishedAt = draft.publishedAt ?? (hydrated ? localDate(new Date()) : "");
+  // 保存、发布、撤回的响应都带最新状态：更新徽标与主按钮
+  const syncServer = (post: PostView) => setServer({ status: post.status, hasUnpublishedChanges: post.hasUnpublishedChanges });
 
   const autosave = useAutosave({
     postId: initial?.id ?? null,
     getContent: (): DraftInput => ({ ...draft, publishedAt: publishedAt || null }),
     onCreated: (id) => {
       postIdRef.current = id;
+      setPostId(id);
       window.history.replaceState(null, "", `/admin/posts/${id}`); // 不刷新，光标与内容保留
     },
-    onSaved: (post) => setServer({ status: post.status, hasUnpublishedChanges: post.hasUnpublishedChanges }),
+    onSaved: syncServer,
     onError: (error) => {
       if (error.code !== "SLUG_TAKEN") return;
       setSlugError(error.message ?? "slug 已存在，请换一个");
@@ -152,7 +157,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               status={status}
               getPostId={() => postIdRef.current}
               flush={flush}
-              onPublished={(post) => setServer({ status: post.status, hasUnpublishedChanges: post.hasUnpublishedChanges })}
+              onPublished={syncServer}
               onMissingFields={onMissingFields}
               onSlugTaken={onSlugTaken}
             />
@@ -178,6 +183,9 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               slugTitleFallback={draft.title.trim() !== "" && slugify(draft.title) === ""}
               slugError={slugError ?? (missing.includes("slug") ? "请填写 slug" : undefined)}
               tagsField={<TagInput tags={draft.tags} onChange={(tags) => update({ tags })} />}
+              unpublishAction={
+                server.status === "published" && postId !== null && <UnpublishAction postId={postId} onUnpublished={syncServer} />
+              }
               summary={draft.summary}
               publishedAt={publishedAt}
               onSlugChange={onSlugChange}
