@@ -26,7 +26,7 @@ function applyEdit(textarea: HTMLTextAreaElement, e: Edit): void;
 | `setGalleryMode(text, range, mode): Edit \| null` | 图片菜单：网格 / 手风琴 / 拆分 | UT-135 |
 | `insertPlaceholder` / `replacePlaceholder` / `removePlaceholder` | 上传占位（按出现顺序定位，不依赖偏移） | UT-87 – UT-89 |
 
-> 已实现（Sprint 2，build-format-toolbar）：`applyEdit`、`applyFormat`（`src/lib/editor/format-commands.ts`）、`matchShortcut`（`src/lib/editor/shortcuts.ts`）、`EditorToolbar.tsx`。
+> 已实现（Sprint 2，build-format-toolbar）：`applyEdit`、`applyFormat`（`src/lib/editor/format-commands.ts`）、`matchShortcut`（`src/lib/editor/shortcuts.ts`）、`EditorToolbar.tsx`。上传占位函数与 `src/lib/upload/use-image-uploads.ts`（Sprint 2，add-image-paste-upload；函数名为 `insertPlaceholders(cursor, count)`，一批一次插入）。
 
 占位文本就是 `![处理中…]()` / `![上传中…]()`（与验收用例一致，不夹带 token）。编辑器在内存中维护"进行中的上传任务"有序列表；第 i 个任务对应源码中第 i 个占位（按出现顺序扫描），因此作者在占位前后输入文字不影响定位。作者手动删掉某个占位时，扫描到的占位数少于任务数，该任务完成后不再插入引用。markdown 模块把空 URL 且 alt 为"处理中…"/"上传中…"的图片渲染为占位块（文件名由编辑器按顺序补上）。
 

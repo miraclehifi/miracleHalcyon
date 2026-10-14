@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 4
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（`src/lib/upload/`、`src/lib/editor/` + 编辑器组件 + markdown 占位渲染）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,14 +34,22 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 占位三函数 + 编辑器内存中的上传任务有序列表；作者删掉占位时该任务完成后不再插入
-- [ ] markdown 模块把空 URL 且 alt 为"上传中…"/"处理中…"的图片渲染为占位块
-- [ ] 剪贴板无名图片 alt 为 `image`
+- [x] 占位三函数 + 编辑器内存中的上传任务有序列表；作者删掉占位时该任务完成后不再插入
+- [x] markdown 模块把空 URL 且 alt 为"上传中…"/"处理中…"的图片渲染为占位块
+- [x] 剪贴板无名图片 alt 为 `image`
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- `format-commands.ts`：`insertPlaceholders(cursor, count)`（一批各占一行）、`replacePlaceholder` / `removePlaceholder`（按第 i 个占位定位，越界返回 null）、`countPlaceholders` / `placeholdersBefore`；`applyEdit` 新增 `preserveSelection`（后台写入：作者选区按长度差平移；源码区不在焦点时走 `setRangeText`，不抢焦点）
+- `src/lib/upload/upload-client.ts`：`uploadImage`（错误按契约 code / message 抛 `UploadError`）、`altFromFileName`、`imageMarkdown`；`use-image-uploads.ts`：任务有序列表与占位按出现顺序对应，新批次按光标前的占位数插入列表；占位数 ≠ 任务数（作者删了占位）时完成后不插入
+- markdown 插件 `plugins/upload-placeholder.ts`（sanitize 之后）：空地址且 alt 为"上传中…"/"处理中…"的图片 → `span[data-upload-placeholder]` 占位块；`MarkdownPreview` 按出现顺序补文件名（"图片上传中… image.png"）
+- 本任务的失败处理只移除占位（无提示），提示与前端校验在 handle-image-upload-errors；并发上限 2 在 add-image-drop-and-pick-upload；主色在 Sprint 3（此前服务端记 `808080`）
+- E2E 用 `holdUploads` 扣住上传请求再断言上传中状态（固定 2 秒延迟在 WebKit 并行负载下预览渲染赶不上，首轮全量出现 1 次失败）
 
 ## 依赖
 

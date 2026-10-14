@@ -1,8 +1,9 @@
 // MarkdownEditor（components.md，admin-post-editor.md"编辑区"，ADR-004 textarea 编辑器）：标题 + 源码区 + 底栏
 // 标题是无边框大号输入（自动增高、不含换行），回车把光标移到正文；工具栏按钮与快捷键改写源码（US-10，可撤销）
-import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { useLayoutEffect, useRef, type ClipboardEvent, type KeyboardEvent } from "react";
 import { applyEdit, applyFormat, type FormatCommand } from "../../../lib/editor/format-commands";
 import { isMacPlatform, matchShortcut } from "../../../lib/editor/shortcuts";
+import { useImageUploads } from "../../../lib/upload/use-image-uploads";
 import { EditorToolbar } from "./EditorToolbar";
 
 export interface MarkdownEditorProps {
@@ -12,6 +13,7 @@ export interface MarkdownEditorProps {
   bodyInvalid?: boolean;
   onTitleChange(title: string): void;
   onBodyChange(body: string): void;
+  onUploadsChange?: (names: string[]) => void; // 进行中上传的文件名（预览占位块用）
 }
 
 const countFormat = new Intl.NumberFormat("en-US");
@@ -23,9 +25,10 @@ export function countChars(text: string): number {
   return count;
 }
 
-export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitleChange, onBodyChange }: MarkdownEditorProps) {
+export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitleChange, onBodyChange, onUploadsChange }: MarkdownEditorProps) {
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange });
 
   // 标题随内容增高（长标题换行显示，与设计稿一致）
   useLayoutEffect(() => {
@@ -45,6 +48,14 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
     const element = bodyRef.current;
     if (!element) return;
     applyEdit(element, applyFormat(element.value, [element.selectionStart, element.selectionEnd], command));
+  };
+
+  // 粘贴图片（US-05）：剪贴板里有图片文件时上传，否则照常粘贴文字
+  const onBodyPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const images = [...(event.clipboardData?.files ?? [])].filter((file) => file.type.startsWith("image/"));
+    if (images.length === 0) return;
+    event.preventDefault();
+    uploadFiles(images);
   };
 
   // 快捷键只在源码区生效（标题框不响应）
@@ -78,6 +89,7 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
         value={body}
         onChange={(event) => onBodyChange(event.target.value)}
         onKeyDown={onBodyKeyDown}
+        onPaste={onBodyPaste}
         spellCheck={false}
         className="min-h-0 w-full flex-1 resize-none bg-transparent font-mono text-ui leading-[1.5] text-ink outline-none max-md:text-base"
       />

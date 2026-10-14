@@ -7,6 +7,7 @@ import remarkParse from "remark-parse";
 import remarkRehype, { type Options as RemarkRehypeOptions } from "remark-rehype";
 import { unified } from "unified";
 import { expressiveCodeOptions, rehypeLanguageWhitelist } from "./ec-config";
+import { rehypeUploadPlaceholders } from "./plugins/upload-placeholder";
 import { rehypeAfterSanitize, sanitizeSchema } from "./sanitize-schema";
 
 export interface RenderOptions {
@@ -34,6 +35,7 @@ const processor = unified()
   .use(rehypeRaw)
   .use(rehypeSanitize, sanitizeSchema)
   .use(rehypeAfterSanitize)
+  .use(rehypeUploadPlaceholders)
   .use(rehypeLanguageWhitelist)
   .use(rehypeExpressiveCode, expressiveCodeOptions)
   .use(rehypeStringify);

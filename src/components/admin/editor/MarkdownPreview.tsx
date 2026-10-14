@@ -1,7 +1,8 @@
 // MarkdownPreview（components.md，admin-post-editor.md"预览区"，markdown module-spec §4）：正文在 Web Worker 中渲染
 // 主线程发 { seq, source }，只采用最新 seq；渲染中又有输入时只保留最后一次，避免长文连续输入时排队
 // 视图切换、同步滚动、窄屏 Tab 在 Sprint 2 接入
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { PLACEHOLDER_LABELS } from "../../../lib/markdown/plugins/upload-placeholder";
 import type { RenderRequest, RenderResponse } from "../../../lib/markdown/worker";
 import MarkdownWorker from "../../../lib/markdown/worker.ts?worker";
 import { Alert } from "../../ui/Alert";
@@ -9,6 +10,7 @@ import { Alert } from "../../ui/Alert";
 export interface MarkdownPreviewProps {
   title: string;
   body: string;
+  uploadNames?: string[]; // 进行中上传的文件名，按占位出现顺序补到占位块上
 }
 
 // 进入写文章页即预热：Shiki 按需编译语法规则，首次遇到某类语法（如类型注解）在 WebKit 上要近 1 秒；
@@ -104,9 +106,18 @@ function usePreviewHtml(source: string): { html: string | null; failed: boolean 
   return { html, failed };
 }
 
-export function MarkdownPreview({ title, body }: MarkdownPreviewProps) {
+export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPreviewProps) {
   const { html, failed } = usePreviewHtml(body);
   const empty = body.trim() === "";
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // 占位块"图片上传中… 文件名"：渲染结果不含文件名（源码里没有），按出现顺序补上
+  useLayoutEffect(() => {
+    contentRef.current?.querySelectorAll<HTMLElement>("[data-upload-placeholder]").forEach((element, i) => {
+      const label = PLACEHOLDER_LABELS[element.dataset.uploadPlaceholder ?? ""] ?? "";
+      element.textContent = uploadNames[i] ? `${label} ${uploadNames[i]}` : label;
+    });
+  }, [html, uploadNames]);
 
   return (
     <div data-testid="md-preview">
@@ -121,7 +132,7 @@ export function MarkdownPreview({ title, body }: MarkdownPreviewProps) {
         {empty ? (
           <p className="mt-6 text-ui text-ink-faint">在左侧开始写作，这里会显示预览</p>
         ) : (
-          <div className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: html ?? "" }} />
+          <div ref={contentRef} className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: html ?? "" }} />
         )}
       </article>
     </div>

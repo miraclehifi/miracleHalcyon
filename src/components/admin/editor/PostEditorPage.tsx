@@ -67,6 +67,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const [slugTouched, setSlugTouched] = useState(() => initial !== null && initial.slug !== slugify(initial.title));
   // 抽屉默认：新建时打开（方便填信息），编辑已有文章时关闭；不跨文章记忆
   const [settingsOpen, setSettingsOpen] = useState(initial === null);
+  const [uploadNames, setUploadNames] = useState<string[]>([]);
   const [slugError, setSlugError] = useState<string | undefined>(); // 服务端 409 SLUG_TAKEN，改 slug 后清除
   const [missing, setMissing] = useState<RequiredField[]>([]); // 发布时缺少的必填项，改了对应字段后清除
   const [focusRequest, setFocusRequest] = useState<{ field: RequiredField } | null>(null);
@@ -172,10 +173,11 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               bodyInvalid={missing.includes("body")}
               onTitleChange={onTitleChange}
               onBodyChange={(body) => update({ body })}
+              onUploadsChange={setUploadNames}
             />
           </section>
           <section aria-label="预览" className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 max-lg:hidden">
-            <MarkdownPreview title={draft.title} body={draft.body} />
+            <MarkdownPreview title={draft.title} body={draft.body} uploadNames={uploadNames} />
           </section>
           {settingsOpen && (
             <PostSettingsDrawer
