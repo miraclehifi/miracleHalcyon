@@ -1,10 +1,16 @@
 // MarkdownPreview（components.md，admin-post-editor.md"预览区"，markdown module-spec §4）：正文在 Web Worker 中渲染
 // 主线程发 { seq, source }，只采用最新 seq；渲染中又有输入时只保留最后一次，避免长文连续输入时排队
 // 渲染结果的顶层块带 data-line，同步滚动由页面（useScrollSync）基于滚动容器处理
+// 单图 figure[data-article-image] 挂载为 ArticleImage（portal 到替换 figure 的宿主元素）；重新渲染时按 reconcileIslands
+// 复用 src 与标记未变的实例——把原宿主移回新位置，已加载的图片不重新请求、不重播马赛克。组图由 add-image-gallery-display 接管
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { islandKey, reconcileIslands } from "../../../lib/markdown/reconcile-islands";
 import { PLACEHOLDER_LABELS } from "../../../lib/markdown/plugins/upload-placeholder";
+import type { ImageRef } from "../../../lib/markdown/render";
 import type { RenderRequest, RenderResponse } from "../../../lib/markdown/worker";
 import MarkdownWorker from "../../../lib/markdown/worker.ts?worker";
+import { ArticleImage } from "../../article/ArticleImage";
 import { Alert } from "../../ui/Alert";
 
 export interface MarkdownPreviewProps {
@@ -57,9 +63,14 @@ function hoistExpressiveCodeAssets(html: string): string {
   return template.innerHTML;
 }
 
-// 渲染出错时 html 保留上一次的结果，failed 置 true；下一次渲染成功后清除
-function usePreviewHtml(source: string): { html: string | null; failed: boolean } {
-  const [html, setHtml] = useState<string | null>(null);
+interface Rendered {
+  html: string;
+  images: ImageRef[];
+}
+
+// 渲染出错时保留上一次的结果，failed 置 true；下一次渲染成功后清除
+function usePreviewHtml(source: string): { rendered: Rendered | null; failed: boolean } {
+  const [rendered, setRendered] = useState<Rendered | null>(null);
   const [failed, setFailed] = useState(false);
   const renderRef = useRef<((source: string) => void) | null>(null);
 
@@ -85,7 +96,7 @@ function usePreviewHtml(source: string): { html: string | null; failed: boolean 
         setFailed(true);
         return;
       }
-      setHtml(hoistExpressiveCodeAssets(response.html));
+      setRendered({ html: hoistExpressiveCodeAssets(response.html), images: response.images ?? [] });
       setFailed(false);
     });
     send(WARMUP_SOURCE);
@@ -103,13 +114,60 @@ function usePreviewHtml(source: string): { html: string | null; failed: boolean 
     if (source.trim() !== "") renderRef.current?.(source);
   }, [source]);
 
-  return { html, failed };
+  return { rendered, failed };
+}
+
+interface Island {
+  id: number; // portal key：复用时不变，组件实例随之保留
+  key: string; // islandKey：src + 标记
+  host: HTMLElement;
+  image: ImageRef;
+}
+
+const HOST_ATTRIBUTES = ["data-line", "data-source-start", "data-source-end"]; // 同步滚动、图片菜单定位用，随每次渲染更新
+
+// 把渲染结果写入 content，单图换成宿主元素（复用的沿用原宿主）；返回本次的 island 列表
+function mountIslands(content: HTMLElement, { html, images }: Rendered, prev: Island[], newId: () => number): Island[] {
+  content.innerHTML = html;
+  const byStart = new Map(images.map((image) => [image.sourceStart, image]));
+  const singles = [...content.querySelectorAll<HTMLElement>("figure[data-article-image]")]
+    .filter((figure) => !figure.closest("[data-gallery]"))
+    .flatMap((figure) => {
+      const image = byStart.get(Number(figure.dataset.sourceStart));
+      return image ? [{ figure, image }] : [];
+    });
+  const { matches } = reconcileIslands(
+    prev.map((island) => island.key),
+    singles.map(({ image }) => islandKey(image)),
+  );
+  return singles.map(({ figure, image }, i) => {
+    const reused = matches[i] === null ? undefined : prev[matches[i]];
+    const host = reused?.host ?? document.createElement("div");
+    for (const name of HOST_ATTRIBUTES) {
+      const value = figure.getAttribute(name);
+      if (value === null) host.removeAttribute(name);
+      else host.setAttribute(name, value);
+    }
+    figure.replaceWith(host);
+    return { id: reused?.id ?? newId(), key: islandKey(image), host, image };
+  });
 }
 
 export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPreviewProps) {
-  const { html, failed } = usePreviewHtml(body);
+  const { rendered, failed } = usePreviewHtml(body);
   const empty = body.trim() === "";
   const contentRef = useRef<HTMLDivElement>(null);
+  const [islands, setIslands] = useState<Island[]>([]);
+  const islandsRef = useRef<Island[]>([]);
+  const lastId = useRef(0);
+
+  // 在下方补占位文件名之前执行：先写入新 HTML
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    const next = content ? mountIslands(content, rendered ?? { html: "", images: [] }, islandsRef.current, () => ++lastId.current) : [];
+    islandsRef.current = next;
+    setIslands(next);
+  }, [rendered, empty]);
 
   // 占位块"图片上传中… 文件名"：渲染结果不含文件名（源码里没有），按出现顺序补上
   useLayoutEffect(() => {
@@ -117,7 +175,7 @@ export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPrevi
       const label = PLACEHOLDER_LABELS[element.dataset.uploadPlaceholder ?? ""] ?? "";
       element.textContent = uploadNames[i] ? `${label} ${uploadNames[i]}` : label;
     });
-  }, [html, uploadNames]);
+  }, [rendered, uploadNames]);
 
   return (
     <div data-testid="md-preview">
@@ -132,7 +190,21 @@ export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPrevi
         {empty ? (
           <p className="mt-6 text-ui text-ink-faint">在左侧开始写作，这里会显示预览</p>
         ) : (
-          <div ref={contentRef} className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: html ?? "" }} />
+          <div ref={contentRef} className="prose mt-6 max-w-none" />
+        )}
+        {islands.map(({ id, host, image }) =>
+          createPortal(
+            <ArticleImage
+              src={image.src}
+              alt={image.alt}
+              caption={image.title}
+              width={image.w}
+              height={image.h}
+              wide={image.marks.wide}
+            />,
+            host,
+            String(id),
+          ),
         )}
       </article>
     </div>

@@ -1,6 +1,6 @@
 # markdown 模块（同构渲染）
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-14
 **状态**: self-checked
 **来源**: [ADR-001](../../../features/F-001-文章写作/architecture/adr/ADR-001-isomorphic-markdown.md) · [ADR-005](../../../features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) · feature-architecture §6.3
 **位置**: `src/lib/markdown/`
@@ -81,7 +81,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 
 | 环境 | 加载方式 |
 |------|---------|
-| 后台预览 | `src/lib/markdown/worker.ts` 作为 Web Worker（Vite `?worker`，已实现）；主线程发送 `{ seq, source }`，只采用最新 `seq` 的结果；首次进入写文章页预热。渲染出错时 Worker 回 `{ seq, error: true }`（不吞掉请求），主线程照常复位"渲染中"、发出排队的输入，并保留上次结果显示错误提示（US-04 BH-09，已实现）。已实现：`src/components/admin/editor/MarkdownPreview.tsx`（渲染中又有输入时只保留最后一次；Expressive Code 的 style / 复制脚本提到 `<head>` 只加载一次）。Worker 中无 `document`：`decode-named-character-reference` 经 alias 使用非 DOM 入口（见 `astro.config.mjs`） |
+| 后台预览 | `src/lib/markdown/worker.ts` 作为 Web Worker（Vite `?worker`，已实现）；主线程发送 `{ seq, source }`，Worker 回 `{ seq, html, images }`，只采用最新 `seq` 的结果；首次进入写文章页预热。渲染出错时 Worker 回 `{ seq, error: true }`（不吞掉请求），主线程照常复位"渲染中"、发出排队的输入，并保留上次结果显示错误提示（US-04 BH-09，已实现）。已实现：`src/components/admin/editor/MarkdownPreview.tsx`（渲染中又有输入时只保留最后一次；Expressive Code 的 style / 复制脚本提到 `<head>` 只加载一次；单图 `figure` 换成宿主元素并 portal 渲染 `ArticleImage`，重新渲染时按 `src/lib/markdown/reconcile-islands.ts` 复用 src 与标记未变的实例）。Worker 中无 `document`：`decode-named-character-reference` 经 alias 使用非 DOM 入口（见 `astro.config.mjs`） |
 | F-002 构建时 | 预渲染页面中直接 import；不进入线上 Worker 包 |
 
 ## 5. 性能目标
@@ -115,3 +115,4 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | 2026-10-13 | 1.3 | 预览区已实现；WebKit 首次编译语法规则的耗时与预热处理 | miraclehifi |
 | 2026-10-14 | 1.4 | `rehypeSourceLines` 已实现（顶层块，记录 / 写回两步） | miraclehifi |
 | 2026-10-14 | 1.5 | 图片插件已实现：组图判定改在 sanitize 之后进行；混有文字段落的拆分规则 | miraclehifi |
+| 2026-10-14 | 1.6 | §4：Worker 回传 `images`；预览单图挂载与 `reconcileIslands`（add-article-image-display） | miraclehifi |

@@ -303,7 +303,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
             id={PREVIEW_PANE_ID}
             aria-label="预览"
             hidden={view.mode === "edit"}
-            className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 max-md:px-4 max-md:py-4"
+            className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 [--article-bleed:40px] max-md:px-4 max-md:py-4 max-md:[--article-bleed:16px]"
           >
             <MarkdownPreview title={draft.title} body={draft.body} uploadNames={uploadNames} />
           </section>

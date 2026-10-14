@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 4
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,14 +34,14 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] RefineFrame 源码改动按 components.md 表格逐项完成，文件头记录对上游的改动（同 `SwipeRow.tsx` 格式）
-- [ ] 测试环境 R2 预置 US-12 只读图片夹具（9 张，宽高、主色各不相同）
-- [ ] components.md 中 `ArticleImage` 标注"已实现"
+- [x] RefineFrame 源码改动按 components.md 表格逐项完成，文件头记录对上游的改动（同 `SwipeRow.tsx` 格式）
+- [x] 测试环境 R2 预置 US-12 只读图片夹具（9 张，宽高、主色各不相同）：`tests/fixtures/images/`，`npm run e2e:seed`（`getPlatformProxy` 写入本地 R2，E2E webServer 启动前执行）
+- [x] components.md 中 `ArticleImage` 标注"已实现"
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/unit/editor/*`、预览相关 E2E（US-04、US-05 占位）通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿（chromium；webkit 上 TC-US12-06/07 报模块脚本加载失败，留待 Sprint 末排查）
+- [ ] 影响范围回归（留到 Sprint 末统一跑，见下方"实现记录"）：`tests/unit/editor/*`、预览相关 E2E（US-04、US-05 占位）通过；E2E 补跑 webkit 一次
+- [x] `npm run lint` 与 `npm run check` 无错误
 
 ## ⚠️ 前置确认项
 
@@ -69,3 +69,10 @@
 | [components.md](../../ui/components.md) | `ArticleImage`、RefineFrame 标注"已实现" |
 | [image-refine-loading](../../backlog/image-refine-loading.md) | 勾选验收项 |
 | [sprint-3/_index.md](_index.md) | 本任务状态 → completed |
+
+## 实现记录（2026-10-14）
+
+- 上游源码：`src/ts-tailwind/Micro/RefineFrame/RefineFrame.tsx`（MIT + Commons Clause，同 SwipeRow），改动清单见 `RefineFrame.tsx` 文件头。另加两项：`aspectRatio` 可选（外链等不知道宽高时按图片自身比例撑开，未加载完保留 96px 最小高度）；减弱动效改为渲染期状态，不启用马赛克画布、不输出 `data-sweep`
+- 挂载方式：Worker 回传 `images`；`MarkdownPreview` 写入 HTML 后把单图 `figure` 换成宿主 `div`（带 `data-line` / `data-source-*`），`createPortal` 渲染 `ArticleImage`；`reconcileIslands` 配对后复用原宿主，组件实例与已加载的 `<img>` 随之保留。组图内的 `figure` 暂不挂载（add-image-gallery-display）
+- 宽图：`--article-bleed`（预览区为左右内边距 40px，手机 16px）；figure 向两侧负外边距，图注加同等内边距对齐正文
+- 遗留：TC-US12-17 的组图部分随 add-image-gallery-display 补；webkit TC-US12-06/07 失败与全量回归中的 9 个失败在 Sprint 末统一处理

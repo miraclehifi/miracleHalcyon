@@ -240,7 +240,7 @@
 | UT-137 | R | `ImageMenu` 单图 / 组图 | 单图：`menuitemcheckbox` "宽图"；组图：`menuitemradio` "网格 / 手风琴" + `menuitem` "拆成单图"；张数不在 3–7 时"手风琴"带 `aria-disabled` | SC-LAYOUT-07, SC-LAYOUT-08 |
 | UT-138 | A | 菜单键盘 | Enter 打开、焦点落在第一项；↑ / ↓ 循环移动；Esc 关闭，焦点回到触发按钮 | SC-LAYOUT-07, SC-LAYOUT-08 |
 | UT-139 | R | 写法帮助 | 内容包含 5 个示例和"从 iPhone 上传实况照片"一节；`role="dialog"`，有可访问名称"图片写法" | SC-LAYOUT-12 |
-| UT-140 | S | 预览挂载复用 `reconcileIslands(prev, next)` | 两次渲染中 `src` 和标记都相同的图片复用原实例；`src` 变化的重新挂载；被删除的卸载 | SC-LAYOUT-13 |
+| UT-140 | S | 预览挂载复用 `reconcileIslands(prev, next)` | 两次渲染中 `src` 和标记都相同的图片复用原实例；`src` 变化的重新挂载；被删除的卸载（已实现：`tests/unit/editor/reconcile-islands.test.ts`） | SC-LAYOUT-13 |
 
 ## 14. 照片预处理（纯函数 / 浏览器 API mock）
 

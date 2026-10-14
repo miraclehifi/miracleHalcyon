@@ -50,3 +50,33 @@
     color: var(--color-accent);
   }
 }
+
+/* 图片加载（design-tokens.md"图片加载"）：RefineFrame 的动画，从组件内 <style> 移出，全站只定义一次 */
+@keyframes refine-frame-sweep {
+  from {
+    background-position: 130% 0;
+  }
+  to {
+    background-position: -130% 0;
+  }
+}
+@keyframes refine-frame-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes refine-frame-label {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+@keyframes refine-frame-wait {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}

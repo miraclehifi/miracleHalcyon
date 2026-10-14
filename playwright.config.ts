@@ -25,8 +25,8 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_ENV
     ? undefined
     : {
-        // CLOUDFLARE_ENV=e2e：使用 wrangler.jsonc env.e2e 的测试账号；先把迁移应用到本地 D1
-        command: `npm run db:migrate:local && npm run build && npm run preview -- --port ${PORT}`,
+        // CLOUDFLARE_ENV=e2e：使用 wrangler.jsonc env.e2e 的测试账号；先把迁移应用到本地 D1、图片夹具写入本地 R2
+        command: `npm run db:migrate:local && npm run e2e:seed && npm run build && npm run preview -- --port ${PORT}`,
         env: { CLOUDFLARE_ENV: "e2e" },
         port: PORT,
         reuseExistingServer: !process.env.CI,

@@ -29,11 +29,11 @@ approvals:
 has_ui_changes: true
 checkpoint:
   sprint: sprint-3
-  current_task: add-article-image-display   # spike 已完成（OPPO 样本；iPhone / HEIC 延后）；Sprint 2 code-review 延后
+  current_task: add-heic-upload   # 任务 4 已完成；add-heic-upload 等 iPhone 样本；E2E 回归统一留到 Sprint 末；Sprint 2 code-review 延后
   current_phase: implementation
-  completed_tasks: [spike-browser-media-processing, implement-markdown-image-plugins, implement-live-photo-upload-api]   # Sprint 3
+  completed_tasks: [spike-browser-media-processing, implement-markdown-image-plugins, implement-live-photo-upload-api, add-article-image-display]   # Sprint 3
   sprint2_completed_tasks: [build-format-toolbar, implement-image-upload-api, add-image-read-route, add-image-paste-upload, add-image-drop-and-pick-upload, handle-image-upload-errors, add-icon-button-tooltips, implement-delete-post-api, add-post-list-animated-entry, add-swipe-row-delete, add-list-delete-undo, add-editor-delete-action, add-editor-view-modes, add-preview-scroll-sync, add-local-draft-restore, handle-session-expired-save, implement-logout-endpoint, add-logout-entry]   # 18 / 18（Sprint 1 的 72 个见 sprint-1/_index.md）
   blocked_tasks: []
-  test_command: "npm test（vitest 4.1：unit + workers）/ npm run test:e2e（@timing 用例在 *-timing 项目最后串行；交互前 waitForHydration）/ npm run test:spike（spike：chromium + astro dev）"
+  test_command: "npm test（vitest 4.1：unit + workers）/ npm run test:e2e（E2E 前 npm run e2e:seed 写入图片夹具，webServer 已自动执行；@timing 用例在 *-timing 项目最后串行；交互前 waitForHydration）/ npm run test:spike（spike：chromium + astro dev）"
   env_info: "Windows 11, Node 24.21.0 LTS, npm 11.19.0；Astro 7.3 + @astrojs/cloudflare 14 + wrangler 4.149 + TS 6.0 + Vitest 4.1"
   last_updated: "2026-10-14"

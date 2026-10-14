@@ -20,10 +20,10 @@
 **验收条件**:
 - [x] [components.md](../ui/components.md) 写明 `ArticleImage`、`ImageGallery` grid 底层用 RefineFrame，以及参数对照和需要改的源码
 - [x] [design-tokens.md](../ui/design-tokens.md) 新增"图片加载"规则，"气质"与"过渡"补加载扫光例外，写明减弱动效时怎么降级
-- [ ] 读屏读到的是图片 `alt`，不是"加载中 / 已加载"；只有加载失败时播报
-- [ ] 重试按钮有项目统一的焦点环，触屏可点区域 ≥ 44px；点重试后重新请求图片
-- [ ] `prefers-reduced-motion` 时不出马赛克、扫光，只做透明度渐显
-- [ ] 不引入 `@hugeicons/*`，图标用 lucide
+- [x] 读屏读到的是图片 `alt`，不是"加载中 / 已加载"；只有加载失败时播报
+- [x] 重试按钮有项目统一的焦点环，触屏可点区域 ≥ 44px；点重试后重新请求图片
+- [x] `prefers-reduced-motion` 时不出马赛克、扫光，只做透明度渐显
+- [x] 不引入 `@hugeicons/*`，图标用 lucide
 
 ## 影响分析
 

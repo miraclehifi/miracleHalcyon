@@ -201,7 +201,7 @@
 
 | 设计稿组件 | React 组件 | Props / variant | 使用位置 |
 |-----------|-----------|----------------|---------|
-| `ArticleImage` · `/Loading` · `/Live` · `/LivePlaying` · `/Wide` | `ArticleImage` | `src`；`alt`；`caption?`（Markdown title）；`width`、`height`（原图尺寸，用来预留宽高比）；`placeholder?`（模糊缩略图）；`live?`（`{ videoSrc }`）；`wide?`。图片外层渲染 React Bits RefineFrame，负责加载中、马赛克渐显和失败重试（见下方"图片加载参数"）。`/Loading`、`/LivePlaying` 是运行时状态，**不是 prop**；`/Live` 对应传了 `live`，`/Wide` 对应 `wide` | 文章详情正文（05 / 05m）、后台 `MarkdownPreview` |
+| `ArticleImage` · `/Loading` · `/Live` · `/LivePlaying` · `/Wide` | `ArticleImage` | `src`；`alt`；`caption?`（Markdown title）；`width`、`height`（原图尺寸，用来预留宽高比）；`placeholder?`（模糊缩略图）；`live?`（`{ videoSrc }`）；`wide?`。图片外层渲染 React Bits RefineFrame，负责加载中、马赛克渐显和失败重试（见下方"图片加载参数"）。`/Loading`、`/LivePlaying` 是运行时状态，**不是 prop**；`/Live` 对应传了 `live`，`/Wide` 对应 `wide`。已实现（`live`、`placeholder` 除外）：`src/components/article/ArticleImage.tsx`（宽图向两侧扩出 `--article-bleed`，由版心所在容器设置，后台预览区为左右内边距；图注对齐正文；根节点加载中带 `data-loading`） | 文章详情正文（05 / 05m）、后台 `MarkdownPreview` |
 | `LiveBadge` · `LiveBadge/Playing` | `LiveBadge` | `playing`；图标 + `LIVE`，`overlay` 底 + 背景模糊，播放中换成 `overlay-ink` 底 | `ArticleImage`、`ImageGallery` 单元格、`Lightbox` |
 | `ImageGallery/Grid` · `/Grid/Hover` · `/Accordion` · `/Accordion/Mobile` | `ImageGallery` | `variant`：`grid` / `accordion`；`images`（每项同 `ArticleImage` 的数据，另带 `accent` 主色）；`caption?`。grid 按张数自动定列数（2–9 张），内部渲染 React Bits ChromaGrid（见下方"组图网格参数"）；accordion 适合 3–7 张，内部渲染 React Bits AccordionGallery（见下方"组图手风琴参数"）。`/Grid/Hover` 是鼠标在组图内的运行时状态，`/Accordion/Mobile` 为 ≤ 520px 形态（竖向条带），都不是 prop | 文章详情正文 |
 | `OverlayButton` | `OverlayButton` | `icon`；`aria-label`（必填）；`size`：48（灯箱桌面）/ 44（灯箱手机、`ImageMenu` 手机）/ 32（`ImageMenu` 桌面，图标 16px） | `Lightbox` 关闭按钮（左右切换用 DepthCarousel 自带箭头）；`ImageMenu` 触发按钮 |
@@ -225,7 +225,7 @@
 | `labels` | `{ generating: '加载中', complete: '已加载', error: '加载失败' }` | — |
 | `retryLabel` / `onRetry` | `'重试'` / 状态回到 `generating`，给 `src` 加 `?retry=n` 重新请求 | 加载失败时点击图片不打开 `Lightbox` |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/RefineFrame.tsx`，上游路径为 `src/ts-tailwind/Micro/RefineFrame`，另补 `aspectRatio` 可选、减弱动效不启用马赛克画布，改动清单见文件头）：
 
 | 改动 | 原因 |
 |------|------|
@@ -359,6 +359,7 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-14 | `ArticleImage`、RefineFrame 标注已实现；宽图扩出量由 `--article-bleed` 决定 | miraclehifi |
 | 2026-10-14 | 写文章页顶栏新增"更多"菜单（`IconButton/Ghost` + `Menu`，项：登出），03 / 03m 顶栏最右、04 新增展开示例；不新增组件 | miraclehifi |
 | 2026-10-10 | 初始版本：admin.pen 分为组件区 / 页面区；7 个组件校正命名，新增 29 个组件，页面改为引用实例 | miraclehifi |
 | 2026-10-10 | 组件区版式整理：按"区 → 组件 → 变体"分组，变体下标 variant 名；组件与命名不变 | miraclehifi |
