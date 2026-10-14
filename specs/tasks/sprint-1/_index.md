@@ -79,7 +79,7 @@
 | 65 | [show-slug-conflict-error](show-slug-conflict-error.md) | 显示 slug 冲突错误 | article-writing | FRONTEND | 表现层 | US-03 | wire-autosave-to-editor | 0 | 低 | completed |
 | 66 | [build-markdown-preview-pane](build-markdown-preview-pane.md) | 实现实时预览区 | article-writing | FRONTEND | 表现层 | US-04 | implement-markdown-code-highlight, spike-markdown-browser-worker, build-editor-page-shell | 0 | 中 | completed |
 | 67 | [implement-publish-action](implement-publish-action.md) | 实现"发布"操作 | article-writing | FRONTEND | 表现层 | US-08 | wire-autosave-to-editor, implement-publish-endpoint, build-toast-component | 1 | 低 | completed |
-| 68 | [implement-publish-update-action](implement-publish-update-action.md) | 实现"发布更新"操作 | article-writing | FRONTEND | 表现层 | US-08 | implement-publish-action | 1 | 低 | pending |
+| 68 | [implement-publish-update-action](implement-publish-update-action.md) | 实现"发布更新"操作 | article-writing | FRONTEND | 表现层 | US-08 | implement-publish-action | 1 | 低 | completed |
 | 69 | [implement-unpublish-action](implement-unpublish-action.md) | 实现"撤回为草稿"操作 | article-writing | FRONTEND | 表现层 | US-08 | implement-publish-update-action, implement-unpublish-endpoint, build-confirm-dialog-component | 0 | 低 | pending |
 
 共 69 个任务：基础设施 5、数据层 7、表现层 29、领域层 17、接口层 11。

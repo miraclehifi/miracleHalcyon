@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 68
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -29,12 +29,17 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 主按钮随状态切换为"发布更新"及置灰态
+- [x] 主按钮随状态切换为"发布更新"及置灰态
 
 ### 测试类
-- [ ] 变更点测试：上述"唯一测试"由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述"唯一测试"由红变绿
+- [x] 影响范围回归：`npm test` 全部通过（含依赖任务的测试）
+- [x] `npm run lint` 与 `astro check` 无错误
+
+## 实现记录
+
+- `PublishActions`：已发布且无修改时"发布更新"`aria-disabled`（仍可聚焦、点击无效），`aria-describedby` 指向"没有未发布的修改"；悬停提示暂用 `title`，Sprint 2 接入 `Tooltip`（US-10）后替换
+- 自动保存响应的 `hasUnpublishedChanges` 驱动徽标与按钮：编辑保存后变为可用；发布更新成功后回到置灰，提示"已发布更新"（文案已在 implement-publish-action 中接入）
 
 ## 依赖
 
