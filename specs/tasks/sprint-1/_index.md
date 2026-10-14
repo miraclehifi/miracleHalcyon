@@ -83,7 +83,7 @@
 | 69 | [implement-unpublish-action](implement-unpublish-action.md) | 实现"撤回为草稿"操作 | article-writing | FRONTEND | 表现层 | US-08 | implement-publish-update-action, implement-unpublish-endpoint, build-confirm-dialog-component | 0 | 低 | completed |
 | 70 | [handle-preview-worker-error](handle-preview-worker-error.md) | 预览渲染出错时恢复 | article-writing | FRONTEND | 表现层 | US-04 | build-markdown-preview-pane, build-alert-component | 0 | 低 | completed |
 | 71 | [stabilize-preview-timing-e2e](stabilize-preview-timing-e2e.md) | 并行负载下 E2E 稳定（计时隔离、等待水合） | article-writing | TEST | 基础设施 | US-04 | build-markdown-preview-pane | 0 | 中 | completed |
-| 72 | [add-mainline-journey-e2e](add-mainline-journey-e2e.md) | 主干用户旅程 E2E | article-writing | TEST | 表现层 | US-01, US-03, US-06, US-07, US-08 | implement-unpublish-action, build-post-list-page, build-login-page | 0 | 低 | pending |
+| 72 | [add-mainline-journey-e2e](add-mainline-journey-e2e.md) | 主干用户旅程 E2E | article-writing | TEST | 表现层 | US-01, US-03, US-06, US-07, US-08 | implement-unpublish-action, build-post-list-page, build-login-page | 0 | 低 | completed |
 
 共 72 个任务：基础设施 6、数据层 7、表现层 31、领域层 17、接口层 11。70–72 为 2026-10-14 DoD 核对后追加（预览出错卡死、计时用例偶发失败、缺主干旅程 E2E）。
 
@@ -122,8 +122,8 @@ scaffold-project-skeleton → setup-workers-test-pool → spike-markdown-workers
 
 ## DoD（Sprint 级）
 
-- [ ] 所有任务状态为 completed
-- [ ] `npm test` 与 `npm run test:e2e` 全部通过
-- [ ] 主干 E2E：登录 → 新建 → 自动保存 → 列表可见 → 发布 → `GET /api/posts/:slug` 200 → 撤回 → 404
-- [ ] ADR-001 已记录 spike 结论
-- [ ] 设计文档已反哺"已实现"标记
+- [x] 所有任务状态为 completed
+- [x] `npm test` 与 `npm run test:e2e` 全部通过
+- [x] 主干 E2E（`tests/e2e/mainline-journey.spec.ts`）：登录 → 新建 → 自动保存 → 列表可见 → 发布 → `GET /api/posts/:slug` 200 → 撤回 → 404
+- [x] ADR-001 已记录 spike 结论
+- [x] 设计文档已反哺"已实现"标记

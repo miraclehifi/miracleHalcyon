@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 1
 **序号**: 72
-**状态**: pending
+**状态**: completed
 **类别**: TEST
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -36,12 +36,12 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 新增 `tests/e2e/mainline-journey.spec.ts`，全程界面操作
+- [x] 新增 `tests/e2e/mainline-journey.spec.ts`，全程界面操作
 
 ### 测试类
-- [ ] 变更点测试：上述旅程在 chromium、webkit 通过
-- [ ] 影响范围回归：全量 E2E 通过
-- [ ] `npm run lint` 与 `astro check` 无错误
+- [x] 变更点测试：上述旅程在 chromium、webkit 通过
+- [x] 影响范围回归：全量 E2E 通过
+- [x] `npm run lint` 与 `astro check` 无错误
 
 ## 依赖
 
