@@ -36,7 +36,7 @@
 
 ### 实现类
 - [x] module-spec §1 的 `ImageRef`、`parseImageKey`、`parseMarks` 导出；`renderMarkdown` 返回 `images`
-- [x] 处理链顺序与 module-spec §2 一致：`remarkImageGroups` 在 remark-rehype 前，`rehypeImageFigures` 在 sanitize 之后
+- [x] 处理链：组图判定与 `rehypeImageFigures` 都在 sanitize 之后（偏离 module-spec 原定的 remark 阶段，原因见实现记录，module-spec 已同步）
 - [x] `live` 只对站内 `/img/` 生效；输出 `src` 去掉片段
 
 ### 测试类
@@ -59,9 +59,9 @@
 
 ## 影响的文件
 
-- `src/lib/markdown/render.ts`、`sanitize-schema.ts`
-- `src/lib/markdown/plugins/image-key.ts`、`image-groups.ts`、`image-figures.ts`（新建）
-- `tests/unit/markdown/image-plugins.test.ts`（新建）
+- `src/lib/markdown/render.ts`
+- `src/lib/markdown/plugins/image-key.ts`、`image-figures.ts`（新建）
+- `tests/unit/markdown/image-plugins.test.ts`、`isomorphic.test.ts`、`tests/integration/markdown/isomorphic.test.ts`、`tests/fixtures/markdown/images-sample.md`（新建）
 
 ## 回滚策略
 
