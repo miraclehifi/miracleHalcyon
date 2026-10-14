@@ -52,6 +52,7 @@
 | TC-US04-09 | SC-PREVIEW-01 | 输入 GFM 后预览实时更新 | ui-interaction | P0 |
 | TC-US04-10 | SC-PREVIEW-02 | 高亮主题随亮/暗模式切换 | ui-interaction | P1 |
 | TC-US04-11 | SC-PREVIEW-05 | 空正文显示占位 | ui-interaction | P1 |
+| TC-US04-15 | SC-PREVIEW-09 | 渲染失败保留上次预览并提示，下次成功后恢复 | unit | P1 |
 | TC-US04-12 | SC-PREVIEW-06 | 宽屏并排与视图切换（含 768 边界） | ui-interaction | P0 |
 | TC-US04-13 | SC-PREVIEW-07 | 窄屏 Tab 切换（含 767 边界） | ui-interaction | P1 |
 | TC-US04-14 | SC-PREVIEW-08 | 编辑区滚动时预览同步滚动 | ui-interaction | P2 |
@@ -482,6 +483,33 @@ await editor.press('Backspace'); await expect(ph).toBeVisible();
 
 ---
 
+### TC-US04-15: 渲染失败保留上次预览并提示，下次成功后恢复
+
+| 字段 | 值 |
+|------|------|
+| TC-ID | TC-US04-15 |
+| covers | SC-PREVIEW-09 |
+| Scenario | Worker 渲染出错时预览不卡死：保留上次结果并提示，后续输入照常渲染；边界：渲染中又有输入时出错，排队的输入仍会发出 |
+| Priority | P1 |
+| Version Tag | v1.1 |
+| Automation Feasibility | ✅（浏览器内无法稳定让真实渲染器出错，用替身 Worker 在 jsdom 中验证） |
+| type | unit |
+| Change History | 2026-10-14 v1.1 新增（Sprint 1 DoD 核对中发现预览出错会永久卡住） |
+
+**前置条件：** 【环境前置】`MarkdownPreview` 挂载在 jsdom 中，Worker 替换为可控替身（逐条回 `{ seq, html }` 或 `{ seq, error }`）
+
+**步骤：**
+1. 正文 `a`，替身回成功 HTML `<p>a</p>`
+2. 正文改为 `b`，替身回 `{ seq, error }`
+3. 正文改为 `c`，替身回成功 HTML `<p>c</p>`
+
+**预期结果：**
+- 步骤 1：预览显示 `a`，无错误提示
+- 步骤 2：预览仍显示 `a`；出现 `role="alert"`"预览渲染失败，继续编辑会自动重试"
+- 步骤 3：替身收到 `c` 的渲染请求（未卡在 busy）；预览显示 `c`，错误提示消失
+
+---
+
 ### TC-US04-12: 宽屏并排与视图切换（含 768 边界）
 
 | 字段 | 值 |
@@ -619,12 +647,13 @@ await expect.poll(async () => {
 | SC-PREVIEW-06 | BH-06 | TC-US04-12 |
 | SC-PREVIEW-07 | BH-07 | TC-US04-13 |
 | SC-PREVIEW-08 | BH-08 | TC-US04-14 |
+| SC-PREVIEW-09 | BH-09 | TC-US04-15 |
 
 **Story 验收标准追溯**：AC1→TC-01/07/09；AC2→TC-02/06/10；AC3→TC-03/04/05；AC4→TC-12；AC5→TC-13；AC6→TC-14；约束"与读者端同一套渲染规则"→TC-06/10。
 
 **NFR 追溯**：内容渲染防 XSS→TC-03/05；亮/暗模式→TC-10；移动端可用→TC-13；成功指标"预览延迟 < 300ms"→TC-07。
 
-**Gap 检查**：behaviors.md SC-ID 集合 {SC-PREVIEW-01 … SC-PREVIEW-08}（8 个）与本文件 covers 集合求差 = ∅。
+**Gap 检查**：behaviors.md SC-ID 集合 {SC-PREVIEW-01 … SC-PREVIEW-09}（9 个）与本文件 covers 集合求差 = ∅。
 
 **Gap: 无**
 
@@ -641,3 +670,4 @@ await expect.poll(async () => {
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | AI（design-acceptance） |
+| 2026-10-14 | v1.1 | 新增 TC-US04-15（SC-PREVIEW-09 渲染失败恢复） | AI（plan-tasks 追加） |

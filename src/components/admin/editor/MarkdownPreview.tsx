@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { RenderRequest, RenderResponse } from "../../../lib/markdown/worker";
 import MarkdownWorker from "../../../lib/markdown/worker.ts?worker";
+import { Alert } from "../../ui/Alert";
 
 export interface MarkdownPreviewProps {
   title: string;
@@ -54,8 +55,10 @@ function hoistExpressiveCodeAssets(html: string): string {
   return template.innerHTML;
 }
 
-function usePreviewHtml(source: string): string | null {
+// 渲染出错时 html 保留上一次的结果，failed 置 true；下一次渲染成功后清除
+function usePreviewHtml(source: string): { html: string | null; failed: boolean } {
   const [html, setHtml] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
   const renderRef = useRef<((source: string) => void) | null>(null);
 
   useEffect(() => {
@@ -74,7 +77,14 @@ function usePreviewHtml(source: string): string | null {
         queued = null;
         return;
       }
-      if (event.data.seq === seq && event.data.seq > 1) setHtml(hoistExpressiveCodeAssets(event.data.html)); // seq 1 是预热
+      const response = event.data;
+      if (response.seq !== seq || response.seq === 1) return; // 过时结果；seq 1 是预热
+      if ("error" in response) {
+        setFailed(true);
+        return;
+      }
+      setHtml(hoistExpressiveCodeAssets(response.html));
+      setFailed(false);
     });
     send(WARMUP_SOURCE);
     renderRef.current = (text) => {
@@ -91,16 +101,21 @@ function usePreviewHtml(source: string): string | null {
     if (source.trim() !== "") renderRef.current?.(source);
   }, [source]);
 
-  return html;
+  return { html, failed };
 }
 
 export function MarkdownPreview({ title, body }: MarkdownPreviewProps) {
-  const html = usePreviewHtml(body);
+  const { html, failed } = usePreviewHtml(body);
   const empty = body.trim() === "";
 
   return (
     <div data-testid="md-preview">
       <p className="text-caption tracking-[1px] text-ink-faint">预览</p>
+      {failed && !empty && (
+        <div className="mt-3">
+          <Alert tone="error">预览渲染失败，继续编辑会自动重试</Alert>
+        </div>
+      )}
       <article className="mx-auto mt-4 max-w-prose">
         <h1 className="font-prose-heading text-display font-bold text-ink">{title || "无标题"}</h1>
         {empty ? (

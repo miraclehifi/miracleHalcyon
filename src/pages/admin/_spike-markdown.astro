@@ -18,7 +18,7 @@ export const prerender = false;
       let seq = 0;
 
       worker.addEventListener("message", (event: MessageEvent<RenderResponse>) => {
-        pending.get(event.data.seq)?.(event.data.html);
+        pending.get(event.data.seq)?.("html" in event.data ? event.data.html : ""); // 渲染出错按空结果计
         pending.delete(event.data.seq);
       });
 

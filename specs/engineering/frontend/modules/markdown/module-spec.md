@@ -81,7 +81,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 
 | 环境 | 加载方式 |
 |------|---------|
-| 后台预览 | `src/lib/markdown/worker.ts` 作为 Web Worker（Vite `?worker`，已实现）；主线程发送 `{ seq, source }`，只采用最新 `seq` 的结果；首次进入写文章页预热。已实现：`src/components/admin/editor/MarkdownPreview.tsx`（渲染中又有输入时只保留最后一次；Expressive Code 的 style / 复制脚本提到 `<head>` 只加载一次）。Worker 中无 `document`：`decode-named-character-reference` 经 alias 使用非 DOM 入口（见 `astro.config.mjs`） |
+| 后台预览 | `src/lib/markdown/worker.ts` 作为 Web Worker（Vite `?worker`，已实现）；主线程发送 `{ seq, source }`，只采用最新 `seq` 的结果；首次进入写文章页预热。渲染出错时 Worker 回 `{ seq, error: true }`（不吞掉请求），主线程照常复位"渲染中"、发出排队的输入，并保留上次结果显示错误提示（US-04 BH-09，已实现）。已实现：`src/components/admin/editor/MarkdownPreview.tsx`（渲染中又有输入时只保留最后一次；Expressive Code 的 style / 复制脚本提到 `<head>` 只加载一次）。Worker 中无 `document`：`decode-named-character-reference` 经 alias 使用非 DOM 入口（见 `astro.config.mjs`） |
 | F-002 构建时 | 预渲染页面中直接 import；不进入线上 Worker 包 |
 
 ## 5. 性能目标

@@ -81,8 +81,11 @@
 | 67 | [implement-publish-action](implement-publish-action.md) | 实现"发布"操作 | article-writing | FRONTEND | 表现层 | US-08 | wire-autosave-to-editor, implement-publish-endpoint, build-toast-component | 1 | 低 | completed |
 | 68 | [implement-publish-update-action](implement-publish-update-action.md) | 实现"发布更新"操作 | article-writing | FRONTEND | 表现层 | US-08 | implement-publish-action | 1 | 低 | completed |
 | 69 | [implement-unpublish-action](implement-unpublish-action.md) | 实现"撤回为草稿"操作 | article-writing | FRONTEND | 表现层 | US-08 | implement-publish-update-action, implement-unpublish-endpoint, build-confirm-dialog-component | 0 | 低 | completed |
+| 70 | [handle-preview-worker-error](handle-preview-worker-error.md) | 预览渲染出错时恢复 | article-writing | FRONTEND | 表现层 | US-04 | build-markdown-preview-pane, build-alert-component | 0 | 低 | completed |
+| 71 | [stabilize-preview-timing-e2e](stabilize-preview-timing-e2e.md) | 预览计时断言与并行用例隔离 | article-writing | TEST | 基础设施 | US-04 | build-markdown-preview-pane | 0 | 中 | pending |
+| 72 | [add-mainline-journey-e2e](add-mainline-journey-e2e.md) | 主干用户旅程 E2E | article-writing | TEST | 表现层 | US-01, US-03, US-06, US-07, US-08 | implement-unpublish-action, build-post-list-page, build-login-page | 0 | 低 | pending |
 
-共 69 个任务：基础设施 5、数据层 7、表现层 29、领域层 17、接口层 11。
+共 72 个任务：基础设施 6、数据层 7、表现层 31、领域层 17、接口层 11。70–72 为 2026-10-14 DoD 核对后追加（预览出错卡死、计时用例偶发失败、缺主干旅程 E2E）。
 
 ## 关键路径
 
