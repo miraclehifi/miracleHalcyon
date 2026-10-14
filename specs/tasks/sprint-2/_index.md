@@ -16,7 +16,7 @@
 | 2 | [implement-image-upload-api](implement-image-upload-api.md) | 图片上传接口（单图） | article-writing | API | 领域 + 数据 + 接口 | US-05 | — | 2 | 中 | completed |
 | 3 | [add-image-read-route](add-image-read-route.md) | 图片读取路由 `/img/*` | article-writing | API | 接口层 | US-05 | implement-image-upload-api | 1 | 低 | completed |
 | 4 | [add-image-paste-upload](add-image-paste-upload.md) | 粘贴图片上传并插入引用 | article-writing | FRONTEND | 表现层 | US-05 | build-format-toolbar, implement-image-upload-api, add-image-read-route | 1 | 中 | completed |
-| 5 | [add-image-drop-and-pick-upload](add-image-drop-and-pick-upload.md) | 拖入与"插入图片"上传 | article-writing | FRONTEND | 表现层 | US-05 | add-image-paste-upload | 1 | 中 | pending |
+| 5 | [add-image-drop-and-pick-upload](add-image-drop-and-pick-upload.md) | 拖入与"插入图片"上传 | article-writing | FRONTEND | 表现层 | US-05 | add-image-paste-upload | 1 | 中 | completed |
 | 6 | [handle-image-upload-errors](handle-image-upload-errors.md) | 图片上传的拒绝与失败处理 | article-writing | FRONTEND | 表现层 | US-05 | add-image-drop-and-pick-upload | 0 | 低 | pending |
 | 7 | [add-icon-button-tooltips](add-icon-button-tooltips.md) | 图标按钮悬停提示 | editor-warm-tooltip | FRONTEND | 表现层 | US-10 | build-format-toolbar | 0 | 中 | pending |
 | 8 | [implement-delete-post-api](implement-delete-post-api.md) | 删除文章接口 | article-writing | API | 领域 + 数据 + 接口 | US-09 | — | 2 | 低 | pending |
@@ -55,7 +55,7 @@ implement-logout-endpoint ─▶ add-logout-entry
 | add-preview-scroll-sync | 按 module-spec 的 `data-line` 逐行插值实现，UT-53（按标题映射）随之改写 |
 | implement-logout-endpoint | 无效会话登出：契约 401 vs 验收用例"返回成功" |
 | add-logout-entry | 写文章页顶栏"登出"入口的位置 |
-| add-image-drop-and-pick-upload | textarea 中放置位置换算为源码偏移的方案 |
+| add-image-drop-and-pick-upload | ~~textarea 中放置位置换算为源码偏移的方案~~ → 镜像元素测量（2026-10-14 作者确认） |
 
 ## US 覆盖（Sprint 2 范围）
 

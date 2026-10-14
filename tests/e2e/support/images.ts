@@ -5,28 +5,30 @@ export const IMAGE_URL = /^\/img\/\d{4}\/\d{2}\/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}
 export interface FakeFile {
   name: string;
   type: string;
-  // "png"：页面内用 canvas 生成可解码的 PNG（width×height）；数字：该字节数的填充内容
-  content: { png: [number, number] } | { bytes: number };
+  // png / jpeg：页面内用 canvas 生成可解码的图片（宽×高）；bytes：该字节数的填充内容
+  content: { png: [number, number] } | { jpeg: [number, number] } | { bytes: number };
+  padTo?: number; // 在图片末尾补零到恰好该字节数（文件头不变，仍能通过服务端嗅探）
 }
 
-// 在页面中构造 File 列表（canvas 生成真实 PNG，或指定字节数的填充文件）
-async function makeFiles(page: Page, files: FakeFile[]) {
+// 在页面中构造 File 列表
+export async function makeFiles(page: Page, files: FakeFile[]) {
   return page.evaluateHandle(async (specs) => {
     const list: File[] = [];
     for (const spec of specs) {
       let blob: Blob;
-      if ("png" in spec.content) {
-        const [w, h] = spec.content.png;
+      if ("bytes" in spec.content) {
+        blob = new Blob([new Uint8Array(spec.content.bytes)]);
+      } else {
+        const [type, [w, h]] = "png" in spec.content ? ["image/png", spec.content.png] : ["image/jpeg", spec.content.jpeg];
         const canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext("2d")!;
         ctx.fillStyle = "#8a7b6c";
         ctx.fillRect(0, 0, w, h);
-        blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
-      } else {
-        blob = new Blob([new Uint8Array(spec.content.bytes)]);
+        blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), type));
       }
+      if (spec.padTo) blob = new Blob([blob, new Uint8Array(spec.padTo - blob.size)]);
       list.push(new File([blob], spec.name, { type: spec.type }));
     }
     return list;

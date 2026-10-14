@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 5
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,14 +34,22 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 拖放高亮层；图片插入到放置位置（TC-US05-02）
-- [ ] ⚠️ 前置确认项：设计文档未写 textarea 内"放置位置"如何换算为源码偏移，实现时确认方案（及不支持时的退路）
-- [ ] "插入图片"连接 `<input type="file" multiple accept>`；批量占位一次插入、并发 2
+- [x] 拖放高亮层；图片插入到放置位置（TC-US05-02）
+- [x] ⚠️ 前置确认项：设计文档未写 textarea 内"放置位置"如何换算为源码偏移 → 已确认：镜像元素测量（见实现记录）
+- [x] "插入图片"连接 `<input type="file" multiple accept>`；批量占位一次插入、并发 2
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- **前置确认项结论（2026-10-14 作者选定）**：放置位置用镜像元素测量——`src/lib/editor/textarea-mirror.ts` `offsetFromPoint`：隐藏 div 复刻 textarea 排版（字体、行高、宽度取 `clientWidth` 减左右内边距、`pre-wrap`），对"该偏移处光标是否在落点之前"二分查找，同一行取更近一侧；同步滚动（add-preview-scroll-sync）复用这套镜像
+- `MarkdownEditor`：编辑区整体为拖放区（`data-drop-zone`），只响应带文件的拖动；`dragenter` / `dragleave` 计数避免在子元素间移动时闪烁；放在源码区按落点插入，放在标题等处插在光标处；覆盖层文案"松开以上传图片"（页面规格为"…图片或实况照片"，实况照片在 Sprint 3 支持后再改）
+- "插入图片"连接隐藏的 `<input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif">`，选择后插在光标处
+- `src/lib/upload/upload-queue.ts` `createLimiter`：并发 2；`useImageUploads.uploadFiles(files, at?)` 支持指定插入位置
+- 测试说明：单元测试先红后绿；E2E 在组件代码完成后才首次运行（未单独跑出红灯），首次运行即全部通过
 
 ## 依赖
 
