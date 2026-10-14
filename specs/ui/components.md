@@ -34,7 +34,7 @@
 | `Pagination` | `Pagination` | `page`；`pageSize`；`total`；手机端页码可点区域 44px。已实现：`src/components/ui/Pagination.tsx`（另有 `href`、`onNavigate`；页码全部显示、可换行） | 文章列表 |
 | `Menu` · `MenuItem/Default` · `/Checked` · `/Disabled` | `Menu` + `Menu.Item` + `Menu.Separator` | Item：`type`：`action` / `checkbox` / `radio`（对应 `menuitem` / `menuitemcheckbox` / `menuitemradio`）；`checked?`；`disabled?`（`aria-disabled`，仍可聚焦，配 `Tooltip` 说明原因）；`children`。容器 `surface` 底、1px `line` 边、`radius`、阴影同悬停提示，内边距 4px；Item 高 32px（触屏 44px），左右内边距 12px，`text-ui`，选中时 ✓ 在右侧（`ink-muted`），悬停 / 键盘高亮底 `surface-sunken`，禁用 `ink-faint`。`/Checked`、`/Disabled` 对应 `checked`、`disabled`，**不是 variant** | 写文章页 `ImageMenu` |
 | `Popover` | `Popover` | `anchor`；`side`：`top` / `bottom`；`title`；`children`；非模态 `role="dialog"`，Esc / 点外部关闭，焦点回到触发元素；`surface` 底、1px `line` 边、12px 圆角、阴影同弹窗 | 写文章页"图片写法"说明 |
-| `Tooltip` · `Tooltip/Shortcut` | `Tooltip` + `TooltipGroup` | Tooltip：`content`；`shortcut?`（按键数组，如 `['Mod', 'B']`，`Mod` 按平台显示 `⌘` 或 `Ctrl`）；`side`：`top` / `bottom`；`children`（触发按钮，一个元素）。`/Shortcut` 对应传了 `shortcut`，**不是 variant**。`TooltipGroup` 包住一组按钮，组内共用一个提示框。底层为 WarmTooltip，参数见"悬停提示参数" | 写文章页：`EditorToolbar`、手机顶栏返回 / 设置、设置抽屉关闭 |
+| `Tooltip` · `Tooltip/Shortcut` | `Tooltip` + `TooltipGroup` | Tooltip：`content`；`shortcut?`（按键数组，如 `['Mod', 'B']`，`Mod` 按平台显示 `⌘` 或 `Ctrl`）；`side`：`top` / `bottom`；`children`（触发按钮，一个元素）。`/Shortcut` 对应传了 `shortcut`，**不是 variant**。`TooltipGroup` 包住一组按钮，组内共用一个提示框。底层为 WarmTooltip，参数见"悬停提示参数"。已实现：`src/components/ui/Tooltip.tsx`（另有 `className` 加在触发包裹层） | 写文章页：`EditorToolbar`、手机顶栏返回 / 设置、设置抽屉关闭 |
 
 ### 按钮质感参数
 
@@ -85,7 +85,7 @@
 
 触发按钮另加 `aria-keyshortcuts`（如 `Meta+B` / `Control+B`），由 `Tooltip` 根据 `shortcut` 写入。
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
 
 | 改动 | 原因 |
 |------|------|
@@ -142,7 +142,7 @@
 | `gap` / `radius` | `20` / `12` | 与卡片间距、圆角一致 |
 | `key`（外层） | 筛选条件 + 页码 | 筛选、搜索、翻页后重新挂载，整页重新入场 |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
 
 | 改动 | 原因 |
 |------|------|
@@ -176,7 +176,7 @@
 | `closeOnAction` / `haptic` | `true` / `true` | — |
 | `label` | `《{标题}》` | 行的读屏名称 |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
 
 | 改动 | 原因 |
 |------|------|
@@ -221,7 +221,7 @@
 | `labels` | `{ generating: '加载中', complete: '已加载', error: '加载失败' }` | — |
 | `retryLabel` / `onRetry` | `'重试'` / 状态回到 `generating`，给 `src` 加 `?retry=n` 重新请求 | 加载失败时点击图片不打开 `Lightbox` |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
 
 | 改动 | 原因 |
 |------|------|
@@ -279,7 +279,7 @@
 | `duration` / `ease` / `stagger` | `0.6` / `"power3.out"` / `0.06` | 默认值 |
 | `showLabels` | 有任一图注时 `true` | — |
 
-**需要在源码上补的改动**（implement 阶段，保留原组件其余行为）：
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；已实现：`src/components/vendor/react-bits/WarmTooltip.tsx`，上游路径为 `src/ts-tailwind/Micro/WarmTooltip`，另补 SSR 无 `window` 的保护）：
 
 | 改动 | 原因 |
 |------|------|

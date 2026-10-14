@@ -36,7 +36,7 @@
 | US-04 | markdown-preview | draft | 正文 Markdown 实时预览（GFM、代码高亮） |
 | US-05 | image-upload | implemented | 粘贴/拖入图片上传 R2 并插入引用 |
 | US-06 | autosave-draft | draft | 停止输入后自动保存，显示保存状态，重开恢复 |
-| US-10 | format-toolbar | draft | 工具栏格式命令、格式快捷键、按钮悬停提示 |
+| US-10 | format-toolbar | implemented | 工具栏格式命令、格式快捷键、按钮悬停提示 |
 | US-11 | live-photo-upload | draft | HEIC 转换、实况照片 / 安卓动态照片配对上传 |
 | US-12 | image-layout-marks | draft | 宽图、组图网格 / 手风琴写法，预览图片菜单 |
 

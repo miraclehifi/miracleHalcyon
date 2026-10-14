@@ -14,8 +14,4 @@ export function matchShortcut(event: ShortcutEvent, isMac: boolean): FormatComma
   return (event.shiftKey ? SHIFTED[event.code] : PLAIN[event.key.toLowerCase()]) ?? null;
 }
 
-export function isMacPlatform(): boolean {
-  if (typeof navigator === "undefined") return false;
-  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
-  return /mac/i.test(nav.userAgentData?.platform || nav.platform || "");
-}
+export { isMacPlatform } from "../dom/media";

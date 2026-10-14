@@ -69,7 +69,7 @@
 
 ### 工具栏与悬停提示
 
-提示用 `Tooltip`（底层 WarmTooltip，见 [components.md](../components.md)"悬停提示参数"，视觉见 [design-tokens.md](../design-tokens.md)"悬停提示"）。提示文字与按钮 `aria-label` 相同。
+已实现（Sprint 2）：工具栏、格式快捷键与提示。提示用 `Tooltip`（底层 WarmTooltip，见 [components.md](../components.md)"悬停提示参数"，视觉见 [design-tokens.md](../design-tokens.md)"悬停提示"）。提示文字与按钮 `aria-label` 相同。
 
 **工具栏**（一个 `TooltipGroup`；桌面提示在按钮下方，手机在按钮上方）：
 

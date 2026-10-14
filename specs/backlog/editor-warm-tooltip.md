@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | ready |
+| 状态 | done |
 | 类型 | Task |
 | 优先级 | P2-Medium |
 | 来源 | 作者需求 |
@@ -25,7 +25,7 @@
 - [x] [admin-post-editor.md](../ui/pages/admin-post-editor.md) 写明哪些按钮带提示、提示朝向、快捷键表
 - [x] 新增 US-10-format-toolbar（story + behaviors）、验收用例 US-10-tests.md、前端单元测试 UT-117 起
 - [x] [admin.pen](../ui/admin.pen) 组件区新增 `Tooltip`、`Tooltip/Shortcut`；03 写文章页工具栏放一个悬停示例；`EditorToolbar` 的"插入图片"改为 `IconButton/Ghost`（`image-plus`）
-- [ ] implement：`WarmTooltip.tsx` 按 components.md 改源码；`Tooltip` 按平台显示 `⌘` 或 `Ctrl`
+- [x] implement：`WarmTooltip.tsx` 按 components.md 改源码；`Tooltip` 按平台显示 `⌘` 或 `Ctrl`（Sprint 2 build-format-toolbar + add-icon-button-tooltips，2026-10-14）
 
 ## 影响分析
 

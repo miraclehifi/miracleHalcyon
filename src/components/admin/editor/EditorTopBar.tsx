@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Button } from "../../ui/Button";
 import { IconButton } from "../../ui/IconButton";
+import { Tooltip } from "../../ui/Tooltip";
 import { StatusBadge, type BadgeStatus } from "../../ui/StatusBadge";
 
 export interface EditorTopBarProps {
@@ -24,7 +25,9 @@ export function EditorTopBar({ status, saveIndicator, settingsOpen, onToggleSett
             文章
           </Button>
         </span>
-        <IconButton icon="arrow-left" size="touch" aria-label="返回文章列表" onClick={goToList} className="md:hidden" />
+        <Tooltip content="返回文章列表" className="md:hidden">
+          <IconButton icon="arrow-left" size="touch" aria-label="返回文章列表" onClick={goToList} />
+        </Tooltip>
         <span aria-hidden="true" className="h-[18px] w-px bg-line-strong max-md:hidden" />
         <span className="max-md:hidden">
           <StatusBadge status={status} />
@@ -37,15 +40,9 @@ export function EditorTopBar({ status, saveIndicator, settingsOpen, onToggleSett
             设置
           </Button>
         </span>
-        <IconButton
-          icon="settings-2"
-          size="touch"
-          aria-label="文章设置"
-          aria-pressed={settingsOpen}
-          aria-controls="post-settings"
-          onClick={onToggleSettings}
-          className="md:hidden"
-        />
+        <Tooltip content="文章设置" className="md:hidden">
+          <IconButton icon="settings-2" size="touch" aria-label="文章设置" aria-pressed={settingsOpen} aria-controls="post-settings" onClick={onToggleSettings} />
+        </Tooltip>
         {primaryAction}
       </div>
     </header>

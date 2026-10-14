@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { isValidSlug } from "../../../domains/post/slug";
 import { Field, FIELD_CONTROL_CLASS } from "../../ui/Field";
 import { IconButton } from "../../ui/IconButton";
+import { Tooltip } from "../../ui/Tooltip";
 
 export const SUMMARY_MAX = 200;
 
@@ -53,7 +54,9 @@ export function PostSettingsDrawer(props: PostSettingsDrawerProps) {
     >
       <div className="flex items-center justify-between">
         <h2 className="text-title-sm font-semibold text-ink">文章设置</h2>
-        <IconButton icon="x" aria-label="关闭设置" onClick={props.onClose} />
+        <Tooltip content="关闭设置">
+          <IconButton icon="x" aria-label="关闭设置" onClick={props.onClose} />
+        </Tooltip>
       </div>
       <Field label="Slug（文章网址）" hint={note.hint} error={slugError ?? note.error}>
         <input
