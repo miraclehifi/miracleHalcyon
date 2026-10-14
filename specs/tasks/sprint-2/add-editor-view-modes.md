@@ -34,6 +34,7 @@
 ### 实现类
 - [ ] 视图模式状态 + localStorage 读写（读写包 try/catch，不可用时默认"并排"）
 - [ ] `Tabs` 组件按 components.md 命名与变体
+- [ ] 窄屏工具栏固定在底部（键盘上方），承接 build-format-toolbar 未做的部分（admin-post-editor"响应式"）
 
 ### 测试类
 - [ ] 变更点测试：上述测试清单全部由红变绿

@@ -1,6 +1,9 @@
 // MarkdownEditor（components.md，admin-post-editor.md"编辑区"，ADR-004 textarea 编辑器）：标题 + 源码区 + 底栏
-// 标题是无边框大号输入（自动增高、不含换行），回车把光标移到正文；工具栏、图片上传在 Sprint 2 接入
+// 标题是无边框大号输入（自动增高、不含换行），回车把光标移到正文；工具栏按钮与快捷键改写源码（US-10，可撤销）
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { applyEdit, applyFormat, type FormatCommand } from "../../../lib/editor/format-commands";
+import { isMacPlatform, matchShortcut } from "../../../lib/editor/shortcuts";
+import { EditorToolbar } from "./EditorToolbar";
 
 export interface MarkdownEditorProps {
   title: string;
@@ -38,6 +41,20 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
     bodyRef.current?.focus();
   };
 
+  const runCommand = (command: FormatCommand) => {
+    const element = bodyRef.current;
+    if (!element) return;
+    applyEdit(element, applyFormat(element.value, [element.selectionStart, element.selectionEnd], command));
+  };
+
+  // 快捷键只在源码区生效（标题框不响应）
+  const onBodyKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    const command = matchShortcut(event.nativeEvent, isMacPlatform());
+    if (!command) return;
+    event.preventDefault();
+    runCommand(command);
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-[18px]">
       <textarea
@@ -52,6 +69,7 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
         onKeyDown={onTitleKeyDown}
         className="w-full resize-none overflow-hidden bg-transparent text-display font-semibold text-ink outline-none placeholder:text-ink-faint max-md:text-[26px]"
       />
+      <EditorToolbar onCommand={runCommand} />
       <textarea
         ref={bodyRef}
         id="post-body"
@@ -59,6 +77,7 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
         aria-invalid={bodyInvalid || undefined}
         value={body}
         onChange={(event) => onBodyChange(event.target.value)}
+        onKeyDown={onBodyKeyDown}
         spellCheck={false}
         className="min-h-0 w-full flex-1 resize-none bg-transparent font-mono text-ui leading-[1.5] text-ink outline-none max-md:text-base"
       />

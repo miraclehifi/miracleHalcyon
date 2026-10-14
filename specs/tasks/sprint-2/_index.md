@@ -12,7 +12,7 @@
 
 | # | Task | 名称 | 来源 PBI | 类别 | 架构层级 | US | 依赖 | 被依赖数 | 不确定性 | 状态 |
 |---|------|------|---------|------|---------|----|------|---------|---------|------|
-| 1 | [build-format-toolbar](build-format-toolbar.md) | 格式工具栏与快捷键 | article-writing, editor-warm-tooltip | FRONTEND | 表现层 | US-10 | — | 2 | 中 | pending |
+| 1 | [build-format-toolbar](build-format-toolbar.md) | 格式工具栏与快捷键 | article-writing, editor-warm-tooltip | FRONTEND | 表现层 | US-10 | — | 2 | 中 | completed |
 | 2 | [implement-image-upload-api](implement-image-upload-api.md) | 图片上传接口（单图） | article-writing | API | 领域 + 数据 + 接口 | US-05 | — | 2 | 中 | pending |
 | 3 | [add-image-read-route](add-image-read-route.md) | 图片读取路由 `/img/*` | article-writing | API | 接口层 | US-05 | implement-image-upload-api | 1 | 低 | pending |
 | 4 | [add-image-paste-upload](add-image-paste-upload.md) | 粘贴图片上传并插入引用 | article-writing | FRONTEND | 表现层 | US-05 | build-format-toolbar, implement-image-upload-api, add-image-read-route | 1 | 中 | pending |

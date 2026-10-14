@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 1
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（`src/lib/editor/` 纯函数 + 组件）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,14 +34,22 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/lib/editor/format-commands.ts`：`applyEdit`、`applyFormat`；`shortcuts.ts`：`matchShortcut`
-- [ ] `EditorToolbar` 9 个按钮（按 components.md 的名称与图标），"插入图片"按钮先占位、不接上传（由 add-image-drop-and-pick-upload 接入）
-- [ ] 不设快捷键的按钮：二级标题、任务列表、插入图片（UI 决定 #6）
+- [x] `src/lib/editor/format-commands.ts`：`applyEdit`、`applyFormat`；`shortcuts.ts`：`matchShortcut`
+- [x] `EditorToolbar` 9 个按钮（按 components.md 的名称与图标），"插入图片"按钮先占位、不接上传（由 add-image-drop-and-pick-upload 接入）
+- [x] 不设快捷键的按钮：二级标题、任务列表、插入图片（UI 决定 #6）
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- `src/lib/editor/format-commands.ts`：`applyFormat`（行内包裹 / 取消；斜体不把 `**` 的一半当成斜体；链接选中 `url`；行级命令作用于选区覆盖的整行，全部已有该前缀时去掉，否则替换为该前缀，`- [ ] ` 先于 `- ` 识别）、`applyEdit`（`execCommand('insertText')`，空插入用 `delete`；不可用时 `setRangeText` + 派发 `input`）
+- `src/lib/editor/shortcuts.ts`：`matchShortcut`、`isMacPlatform`
+- `EditorToolbar.tsx`：`role="toolbar"`，按钮 `mousedown` 阻止默认行为以保留源码区焦点与选区；手机隐藏斜体、任务列表，按钮 44px；"插入图片"在上传接入前禁用（add-image-drop-and-pick-upload 接入）
+- 图标按 lucide 命名登记到 `icons.ts`：`heading-2`、`bold`、`italic`、`link`、`code`、`list`、`list-todo`、`text-quote`、`image-plus`
+- 未做（不在本任务测试范围）：手机工具栏"固定在键盘上方"的定位，留到 add-editor-view-modes 处理窄屏布局时一并实现
 
 ## 依赖
 
