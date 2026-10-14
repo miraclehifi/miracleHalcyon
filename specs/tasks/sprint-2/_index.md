@@ -51,10 +51,10 @@ implement-logout-endpoint ─▶ add-logout-entry
 
 | 任务 | 事项 |
 |------|------|
-| handle-session-expired-save | 401 后跳登录页（module-spec、UI 决定 #3）还是新窗口登录（TC-US06-25、UT-63） |
-| add-preview-scroll-sync | 按 module-spec 的 `data-line` 逐行插值实现，UT-53（按标题映射）随之改写 |
-| implement-logout-endpoint | 无效会话登出：契约 401 vs 验收用例"返回成功" |
-| add-logout-entry | 写文章页顶栏"登出"入口的位置 |
+| handle-session-expired-save | ~~401 后跳登录页还是新窗口登录~~ → 先暂存本地再跳 `/admin/login?next=当前地址`，按 module-spec、UI 决定 #3；TC-US06-25、UT-63 随之改写（2026-10-14 作者确认） |
+| add-preview-scroll-sync | ~~实现方式~~ → 按 module-spec 的 `data-line` 逐行插值，UT-53（按标题映射）随之改写（2026-10-14 作者确认） |
+| implement-logout-endpoint | ~~无效会话登出返回什么~~ → 返回成功（幂等，照样清 Cookie），契约随之修改（2026-10-14 作者确认） |
+| add-logout-entry | ~~写文章页顶栏"登出"入口的位置~~ → 顶栏新增 `⋯` 更多菜单，"登出"放在菜单里；需先补设计稿与 components.md（2026-10-14 作者确认） |
 | add-image-drop-and-pick-upload | ~~textarea 中放置位置换算为源码偏移的方案~~ → 镜像元素测量（2026-10-14 作者确认） |
 
 ## US 覆盖（Sprint 2 范围）
