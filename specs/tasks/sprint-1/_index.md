@@ -1,6 +1,7 @@
 # Sprint 1：主干打通
 
-**状态**: in_progress
+**状态**: completed
+**关闭**: 2026-10-14
 **创建**: 2026-10-13
 **Feature**: F-001 文章写作（[Backlog: article-writing](../backlog/article-writing.md)）
 **规划方式**: 迭代递进（Sprint 2、3 见 [tasks/_index.md](../_index.md)）
@@ -118,7 +119,7 @@ scaffold-project-skeleton → setup-workers-test-pool → spike-markdown-workers
 
 ## Sprint 目标
 
-<!-- Sprint 关闭时根据实际完成的任务生成 -->
+主干打通（已达成）：登录 → 写文章（2 秒自动保存、失败重试、离开拦截）→ 列表筛选 / 搜索 / 分页 → 发布 / 发布更新 / 撤回 → 读者只读接口；预览支持 GFM、XSS 过滤与代码高亮（Web Worker 渲染）。72 个任务全部完成；code-review 与 verify 待做。
 
 ## DoD（Sprint 级）
 
