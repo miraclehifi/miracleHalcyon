@@ -10,12 +10,14 @@ import { slugify } from "../../../domains/post/slug";
 import type { PostView } from "../../../domains/post/service";
 import type { AutosaveState } from "../../../lib/autosave/controller";
 import { clearLocalDraft, compareLocalStash, readLocalDraft, writeLocalDraft } from "../../../lib/autosave/local-draft";
+import { logout } from "../../../lib/admin/logout";
 import { useAutosave } from "../../../lib/autosave/useAutosave";
 import { useScrollSync } from "../../../lib/editor/scroll-sync";
 import { useEditorView, type NarrowTab, type ViewMode } from "../../../lib/editor/view-mode";
 import { useHydrated } from "../../../lib/dom/hydration";
 import { navigate } from "../../../lib/dom/navigate";
 import { localDate } from "../../../lib/format/local-date";
+import { ConfirmDialog } from "../../ui/ConfirmDialog";
 import { RestoreBanner } from "../../ui/RestoreBanner";
 import { SaveIndicator, type SaveState } from "../../ui/SaveIndicator";
 import { SegmentedControl } from "../../ui/SegmentedControl";
@@ -200,6 +202,18 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
     setSlugError(message);
     setSettingsOpen(true);
   };
+  // 登出（US-02）：有未保存修改先确认；确认后把当前内容写入本地暂存（下次打开由恢复横幅找回），放行离开拦截再登出
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const logoutNow = () => {
+    if (unsaved) writeLocalDraft(postIdRef.current, getContent());
+    leavingRef.current = true;
+    return logout();
+  };
+  const onLogout = () => {
+    if (unsaved) setConfirmLogout(true);
+    else void logoutNow();
+  };
+
   const onDeleted = () => {
     leavingRef.current = true;
     clearStash();
@@ -237,6 +251,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               </SegmentedControl>
             )
           }
+          onLogout={onLogout}
           settingsOpen={settingsOpen}
           onToggleSettings={() => setSettingsOpen((open) => !open)}
           primaryAction={
@@ -316,6 +331,16 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmLogout}
+        tone="default"
+        icon="log-out"
+        title="有未保存的修改，确定登出吗？"
+        description="未保存的内容会暂存在本机，下次打开这篇文章时可以恢复。"
+        confirmLabel="登出"
+        onConfirm={logoutNow}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </ToastProvider>
   );
 }

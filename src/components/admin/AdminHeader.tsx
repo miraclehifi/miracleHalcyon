@@ -1,5 +1,6 @@
 // AdminHeader（components.md"文章列表"，admin-post-list.md"布局"）：后台顶栏，站点名 +"查看博客""登出"
-// 手机端两个操作只留图标（44×44，带 aria-label）。"登出"在 Sprint 2（US-02）接入，此前禁用
+// 手机端两个操作只留图标（44×44，带 aria-label）。"登出"：POST 登出接口后跳登录页（列表页没有未保存内容，不需确认）
+import { logout } from "../../lib/admin/logout";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
 
@@ -16,13 +17,13 @@ export function AdminHeader() {
         <Button variant="ghost" icon="external-link" onClick={openBlog}>
           查看博客
         </Button>
-        <Button variant="ghost" icon="log-out" disabled>
+        <Button variant="ghost" icon="log-out" onClick={() => void logout()}>
           登出
         </Button>
       </div>
       <div className="flex items-center md:hidden">
         <IconButton icon="external-link" size="touch" aria-label="查看博客" onClick={openBlog} />
-        <IconButton icon="log-out" size="touch" aria-label="登出" disabled />
+        <IconButton icon="log-out" size="touch" aria-label="登出" onClick={() => void logout()} />
       </div>
     </header>
   );

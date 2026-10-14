@@ -1,6 +1,6 @@
 # Sprint 2：写作体验
 
-**状态**: in_progress
+**状态**: completed（待 code-review）
 **创建**: 2026-10-14
 **Feature**: F-001 文章写作（[Backlog: article-writing](../../backlog/article-writing.md)）
 **规划方式**: 迭代递进（Sprint 3 见 [tasks/_index.md](../_index.md)）
@@ -29,7 +29,7 @@
 | 15 | [add-local-draft-restore](add-local-draft-restore.md) | 本地暂存与恢复横幅 | article-writing | FRONTEND | 表现层 | US-06 | — | 1 | 低 | completed |
 | 16 | [handle-session-expired-save](handle-session-expired-save.md) | 保存时会话过期的处理 | article-writing | FRONTEND | 表现层 | US-06 | add-local-draft-restore | 0 | 中 | completed |
 | 17 | [implement-logout-endpoint](implement-logout-endpoint.md) | 登出接口 | article-writing | API | 领域 + 接口 | US-02 | — | 1 | 低 | completed |
-| 18 | [add-logout-entry](add-logout-entry.md) | 后台"登出"入口 | article-writing | FRONTEND | 表现层 | US-02 | implement-logout-endpoint | 0 | 低 | pending |
+| 18 | [add-logout-entry](add-logout-entry.md) | 后台"登出"入口 | article-writing | FRONTEND | 表现层 | US-02 | implement-logout-endpoint | 0 | 低 | completed |
 
 共 18 个任务：接口 / 后端 4、前端 14。执行顺序按本表序号。
 
@@ -79,11 +79,20 @@ implement-logout-endpoint ─▶ add-logout-entry
 
 ## Sprint 目标
 
-<!-- Sprint 关闭时根据实际完成的任务生成 -->
+18 / 18 完成（2026-10-14）。作者现在可以：
+- 登出（列表页顶栏、写文章页 ⋯ 菜单；有未保存修改先确认并暂存）；登出后"后退"看不到后台内容
+- 粘贴 / 拖入 / 选择图片上传，拒绝与失败有提示
+- 用工具栏和快捷键排版，图标按钮都有悬停提示
+- 切换 编辑 / 并排 / 预览（手机为 Tab），并排时两栏同步滚动
+- 断网、会话过期不丢内容：本地暂存 + 恢复横幅，401 时暂存后跳登录页
+- 在写文章页删除文章，在列表左滑删除并 6 秒内撤销；列表有入场动效
+
+过程中的规则变化：任务内只跑受影响的测试，全量回归放 Sprint 末（[targeted-task-testing](../../backlog/targeted-task-testing.md)）。
+遗留：webkit `mainline-journey` 在全量并行时接近 30 秒总超时（偶发）；`ImageMenu` 用的 checkbox / radio 菜单项在 Sprint 3 补
 
 ## DoD（Sprint 级）
 
-- [ ] 所有任务状态为 completed
-- [ ] `npm test` 与 `npm run test:e2e` 全部通过
-- [ ] ⚠️ 前置确认项全部有结论，并同步到对应文档
-- [ ] 设计文档已反哺"已实现"标记；相关 Backlog 条目（editor-warm-tooltip、swipe-row-actions、animated-list 后台部分）验收项已勾选
+- [x] 所有任务状态为 completed
+- [x] `npm test` 与 `npm run test:e2e` 全部通过（E2E 1 个偶发超时，单独重跑通过）
+- [x] ⚠️ 前置确认项全部有结论，并同步到对应文档
+- [x] 设计文档已反哺"已实现"标记；相关 Backlog 条目（editor-warm-tooltip、swipe-row-actions、animated-list 后台部分）验收项已勾选

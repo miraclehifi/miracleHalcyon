@@ -29,6 +29,12 @@ async function reject(request: Request, response: Response): Promise<Response> {
   return response;
 }
 
+// 后台页面不进浏览器缓存（含往返缓存）：登出后"后退"会重新请求并被跳转到登录页（US-02 TC-US02-12）
+function noStore(response: Response): Response {
+  response.headers.set("Cache-Control", "no-store");
+  return response;
+}
+
 function redirect(location: string): Response {
   return new Response(null, { status: 302, headers: { Location: location } });
 }
@@ -64,7 +70,7 @@ export function createAuthMiddleware(deps: AuthMiddlewareDeps): MiddlewareHandle
     context.locals.session = session;
 
     if (pathname === LOGIN_PAGE) return session ? redirect(sanitizeNext(searchParams.get("next"))) : next();
-    if (session) return next();
+    if (session) return isApi ? next() : noStore(await next());
     return isApi ? reject(context.request, unauthenticated()) : redirect(`${LOGIN_PAGE}?next=${encodeURIComponent(pathname + search)}`);
   };
 }

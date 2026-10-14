@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 18
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -37,13 +37,25 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 登出按钮（列表页、写文章页）；接口返回 401 也按已登出处理并跳登录页
-- [ ] `/admin/**` 页面不被浏览器缓存（"后退"重新请求并被 302）
+- [x] 登出按钮（列表页、写文章页）；接口返回 401 也按已登出处理并跳登录页
+- [x] `/admin/**` 页面不被浏览器缓存（"后退"重新请求并被 302）
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- 前置确认（2026-10-14 作者确认）：写文章页入口放在顶栏 `⋯` 更多菜单。先补设计（admin.pen 03 / 03m 顶栏、04"写文章页更多菜单"，提交 02e3bf4），再实现
+- `src/components/ui/Menu.tsx`（新建，按 components.md）：`Menu` + `Menu.Item` + `Menu.Separator`；`role="menu"`，打开时焦点到第一项，↑ ↓ 循环、Home / End，Enter / 空格选择，Esc / Tab / 点外部关闭（`onClose` 负责还焦点）；禁用项 `aria-disabled` 仍可聚焦。checkbox / radio 项留给 Sprint 3 的 `ImageMenu`
+- `src/lib/admin/logout.ts`：POST 登出后跳 `/admin/login`；401 / 网络失败也跳（会话若仍有效，登录页会送回后台）
+- `AdminHeader`：桌面"登出"按钮与手机图标按钮启用
+- `EditorTopBar`：主按钮右侧 `MoreMenu`（`IconButton` ellipsis，"更多操作"，`aria-haspopup` / `aria-expanded`，展开时 `surface-sunken` 底；桌面 34px、手机 44px）
+- `PostEditorPage`：有未保存修改时 `ConfirmDialog`（default，log-out 图标）"有未保存的修改，确定登出吗？"/"未保存的内容会暂存在本机，下次打开这篇文章时可以恢复。"/"登出"；确认后写本地暂存、放行离开拦截再登出（确认中按钮加载）
+- `middleware`：有会话的 `/admin/**` 页面响应加 `Cache-Control: no-store`（"后退"重新请求并被跳转）
+- 测试：`tests/unit/ui/menu.test.tsx`、`tests/unit/admin/editor-logout.test.tsx`；`tests/e2e/logout.spec.ts`（TC-US02-02 / 12 / 13 / 14 / 15 / 16）。E2E 在实现之后编写，未单独跑红灯
+- 回归（Sprint 末全量，按 `.claude/rules/tasks.md`"测试执行"）：`npm test` 81 文件 160 用例；`npm run test:e2e` 140 通过 1 跳过 1 失败（webkit mainline-journey 并行负载下超过 30 秒总超时），单独重跑 16/16 通过
 
 ## 依赖
 

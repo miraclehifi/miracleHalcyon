@@ -24,7 +24,7 @@
 | US ID | 名称 | 状态 | 说明 |
 |-------|------|------|------|
 | US-01 | admin-login | implemented | 账号密码登录（含失败限流）；未登录访问后台跳转登录页 |
-| US-02 | admin-logout | draft | 登出并使会话失效 |
+| US-02 | admin-logout | implemented | 登出并使会话失效 |
 
 ### post-editor
 
