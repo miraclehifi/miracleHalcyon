@@ -9,11 +9,12 @@ import type { PostStatus } from "../../../domains/post/post";
 import { slugify } from "../../../domains/post/slug";
 import type { PostView } from "../../../domains/post/service";
 import type { AutosaveState } from "../../../lib/autosave/controller";
-import { clearLocalDraft, compareLocalStash, readLocalDraft } from "../../../lib/autosave/local-draft";
+import { clearLocalDraft, compareLocalStash, readLocalDraft, writeLocalDraft } from "../../../lib/autosave/local-draft";
 import { useAutosave } from "../../../lib/autosave/useAutosave";
 import { useScrollSync } from "../../../lib/editor/scroll-sync";
 import { useEditorView, type NarrowTab, type ViewMode } from "../../../lib/editor/view-mode";
 import { useHydrated } from "../../../lib/dom/hydration";
+import { navigate } from "../../../lib/dom/navigate";
 import { localDate } from "../../../lib/format/local-date";
 import { RestoreBanner } from "../../ui/RestoreBanner";
 import { SaveIndicator, type SaveState } from "../../ui/SaveIndicator";
@@ -97,9 +98,18 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   // 保存、发布、撤回的响应都带最新状态：更新徽标与主按钮
   const syncServer = (post: PostView) => setServer({ status: post.status, hasUnpublishedChanges: post.hasUnpublishedChanges });
 
+  const getContent = (): DraftInput => ({ ...draft, publishedAt: publishedAt || null });
+  // 会话过期（保存或发布返回 401，UI 决定 #3）：先暂存当前内容，再跳登录页；登录后回到这里，由恢复横幅找回
+  const onSessionExpired = () => {
+    if (leavingRef.current) return;
+    writeLocalDraft(postIdRef.current, getContent());
+    leavingRef.current = true;
+    navigate(`/admin/login?next=${encodeURIComponent(window.location.pathname)}`);
+  };
+
   const autosave = useAutosave({
     postId: initial?.id ?? null,
-    getContent: (): DraftInput => ({ ...draft, publishedAt: publishedAt || null }),
+    getContent,
     onCreated: (id) => {
       postIdRef.current = id;
       setPostId(id);
@@ -107,6 +117,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
     },
     onSaved: syncServer,
     onError: (error) => {
+      if (error.kind === "unauthenticated") return onSessionExpired();
       if (error.code !== "SLUG_TAKEN") return;
       setSlugError(error.message ?? "slug 已存在，请换一个");
       setSettingsOpen(true); // 自动打开设置抽屉，让作者看到字段错误
@@ -117,8 +128,13 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   // 本地暂存恢复（editor module-spec §2"恢复判断"）：水合后读一次；比服务端新且内容不同 → 横幅，否则清掉过期暂存
   const stash = useMemo(() => (hydrated ? readLocalDraft(initial?.id ?? null) : null), [hydrated, initial]);
   const [restoreSettled, setRestoreSettled] = useState(false);
+  // 服务端版本按编辑器的默认值比较：发布日期为空时编辑器显示并保存"今天"，暂存里也是今天
   const restoreDecision = useMemo(
-    () => compareLocalStash(stash, initial && { updatedAt: initial.updatedAt, content: initialDraft(initial) }),
+    () =>
+      compareLocalStash(
+        stash,
+        initial && { updatedAt: initial.updatedAt, content: { ...initialDraft(initial), publishedAt: initial.publishedAt ?? localDate(new Date()) } },
+      ),
     [stash, initial],
   );
   useEffect(() => {
@@ -187,7 +203,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const onDeleted = () => {
     leavingRef.current = true;
     clearStash();
-    window.location.assign("/admin");
+    navigate("/admin");
   };
   const onTitleChange = (title: string) => update(slugTouched ? { title } : { title, slug: slugify(title) });
   const onSlugChange = (slug: string) => {
@@ -231,6 +247,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               onPublished={syncServer}
               onMissingFields={onMissingFields}
               onSlugTaken={onSlugTaken}
+              onSessionExpired={onSessionExpired}
             />
           }
         />

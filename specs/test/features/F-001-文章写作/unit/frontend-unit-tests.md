@@ -130,7 +130,7 @@
 | UT-60 | S | 纯 reducer 合法转换 | 按上表逐行断言下一状态 | SC-AUTOSAVE-02, SC-AUTOSAVE-06, SC-AUTOSAVE-10 |
 | UT-61 | S | 非法事件 | saved 收到 SAVE_OK/SAVE_FAIL 状态不变、不抛错 | SC-AUTOSAVE-02 |
 | UT-62 | R | 各状态文案 | 与上表一致；`已保存 · 14:32` 时间格式 HH:mm（冻结时钟 14:32） | SC-AUTOSAVE-02 |
-| UT-63 | R | authExpired 登录链接 | 链接 `target="_blank"` 且 `rel="noopener"` | SC-AUTOSAVE-10 |
+| UT-63 | S | 会话过期跳转 | 自动保存或发布返回 401 → 先写入本地暂存，再跳 `/admin/login?next={当前路径}`，不触发离开确认（UI 决定 #3） | SC-AUTOSAVE-10 |
 | UT-64 | S | `shouldWarnOnLeave(state)` | dirty / saving / error / authExpired → true；saved → false | SC-AUTOSAVE-09 |
 | UT-65 | A | 播报 | 指示器 `role="status"` / `aria-live="polite"`；错误态不只用颜色 | SC-AUTOSAVE-02 |
 
@@ -147,7 +147,7 @@
 | UT-74 | S | 新建文章首存 | 无 id 且标题为空、正文非空 → create 载荷 title="无标题"；成功后回调 `onCreated(id)`（用于替换 URL） | SC-AUTOSAVE-04 |
 | UT-75 | S | 空白新建不保存 | 无 id 且所有字段为空（含仅空白）→ 推进任意时间都不调用 create | SC-AUTOSAVE-05 |
 | UT-76 | S | 失败重试与本地暂存 | 每次编辑节流 500ms 写入 stash（`mh:draft:{id|new}`，值含内容与 `savedAt`），save reject（网络）时保留；新建创建成功后 new → id；按退避策略（如 2s/4s/8s，上限以 design-domain 为准）重试；成功后清除 stash | SC-AUTOSAVE-06 |
-| UT-77 | S | 401 处理 | save 返回 401 → 进入 authExpired，写入 stash，不进入无限重试；下一次编辑/恢复后保存成功 | SC-AUTOSAVE-10 |
+| UT-77 | S | 401 处理 | save 返回 401 → `failed` / `unauthenticated`，在通知页面之前同步写入 stash（不等节流），不重试；下一次编辑/恢复后保存成功并清除 stash | SC-AUTOSAVE-10 |
 | UT-78 | S | 纯函数 `compareLocalStash(stash, server)` | stash.updatedAt > server.updatedAt 且内容不同 → `promptRestore`；时间更旧或内容相同 → `discard`；无 stash → `none`；stash 损坏（非法 JSON）→ `none` 且不抛错 | SC-AUTOSAVE-07 |
 | UT-79 | R | 恢复提示条 | `promptRestore` 时显示"发现未同步的本地内容，是否恢复？"、"本地暂存于 10月10日 14:35，比服务端版本更新。丢弃后无法找回。"及"丢弃本地内容"/"恢复本地内容"；"恢复"→ 用本地内容替换并立即保存；"丢弃"→ 清除 stash | SC-AUTOSAVE-07 |
 | UT-80 | S | 不改变发布状态 | 已发布文章自动保存载荷不含 status 字段/不调用 publish | SC-AUTOSAVE-08 |
@@ -296,6 +296,7 @@
 | 2026-10-12 | v1.2 | 新增 §11 EditorToolbar + Tooltip（UT-117 ~ UT-125，US-10） | miraclehifi |
 | 2026-10-13 | v1.3 | 新增 §12 图片插件、§13 图片菜单、§14 照片预处理（UT-126 ~ UT-147，US-11、US-12） | miraclehifi |
 | 2026-10-14 | v1.4 | 新增 §15 列表删除的延迟提交（UT-148 ~ UT-151，US-09 撤销） | miraclehifi |
+| 2026-10-14 | v1.9 | UT-63 改为跳登录页（作者确认）；UT-77 补充同步暂存 | miraclehifi |
 | 2026-10-14 | v1.8 | UT-76 暂存时机与 key；UT-79 横幅文案按设计稿 | miraclehifi |
 | 2026-10-14 | v1.7 | UT-53 由按标题映射改为按 `data-line` 行映射（editor module-spec §3，作者确认） | miraclehifi |
 | 2026-10-14 | v1.6 | UT-52 补充默认视图与存储；UT-55 宽屏视图切换按设计稿改为单选组 | miraclehifi |

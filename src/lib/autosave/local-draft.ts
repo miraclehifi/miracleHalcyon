@@ -65,7 +65,8 @@ export interface DraftStash {
   save(postId: string | null, getContent: () => DraftInput): void;
   clear(postId: string | null): void;
   move(from: string | null, to: string): void; // 新建文章创建成功：new → id
-  dispose(): void; // 立即写入节流中的内容
+  flush(): void; // 立即写入节流中的内容
+  dispose(): void; // 同 flush（卸载时）
 }
 
 export function createLocalDraftStash(): DraftStash {
@@ -101,6 +102,13 @@ export function createLocalDraftStash(): DraftStash {
       clearLocalDraft(from);
       if (draft) writeLocalDraft(to, draft.content, draft.savedAt);
     },
-    dispose: write, // 卸载时把节流中的最后一次写掉
+    flush() {
+      clearTimeout(timer);
+      write();
+    },
+    dispose() {
+      clearTimeout(timer);
+      write(); // 卸载时把节流中的最后一次写掉
+    },
   };
 }

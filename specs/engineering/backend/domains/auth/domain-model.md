@@ -117,6 +117,7 @@ interface ThrottleRepo { // 已实现：D1ThrottleRepo（src/domains/auth/thrott
 - 有效会话访问 `/admin/login` → 302 到 `sanitizeNext(next)`
 - Origin 校验：取 `Origin` 头，缺失时取 `Referer` 的 origin；两者都缺失 → 403
 - 会话对象写入 `Astro.locals.session`
+- 拒绝写请求（401 / 403 / 500）前先读完请求体：本地 preview（miniflare）中带请求体的请求未读就返回，同一连接上的下一个请求会失败（2026-10-14，handle-session-expired-save 发现）
 
 ## 8. 服务的需求
 

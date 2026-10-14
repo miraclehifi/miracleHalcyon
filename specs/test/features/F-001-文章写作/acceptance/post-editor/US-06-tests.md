@@ -61,7 +61,7 @@
 | TC-US06-22 | SC-AUTOSAVE-02 | 状态转换：未保存 → 保存中… → 已保存 · 14:32 | ui-interaction | P0 |
 | TC-US06-23 | SC-AUTOSAVE-02, SC-AUTOSAVE-06 | 状态转换：保存失败 → 重试 → 已保存 | ui-interaction | P0 |
 | TC-US06-24 | SC-AUTOSAVE-02 | 保存中继续输入，完成后显示"未保存" | ui-interaction | P1 |
-| TC-US06-25 | SC-AUTOSAVE-10 | 状态转换：401 → 登录已过期，登录链接新窗口打开 | ui-interaction | P0 |
+| TC-US06-25 | SC-AUTOSAVE-10 | 发布时会话过期跳登录页 | ui-interaction | P0 |
 | TC-US06-26 | SC-AUTOSAVE-09 | "未保存"/"保存中…"时离开弹确认 | ui-interaction | P0 |
 | TC-US06-27 | SC-AUTOSAVE-09 | "已保存"时离开不弹确认 | ui-interaction | P1 |
 | TC-US06-28 | SC-AUTOSAVE-11 | Ctrl/Cmd+S 立即保存且不弹"保存网页" | ui-interaction | P0 |
@@ -635,35 +635,36 @@
 
 ---
 
-## TC-US06-18: 会话过期——提示重新登录、本地暂存、登录后保存成功
+## TC-US06-18: 会话过期——本地暂存、跳登录页、登录后恢复并保存
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US06-18 |
 | covers | SC-AUTOSAVE-10 |
-| Scenario | 自动保存收到 401 后不丢内容，重新登录后下一次保存成功 |
+| Scenario | 自动保存收到 401 后不丢内容，重新登录回到原文章，恢复后保存成功 |
 | Priority | P0 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | e2e |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-14 v1.1 按 UI 决定 #3 改为跳登录页（作者确认） |
 
 **前置条件：**
 - 【数据前置】草稿，正文 `基线`
-- 【环境前置】已登录打开编辑页后，服务端使该会话失效（另一请求调用登出）
+- 【环境前置】已登录打开编辑页后使会话失效（E2E 用清除 Cookie 模拟）；监听 dialog 事件
 
-**测试数据：** 正文改为 `基线+过期后输入`；管理员测试账号（测试环境 Secret 注入）
+**测试数据：** 正文改为 `基线+过期后输入`；管理员测试账号
 
 **步骤：**
 1. 修改正文，停止 2s（保存收到 401）
-2. 读取 localStorage
-3. 点击状态栏登录链接，在新窗口完成登录并关闭
-4. 回到编辑页，追加 `!` 并停止 2s
+2. 读取 `localStorage['mh:draft:{id}']`
+3. 在登录页登录
+4. 回到编辑页，点击"恢复本地内容"
 
 **预期结果：**
-- 步骤 1：状态栏"登录已过期，请重新登录"
-- 步骤 2：暂存包含 `基线+过期后输入`；编辑区内容不变（未跳转、未刷新）
-- 步骤 4：保存成功，状态栏"已保存"，DB `body` = `基线+过期后输入!`，暂存清除
+- 步骤 1：不弹离开确认，跳转到 `/admin/login?next=%2Fadmin%2Fposts%2F{id}`
+- 步骤 2：暂存包含 `基线+过期后输入`
+- 步骤 3：登录后回到 `/admin/posts/{id}`，编辑区为 `基线`，显示本地内容恢复横幅
+- 步骤 4：编辑区为 `基线+过期后输入`，保存成功（"已保存"），DB `body` = `基线+过期后输入`
 
 **清理：** 删除文章；清空 localStorage
 
@@ -879,40 +880,29 @@ await expect(status).toHaveText('未保存');
 
 ---
 
-### TC-US06-25: 状态转换——401 → 登录已过期，登录链接新窗口打开
+### TC-US06-25: 发布时会话过期跳登录页
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US06-25 |
 | covers | SC-AUTOSAVE-10 |
-| Scenario | 401 状态文案与登录链接行为 |
+| Scenario | 发布请求返回 401 时与自动保存同样处理 |
 | Priority | P0 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | ui-interaction |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-14 v1.1 按 UI 决定 #3 改为跳登录页（原为新窗口登录，作者确认） |
 
 **前置条件：**
-- 【环境前置】`page.route` 对保存请求 `fulfill({ status: 401 })`
-
-**测试数据：** 输入 `x`
+- 【环境前置】已登录打开草稿编辑页后使会话失效（清除 Cookie）
 
 **步骤：**
-1. 输入，停止 2s
-2. 点击登录链接
+1. 点击"发布"
+2. 在登录页登录
 
 **预期结果：**
-- 状态栏"登录已过期，请重新登录"，含登录链接
-- 点击后打开新页面（`target="_blank"`），原编辑页 URL 与编辑区内容不变
-- 401 状态下不进入"保存失败，将自动重试"的无限重试（以实现为准，不得刷屏请求：10s 内保存请求 ≤ 3 次）
-
-**playwright_hint：**
-```ts
-await expect(status).toContainText('登录已过期，请重新登录');
-const [popup] = await Promise.all([page.waitForEvent('popup'), status.getByRole('link').click()]);
-await expect(popup).toHaveURL(/\/admin\/login/);
-await expect(editor).toContainText('x');
-```
+- 步骤 1：跳转到 `/admin/login?next=%2Fadmin%2Fposts%2F{id}`，不弹离开确认
+- 步骤 2：回到写文章页；没有未保存的修改，不显示恢复横幅（暂存与服务端内容相同，被清除）
 
 **清理：** 删除文章；清空 localStorage
 
@@ -1112,4 +1102,5 @@ expect(saveCount).toBe(1);
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
+| 2026-10-14 | v1.2 | TC-18 / 25 按 UI 决定 #3 改为暂存后跳登录页（原为新窗口登录，作者确认） | miraclehifi |
 | 2026-10-14 | v1.1 | 暂存 key 改为 `mh:draft:`；TC-13 / 14 / 15 横幅文案与按钮名按设计稿 | miraclehifi |

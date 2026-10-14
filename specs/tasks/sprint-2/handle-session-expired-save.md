@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 16
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -37,13 +37,25 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 按确认后的方案实现 401 处理；落选方的文档同步修改
-- [ ] `shouldWarnOnLeave` 在 `authExpired` 时为 true（UT-64）
+- [x] 按确认后的方案实现 401 处理；落选方的文档同步修改
+- [x] `shouldWarnOnLeave` 在 `authExpired` 时为 true（UT-64）
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test`、`npm run test:e2e` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- 方案（2026-10-14 作者确认）：跳登录页。落选方（TC-US06-25、UT-63 的新窗口登录）已改写
+- 控制器：401 时先 `stash.save` + `stash.flush()` 同步写入暂存，再 `onError`（`DraftStash` 新增 `flush`）；仍不重试
+- 页面 `onSessionExpired`：写入当前内容到暂存 → `leavingRef` 放行 `beforeunload` → `navigate('/admin/login?next=' + 当前路径)`；自动保存 401 与 `PublishActions` 的发布 401 都走这里。新增 `src/lib/dom/navigate.ts`（单元测试可替换），删除后跳列表也改用它
+- 恢复判断修正：服务端 `publishedAt` 为空时按编辑器默认"今天"比较，否则内容没变也会提示恢复（TC-US06-25 发现）
+- `shouldWarnOnLeave`（UT-64）：现有 `unsaved` 已含 `failed`；跳登录页时由 `leavingRef` 放行
+- 影响范围外的修改：`src/middleware.ts` 拒绝写请求（401 / 403 / 500）前读完请求体。本地 preview（miniflare）中带请求体的请求未读就返回，同一连接上的下一个请求返回 500"fetch failed"（自动保存 PUT 401 后的登录页）；只 `cancel()` 流不够。已记入 auth domain-model §7
+- 未做：SaveIndicator 的"登录已过期"状态——401 后立即跳转，没有停留的界面
+- 测试：`tests/unit/admin/local-draft.test.ts`（UT-77）、`tests/unit/admin/session-expired.test.tsx`（UT-63、发布 401）；`tests/e2e/editor-session-expired.spec.ts`（TC-US06-18、TC-US06-25，会话失效用清 Cookie 模拟）
+- 测试说明：UT-77 初版在未实现时就通过（节流写入总在 2 秒保存之前完成），改为断言"flush 在 onError 之前、暂存为最新内容"后红灯
 
 ## 依赖
 

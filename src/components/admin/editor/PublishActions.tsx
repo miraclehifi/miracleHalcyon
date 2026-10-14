@@ -18,6 +18,7 @@ export interface PublishActionsProps {
   onPublished(post: PostView): void;
   onMissingFields(fields: RequiredField[]): void;
   onSlugTaken(message: string): void;
+  onSessionExpired(): void; // 401：页面暂存并跳登录页
 }
 
 const FIELD_LABELS: Record<RequiredField, string> = { title: "标题", slug: "slug", body: "正文" };
@@ -29,7 +30,7 @@ interface ErrorBody {
   error?: { code?: string; message?: string; fields?: RequiredField[] };
 }
 
-export function PublishActions({ status, getPostId, flush, onPublished, onMissingFields, onSlugTaken }: PublishActionsProps) {
+export function PublishActions({ status, getPostId, flush, onPublished, onMissingFields, onSlugTaken, onSessionExpired }: PublishActionsProps) {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const reasonId = useId();
@@ -53,6 +54,7 @@ export function PublishActions({ status, getPostId, flush, onPublished, onMissin
       toast.show({ tone: "success", message: status === "draft" ? "已发布，几分钟后读者可见" : "已发布更新" });
       return;
     }
+    if (response.status === 401) return onSessionExpired();
     const { error } = ((await response.json().catch(() => ({}))) as ErrorBody) ?? {};
     if (response.status === 422 && error?.fields?.length) return missing(error.fields);
     if (error?.code === "SLUG_TAKEN") return onSlugTaken(error.message ?? "slug 已存在，请换一个");

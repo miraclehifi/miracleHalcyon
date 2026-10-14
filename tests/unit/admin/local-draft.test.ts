@@ -109,3 +109,50 @@ describe("自动保存写本地暂存", () => {
     expect({ beforeCreate, after }).toEqual({ beforeCreate: "x", after: { fresh: null, byId: "xy" } });
   });
 });
+
+describe("会话过期", () => {
+  // [UT-77][ED-UT-02][SC-AUTOSAVE-10] 401：在 onError（页面随即跳转）之前同步写入暂存（不等节流），状态 failed / unauthenticated，
+  // 不重试；之后编辑可再次保存
+  it("401 立即暂存且不重试", async () => {
+    const { fetchMock, calls } = controllableFetch();
+    let body = "基线+过期后输入";
+    const events: string[] = [];
+    const real = createLocalDraftStash();
+    const stash = { ...real, flush: () => (events.push("flush"), real.flush()) };
+    const controller = createAutosaveController({
+      postId: "7",
+      getContent: () => ({ ...CONTENT, body }),
+      fetch: fetchMock,
+      stash,
+      onError: (error) => events.push(`${error.kind}:${readLocalDraft("7")?.content.body}`),
+    });
+    writeLocalDraft("7", { ...CONTENT, body: "旧暂存" });
+
+    controller.edit();
+    await vi.advanceTimersByTimeAsync(0);
+    body = "基线+过期后输入!"; // 节流期内的最后一次输入
+    controller.edit();
+    await vi.advanceTimersByTimeAsync(2000);
+    calls[0].resolve(Response.json({ error: { code: "UNAUTHENTICATED" } }, { status: 401 }));
+    await vi.advanceTimersByTimeAsync(0);
+    const expired = { state: controller.state(), events: [...events] };
+    await vi.advanceTimersByTimeAsync(60_000);
+    const retries = calls.length;
+
+    controller.edit();
+    await vi.advanceTimersByTimeAsync(2000);
+    calls[1].resolve(Response.json(view("7", "2026-10-10T06:36:10.000Z")));
+    await vi.advanceTimersByTimeAsync(0);
+    controller.dispose();
+
+    expect({ expired, retries, after: controller.state().status, stash: readLocalDraft("7") }).toEqual({
+      expired: {
+        state: { status: "failed", savedAt: null, error: { kind: "unauthenticated", code: "UNAUTHENTICATED" } },
+        events: ["flush", "unauthenticated:基线+过期后输入!"],
+      },
+      retries: 1,
+      after: "saved",
+      stash: null,
+    });
+  });
+});

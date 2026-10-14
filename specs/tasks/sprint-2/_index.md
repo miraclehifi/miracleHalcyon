@@ -27,7 +27,7 @@
 | 13 | [add-editor-view-modes](add-editor-view-modes.md) | 视图切换与窄屏 Tab | article-writing | FRONTEND | 表现层 | US-04 | — | 1 | 低 | completed |
 | 14 | [add-preview-scroll-sync](add-preview-scroll-sync.md) | 编辑区与预览同步滚动 | article-writing | FRONTEND | 表现层 | US-04 | add-editor-view-modes | 0 | 高 | completed |
 | 15 | [add-local-draft-restore](add-local-draft-restore.md) | 本地暂存与恢复横幅 | article-writing | FRONTEND | 表现层 | US-06 | — | 1 | 低 | completed |
-| 16 | [handle-session-expired-save](handle-session-expired-save.md) | 保存时会话过期的处理 | article-writing | FRONTEND | 表现层 | US-06 | add-local-draft-restore | 0 | 中 | pending |
+| 16 | [handle-session-expired-save](handle-session-expired-save.md) | 保存时会话过期的处理 | article-writing | FRONTEND | 表现层 | US-06 | add-local-draft-restore | 0 | 中 | completed |
 | 17 | [implement-logout-endpoint](implement-logout-endpoint.md) | 登出接口 | article-writing | API | 领域 + 接口 | US-02 | — | 1 | 低 | pending |
 | 18 | [add-logout-entry](add-logout-entry.md) | 后台"登出"入口 | article-writing | FRONTEND | 表现层 | US-02 | implement-logout-endpoint | 0 | 低 | pending |
 

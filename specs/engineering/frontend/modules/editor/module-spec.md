@@ -52,7 +52,7 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 离开拦截 | `dirty`/`saving`/`failed` 时注册 `beforeunload` |
 | 发布前 | 点击发布 / 发布更新时先 flush（立即保存并等待），再调用 `/publish` |
 
-> 已实现（Sprint 1）：`src/lib/autosave/controller.ts`（状态机）+ `useAutosave.ts`。已实现（Sprint 2）：本地暂存与恢复判断——`src/lib/autosave/local-draft.ts`（写入节流 500ms、写入时才读取内容；新建 new → id；控制器 `stash` 选项）、`RestoreBanner`；删除期间 `disable` / `enable`。401 跳转在 Sprint 2 后续任务。
+> 已实现（Sprint 1）：`src/lib/autosave/controller.ts`（状态机）+ `useAutosave.ts`。已实现（Sprint 2）：本地暂存与恢复判断——`src/lib/autosave/local-draft.ts`（写入节流 500ms、写入时才读取内容；新建 new → id；控制器 `stash` 选项）、`RestoreBanner`；删除期间 `disable` / `enable`。401：控制器同步写入暂存后通知页面，页面（含发布 401）跳 `/admin/login?next=当前路径`、放行离开确认（已实现，`src/lib/dom/navigate.ts` 便于测试替换）。
 
 ## 3. 预览（`MarkdownPreview`）
 
@@ -89,5 +89,6 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-14 | 1.3 | 401 跳转已实现 | miraclehifi |
 | 2026-10-14 | 1.2 | §2 本地暂存、恢复判断已实现 | miraclehifi |
 | 2026-10-14 | 1.1 | §3 同步滚动已实现；防回声由 50ms 锁改为按写入值识别 | miraclehifi |

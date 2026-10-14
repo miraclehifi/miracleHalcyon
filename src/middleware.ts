@@ -21,6 +21,13 @@ export interface AuthMiddlewareDeps {
 
 const isUnder = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
 
+// 拒绝写请求前读完请求体：本地 preview（miniflare）里带请求体的请求未被读取就返回时，同一连接上的下一个请求
+// 会失败（如自动保存 PUT 收到 401 后跳登录页，登录页返回 500）；只 cancel 流不够，必须读完
+async function reject(request: Request, response: Response): Promise<Response> {
+  if (request.body) await request.arrayBuffer().catch(() => undefined);
+  return response;
+}
+
 function redirect(location: string): Response {
   return new Response(null, { status: 302, headers: { Location: location } });
 }
@@ -47,8 +54,8 @@ export function createAuthMiddleware(deps: AuthMiddlewareDeps): MiddlewareHandle
     if (!isApi && !isUnder(pathname, "/admin")) return next();
 
     if (!SAFE_METHODS.has(context.request.method)) {
-      if (!deps.siteOrigin) return serverMisconfigured(); // 无法校验来源时拒绝写操作
-      if (requestOrigin(context.request) !== deps.siteOrigin) return forbiddenOrigin();
+      if (!deps.siteOrigin) return reject(context.request, serverMisconfigured()); // 无法校验来源时拒绝写操作
+      if (requestOrigin(context.request) !== deps.siteOrigin) return reject(context.request, forbiddenOrigin());
     }
     if (pathname === LOGIN_API) return next();
 
@@ -57,7 +64,7 @@ export function createAuthMiddleware(deps: AuthMiddlewareDeps): MiddlewareHandle
 
     if (pathname === LOGIN_PAGE) return session ? redirect(sanitizeNext(searchParams.get("next"))) : next();
     if (session) return next();
-    return isApi ? unauthenticated() : redirect(`${LOGIN_PAGE}?next=${encodeURIComponent(pathname + search)}`);
+    return isApi ? reject(context.request, unauthenticated()) : redirect(`${LOGIN_PAGE}?next=${encodeURIComponent(pathname + search)}`);
   };
 }
 

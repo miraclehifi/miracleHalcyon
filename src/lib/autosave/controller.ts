@@ -1,7 +1,7 @@
 // 自动保存状态机（editor module-spec §2）：与框架无关，useAutosave 负责接到 React
 //   idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──成功──▶ saved
 //   保存中又编辑：完成后立即再保存；网络错误 / 5xx：failed + 退避重试（2s、4s、8s… 上限 60s；online 立即重试）
-//   409 / 400 / 401 等客户端错误：failed，不重试（401 的本地暂存与跳转在 Sprint 2）
+//   409 / 400 / 401 等客户端错误：failed，不重试；401 时先同步写入本地暂存，再通知页面（页面随即跳登录页）
 //   本地暂存（stash，见 local-draft.ts）：每次编辑都写；保存成功且期间没有再编辑时清除；新建创建成功后 new → id
 //   disable：删除文章期间暂停（等进行中的保存结束，之后只记录状态不发请求）；删除失败时 enable 恢复并补存
 import type { DraftInput } from "../../domains/post/content";
@@ -107,6 +107,10 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
   }
 
   function fail(error: SaveError): false {
+    if (error.kind === "unauthenticated" && options.stash) {
+      options.stash.save(postId, options.getContent);
+      options.stash.flush();
+    }
     set({ status: "failed", error });
     options.onError?.(error);
     if (isRetryable(error)) {
