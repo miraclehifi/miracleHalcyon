@@ -146,10 +146,10 @@
 | UT-73 | S | 保存串行化 | 保存进行中再次触发，不并发；上一次完成后用最新内容再保存 1 次 | SC-AUTOSAVE-02 |
 | UT-74 | S | 新建文章首存 | 无 id 且标题为空、正文非空 → create 载荷 title="无标题"；成功后回调 `onCreated(id)`（用于替换 URL） | SC-AUTOSAVE-04 |
 | UT-75 | S | 空白新建不保存 | 无 id 且所有字段为空（含仅空白）→ 推进任意时间都不调用 create | SC-AUTOSAVE-05 |
-| UT-76 | S | 失败重试与本地暂存 | save reject（网络）→ 写入 stash（key 含文章 id，值含内容与时间戳）；按退避策略（如 2s/4s/8s，上限以 design-domain 为准）重试；成功后清除 stash | SC-AUTOSAVE-06 |
+| UT-76 | S | 失败重试与本地暂存 | 每次编辑节流 500ms 写入 stash（`mh:draft:{id|new}`，值含内容与 `savedAt`），save reject（网络）时保留；新建创建成功后 new → id；按退避策略（如 2s/4s/8s，上限以 design-domain 为准）重试；成功后清除 stash | SC-AUTOSAVE-06 |
 | UT-77 | S | 401 处理 | save 返回 401 → 进入 authExpired，写入 stash，不进入无限重试；下一次编辑/恢复后保存成功 | SC-AUTOSAVE-10 |
 | UT-78 | S | 纯函数 `compareLocalStash(stash, server)` | stash.updatedAt > server.updatedAt 且内容不同 → `promptRestore`；时间更旧或内容相同 → `discard`；无 stash → `none`；stash 损坏（非法 JSON）→ `none` 且不抛错 | SC-AUTOSAVE-07 |
-| UT-79 | R | 恢复提示条 | `promptRestore` 时显示"发现未同步的本地内容（14:35），是否恢复？"及"恢复"/"丢弃"；"恢复"→ 用本地内容替换并立即保存；"丢弃"→ 清除 stash | SC-AUTOSAVE-07 |
+| UT-79 | R | 恢复提示条 | `promptRestore` 时显示"发现未同步的本地内容，是否恢复？"、"本地暂存于 10月10日 14:35，比服务端版本更新。丢弃后无法找回。"及"丢弃本地内容"/"恢复本地内容"；"恢复"→ 用本地内容替换并立即保存；"丢弃"→ 清除 stash | SC-AUTOSAVE-07 |
 | UT-80 | S | 不改变发布状态 | 已发布文章自动保存载荷不含 status 字段/不调用 publish | SC-AUTOSAVE-08 |
 | UT-81 | S | beforeunload 注册 | `shouldWarnOnLeave` 为 true 时注册 beforeunload，saved 时移除；`disable()`（删除后跳转）后不再提示且不再保存 | SC-AUTOSAVE-09, SC-DELETE-02 |
 | UT-82 | S | 卸载清理 | 组件卸载时清除定时器，无挂起的 save 调用 | — |
@@ -296,6 +296,7 @@
 | 2026-10-12 | v1.2 | 新增 §11 EditorToolbar + Tooltip（UT-117 ~ UT-125，US-10） | miraclehifi |
 | 2026-10-13 | v1.3 | 新增 §12 图片插件、§13 图片菜单、§14 照片预处理（UT-126 ~ UT-147，US-11、US-12） | miraclehifi |
 | 2026-10-14 | v1.4 | 新增 §15 列表删除的延迟提交（UT-148 ~ UT-151，US-09 撤销） | miraclehifi |
+| 2026-10-14 | v1.8 | UT-76 暂存时机与 key；UT-79 横幅文案按设计稿 | miraclehifi |
 | 2026-10-14 | v1.7 | UT-53 由按标题映射改为按 `data-line` 行映射（editor module-spec §3，作者确认） | miraclehifi |
 | 2026-10-14 | v1.6 | UT-52 补充默认视图与存储；UT-55 宽屏视图切换按设计稿改为单选组 | miraclehifi |
 | 2026-10-14 | v1.5 | UT-110 文案按设计稿改为"删除《标题》？"；UT-113 补充进行中不可取消；UT-116 触发元素改为"删除文章"按钮 | miraclehifi |

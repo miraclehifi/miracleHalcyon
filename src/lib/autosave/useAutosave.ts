@@ -5,6 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import type { DraftInput } from "../../domains/post/content";
 import type { PostView } from "../../domains/post/service";
 import { createAutosaveController, type AutosaveController, type AutosaveState, type SaveError } from "./controller";
+import { createLocalDraftStash } from "./local-draft";
 
 export interface UseAutosaveOptions {
   postId: string | null;
@@ -19,6 +20,7 @@ export interface UseAutosaveResult extends AutosaveState {
   flush(): Promise<boolean>;
   disable(): Promise<void>;
   enable(): void;
+  clearStash(): void;
 }
 
 export function useAutosave(options: UseAutosaveOptions): UseAutosaveResult {
@@ -42,6 +44,7 @@ export function useAutosave(options: UseAutosaveOptions): UseAutosaveResult {
       onSaved: (post) => optionsRef.current.onSaved?.(post),
       onError: (error) => optionsRef.current.onError?.(error),
       onChange: setState,
+      stash: createLocalDraftStash(),
     });
     return controllerRef.current;
   }, []);
@@ -58,6 +61,7 @@ export function useAutosave(options: UseAutosaveOptions): UseAutosaveResult {
   const flush = useCallback(() => controller().flush(), [controller]);
   const disable = useCallback(() => controller().disable(), [controller]);
   const enable = useCallback(() => controller().enable(), [controller]);
+  const clearStash = useCallback(() => controller().clearStash(), [controller]);
 
-  return { ...state, edit, flush, disable, enable };
+  return { ...state, edit, flush, disable, enable, clearStash };
 }

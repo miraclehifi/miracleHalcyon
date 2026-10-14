@@ -34,7 +34,7 @@ test("[TC-US04-14] 编辑区滚动时预览同步滚动", async ({ page, baseURL
   const id = await adminApi(page, baseURL!).create({ title: `滚动 ${run}`, slug: `scroll-${run}`, body: BODY });
   await page.goto(`/admin/posts/${id}`);
   await waitForHydration(page);
-  await expect(preview(page).locator("h2")).toHaveCount(16);
+  await expect(preview(page).locator("h2")).toHaveCount(16, { timeout: 15_000 }); // 首次渲染：WebKit 冷编译语法规则，并行负载下可超过 5 秒
 
   for (const n of [3, 10]) {
     await scrollEditorToHeading(page, n);

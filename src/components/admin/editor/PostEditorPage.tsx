@@ -3,17 +3,19 @@
 // 视图：≥ 768px 顶栏分段控件 编辑 / 并排 / 预览，< 768px 顶栏下方 Tab（useEditorView）；隐藏的一栏只加 hidden，不卸载
 // 任何字段变化都交给自动保存（停止输入 2 秒后保存；Ctrl / ⌘ + S 立即保存）；预览在 Web Worker 中渲染（MarkdownPreview）；
 // 发布见 PublishActions：缺少必填项时标出字段并聚焦第一个；删除：暂停自动保存 → DELETE → 不弹离开确认，回到列表
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DraftInput } from "../../../domains/post/content";
 import type { PostStatus } from "../../../domains/post/post";
 import { slugify } from "../../../domains/post/slug";
 import type { PostView } from "../../../domains/post/service";
 import type { AutosaveState } from "../../../lib/autosave/controller";
+import { clearLocalDraft, compareLocalStash, readLocalDraft } from "../../../lib/autosave/local-draft";
 import { useAutosave } from "../../../lib/autosave/useAutosave";
 import { useScrollSync } from "../../../lib/editor/scroll-sync";
 import { useEditorView, type NarrowTab, type ViewMode } from "../../../lib/editor/view-mode";
 import { useHydrated } from "../../../lib/dom/hydration";
 import { localDate } from "../../../lib/format/local-date";
+import { RestoreBanner } from "../../ui/RestoreBanner";
 import { SaveIndicator, type SaveState } from "../../ui/SaveIndicator";
 import { SegmentedControl } from "../../ui/SegmentedControl";
 import { badgeStatus } from "../../ui/StatusBadge";
@@ -110,7 +112,37 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
       setSettingsOpen(true); // 自动打开设置抽屉，让作者看到字段错误
     },
   });
-  const { edit, flush, disable, enable } = autosave;
+  const { edit, flush, disable, enable, clearStash } = autosave;
+
+  // 本地暂存恢复（editor module-spec §2"恢复判断"）：水合后读一次；比服务端新且内容不同 → 横幅，否则清掉过期暂存
+  const stash = useMemo(() => (hydrated ? readLocalDraft(initial?.id ?? null) : null), [hydrated, initial]);
+  const [restoreSettled, setRestoreSettled] = useState(false);
+  const restoreDecision = useMemo(
+    () => compareLocalStash(stash, initial && { updatedAt: initial.updatedAt, content: initialDraft(initial) }),
+    [stash, initial],
+  );
+  useEffect(() => {
+    if (restoreDecision === "discard") clearLocalDraft(initial?.id ?? null);
+  }, [restoreDecision, initial]);
+  const flushAfterRestore = useRef(false);
+  useEffect(() => {
+    if (!flushAfterRestore.current) return;
+    flushAfterRestore.current = false;
+    void flush(); // 恢复后立即保存（不等 2 秒），此时 getContent 已是恢复后的内容
+  }, [draft, flush]);
+  const restoreLocal = () => {
+    if (!stash) return;
+    const content = stash.content;
+    setDraft({ title: content.title, slug: content.slug, tags: content.tags, summary: content.summary, body: content.body, publishedAt: content.publishedAt });
+    setSlugTouched(content.slug !== slugify(content.title));
+    setRestoreSettled(true);
+    flushAfterRestore.current = true;
+    edit();
+  };
+  const discardLocal = () => {
+    clearLocalDraft(initial?.id ?? null);
+    setRestoreSettled(true);
+  };
   const unsaved = autosave.status === "dirty" || autosave.status === "saving" || autosave.status === "failed";
 
   // 有未保存修改时离开页面 → 浏览器原生离开确认
@@ -154,6 +186,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   };
   const onDeleted = () => {
     leavingRef.current = true;
+    clearStash();
     window.location.assign("/admin");
   };
   const onTitleChange = (title: string) => update(slugTouched ? { title } : { title, slug: slugify(title) });
@@ -201,6 +234,11 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
             />
           }
         />
+        {restoreDecision === "promptRestore" && !restoreSettled && stash && (
+          <div className="px-5 pt-3 max-md:px-4">
+            <RestoreBanner savedAt={new Date(stash.savedAt)} onRestore={restoreLocal} onDiscard={discardLocal} />
+          </div>
+        )}
         {view.narrow && (
           <Tabs aria-label="视图" value={view.mode} onChange={(tab) => view.setNarrowTab(tab as NarrowTab)}>
             <Tabs.Item value="edit" controls={EDITOR_PANE_ID}>

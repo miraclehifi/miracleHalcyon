@@ -2,9 +2,11 @@
 //   idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──成功──▶ saved
 //   保存中又编辑：完成后立即再保存；网络错误 / 5xx：failed + 退避重试（2s、4s、8s… 上限 60s；online 立即重试）
 //   409 / 400 / 401 等客户端错误：failed，不重试（401 的本地暂存与跳转在 Sprint 2）
+//   本地暂存（stash，见 local-draft.ts）：每次编辑都写；保存成功且期间没有再编辑时清除；新建创建成功后 new → id
 //   disable：删除文章期间暂停（等进行中的保存结束，之后只记录状态不发请求）；删除失败时 enable 恢复并补存
 import type { DraftInput } from "../../domains/post/content";
 import type { PostView } from "../../domains/post/service";
+import type { DraftStash } from "./local-draft";
 
 export type AutosaveStatus = "idle" | "dirty" | "saving" | "saved" | "failed";
 
@@ -30,6 +32,7 @@ export interface AutosaveOptions {
   onError?(error: SaveError): void; // 每次保存失败调用（如 409 时打开设置抽屉）
   fetch?: typeof fetch;
   delayMs?: number;
+  stash?: DraftStash;
 }
 
 export interface AutosaveController {
@@ -38,6 +41,7 @@ export interface AutosaveController {
   flush(): Promise<boolean>; // 立即保存并等待；成功（或无需保存）返回 true
   disable(): Promise<void>; // 停止发请求，等进行中的保存结束
   enable(): void;
+  clearStash(): void; // 文章已删除：清除本地暂存并取消节流中的写入
   dispose(): void;
 }
 
@@ -92,9 +96,11 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
     const post = (await response.json()) as PostView;
     if (isNew) {
       postId = post.id;
+      options.stash?.move(null, post.id);
       options.onCreated?.(post.id);
     }
     attempts = 0;
+    if (!editedDuringSave) options.stash?.clear(postId);
     options.onSaved?.(post);
     set({ status: editedDuringSave ? "dirty" : "saved", savedAt: post.updatedAt, error: null });
     return true;
@@ -136,6 +142,7 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
   return {
     state: () => current,
     edit() {
+      options.stash?.save(postId, options.getContent);
       if (inFlight) {
         editedDuringSave = true;
         return;
@@ -161,8 +168,12 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
       if (current.status === "dirty") debounceTimer = setTimeout(save, delayMs);
       else if (current.status === "failed" && current.error && isRetryable(current.error)) void save();
     },
+    clearStash() {
+      options.stash?.clear(postId);
+    },
     dispose() {
       clearTimers();
+      options.stash?.dispose();
       if (typeof window !== "undefined") window.removeEventListener("online", onOnline);
     },
   };

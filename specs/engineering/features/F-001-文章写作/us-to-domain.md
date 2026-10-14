@@ -11,7 +11,7 @@
 | US-03 edit-post-info | ○ | ● | | | ● | | `POST/GET/PUT /api/admin/posts[/:id]`、`GET /api/admin/tags`、`slugify` |
 | US-04 markdown-preview | | | | ● | ● | | `renderMarkdown`（Web Worker）、`useEditorView`（视图切换、窄屏 Tab）、`useScrollSync`（同步滚动）——已实现，Sprint 2 |
 | US-05 image-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`、`GET /img/*`（已实现，Sprint 2） |
-| US-06 autosave-draft | ○ | ● | | | ● | | `POST/PUT /api/admin/posts`、自动保存状态机、本地暂存 |
+| US-06 autosave-draft | ○ | ● | | | ● | | `POST/PUT /api/admin/posts`、自动保存状态机、本地暂存与恢复横幅（已实现，Sprint 2；401 处理待做） |
 | US-07 post-list | ○ | ● | | | | | `GET /api/admin/posts`（已实现，Sprint 1；列表页 `/admin` 已实现） |
 | US-08 publish-post | ○ | ● | | | ● | | `POST /api/admin/posts/:id/publish`、`/unpublish`、`GET /api/posts[/:slug]` |
 | US-09 delete-post | ○ | ● | | | | | `DELETE /api/admin/posts/:id`（已实现，Sprint 2：列表左滑 + 撤销、写文章页删除） |
