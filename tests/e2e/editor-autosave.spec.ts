@@ -1,12 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 // [TC-US06][SC-AUTOSAVE] 新建页输入正文，停止 2 秒后自动保存：显示"已保存 · HH:mm"，地址换成 /admin/posts/:id，刷新后内容仍在
 test("[TC-US06] 停止输入 2 秒后自动保存并换成编辑地址", async ({ page }, testInfo) => {
   const title = `A${Date.now().toString(36)}${testInfo.project.name[0]} 自动保存`;
   await login(page);
   await page.goto("/admin/posts/new");
-  await page.waitForSelector("astro-island:not([ssr])");
+  await waitForHydration(page);
 
   await page.getByRole("textbox", { name: "标题" }).fill(title);
   await page.getByRole("textbox", { name: "正文" }).fill("第一段正文");
@@ -23,11 +24,14 @@ test("[TC-US06] 停止输入 2 秒后自动保存并换成编辑地址", async (
 // [TC-US03-18][SC-POSTINFO-02] Ctrl / ⌘ + S 立即保存，地址换成编辑地址
 test("[TC-US03-18] Ctrl/Cmd+S 立即保存", async ({ page }) => {
   await login(page);
+  await page.clock.install();
   await page.goto("/admin/posts/new");
-  await page.waitForSelector("astro-island:not([ssr])");
+  await waitForHydration(page);
+  // 暂停页面计时器：2 秒防抖永远不会触发，发出的保存请求只能来自快捷键（不依赖并行负载下不可靠的时间窗）
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1000);
   await page.getByRole("textbox", { name: "正文" }).fill("立即保存");
-  // 请求在 1 秒内发出（自动保存的防抖是 2 秒），证明是快捷键触发；完成时间不设限，避免并行负载下误报
-  const request = page.waitForRequest((r) => r.method() === "POST" && new URL(r.url()).pathname === "/api/admin/posts", { timeout: 1000 });
+  await expect(page.getByRole("banner").getByRole("status")).toHaveText("未保存");
+  const request = page.waitForRequest((r) => r.method() === "POST" && new URL(r.url()).pathname === "/api/admin/posts");
   await page.keyboard.press("ControlOrMeta+s");
   await request;
   await expect(page).toHaveURL(/\/admin\/posts\/\d+$/);

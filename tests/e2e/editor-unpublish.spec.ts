@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 // [TC-US08-06][SC-PUBLISH-05] 设置抽屉"撤回为草稿"→ 确认框 → 确认后徽标"草稿"、提示"已撤回为草稿"；
 // 读者端 GET /api/posts/:slug 返回 404，编辑内容保留
@@ -14,7 +15,7 @@ test("[TC-US08-06] 撤回为草稿后读者不可见、内容保留", async ({ p
   await api.save(id, { title, slug, body: "B2" }); // 有未发布修改
 
   await page.goto(`/admin/posts/${id}`);
-  await page.waitForSelector("astro-island:not([ssr])");
+  await waitForHydration(page);
   await page.getByRole("button", { name: "设置" }).click();
   await page.getByRole("complementary", { name: "文章设置" }).getByRole("button", { name: "撤回为草稿" }).click();
 

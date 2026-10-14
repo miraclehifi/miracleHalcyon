@@ -13,9 +13,13 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
+  // 带计时断言的用例（@timing）在常规用例全部结束后单独跑，两个浏览器也不同时跑，避免并行负载拖慢计时
+  // 代价：常规项目有失败时 Playwright 会跳过依赖它的计时项目
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+    { name: "chromium", grepInvert: /@timing/, use: { ...devices["Desktop Chrome"] } },
+    { name: "webkit", grepInvert: /@timing/, use: { ...devices["Desktop Safari"] } },
+    { name: "chromium-timing", grep: /@timing/, dependencies: ["chromium", "webkit"], use: { ...devices["Desktop Chrome"] } },
+    { name: "webkit-timing", grep: /@timing/, dependencies: ["chromium-timing"], use: { ...devices["Desktop Safari"] } },
   ],
   // 指定 PLAYWRIGHT_ENV 时测已部署环境，不起本地服务
   webServer: process.env.PLAYWRIGHT_ENV

@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { waitForHydration } from "./hydration";
 
 // E2E 测试账号（wrangler.jsonc env.e2e，仅本地）
 export const USERNAME = "test-admin";
@@ -6,6 +7,7 @@ export const PASSWORD = "Test-Passw0rd!";
 
 export async function login(page: Page) {
   await page.goto("/admin/login");
+  await waitForHydration(page);
   await page.getByLabel("账号").fill(USERNAME);
   await page.getByLabel("密码").fill(PASSWORD);
   await page.getByRole("button", { name: "登录" }).click();

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 // [TC-US03-23][SC-POSTINFO-08] 保存时 slug 与其他文章重复：设置抽屉自动打开，slug 输入框标红并提示"slug 已存在，请换一个"，服务端 slug 不变
 test("[TC-US03-23] 重复 slug 提示已存在并保持原值", async ({ page, baseURL }, testInfo) => {
@@ -10,7 +11,7 @@ test("[TC-US03-23] 重复 slug 提示已存在并保持原值", async ({ page, b
   const a = await api.create({ title: `A ${run}`, slug: `orig-${run}` });
 
   await page.goto(`/admin/posts/${a}`);
-  await page.waitForSelector("astro-island:not([ssr])");
+  await waitForHydration(page);
   await page.getByRole("button", { name: "设置" }).click();
   await page.getByLabel(/^Slug/).fill(`hello-astro-${run}`);
   await page.getByRole("button", { name: "关闭设置" }).click();

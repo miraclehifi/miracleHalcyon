@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 // [TC-US07-16][SC-POSTLIST-05] 标题搜索：停止输入 300ms 后筛选（连续输入只发 1 次请求），不区分大小写，同步到 ?q=
 test("[TC-US07-16] 输入关键字后只显示标题包含关键字的文章", async ({ page, baseURL }, testInfo) => {
@@ -9,7 +10,7 @@ test("[TC-US07-16] 输入关键字后只显示标题包含关键字的文章", a
   for (const title of [`${token}astro 一`, `${token}ASTRO 二`, `${token}react`, `${token}vue`, `${token}css`]) await api.create({ title });
 
   await page.goto("/admin");
-  await page.waitForSelector("astro-island:not([ssr])");
+  await waitForHydration(page);
   let requests = 0;
   page.on("request", (request) => new URL(request.url()).pathname === "/api/admin/posts" && requests++);
   await page.getByRole("searchbox", { name: "搜索标题" }).pressSequentially(`${token}Astro`, { delay: 40 });

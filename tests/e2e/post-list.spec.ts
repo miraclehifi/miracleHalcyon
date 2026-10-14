@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 // [TC-US07-01][SC-POSTLIST-01][SC-POSTLIST-03] 登录后 /admin 列出全部文章（含草稿）按更新时间倒序；"新建文章"进入 /admin/posts/new
 // 本地 D1 被并行用例共享：标题带本次运行的唯一前缀，只断言这几篇的相对顺序
@@ -16,6 +17,7 @@ test("[TC-US07-01] 列表按更新时间倒序显示草稿与已发布文章；�
   await api.create({ title: `${prefix} 草稿 A` });
 
   await page.goto("/admin");
+  await waitForHydration(page);
   const rows = page.getByRole("listitem").filter({ hasText: prefix });
   await expect(rows).toHaveCount(3);
   const texts = await rows.allTextContents();

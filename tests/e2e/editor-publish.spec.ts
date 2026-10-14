@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 // [TC-US08-01][SC-PUBLISH-01][SC-PUBLISH-09] 草稿点"发布"：先保存未保存的修改再发布 → 徽标"已发布"、提示"已发布，几分钟后读者可见"；
 // 读者端 GET /api/posts/:slug 返回 200，内容与发布时一致
@@ -11,7 +12,7 @@ test("[TC-US08-01] 发布草稿后读者可按 slug 读取", async ({ page, base
   expect((await page.request.get(`/api/posts/${slug}`)).status()).toBe(404);
 
   await page.goto(`/admin/posts/${id}`);
-  await page.waitForSelector("astro-island:not([ssr])");
+  await waitForHydration(page);
   await page.getByRole("textbox", { name: "正文" }).press("ControlOrMeta+End"); // 光标移到正文末尾
   await page.getByRole("textbox", { name: "正文" }).pressSequentially(" 末尾");
   await page.getByRole("button", { name: "发布", exact: true }).click(); // 自动保存的 2 秒防抖未到

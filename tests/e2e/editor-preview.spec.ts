@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 const GFM = `# 标题
 - [ ] 任务
@@ -18,12 +19,13 @@ const answer: number = 42;
 `;
 
 // [TC-US04-09][SC-PREVIEW-01][SC-PREVIEW-02] 输入 GFM 停止后 300ms 内预览显示渲染结果，代码块有高亮；预览区不含 script
-test("[TC-US04-09] 输入 GFM 后预览 300ms 内更新且代码块高亮", async ({ page, baseURL }, testInfo) => {
+// @timing：在 *-timing 项目中单独运行（playwright.config.ts）
+test("[TC-US04-09] 输入 GFM 后预览 300ms 内更新且代码块高亮", { tag: "@timing" }, async ({ page, baseURL }, testInfo) => {
   const run = `${Date.now().toString(36)}${testInfo.project.name[0]}`;
   await login(page);
   const id = await adminApi(page, baseURL!).create({ title: `预览 ${run}` });
   await page.goto(`/admin/posts/${id}`);
-  await page.waitForSelector("astro-island:not([ssr])");
+  await waitForHydration(page);
 
   const body = page.getByRole("textbox", { name: "正文" });
   const preview = page.getByTestId("md-preview");

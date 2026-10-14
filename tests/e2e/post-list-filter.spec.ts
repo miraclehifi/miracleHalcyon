@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { adminApi, login } from "./support/admin";
+import { waitForHydration } from "./support/hydration";
 
 // [TC-US07-15][SC-POSTLIST-04] 状态筛选：结果与数量正确，同步到 URL ?status=，刷新保持，切换后回到第 1 页
 // 本地 D1 被并行用例共享：带本次唯一关键字搜索，只看本次创建的 5 篇（分段数量也只按关键字统计）
@@ -16,6 +17,7 @@ test("[TC-US07-15] 草稿 / 已发布 / 全部筛选，数量与 URL 同步", as
   const rows = page.getByRole("listitem");
 
   await page.goto(`/admin?q=${token}&page=2`);
+  await waitForHydration(page);
   await expect(radio(page, "全部")).toContainText("5");
   await expect(radio(page, "草稿")).toContainText("2");
   await expect(radio(page, "已发布")).toContainText("3");
@@ -26,6 +28,7 @@ test("[TC-US07-15] 草稿 / 已发布 / 全部筛选，数量与 URL 同步", as
   await expect(rows.filter({ hasText: "已发布" })).toHaveCount(0);
 
   await page.reload();
+  await waitForHydration(page);
   await expect(radio(page, "草稿")).toHaveAttribute("aria-checked", "true");
   await expect(rows).toHaveCount(2);
 
