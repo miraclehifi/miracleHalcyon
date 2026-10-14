@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 14
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（markdown `line-map` 插件 + `src/lib/editor/scroll-sync.ts`）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -35,13 +35,23 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `line-map` 插件 + 滚动同步模块，仅并排视图启用
-- [ ] UT-53 描述同步为行映射
+- [x] `line-map` 插件 + 滚动同步模块，仅并排视图启用
+- [x] UT-53 描述同步为行映射
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test`（含 `tests/unit/markdown/*` 快照）、`npm run test:e2e` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test`（含 `tests/unit/markdown/*` 快照）、`npm run test:e2e` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- 插件按 markdown module-spec 命名为 `rehypeSourceLines`（任务里写的 `line-map`），文件 `src/lib/markdown/plugins/source-lines.ts`，分两步：sanitize 之后记下顶层元素起始行（`Mark`），Expressive Code 之后按顺序写回 `data-line`（`Apply`）——EC 会把顶层 `<pre>` 换成新的外层 div，直接标在 `pre` 上会丢；顶层元素数量对不上时不标。开关经 `file.data.sourceMap` 传入（处理器共用）；不需要改 sanitize schema（在 sanitize 之后加，作者写的 `data-line` 已被去掉）。读者端不传 `sourceMap`，输出逐字节不变（快照未变）
+- Worker 渲染预览时传 `sourceMap: true`
+- `src/lib/editor/scroll-sync.ts`：`scrollPairs`（锚点 + 首尾配对，丢掉越界与不递增的点）、`interpolate`（分段线性，双向）、`useScrollSync`（滚动时才测量并缓存；MutationObserver / ResizeObserver / input / 图片 load 时失效）。编辑区行位置用 `textarea-mirror.ts` 新增的 `lineTops`
+- 仅 `view.mode === "split"` 启用；双向同步（滚预览，编辑区跟随，不动光标）
+- 偏差：防回声没有用 50ms 互斥锁，改为"记下写给另一侧的 scrollTop，那一侧下一次滚动事件落在该值上就忽略"。定时锁会吞掉锁期内作者对另一侧的真实滚动（E2E 在负载下复现过）
+- 顺带修复：`tests/e2e/support/post-list.ts` 的 `entranceDone` 等待被取消的动画时 `finished` 以 AbortError 拒绝，导致 webkit TC-US09-14 偶发失败；改为忽略拒绝
+- 测试：`tests/unit/editor/scroll-sync.test.ts`（data-line 位置、无 sourceMap 时输出不变、原始 HTML 的 data-line 被去掉、插值与比例映射）；`tests/e2e/editor-scroll-sync.spec.ts`（TC-US04-14：第 3 / 10 个标题、回顶、反向同步不动光标、切换视图后仍生效）
 
 ## 依赖
 

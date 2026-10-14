@@ -89,3 +89,17 @@ export function offsetFromPoint(textarea: HTMLTextAreaElement, clientX: number, 
     mirror.dispose();
   }
 }
+
+// 各源码行（1 起）行首在 textarea 内容中的 top（含上内边距，与 scrollTop 同一坐标）；同步滚动用
+export function lineTops(textarea: HTMLTextAreaElement, lines: readonly number[]): number[] {
+  const value = textarea.value;
+  const starts = [0];
+  for (let i = value.indexOf("\n"); i !== -1; i = value.indexOf("\n", i + 1)) starts.push(i + 1);
+  const paddingTop = parseFloat(getComputedStyle(textarea).paddingTop) || 0;
+  const mirror = createMirror(textarea);
+  try {
+    return lines.map((line) => mirror.caretAt(starts[Math.min(Math.max(line, 1), starts.length) - 1]).top + paddingTop);
+  } finally {
+    mirror.dispose();
+  }
+}

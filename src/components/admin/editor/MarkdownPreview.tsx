@@ -1,6 +1,6 @@
 // MarkdownPreview（components.md，admin-post-editor.md"预览区"，markdown module-spec §4）：正文在 Web Worker 中渲染
 // 主线程发 { seq, source }，只采用最新 seq；渲染中又有输入时只保留最后一次，避免长文连续输入时排队
-// 视图切换、同步滚动、窄屏 Tab 在 Sprint 2 接入
+// 渲染结果的顶层块带 data-line，同步滚动由页面（useScrollSync）基于滚动容器处理
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PLACEHOLDER_LABELS } from "../../../lib/markdown/plugins/upload-placeholder";
 import type { RenderRequest, RenderResponse } from "../../../lib/markdown/worker";

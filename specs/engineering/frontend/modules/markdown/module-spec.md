@@ -34,7 +34,7 @@ export function parseMarks(url: string): { wide: boolean; live: boolean; accordi
 
 ```
 remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDangerousHtml) → rehype-raw
-  → rehype-sanitize(schema) → rehypeAfterSanitize → [rehypeImageFigures] → rehype-expressive-code → [rehypeSourceLines?] → rehype-stringify
+  → rehype-sanitize(schema) → rehypeAfterSanitize → [rehypeImageFigures] → [rehypeSourceLines 记录] → rehype-expressive-code → [rehypeSourceLines 写回] → rehype-stringify
 ```
 
 | 步骤 | 说明 |
@@ -45,7 +45,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | `rehypeAfterSanitize` | `src` 的 `data:` 只保留 `data:image/*`；sanitize 给 id 加 `user-content-` 前缀，脚注页内链接同步加前缀（remark-rehype 不再加前缀，避免双重前缀） |
 | `rehypeImageFigures` | sanitize 之后执行，只生成白名单属性（下表），因此不会引入可注入内容 |
 | `rehype-expressive-code` | Shiki 使用 JavaScript 正则引擎；语言白名单：ts、tsx、js、jsx、json、bash、shell、css、html、md、yaml、toml、sql、python、go、rust、diff；主题跟随站点亮 / 暗主题（两套主题，CSS 变量切换）。已实现：`src/lib/markdown/ec-config.ts`——github-light 为基础主题，选择器按主题类型生成 `[data-theme='light|dark']`，系统暗色经 `prefers-color-scheme` 媒体查询切换 |
-| `rehypeSourceLines` | 仅 `sourceMap: true`：块级元素加 `data-line`（源码行号，供同步滚动） |
+| `rehypeSourceLines` | 仅 `sourceMap: true`：顶层块级元素加 `data-line`（源码起始行，供同步滚动）。已实现：`src/lib/markdown/plugins/source-lines.ts`——EC 会替换顶层 `<pre>`，故先记录后写回；开关经 `file.data.sourceMap` |
 
 > 已实现（implement-markdown-gfm-render）：GFM 处理链与 `RenderOptions` 签名；脚注区无障碍文案为中文（标题「脚注」、回链「返回引用 N」）。
 > 已实现（implement-markdown-sanitize）：`src/lib/markdown/sanitize-schema.ts`。注意：Expressive Code 在每个代码块内输出自带的 `<style>` 与复制按钮 `<script type="module">`，预览区（TC-US04-05 断言无 script）需处理。
@@ -100,7 +100,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | MD-UT-02 | XSS 向量集（`<script>`、`<img onerror>`、`javascript:` 链接、`<iframe>`、SVG 内联、`style`） | 输出不含可执行内容 |
 | MD-UT-03 | 代码块 `ts` 与未知语言 `foo` | 前者高亮；后者按纯文本输出，不报错 |
 | MD-UT-04 | 图片插件 | 见 [frontend-unit-tests.md](../../../../test/features/F-001-文章写作/unit/frontend-unit-tests.md) UT-126 – UT-133 |
-| MD-UT-05 | `sourceMap` | 每个块级元素 `data-line` 与源码行一致；关闭时不输出 |
+| MD-UT-05 | `sourceMap` | 每个顶层块级元素 `data-line` 与源码起始行一致；关闭时不输出（已实现：`tests/unit/editor/scroll-sync.test.ts`） |
 | MD-UT-06 | 同一输入在 Node 与 Worker 环境渲染 | 输出字节一致（同构保证） |
 
 ---
@@ -113,3 +113,4 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | 2026-10-13 | 1.1 | spike 结果回写；F-002 使用方式改为构建时预渲染（ADR-001 修订） | miraclehifi |
 | 2026-10-13 | 1.2 | 浏览器 Web Worker spike 结果回写；worker.ts 已实现 | miraclehifi |
 | 2026-10-13 | 1.3 | 预览区已实现；WebKit 首次编译语法规则的耗时与预热处理 | miraclehifi |
+| 2026-10-14 | 1.4 | `rehypeSourceLines` 已实现（顶层块，记录 / 写回两步） | miraclehifi |

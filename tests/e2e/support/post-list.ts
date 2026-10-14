@@ -18,9 +18,12 @@ export async function openList(page: Page, baseURL: string, label: string, names
   return { prefix, ids, row, api };
 }
 
-// 等入场动效（CSS transition，弹入时有缩放）播完，否则量到的行宽偏小
+// 等入场动效（CSS transition，弹入时有缩放）播完，否则量到的行宽偏小；
+// 被取消的动画（如行被移除、样式被替换）finished 会以 AbortError 拒绝，也算结束
 export async function entranceDone(page: Page) {
-  await page.locator("[role=list]").evaluate((list) => Promise.all(list.getAnimations({ subtree: true }).map((a) => a.finished)).then(() => undefined));
+  await page
+    .locator("[role=list]")
+    .evaluate((list) => Promise.all(list.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => undefined))).then(() => undefined));
 }
 
 // 用鼠标从卡片右侧（避开 ⋯）按住向左慢拖 dx 像素，停住再松手（不算甩动）；dy 为竖直分量；

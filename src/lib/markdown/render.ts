@@ -7,11 +7,12 @@ import remarkParse from "remark-parse";
 import remarkRehype, { type Options as RemarkRehypeOptions } from "remark-rehype";
 import { unified } from "unified";
 import { expressiveCodeOptions, rehypeLanguageWhitelist } from "./ec-config";
+import { rehypeSourceLinesApply, rehypeSourceLinesMark } from "./plugins/source-lines";
 import { rehypeUploadPlaceholders } from "./plugins/upload-placeholder";
 import { rehypeAfterSanitize, sanitizeSchema } from "./sanitize-schema";
 
 export interface RenderOptions {
-  sourceMap?: boolean; // 预览传 true：输出源码位置属性（由后续任务实现）
+  sourceMap?: boolean; // 预览传 true：顶层块输出 data-line（同步滚动）
 }
 
 export interface RenderResult {
@@ -36,12 +37,13 @@ const processor = unified()
   .use(rehypeSanitize, sanitizeSchema)
   .use(rehypeAfterSanitize)
   .use(rehypeUploadPlaceholders)
+  .use(rehypeSourceLinesMark)
   .use(rehypeLanguageWhitelist)
   .use(rehypeExpressiveCode, expressiveCodeOptions)
+  .use(rehypeSourceLinesApply)
   .use(rehypeStringify);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- sourceMap 由后续任务实现
-export async function renderMarkdown(source: string, _opts?: RenderOptions): Promise<RenderResult> {
-  const file = await processor.process(source);
+export async function renderMarkdown(source: string, opts: RenderOptions = {}): Promise<RenderResult> {
+  const file = await processor.process({ value: source, data: { sourceMap: opts.sourceMap ?? false } });
   return { html: String(file), images: [] };
 }

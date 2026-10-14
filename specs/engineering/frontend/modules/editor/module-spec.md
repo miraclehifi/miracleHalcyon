@@ -61,7 +61,7 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 渲染触发 | 源码变化即发给 Web Worker（不 debounce）；渲染中又有输入时只保留最后一次，上一次完成后再发，只采用最新 seq 的结果（长文连续输入不排队）。已实现：`src/components/admin/editor/MarkdownPreview.tsx` |
 | 注入 | `innerHTML` 替换正文容器，然后按 `ImageRef` 挂载：`[data-article-image]` → `ArticleImage`、`[data-gallery]` → `ImageGallery`、占位 → 上传占位块 |
 | 复用 | `reconcileIslands`：以 `src + marks` 为键复用已挂载的 React root（保持加载状态），新增的挂载、消失的 `unmount`（UT-140） |
-| 同步滚动 | 源码 textarea 用隐藏镜像元素（`src/lib/editor/textarea-mirror.ts`，拖放落点换算已在用）算出每行的 `offsetTop`；预览按 `data-line` 建立映射；两侧滚动按行插值，带 50ms 互斥锁防止回声 |
+| 同步滚动 | 源码 textarea 用隐藏镜像元素（`src/lib/editor/textarea-mirror.ts`，拖放落点换算已在用）算出每行的 `offsetTop`；预览按 `data-line` 建立映射；两侧滚动按行插值；防回声：记下写给另一侧的 scrollTop，那一侧下一次滚动事件落在该值上即忽略（不用定时锁，避免吞掉作者对另一侧的真实滚动）。已实现：`src/lib/editor/scroll-sync.ts`（`lineTops` 在 `textarea-mirror.ts`），仅并排视图启用 |
 | 图片菜单 | `ImageMenu` 收到 `ImageRef.sourceStart/End` 与 `src`；执行前核对 `text.slice(start, end)` 中包含该 `src`，否则放弃（UT-136） |
 
 ## 4. 设置与发布
@@ -89,3 +89,4 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-14 | 1.1 | §3 同步滚动已实现；防回声由 50ms 锁改为按写入值识别 | miraclehifi |

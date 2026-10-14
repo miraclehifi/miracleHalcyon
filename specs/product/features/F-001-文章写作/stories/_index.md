@@ -33,7 +33,7 @@
 | US ID | 名称 | 状态 | 说明 |
 |-------|------|------|------|
 | US-03 | edit-post-info | implemented | 新建/编辑文章：标题、slug、标签、摘要、发布日期、正文 |
-| US-04 | markdown-preview | draft | 正文 Markdown 实时预览（GFM、代码高亮） |
+| US-04 | markdown-preview | implemented | 正文 Markdown 实时预览（GFM、代码高亮） |
 | US-05 | image-upload | implemented | 粘贴/拖入图片上传 R2 并插入引用 |
 | US-06 | autosave-draft | draft | 停止输入后自动保存，显示保存状态，重开恢复 |
 | US-10 | format-toolbar | implemented | 工具栏格式命令、格式快捷键、按钮悬停提示 |

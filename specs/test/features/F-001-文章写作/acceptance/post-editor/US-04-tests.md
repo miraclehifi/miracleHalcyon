@@ -618,15 +618,15 @@ expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWi
 - 步骤 2：预览区第 3 个 `h2` 顶部与预览视口顶部距离 ≤ 视口高度 25%（建议容差）
 - 步骤 3：第 10 个 `h2` 同上
 - 步骤 4：预览区 `scrollTop` ≤ 10px
-- 滚动预览区不导致编辑区光标位置改变（反向同步是否需要以 design-ui 为准，本 TC 不强制）
+- 滚动预览区时编辑区跟随（已实现双向同步），编辑区光标位置不变
 
 **playwright_hint：**
 ```ts
 // 通过编辑器 API 或定位第 3 个 "## " 行后 scrollIntoView
 await editor.evaluate(el => /* scroll to 3rd h2 line */ void 0);
-const h2 = page.getByTestId('md-preview').locator('h2').nth(2);
+const h2 = page.getByRole('region', { name: '预览' }).locator('h2').nth(2);
 await expect.poll(async () => {
-  const [pv, h] = await Promise.all([page.getByTestId('md-preview').boundingBox(), h2.boundingBox()]);
+  const [pv, h] = await Promise.all([page.getByRole('region', { name: '预览' }).boundingBox(), h2.boundingBox()]);
   return Math.abs(h!.y - pv!.y) / pv!.height;
 }).toBeLessThanOrEqual(0.25);
 ```
@@ -671,4 +671,5 @@ await expect.poll(async () => {
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | AI（design-acceptance） |
 | 2026-10-14 | v1.1 | 新增 TC-US04-15（SC-PREVIEW-09 渲染失败恢复） | AI（plan-tasks 追加） |
+| 2026-10-14 | v1.3 | TC-14：反向同步改为必测；预览按滚动容器（区域"预览"）定位 | miraclehifi |
 | 2026-10-14 | v1.2 | TC-12：768px 默认"编辑"、视图切换按设计稿为"编辑 / 并排 / 预览"单选组、刷新后保持 | miraclehifi |

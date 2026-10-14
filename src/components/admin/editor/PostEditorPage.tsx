@@ -3,13 +3,14 @@
 // 视图：≥ 768px 顶栏分段控件 编辑 / 并排 / 预览，< 768px 顶栏下方 Tab（useEditorView）；隐藏的一栏只加 hidden，不卸载
 // 任何字段变化都交给自动保存（停止输入 2 秒后保存；Ctrl / ⌘ + S 立即保存）；预览在 Web Worker 中渲染（MarkdownPreview）；
 // 发布见 PublishActions：缺少必填项时标出字段并聚焦第一个；删除：暂停自动保存 → DELETE → 不弹离开确认，回到列表
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { DraftInput } from "../../../domains/post/content";
 import type { PostStatus } from "../../../domains/post/post";
 import { slugify } from "../../../domains/post/slug";
 import type { PostView } from "../../../domains/post/service";
 import type { AutosaveState } from "../../../lib/autosave/controller";
 import { useAutosave } from "../../../lib/autosave/useAutosave";
+import { useScrollSync } from "../../../lib/editor/scroll-sync";
 import { useEditorView, type NarrowTab, type ViewMode } from "../../../lib/editor/view-mode";
 import { useHydrated } from "../../../lib/dom/hydration";
 import { localDate } from "../../../lib/format/local-date";
@@ -84,6 +85,11 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const leavingRef = useRef(false); // 删除成功后跳转：不再拦截离开
   const hydrated = useHydrated();
   const view = useEditorView();
+  // 并排时两栏同步滚动（editor module-spec §3）
+  const previewRef = useRef<HTMLElement>(null);
+  const getBody = useCallback(() => document.getElementById(FIELD_INPUT_IDS.body) as HTMLTextAreaElement | null, []);
+  const getPreview = useCallback(() => previewRef.current, []);
+  useScrollSync(getBody, getPreview, view.mode === "split");
   // 发布日期默认浏览器本地的今天；服务端不知道作者时区，水合前留空
   const publishedAt = draft.publishedAt ?? (hydrated ? localDate(new Date()) : "");
   // 保存、发布、撤回的响应都带最新状态：更新徽标与主按钮
@@ -223,6 +229,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
             />
           </section>
           <section
+            ref={previewRef}
             id={PREVIEW_PANE_ID}
             aria-label="预览"
             hidden={view.mode === "edit"}

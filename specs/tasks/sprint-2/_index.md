@@ -25,7 +25,7 @@
 | 11 | [add-list-delete-undo](add-list-delete-undo.md) | 列表删除撤销与延迟提交 | swipe-row-actions | FRONTEND | 表现层 | US-09 | add-swipe-row-delete | 0 | 中 | completed |
 | 12 | [add-editor-delete-action](add-editor-delete-action.md) | 写文章页"删除文章" | article-writing | FRONTEND | 表现层 | US-09 | implement-delete-post-api | 0 | 低 | completed |
 | 13 | [add-editor-view-modes](add-editor-view-modes.md) | 视图切换与窄屏 Tab | article-writing | FRONTEND | 表现层 | US-04 | — | 1 | 低 | completed |
-| 14 | [add-preview-scroll-sync](add-preview-scroll-sync.md) | 编辑区与预览同步滚动 | article-writing | FRONTEND | 表现层 | US-04 | add-editor-view-modes | 0 | 高 | pending |
+| 14 | [add-preview-scroll-sync](add-preview-scroll-sync.md) | 编辑区与预览同步滚动 | article-writing | FRONTEND | 表现层 | US-04 | add-editor-view-modes | 0 | 高 | completed |
 | 15 | [add-local-draft-restore](add-local-draft-restore.md) | 本地暂存与恢复横幅 | article-writing | FRONTEND | 表现层 | US-06 | — | 1 | 低 | pending |
 | 16 | [handle-session-expired-save](handle-session-expired-save.md) | 保存时会话过期的处理 | article-writing | FRONTEND | 表现层 | US-06 | add-local-draft-restore | 0 | 中 | pending |
 | 17 | [implement-logout-endpoint](implement-logout-endpoint.md) | 登出接口 | article-writing | API | 领域 + 接口 | US-02 | — | 1 | 低 | pending |
