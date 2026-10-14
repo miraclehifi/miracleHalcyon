@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 2
 **序号**: 2
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 领域层 + 数据层 + 接口层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -35,14 +35,22 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `src/domains/media/validate.ts`（`sniffImage`、大小与字段校验）、`key.ts`（`ImageId`、`buildImageKey`）、`repo.ts`（R2 `MediaStore`、D1 `ImageRepo`）、`service.ts`（`upload` 流程 §5 第 1–4、6 步）
-- [ ] `POST /api/admin/images` 返回契约中的 201 体（`live: false`、`videoUrl: null`），错误码与契约一致
-- [ ] 请求体 > 16 MiB 按 `Content-Length` 直接 413 `PAYLOAD_TOO_LARGE`
+- [x] `src/domains/media/validate.ts`（`sniffImage`、大小与字段校验）、`key.ts`（`ImageId`、`buildImageKey`）、`repo.ts`（R2 `MediaStore`、D1 `ImageRepo`）、`service.ts`（`upload` 流程 §5 第 1–4、6 步）
+- [x] `POST /api/admin/images` 返回契约中的 201 体（`live: false`、`videoUrl: null`），错误码与契约一致
+- [x] 请求体 > 16 MiB 按 `Content-Length` 直接 413 `PAYLOAD_TOO_LARGE`
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`npm test` 全部通过
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`npm test` 全部通过
+- [x] `npm run lint` 与 `npm run check` 无错误
+
+## 实现记录
+
+- `src/domains/media/validate.ts`：`sniffImage`（PNG IHDR、JPEG 顺序扫描段取首个 SOF、WebP VP8 / VP8L / VP8X、GIF 逻辑屏幕；越界即截断 → null；尺寸须在 1–20000）、`validateUploadFields`（rgb 缺省 `808080`）、`checkImageSize`
+- `key.ts`：`generateImageId`（`crypto.getRandomValues`，a-z2-7 共 32 字符取低 5 位，无偏）、`buildImageKey`（UTC 年月）；`repo.ts`：`R2MediaStore`（`contentType` + 长缓存 `cacheControl`）、`D1ImageRepo`；`service.ts`：`upload`（key 冲突重试 3 次；R2 写失败 / D1 插入失败均 `UPLOAD_FAILED`，D1 失败时删除已写对象）
+- `POST /api/admin/images`（`src/pages/api/admin/images.ts`）：`Content-Length` > 16 MiB 直接 413；缺少 `file` 或 0 字节 → 400 `VALIDATION_FAILED`（`fields: ["file"]`，提示文字"不支持的图片格式"，同时满足契约错误码与 TC-US05-16 文案）
+- 未登录 / 跨站由 middleware 统一处理（`/api/admin/**`），测试经 `createAuthMiddleware` 验证未到达处理器
+- `video` 字段暂不处理（Sprint 3 US-11）
 
 ## 依赖
 

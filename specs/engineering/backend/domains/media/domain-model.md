@@ -75,6 +75,8 @@ URL = `/` + key（如 `/img/2026/10/k3j9x2m4q1_4032x3024_8a7b6c.jpg`）。
 
 ## 5. 领域服务
 
+> 已实现（Sprint 2，implement-image-upload-api）：`src/domains/media/`（`validate.ts`、`key.ts`、`repo.ts`、`service.ts`；单图，视频部分在 Sprint 3）。
+
 ```ts
 interface MediaService {
   upload(input: { file: Blob & { name: string }; video?: Blob; rgb?: string; width?: string; height?: string; now: Date }):

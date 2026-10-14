@@ -14,7 +14,7 @@ phases:
   architecture: done
   domain_design: done   # domain_model / api_contract / data_model: self-checked
   task_planning: done   # self-checked；Sprint 1 共 72 个任务（已关闭）；Sprint 2 共 18 个任务（2026-10-14，按功能点粒度，.claude/rules/tasks.md）
-  implementation: in_progress   # Sprint 1 完成（72 / 72）；Sprint 2 进行中（1 / 18）；Sprint 3 待拆分
+  implementation: in_progress   # Sprint 1 完成（72 / 72）；Sprint 2 进行中（2 / 18）；Sprint 3 待拆分
   code_review: pending   # Sprint 1 待审查
   validation: pending
 current_phase: implementation
@@ -29,9 +29,9 @@ approvals:
 has_ui_changes: true
 checkpoint:
   sprint: sprint-2
-  current_task: implement-image-upload-api
+  current_task: add-image-read-route
   current_phase: implementation
-  completed_tasks: [build-format-toolbar]   # Sprint 2：1 / 18（Sprint 1 的 72 个见 sprint-1/_index.md）
+  completed_tasks: [build-format-toolbar, implement-image-upload-api]   # Sprint 2：2 / 18（Sprint 1 的 72 个见 sprint-1/_index.md）
   blocked_tasks: []
   test_command: "npm test（vitest 4.1：unit + workers）/ npm run test:e2e（@timing 用例在 *-timing 项目最后串行；交互前 waitForHydration）/ npm run test:spike（spike：chromium + astro dev）"
   env_info: "Windows 11, Node 24.21.0 LTS, npm 11.19.0；Astro 7.3 + @astrojs/cloudflare 14 + wrangler 4.149 + TS 6.0 + Vitest 4.1"
