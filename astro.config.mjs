@@ -15,6 +15,7 @@ const spikeRoutes = {
     "astro:config:setup": ({ command, injectRoute }) => {
       if (command !== "dev") return;
       injectRoute({ pattern: "/_spike/markdown", entrypoint: "./src/pages/admin/_spike-markdown.astro" });
+      injectRoute({ pattern: "/_spike/media", entrypoint: "./src/pages/admin/_spike-media.astro" });
     },
   },
 };

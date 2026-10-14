@@ -42,6 +42,7 @@
 ### 测试类
 - [ ] 变更点测试：上述测试清单全部由红变绿
 - [ ] 影响范围回归：`tests/unit/upload/*`、US-05 上传 E2E、add-heic-upload 的 E2E 通过；E2E 补跑 webkit 一次
+- [ ] 构建产物检查（自 spike 移入）：`npm run build` 后 `mediabunny`（及 `heic-to`）只出现在后台 chunk，不在读者页与 `_worker.js` 中
 - [ ] `npm run lint` 与 `npm run check` 无错误
 
 ## 依赖

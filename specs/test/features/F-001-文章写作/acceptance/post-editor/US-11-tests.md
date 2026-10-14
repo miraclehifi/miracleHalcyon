@@ -17,11 +17,11 @@
 
 | 类别 | 策略 |
 |------|------|
-| 媒体夹具 | 放在 `tests/fixtures/live/`，提交 git（真实设备导出的样本，已去掉 EXIF 中的 GPS 信息）；超限样本由脚本生成 |
+| 媒体夹具 | 放在 `tests/fixtures/live/`，提交 git（真实设备导出的样本，保留原始 EXIF——2026-10-14 作者决定不去 GPS）；超限样本由脚本生成 |
 | 测试文章 | 每个 TC 通过 API 新建独立草稿，标题前缀 `[E2E-US11]` |
 | 登录态 | 沿用 US-05 的 `storageState` |
 | R2 对象 | 每个 TC 记录响应中的 key，`afterEach` 删除图片和同名 `.live.mp4`；断言"无残留"时比较测试前后的 `list` 差集 |
-| 浏览器能力 | 用 Playwright 项目矩阵区分：`chromium`（不能解码 HEIC，能编码 H.264）、`webkit`（原生解码 HEIC）。"不支持 H.264 编码"通过 `addInitScript` 改写 `VideoEncoder.isConfigSupported`，让它返回 `{ supported: false }` 来模拟 |
+| 浏览器能力 | 用 Playwright 项目矩阵区分：`chromium`（不能解码 HEIC，能编码 H.264；需 `channel: "chromium"`，默认 headless shell 不能解码 HEVC，见 ADR-006"验证结果"）、`webkit`（原生解码 HEIC）。"不支持 H.264 编码"通过 `addInitScript` 改写 `VideoEncoder.isConfigSupported`，让它返回 `{ supported: false }` 来模拟 |
 | 处理组件加载 | "首次加载"用全新 context（无缓存），并通过 `page.route` 给 `heic-to` / `mediabunny` 的 chunk 加 1.5s 延迟 |
 
 **夹具清单**：
@@ -30,7 +30,7 @@
 |------|------|------|
 | `IMG_1234.HEIC` + `IMG_1234.MOV` | iPhone 实况照片，4032×3024，HEVC 视频约 3s、≈ 4MB | 主路径 |
 | `IMG_5678.HEIC` | 单张 HEIC 4032×3024 | 单图转换 |
-| `PXL_0001.MP.jpg` | Pixel 动态照片（XMP `Container:Directory` + `Item:Semantic=MotionPhoto`），内嵌 mp4 ≈ 2MB | 安卓 |
+| `IMG20260516172228.jpg` | OPPO（ColorOS）动态照片，代替原计划的 Pixel 样本：XMP `Container:Directory` + `Item:Semantic=MotionPhoto` + `OpCamera:*` 扩展；主视频 HEVC 3840×2880 + AAC ≈ 16.4MB，其后还有副视频与 OPPO 私有尾部 | 安卓；同时是"视频处理前 > 10MB"的真实样本 |
 | `MVIMG_0002.jpg` | 旧版 `MicroVideoOffset` 格式 | 安卓旧格式（等价类） |
 | `IMG_2000.HEIC` + `IMG_2000.MOV` | 视频处理后 ≈ 12MB | 超限 |
 | `IMG_2100.JPG` + `IMG_2100.MP4` | 视频为 H.264 mp4，恰好 10,485,760 B，已是 mp4，无需处理 | 上边界（接受） |

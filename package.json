@@ -25,6 +25,7 @@
     "@astrojs/react": "^7.0.1",
     "astro": "^7.3.8",
     "lucide-react": "^1.56.0",
+    "mediabunny": "^1.61.4",
     "motion": "^14.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

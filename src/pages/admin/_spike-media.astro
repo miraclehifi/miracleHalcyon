@@ -1,0 +1,109 @@
+---
+// spike-browser-media-processing 测试页：仅 dev 注入路由（astro.config 的 spikeRoutes），不进生产构建
+export const prerender = false;
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>spike · media processing</title>
+  </head>
+  <body>
+    <script>
+      // MP4 顶层 box：遇到不认识的类型或越界即视为视频结束（OPPO 在主视频后追加副视频与私有尾部）
+      const TOP_LEVEL = new Set(["ftyp", "moov", "mdat", "free", "skip", "wide", "uuid", "meta", "udta", "pdin", "sidx"]);
+      const ascii = (bytes: Uint8Array, from: number, to: number) => String.fromCharCode(...bytes.subarray(from, to));
+
+      function mp4End(bytes: Uint8Array, start: number): number {
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        let pos = start;
+        let seenMdat = false;
+        while (pos + 8 <= bytes.length) {
+          let size = view.getUint32(pos);
+          const type = ascii(bytes, pos + 4, pos + 8);
+          if (size === 1) size = Number(view.getBigUint64(pos + 8));
+          if (!TOP_LEVEL.has(type) || size < 8 || pos + size > bytes.length) break;
+          // 副视频同样以 ftyp 开头：主视频的 mdat 之后再遇到 ftyp 即停
+          if (type === "ftyp" && pos !== start) break;
+          if (type === "mdat") seenMdat = true;
+          pos += size;
+          if (seenMdat && pos < bytes.length && ascii(bytes, pos + 4, pos + 8) === "ftyp") break;
+        }
+        return pos;
+      }
+
+      // Motion Photo v1：XMP Container:Directory 中 Semantic=MotionPhoto 的 Item:Length 为距文件末尾的长度
+      function motionPhotoVideo(bytes: Uint8Array): { video: Uint8Array; itemLength: number } {
+        const text = new TextDecoder("latin1").decode(bytes.subarray(0, Math.min(bytes.length, 256 * 1024)));
+        const item = /<Container:Item[^>]*Item:Semantic="MotionPhoto"[^>]*>/.exec(text)?.[0];
+        const itemLength = Number(/Item:Length="(\d+)"/.exec(item ?? "")?.[1]);
+        if (!itemLength) throw new Error("not a motion photo");
+        const start = bytes.length - itemLength;
+        if (ascii(bytes, start + 4, start + 8) !== "ftyp") throw new Error("ftyp not found");
+        return { video: bytes.subarray(start, mp4End(bytes, start)), itemLength };
+      }
+
+      async function load(url: string) {
+        return new Uint8Array(await (await fetch(url)).arrayBuffer());
+      }
+
+      async function describe(bytes: Uint8Array) {
+        const { Input, BufferSource, ALL_FORMATS } = await import("mediabunny");
+        const input = new Input({ source: new BufferSource(bytes), formats: ALL_FORMATS });
+        const track = await input.getPrimaryVideoTrack();
+        return {
+          size: bytes.length,
+          head: Array.from(bytes.subarray(0, 12)),
+          codec: (await track?.getCodec()) ?? null,
+          width: (await track?.getDisplayWidth()) ?? 0,
+          height: (await track?.getDisplayHeight()) ?? 0,
+          hasAudio: (await input.getAudioTracks()).length > 0,
+          duration: await input.computeDuration(),
+        };
+      }
+
+      async function extract(url: string) {
+        const { video, itemLength } = motionPhotoVideo(await load(url));
+        return { ...(await describe(video)), itemLength };
+      }
+
+      const MAX_EDGE = 1920;
+      // 默认质量下 1920×1440 约 115 Mbps（2.7s 产出 39MB），显式限码率：6 Mbps 约 0.75MB/s，3s 片段 ≈ 2.3MB
+      const VIDEO_BITRATE = 6_000_000;
+
+      // ADR-006 §3：能编码 H.264 就转码并去音轨，否则只转封装（保留原编码）
+      async function process(url: string) {
+        const { video } = motionPhotoVideo(await load(url));
+        const started = performance.now();
+        const lib = await import("mediabunny");
+        const libMs = performance.now() - started;
+        const { Input, Output, Conversion, BufferSource, BufferTarget, Mp4OutputFormat, ALL_FORMATS, canEncodeVideo } = lib;
+
+        const input = new Input({ source: new BufferSource(video), formats: ALL_FORMATS });
+        const track = await input.getPrimaryVideoTrack();
+        const width = (await track?.getDisplayWidth()) ?? 0;
+        const height = (await track?.getDisplayHeight()) ?? 0;
+        // 浏览器 H.264 编码器不支持 4K（OPPO 主视频 3840×2880），转码时长边缩到 1920
+        const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
+        const size = { width: Math.round((width * scale) / 2) * 2, height: Math.round((height * scale) / 2) * 2 };
+        const mode = (await canEncodeVideo("avc", { ...size, bitrate: VIDEO_BITRATE })) ? "transcode" : "remux";
+
+        const target = new BufferTarget();
+        const output = new Output({ format: new Mp4OutputFormat({ fastStart: "in-memory" }), target });
+        const conversion = await Conversion.init({
+          input,
+          output,
+          video: mode === "transcode" ? { codec: "avc", ...size, fit: "contain", bitrate: VIDEO_BITRATE, forceTranscode: true } : {},
+          audio: { discard: true },
+          showWarnings: false,
+        });
+        if (!conversion.isValid) throw new Error(`invalid conversion: ${JSON.stringify(conversion.discardedTracks.map((t) => t.reason))}`);
+        await conversion.execute();
+        const ms = performance.now() - started;
+        return { ...(await describe(new Uint8Array(target.buffer!))), mode, ms, libMs };
+      }
+
+      Object.assign(window, { __spikeMedia: { extract, process } });
+    </script>
+  </body>
+</html>

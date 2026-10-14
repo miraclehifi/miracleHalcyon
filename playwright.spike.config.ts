@@ -8,7 +8,8 @@ export default defineConfig({
   testMatch: "**/*.spec.ts",
   reporter: "list",
   use: { baseURL: `http://localhost:${PORT}` },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // channel "chromium"：用完整 Chromium 的新 headless；默认的 headless shell 没有 HEVC 解码（spike-browser-media-processing）
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], channel: "chromium" } }],
   webServer: {
     command: `npm run dev -- --port ${PORT}`,
     port: PORT,
