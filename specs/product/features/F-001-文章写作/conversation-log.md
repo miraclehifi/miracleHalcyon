@@ -61,3 +61,19 @@
 
 **对话摘要**
 - 用户：「继续」→ AI 自主完成 auth / post / media 三个 Domain 与 markdown / editor / media-upload 三个前端模块规格，并回写架构文档、US-05 用例与单元测试规格
+
+## [verify] 2026-10-15 · miraclehifi
+
+**关键决策**
+- code-review 由本会话接手收尾：补记审查报告（F-001 6 项 MUST-FIX），修类型错误，内存仓储对齐 slug 条件；任务 20、21 与审查修复分三次提交
+- verify 不做本地前端联调；E2E 用项目自带 Playwright 套件，接口测试由 workers 集成测试承担（项目没有 local-server-start / apitest-skill）
+- 插件的 gap-tc-to-code.py 识别不了本项目的表格格式（解析出 0 条），改为自写脚本加逐条阅读测试断言做 TC 追溯
+- F-001 验证**未通过**：现有测试全过，但 256 个验收用例中 18 个无测试（4 个 P0：TC-US01-31、TC-US01-33、TC-US03-22、TC-US06-26）、54 个部分覆盖；US-03 / US-06 / US-07 的部分验收期望值在 design-domain 后未同步。成因是 Sprint 1 的测试按领域单元规格与接口契约组织，不对应 TC
+- 建议新开 Sprint 5 补齐验收测试后重新 verify；作者也可以选择记为已知风险后发布（status.yaml blocker：needs-decision）
+
+**对话摘要**
+- 用户：「继续」（接上 Sprint 4 完成后的状态）
+- AI：发现工作区有另一会话留下、未提交且无记录的 code-review 修复，`npm run check` 有 2 个错误，询问如何接手
+- 用户：选「接手并收尾」（补记审查、修 check、跑回归、分批提交，再进入 verify）
+- AI：verify 前询问是否做本地联调（dev:local + Playwright 走完整旅程并截图）
+- 用户：选「不做联调」

@@ -16,7 +16,7 @@ phases:
   task_planning: done   # Sprint 4 共 19 个任务（按功能点粒度，.claude/rules/tasks.md）
   implementation: done   # Sprint 4：21 / 21（20、21 为 2026-10-15 追加）；2026-10-15 统一测试通过（lint、check、npm test 309、test:build 5、全量 E2E 余 6 个 WebKit 负载超时单独重跑通过）
   code_review: done   # 2026-10-15 与 F-001 一起审查：4 项 MUST-FIX 已修复，报告 test/features/F-002-博客首页与阅读/reviews/code-review.md
-  validation: pending
+  validation: done   # 2026-10-15：83 个 TC 中 82 个已覆盖、1 个上线后实测（TC-US03-10）；Lighthouse 首页达标，/posts 与文章页需线上复测；发布跟随 F-001
 current_phase: validation
 blockers: []
 has_ui_changes: true

@@ -31,3 +31,18 @@
 **对话摘要**
 - 用户：「文档都按照你的设计来，不要找我确认」
 - AI：按 Backlog 与先行稿定 UI，按适配器实测能力（预渲染默认 workerd、`cfContext.waitUntil`）定构建与重建方案，spike 列为 Sprint 首个任务
+
+## [verify] 2026-10-15 · miraclehifi
+
+**关键决策**
+- F-002 验证通过：83 个 TC 中 82 个已覆盖，TC-US03-10（线上发布到可见时长）留到上线后实测
+- 回归中发现灯箱懒加载首次打开时焦点移入有约 100ms 空窗（WebKit 下 Esc 无效），改为 `useLayoutEffect` 设置初始焦点，计入 code-review MUST-FIX
+- Lighthouse（本地移动端模拟）：首页 91 分、LCP 1.5s 达标；`/posts` 与文章页的 LCP 超标，原因是本地 preview 不压缩 CSS（88KB，gzip 后 16.7KB），上线后用线上地址复测
+- 发布时机跟随 F-001（读者端内容来自后台写作）
+
+**对话摘要**
+- 用户：「继续」（接上 Sprint 4 完成后的状态）
+- AI：发现工作区有另一会话留下、未提交且无记录的 code-review 修复，`npm run check` 有 2 个错误，询问如何接手
+- 用户：选「接手并收尾」（补记审查、修 check、跑回归、分批提交，再进入 verify）
+- AI：verify 前询问是否做本地联调（dev:local + Playwright 走完整旅程并截图）
+- 用户：选「不做联调」
