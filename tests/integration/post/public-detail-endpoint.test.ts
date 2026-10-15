@@ -39,7 +39,7 @@ describe("GET /api/posts/:slug", () => {
       published: {
         status: 200,
         cache: "no-store",
-        body: { slug: "hello", title: "Hello", summary: "摘要", tags: ["Astro"], publishedAt: "2026-10-13", body: "已发布正文", lastPublishedAt: NOW.toISOString() },
+        body: { slug: "hello", title: "Hello", summary: "摘要", tags: ["Astro"], publishedAt: "2026-10-13", body: "已发布正文", lastPublishedAt: NOW.toISOString(), cover: null },
       },
       wrongCase: 404,
       afterUnpublish: 404,

@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CoverField, type CoverFieldProps } from "../../../src/components/admin/editor/CoverField";
-import { UploadError, type UploadedImage } from "../../../src/lib/upload/upload-client";
+import { UploadError, type UploadedImage, type UploadExtras } from "../../../src/lib/upload/upload-client";
 
 const A = "/img/2026/10/aaaaaaaaaa_1600x900_556677.jpg";
 const B = "/img/2026/10/bbbbbbbbbb_1200x800_112233.jpg";
@@ -10,7 +10,7 @@ const png = (name = "b.png", size = 10) => new File([new Uint8Array(size)], name
 
 function setup(props: Partial<CoverFieldProps> = {}) {
   const onChange = vi.fn();
-  const upload = vi.fn(async () => uploaded(B));
+  const upload = vi.fn<(file: File, extras?: UploadExtras) => Promise<UploadedImage>>(async () => uploaded(B));
   const measure = vi.fn(async () => ({ width: 1200, height: 800, rgb: "112233" }));
   render(<CoverField value={null} onChange={onChange} upload={upload} measure={measure} {...props} />);
   return { onChange, upload, measure };
@@ -43,7 +43,7 @@ describe("CoverField", () => {
 
   it("[UT-232] 选择文件：校验 → 上传中 → 上传成功后回传地址（带主色与宽高）", async () => {
     let finish!: (value: UploadedImage) => void;
-    const upload = vi.fn(() => new Promise<UploadedImage>((resolve) => (finish = resolve)));
+    const upload = vi.fn<(file: File, extras?: UploadExtras) => Promise<UploadedImage>>(() => new Promise<UploadedImage>((resolve) => (finish = resolve)));
     const { onChange, measure } = setup({ upload });
     await choose(png());
     expect(screen.getByText("上传中…")).toBeTruthy();

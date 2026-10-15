@@ -58,7 +58,8 @@ describe("文章封面", () => {
       results.push([result.status, (result.body.error as { code: string; fields: string[] }).fields]);
     }
     const ok = await put(id, draft("validate-cover", A));
-    const { cover: _omit, ...missing } = draft("validate-cover", null);
+    const missing: Partial<DraftInput> = draft("validate-cover", null);
+    delete missing.cover;
     const absent = await put(id, missing);
     expect(results.every(([status, fields]) => status === 400 && (fields as string[]).includes("cover"))).toBe(true);
     expect([ok.status, ok.body.cover, absent.status, (absent.body.error as { message: string }).message]).toEqual([200, A, 400, "请求缺少字段：cover"]);

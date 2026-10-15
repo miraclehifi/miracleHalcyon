@@ -46,6 +46,7 @@ describe("POST /api/admin/posts", () => {
           status: "draft",
           hasUnpublishedChanges: false,
           lastPublishedAt: null,
+          cover: null,
           createdAt: NOW.toISOString(),
           updatedAt: NOW.toISOString(),
         },

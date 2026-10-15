@@ -22,7 +22,8 @@ export interface DraftInput {
   cover?: string | null; // F-002 封面：站内图片地址，null = 无封面；API 层要求必填，领域层缺省按 null
 }
 
-export type PostContent = Readonly<Omit<DraftInput, "cover"> & { cover: string | null }>;
+// cover 可缺省（迁移前的行、F-001 时期的调用方）：normalizeContent 总会补齐为 null
+export type PostContent = Readonly<DraftInput>;
 
 const COVER_MAX = 200;
 

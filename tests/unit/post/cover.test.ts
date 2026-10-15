@@ -12,7 +12,8 @@ describe("normalizeContent 封面", () => {
   it("null 与站内图片地址合法；缺省按 null", () => {
     expect(normalizeContent(base).cover).toBeNull();
     expect(normalizeContent({ ...base, cover: COVER }).cover).toBe(COVER);
-    const { cover: _omit, ...withoutCover } = base;
+    const withoutCover: Partial<DraftInput> = { ...base };
+    delete withoutCover.cover;
     expect(normalizeContent(withoutCover as DraftInput).cover).toBeNull();
   });
 

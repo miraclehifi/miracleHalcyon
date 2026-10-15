@@ -17,9 +17,11 @@ const { title, description } = Astro.props;
     <!-- 首屏主题（reader-shell.md"主题切换"）：在样式之前设置 data-theme，避免先闪成另一种主题；后台页面共用同一选择 -->
     <script is:inline>
       try {
-        var theme = localStorage.getItem("theme");
+        const theme = localStorage.getItem("theme");
         if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
-      } catch (e) {}
+      } catch {
+        // 存储不可用时跟随系统
+      }
     </script>
     <title>{title}</title>
     {description && <meta name="description" content={description} />}

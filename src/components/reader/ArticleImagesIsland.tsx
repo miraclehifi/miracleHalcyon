@@ -16,7 +16,7 @@ interface Mounted {
   island: ArticleIsland;
 }
 
-const toGalleryImage = ({ wide: _wide, ...image }: ArticleImageData) => image;
+const toGalleryImage = ({ src, alt, caption, width, height, accent, live }: ArticleImageData) => ({ src, alt, caption, width, height, accent, live });
 const Lightbox = lazy(() => import("./Lightbox"));
 
 export function ArticleImagesIsland({ rootSelector }: ArticleImagesIslandProps) {
@@ -38,6 +38,7 @@ export function ArticleImagesIsland({ rootSelector }: ArticleImagesIslandProps) 
     const root = document.querySelector<HTMLElement>(rootSelector);
     if (!root) return;
     const { islands, images: all } = collectArticleImages(root);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 挂载点来自水合后的 DOM，只能在挂载后读取一次
     setImages(all);
     setMounted(
       islands.map((island) => {

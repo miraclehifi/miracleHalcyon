@@ -142,7 +142,7 @@ export class D1PostRepo implements PostRepo {
       .prepare(
         "INSERT INTO posts (title, slug, tags, summary, body, published_at, cover, draft_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       )
-      .bind(draft.title, draft.slug, JSON.stringify(draft.tags), draft.summary, draft.body, draft.publishedAt, draft.cover, draftHash, at, at)
+      .bind(draft.title, draft.slug, JSON.stringify(draft.tags), draft.summary, draft.body, draft.publishedAt, draft.cover ?? null, draftHash, at, at)
       .run();
     return meta.last_row_id;
   }
@@ -164,7 +164,7 @@ export class D1PostRepo implements PostRepo {
       .prepare(
         "UPDATE posts SET title = ?, slug = ?, tags = ?, summary = ?, body = ?, published_at = ?, cover = ?, draft_hash = ?, updated_at = ? WHERE id = ?",
       )
-      .bind(content.title, content.slug, JSON.stringify(content.tags), content.summary, content.body, content.publishedAt, content.cover, draftHash, now.toISOString(), id)
+      .bind(content.title, content.slug, JSON.stringify(content.tags), content.summary, content.body, content.publishedAt, content.cover ?? null, draftHash, now.toISOString(), id)
       .run();
     return meta.changes > 0;
   }

@@ -42,8 +42,8 @@ describe("GET /api/posts", () => {
         cache: "no-store",
         body: {
           items: [
-            { slug: "newer", title: "newer", summary: "摘要", tags: ["css"], publishedAt: "2026-10-10", lastPublishedAt: NOW.toISOString() },
-            { slug: "older", title: "older", summary: "摘要", tags: ["Astro"], publishedAt: "2026-10-01", lastPublishedAt: NOW.toISOString() },
+            { slug: "newer", title: "newer", summary: "摘要", tags: ["css"], publishedAt: "2026-10-10", lastPublishedAt: NOW.toISOString(), cover: null },
+            { slug: "older", title: "older", summary: "摘要", tags: ["Astro"], publishedAt: "2026-10-01", lastPublishedAt: NOW.toISOString(), cover: null },
           ],
           page: 1,
           pageSize: 20,

@@ -14,6 +14,7 @@ const content = (slug: string, extra: Partial<PostContent> = {}): PostContent =>
   summary: "摘要",
   body: "# 正文",
   publishedAt: "2026-10-13",
+  cover: null, // F-002 迁移 0003
   ...extra,
 });
 

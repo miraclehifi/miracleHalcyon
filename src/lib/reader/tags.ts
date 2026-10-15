@@ -34,7 +34,7 @@ export function groupTags(posts: readonly ReaderPost[]): TagGroup[] {
       const key = tag.trim().toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
-      const group = groups.get(key) ?? { posts: [], spellings: new Map() };
+      const group = groups.get(key) ?? { posts: [] as ReaderPost[], spellings: new Map<string, { count: number; oldest: number }>() };
       groups.set(key, group);
       group.posts.push(post);
       const spelling = group.spellings.get(tag) ?? { count: 0, oldest: order };

@@ -144,11 +144,14 @@ const DepthCarousel = ({
   const autoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reduced = useReducedMotion(); // 改动 5
   const reducedRef = useRef(reduced);
+  // eslint-disable-next-line react-hooks/refs -- 与上游一致：gsap 补间与拖动回调读取最新配置
   reducedRef.current = reduced;
 
   const [active, setActive] = useState(start);
 
+  // eslint-disable-next-line react-hooks/refs -- 同上
   onChangeRef.current = onChange;
+  // eslint-disable-next-line react-hooks/refs -- 同上
   cfgRef.current = { count, depth, spread, tilt, tiltDirection, visibleCards, falloff, blur, duration, ease, loop, cardWidth, edgePadding, autoplayDelay };
 
   const layout = useCallback((pos: number) => {

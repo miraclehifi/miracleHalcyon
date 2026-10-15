@@ -25,7 +25,7 @@ function fakeApi(total = 41, failPage?: number) {
     if (url.pathname === "/api/posts") {
       const page = Number(url.searchParams.get("page") ?? "1");
       if (page === failPage) return new Response("boom", { status: 500 });
-      const items = all.slice((page - 1) * 20, page * 20).map(({ body: _body, ...summary }) => summary);
+      const items = all.slice((page - 1) * 20, page * 20).map((post) => ({ ...post, body: undefined }));
       return json({ items, page, pageSize: 20, total });
     }
     const slug = decodeURIComponent(url.pathname.replace("/api/posts/", ""));
@@ -37,7 +37,7 @@ function fakeApi(total = 41, failPage?: number) {
 // READER-UT-09（SC-REBUILD-07、SC-REBUILD-08）
 describe("loadReaderData", () => {
   it("线上接口：翻完全部列表页再逐篇取正文，按发布日期倒序输出", async () => {
-    const fetch = fakeApi();
+    const fetch = fakeApi() as unknown as typeof globalThis.fetch & ReturnType<typeof fakeApi>;
     const data = await loadReaderData({ apiOrigin: "https://halcyon.example.com", fetch });
     expect(data.posts).toHaveLength(41);
     expect(data.posts.every((p) => p.body.startsWith("正文"))).toBe(true);
@@ -47,7 +47,7 @@ describe("loadReaderData", () => {
   });
 
   it("[TC-US03-08] 接口返回 500 时报错，信息含地址与状态", async () => {
-    const error = await loadReaderData({ apiOrigin: "https://halcyon.example.com", fetch: fakeApi(41, 2) }).catch((e: unknown) => e);
+    const error = await loadReaderData({ apiOrigin: "https://halcyon.example.com", fetch: fakeApi(41, 2) as unknown as typeof fetch }).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ReaderDataError);
     expect(String((error as Error).message)).toMatch(/https:\/\/halcyon\.example\.com\/api\/posts\?page=2.*500/);
   });

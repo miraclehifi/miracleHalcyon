@@ -53,6 +53,7 @@ describe("PublishedPostQuery", () => {
         publishedAt: "2026-10-10",
         body: "已发布正文",
         lastPublishedAt: NOW.toISOString(),
+        cover: null,
       },
       list: { slugs: ["modified", "older"], total: 2, hasBody: false },
       byTag: ["modified"],

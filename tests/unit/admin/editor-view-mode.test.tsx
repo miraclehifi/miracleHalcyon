@@ -42,6 +42,7 @@ const POST: PostView = {
   hasUnpublishedChanges: false,
   publishedAt: "2026-10-10",
   lastPublishedAt: null,
+  cover: null,
   createdAt: "2026-10-10T00:00:00.000Z",
   updatedAt: "2026-10-10T00:00:00.000Z",
 };
