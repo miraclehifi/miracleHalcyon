@@ -8,6 +8,7 @@ import remarkRehype, { type Options as RemarkRehypeOptions } from "remark-rehype
 import { unified } from "unified";
 import { expressiveCodeOptions, rehypeLanguageWhitelist } from "./ec-config";
 import { rehypeImageFigures, type ImageRef } from "./plugins/image-figures";
+import { rehypeQuoteAttribution } from "./plugins/quote-attribution";
 import { rehypeSourceLinesApply, rehypeSourceLinesMark } from "./plugins/source-lines";
 import { rehypeUploadPlaceholders } from "./plugins/upload-placeholder";
 import { rehypeAfterSanitize, sanitizeSchema } from "./sanitize-schema";
@@ -40,6 +41,7 @@ const processor = unified()
   .use(rehypeRaw)
   .use(rehypeSanitize, sanitizeSchema)
   .use(rehypeAfterSanitize)
+  .use(rehypeQuoteAttribution)
   .use(rehypeUploadPlaceholders)
   .use(rehypeImageFigures)
   .use(rehypeSourceLinesMark)

@@ -45,3 +45,13 @@ describe("读者页正文渲染", () => {
     expect(html).not.toMatch(/alert\(1\)<\/script>|onerror|javascript:/);
   });
 });
+
+// [TC-US07-06][TC-US07-07][SC-ARTICLE-04][SC-ARTICLE-05] READER-UT-07（首字下沉标记）
+describe("首字下沉标记", () => {
+  it("只在正文第一个元素是段落时标记该段", async () => {
+    expect((await prepare("第一段\n\n第二段")).html).toMatch(/^<p data-dropcap(="")?>第一段<\/p>\n<p>第二段<\/p>/);
+    expect((await prepare("![图](/img/2026/10/aaaaaaaaaa_1600x900_556677.jpg)\n\n正文")).html).not.toMatch(/data-dropcap/);
+    expect((await prepare("## 标题\n\n正文")).html).not.toMatch(/data-dropcap/);
+    expect((await prepare("```ts\nconst a = 1;\n```\n\n正文")).html).not.toMatch(/data-dropcap/);
+  });
+});

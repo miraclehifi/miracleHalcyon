@@ -60,6 +60,8 @@
 | 标题锚点 | h2 / h3 带 `id`（与目录一致），`scroll-margin-top: 24px` |
 | 代码块 | Expressive Code，亮 / 暗两套主题随 `data-theme` 切换，无需刷新 |
 
+> 已实现（Sprint 4，add-article-typography）：段首缩进、首字下沉、标题 `scroll-margin-top` 在 `global.css` 的 `.article-content`；引用装饰引号与署名在 `.prose`（预览同步）；署名由 markdown 插件 `rehypeQuoteAttribution` 输出。
+
 ### 文末 `PostPager`
 
 纸张内最后一块，上边框 `line`：左"← 上一篇"+ 标题（更早发布），右"下一篇 →"+ 标题（更新发布），16px；缺一侧时该侧留空；两侧都没有时不渲染。`nav aria-label="上一篇 / 下一篇"`。

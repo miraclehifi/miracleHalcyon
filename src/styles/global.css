@@ -49,6 +49,60 @@
   :where(a):not(:where(.not-prose *)):hover {
     color: var(--color-accent);
   }
+
+  /* 引用（reader-post-detail.md"正文"）：左侧细线 + 装饰引号，不用 typography 自带的首尾引号；
+     末段"— 出处"由 rehypeQuoteAttribution 转为 footer[data-attribution]，右对齐署名。预览与读者页一致 */
+  :where(blockquote):not(:where(.not-prose *)) {
+    position: relative;
+    border-inline-start: 2px solid var(--color-line-strong);
+    padding-inline-start: 20px;
+    padding-top: 0.6em;
+    font-style: normal;
+
+    &::before {
+      content: "“" / "";
+      position: absolute;
+      top: -0.35em;
+      inset-inline-start: 14px;
+      font-family: var(--font-prose);
+      font-size: 2.5em;
+      line-height: 1;
+      color: var(--color-ink-faint);
+    }
+
+    :where(p):first-of-type::before,
+    :where(p):last-of-type::after {
+      content: none;
+    }
+
+    :where(footer[data-attribution]) {
+      margin-top: 0.75em;
+      text-align: end;
+      color: var(--color-ink-muted);
+    }
+  }
+}
+
+/* 读者页正文版式（reader-post-detail.md"正文"）：段首缩进 2 字（列表、引用、代码、图片、表格不缩进）、
+   首段首字下沉（data-dropcap 由 prepareArticleHtml 标记）；标题跳转时留出顶部空间 */
+.article-content {
+  > p {
+    text-indent: 2em;
+  }
+  > p[data-dropcap] {
+    text-indent: 0;
+  }
+  > p[data-dropcap]::first-letter {
+    float: left;
+    margin: 0.08em 0.12em 0 0;
+    font-family: var(--font-prose-heading);
+    font-size: 2.4em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  > :is(h2, h3) {
+    scroll-margin-top: 24px;
+  }
 }
 
 /* 读者页正文图片（reader-post-detail.md"图片与灯箱"）：岛水合前的静态 figure / 组图按最终版式占位，

@@ -1,5 +1,6 @@
 // 读者页正文后处理（reader module-spec §2 prepareArticleHtml）：在 renderMarkdown 的结果上
-// 把 h1 降为 h2（页面只有标题区一个 h1）、给 h2 / h3 补 id 并提取目录、判断是否含图片
+// 把 h1 降为 h2（页面只有标题区一个 h1）、给 h2 / h3 补 id 并提取目录、判断是否含图片；
+// 正文第一个元素是段落时标记 data-dropcap（首字下沉只作用于该段）
 import GithubSlugger from "github-slugger";
 import type { Element, ElementContent, Root } from "hast";
 import rehypeParse from "rehype-parse";
@@ -26,6 +27,8 @@ export function prepareArticleHtml(html: string): PreparedArticle {
   const slugger = new GithubSlugger();
 
   const transform = () => (tree: Root) => {
+    const first = tree.children.find((child): child is Element => child.type === "element");
+    if (first?.tagName === "p") first.properties = { ...first.properties, dataDropcap: "" };
     visit(tree, "element", (node) => {
       if (node.tagName === "h1") node.tagName = "h2";
       if (node.tagName === "h2" || node.tagName === "h3") {

@@ -60,7 +60,7 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | `readingStats(text)`（已实现） | `reading-stats.ts` | 计数 = 汉字（`\p{Script=Han}`）个数 + 其余按 `[\p{L}\p{N}]+` 匹配的词数；`displayWords` = 向上取整到百（< 100 时为实际数）；`minutes = max(1, ceil(count/300))` | TC-US07-05 |
 | `updatedDate(post)`（已实现） | `reading-stats.ts` | `lastPublishedAt` 取 UTC 日期；晚于 `publishedAt` 时返回该日期，否则 `null` | TC-US07-05 |
 | `formatLongDate(date)`（已实现） | `reading-stats.ts` | `yyyy-MM-dd` → "2026年10月10日 星期六"（按日历计算星期，不依赖时区） | TC-US07-04 |
-| `prepareArticleHtml(html)`（已实现：h1 降级、标题 id、目录、hasImages；`data-dropcap` 在 add-article-typography） | `article-html.ts` | 在 `renderMarkdown` 结果上（rehype 解析 → 变换 → 序列化）：① 正文 `h1` 改为 `h2`；② 第一个顶层元素是 `p` 时加 `data-dropcap`；③ 给 h2 / h3 补 `id`（无 id 时按 `github-slugger` 规则生成，同名追加 `-1`、`-2`）；返回 `{ html, toc: TocItem[], hasImages }` | TC-US07-02、06、07、TC-US08-09 |
+| `prepareArticleHtml(html)`（已实现：h1 降级、标题 id、目录、hasImages；`data-dropcap` 已实现） | `article-html.ts` | 在 `renderMarkdown` 结果上（rehype 解析 → 变换 → 序列化）：① 正文 `h1` 改为 `h2`；② 第一个顶层元素是 `p` 时加 `data-dropcap`；③ 给 h2 / h3 补 `id`（无 id 时按 `github-slugger` 规则生成，同名追加 `-1`、`-2`）；返回 `{ html, toc: TocItem[], hasImages }` | TC-US07-02、06、07、TC-US08-09 |
 | `normalizeSiteConfig(raw)`（已实现） | `site-config.ts` | `name`、`avatar`、`bio`（≥ 1 段）必填；`github` / `photo` 为空串或 `undefined` → 省略，否则必须 `http:` / `https:` URL；`email` 空 → 省略，否则 `^[^\s@]+@[^\s@]+\.[^\s@]+$`；不合法抛 `Error('site.{字段} …')`，构建失败 | TC-US02-03、04 |
 
 ## 3. 运行时脚本（原生，ADR-008）

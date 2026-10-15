@@ -45,7 +45,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | `rehypeAfterSanitize` | `src` 的 `data:` 只保留 `data:image/*`；sanitize 给 id 加 `user-content-` 前缀，脚注页内链接同步加前缀（remark-rehype 不再加前缀，避免双重前缀） |
 | `rehypeImageFigures` | sanitize 之后执行，只生成白名单属性（下表），因此不会引入可注入内容。已实现：`src/lib/markdown/plugins/image-figures.ts`（在上传占位之后、`rehypeSourceLines` 之前）；`parseImageKey` / `parseMarks` 在 `plugins/image-key.ts`，经 `render.ts` 导出 |
 | `rehype-expressive-code` | Shiki 使用 JavaScript 正则引擎；语言白名单：ts、tsx、js、jsx、json、bash、shell、css、html、md、yaml、toml、sql、python、go、rust、diff；主题跟随站点亮 / 暗主题（两套主题，CSS 变量切换）。已实现：`src/lib/markdown/ec-config.ts`——github-light 为基础主题，选择器按主题类型生成 `[data-theme='light|dark']`，系统暗色经 `prefers-color-scheme` 媒体查询切换 |
-| `rehypeQuoteAttribution`（F-002） | sanitize 之后、`rehypeImageFigures` 之前：`blockquote` 有 ≥ 2 个直接子级 `p`，且最后一个 `p` 的文本以"— "（U+2014 + 空格）或"—— "开头 → 该 `p` 换成 `<footer data-attribution>`（内容不变，含开头破折号）；单段引用、`-- `、无空格、非最后一段都不处理。只生成白名单属性。文件 `plugins/quote-attribution.ts`。预览与读者页同时生效 |
+| `rehypeQuoteAttribution`（F-002，已实现：`plugins/quote-attribution.ts`，在 `rehypeAfterSanitize` 之后） | sanitize 之后、`rehypeImageFigures` 之前：`blockquote` 有 ≥ 2 个直接子级 `p`，且最后一个 `p` 的文本以"— "（U+2014 + 空格）或"—— "开头 → 该 `p` 换成 `<footer data-attribution>`（内容不变，含开头破折号）；单段引用、`-- `、无空格、非最后一段都不处理。只生成白名单属性。文件 `plugins/quote-attribution.ts`。预览与读者页同时生效 |
 | `rehypeSourceLines` | 仅 `sourceMap: true`：顶层块级元素加 `data-line`（源码起始行，供同步滚动）。已实现：`src/lib/markdown/plugins/source-lines.ts`——EC 会替换顶层 `<pre>`，故先记录后写回；开关经 `file.data.sourceMap` |
 
 > 已实现（implement-markdown-gfm-render）：GFM 处理链与 `RenderOptions` 签名；脚注区无障碍文案为中文（标题「脚注」、回链「返回引用 N」）。
