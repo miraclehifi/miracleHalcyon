@@ -11,7 +11,8 @@ export async function login(page: Page) {
   await page.getByLabel("账号").fill(USERNAME);
   await page.getByLabel("密码").fill(PASSWORD);
   await page.getByRole("button", { name: "登录" }).click();
-  await expect(page).toHaveURL(/\/admin$/);
+  // 并行用例同时登录时，本地 workerd 依次计算 PBKDF2（10 万次迭代），排队可能超过默认 5 秒
+  await expect(page).toHaveURL(/\/admin$/, { timeout: 20_000 });
 }
 
 export interface DraftFields {

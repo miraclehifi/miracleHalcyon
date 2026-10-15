@@ -29,7 +29,7 @@ approvals:
 has_ui_changes: true
 checkpoint:
   sprint: sprint-3
-  current_task: sprint-3-regression   # 任务 7 已完成，Sprint 3 任务全部完成；下一步统一跑 npm test、test:e2e、lint、check、构建产物检查；2026-10-15 作者决定不考虑苹果（backlog drop-apple-live-photo），任务 5–7 改为主色 / 处理中占位、视频处理与上传、安卓动态照片，不再等样本，排在 11、12 之后；任务内只跑本任务测试，回归 / lint / check 等可做任务全部完成后统一跑（2026-10-15 作者要求）；E2E 回归统一留到 Sprint 末；Sprint 2 code-review 延后
+  current_task: sprint-3-regression   # Sprint 3 任务全部完成；2026-10-15 统一回归：lint / check / npm test 全过，全量 E2E 剩 7 个负载下偶发失败（单独重跑均通过，见 sprint-3-task-results），待作者决定是否加固后进入 code-review；2026-10-15 作者决定不考虑苹果（backlog drop-apple-live-photo），任务 5–7 改为主色 / 处理中占位、视频处理与上传、安卓动态照片，不再等样本，排在 11、12 之后；任务内只跑本任务测试，回归 / lint / check 等可做任务全部完成后统一跑（2026-10-15 作者要求）；E2E 回归统一留到 Sprint 末；Sprint 2 code-review 延后
   current_phase: implementation
   completed_tasks: [spike-browser-media-processing, implement-markdown-image-plugins, implement-live-photo-upload-api, add-article-image-display, raise-image-size-limit, fix-jpeg-sniff-large-metadata, add-image-gallery-display, add-live-photo-playback, add-single-image-menu, add-gallery-menu, add-image-syntax-help, add-heic-upload, add-live-photo-pair-upload, add-motion-photo-detection]   # Sprint 3
   sprint2_completed_tasks: [build-format-toolbar, implement-image-upload-api, add-image-read-route, add-image-paste-upload, add-image-drop-and-pick-upload, handle-image-upload-errors, add-icon-button-tooltips, implement-delete-post-api, add-post-list-animated-entry, add-swipe-row-delete, add-list-delete-undo, add-editor-delete-action, add-editor-view-modes, add-preview-scroll-sync, add-local-draft-restore, handle-session-expired-save, implement-logout-endpoint, add-logout-entry]   # 18 / 18（Sprint 1 的 72 个见 sprint-1/_index.md）

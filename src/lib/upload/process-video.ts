@@ -10,7 +10,8 @@ export type ProcessedVideo = { blob: Blob; warning?: "HEVC_KEPT" } | { dropVideo
 export type VideoPlan = "as-is" | "transcode" | "remux";
 
 type Mediabunny = typeof import("mediabunny");
-const loadMediabunny = () => import("mediabunny");
+// 只在浏览器加载：服务端渲染写文章页时不会处理视频，SSR 构建里这个分支被消掉，mediabunny 不进 Worker 包
+const loadMediabunny = (): Promise<Mediabunny> => (import.meta.env.SSR ? Promise.reject(new Error("视频处理只在浏览器中进行")) : import("mediabunny"));
 
 export interface SourceVideo {
   isMp4: boolean;

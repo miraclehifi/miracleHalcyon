@@ -66,7 +66,7 @@ test("[TC-US05-03] 工具栏选择 diagram.webp 上传", async ({ page, baseURL 
   await fileChooser.setFiles({ name: "diagram.webp", mimeType: "image/webp", buffer: Buffer.from(webp!) });
   const { url } = (await (await response).json()) as { url: string };
 
-  expect(url).toMatch(/_20x10_808080\.webp$/);
+  expect(url).toMatch(/_20x10_[0-9a-f]{6}\.webp$/); // 主色由浏览器计算（add-heic-upload），不再是缺省 808080
   await expect(editor).toHaveValue(`前文![diagram](${url})`);
 });
 

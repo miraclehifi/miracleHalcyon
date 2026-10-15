@@ -15,10 +15,11 @@ export default defineConfig({
   },
   // 带计时断言的用例（@timing）在常规用例全部结束后单独跑，两个浏览器也不同时跑，避免并行负载拖慢计时
   // 代价：常规项目有失败时 Playwright 会跳过依赖它的计时项目
-  // chromium 用完整 Chromium 的新 headless（channel "chromium"）：默认的 headless shell 没有 HEVC 解码，安卓动态照片的视频会被当成
-  // 不能转码（ADR-006"验证结果"，US-11 测试数据策略）
+  // 安卓动态照片上传（live-photo-upload）单独用完整 Chromium 的新 headless（channel "chromium"）：默认的 headless shell 没有 HEVC
+  // 解码（ADR-006"验证结果"）。其余用例仍用 headless shell——全部换成完整 Chromium 时，各 worker 同时启动会把机器压满、用例超时
   projects: [
-    { name: "chromium", grepInvert: /@timing/, use: { ...devices["Desktop Chrome"], channel: "chromium" } },
+    { name: "chromium", grepInvert: /@timing/, testIgnore: /live-photo-upload\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
+    { name: "chromium-media", testMatch: /live-photo-upload\.spec\.ts/, use: { ...devices["Desktop Chrome"], channel: "chromium" } },
     { name: "webkit", grepInvert: /@timing/, use: { ...devices["Desktop Safari"] } },
     { name: "chromium-timing", grep: /@timing/, dependencies: ["chromium", "webkit"], use: { ...devices["Desktop Chrome"] } },
     { name: "webkit-timing", grep: /@timing/, dependencies: ["chromium-timing"], use: { ...devices["Desktop Safari"] } },
