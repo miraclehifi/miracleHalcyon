@@ -75,3 +75,51 @@ export async function dropFiles(page: Page, target: Locator, files: FakeFile[], 
     { list: handle, line, events },
   );
 }
+
+export interface ByteFile {
+  name: string;
+  type: string;
+  bytes: Uint8Array;
+}
+
+// 在源码区第 line 行末尾派发拖放事件，载荷为给定字节的文件（真实样本 / 派生夹具；以 base64 传入页面）
+export async function dropBytes(page: Page, target: Locator, files: ByteFile[], line = 1) {
+  const handle = await page.evaluateHandle(
+    (specs) =>
+      specs.map(({ name, type, base64 }) => {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new File([bytes], name, { type });
+      }),
+    files.map(({ name, type, bytes }) => ({ name, type, base64: Buffer.from(bytes).toString("base64") })),
+  );
+  await target.evaluate(
+    (element, { list, line }) => {
+      const data = new DataTransfer();
+      for (const file of list) data.items.add(file);
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      const clientY = rect.top + element.clientTop + parseFloat(style.paddingTop) + parseFloat(style.lineHeight) * (line - 0.5);
+      for (const type of ["dragenter", "dragover", "drop"]) element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data, clientX: rect.right - 8, clientY }));
+    },
+    { list: handle, line },
+  );
+}
+
+// multipart 请求体中各字段的字节（按 Content-Type 里的 boundary 切分）
+export function multipartFields(body: Buffer, contentType: string): Record<string, Buffer> {
+  const boundary = Buffer.from(`--${/boundary=(.+)$/.exec(contentType)![1]}`);
+  const fields: Record<string, Buffer> = {};
+  let pos = body.indexOf(boundary);
+  while (pos >= 0) {
+    const next = body.indexOf(boundary, pos + boundary.length);
+    if (next < 0) break;
+    const part = body.subarray(pos + boundary.length + 2, next - 2); // 去掉 boundary 后的 CRLF 与下一个 boundary 前的 CRLF
+    const split = part.indexOf("\r\n\r\n");
+    const name = /name="([^"]+)"/.exec(part.subarray(0, split).toString("latin1"))?.[1];
+    if (name) fields[name] = part.subarray(split + 4);
+    pos = next;
+  }
+  return fields;
+}

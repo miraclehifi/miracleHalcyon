@@ -15,6 +15,7 @@ import {
   replacePlaceholder,
 } from "../editor/format-commands";
 import { measureImage, type ImageMeta } from "./dominant-color";
+import { extractMotionPhoto } from "./extract-motion-photo";
 import { processVideo as processVideoDefault, type ProcessedVideo } from "./process-video";
 import { uploadImage, type UploadedImage, type UploadExtras } from "./upload-client";
 import { uploadItem, type UploadItem } from "./upload-item";
@@ -36,14 +37,19 @@ export interface UseImageUploadsOptions {
   onWarning?: (message: string) => void; // 做成了但打了折扣（实况视频被丢弃 / 只在部分浏览器播放），带文件名规则同上
 }
 
-const asImage = async (file: File): Promise<UploadItem> => ({ kind: "image", file });
+// JPEG 内嵌视频（安卓动态照片）展开为实况项；其余按普通图片
+export async function fileToItem(file: File): Promise<UploadItem> {
+  if (file.type !== "image/jpeg") return { kind: "image", file };
+  const motion = extractMotionPhoto(await file.arrayBuffer());
+  return motion ? { kind: "live", name: file.name, ...motion } : { kind: "image", file };
+}
 
 export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | null>, {
     onTasksChange,
     upload = uploadImage,
     measure = measureImage,
     processVideo = processVideoDefault,
-    toItem = asImage,
+    toItem = fileToItem,
     onError,
     onWarning,
   }: UseImageUploadsOptions = {},

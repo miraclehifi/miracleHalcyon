@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 7
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（`src/lib/upload/`）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -20,7 +20,7 @@
 ## 样本
 
 - 真实样本：OPPO（ColorOS）动态照片 `tests/fixtures/live/IMG20260516172228.jpg`（Motion Photo v1 XMP + `OpCamera:*`；主视频 HEVC 3840×2880 ≈ 16.4MB，结构见 [ADR-006"验证结果"](../../engineering/features/F-001-文章写作/architecture/adr/ADR-006-live-photo-browser-processing.md)）
-- 派生夹具（夹具脚本基于 OPPO 样本生成）：`MVIMG_0002.jpg`（旧版 `MicroVideoOffset`）、`IMG_4000.jpg`（内嵌 HEVC 副视频）、`IMG_2100.jpg` / `IMG_2101.jpg`（内嵌 H.264 视频 10,485,760 B / +1）、`IMG_3000.jpg`（改名）
+- 派生夹具（已实现：`tests/fixtures/live/motion-photos.ts` 在内存中由 OPPO 样本派生，不另存文件；OPPO 主视频之后有一段私有数据，副视频要按下一个 `ftyp` 定位）：`MVIMG_0002.jpg`（旧版 `MicroVideoOffset`）、`IMG_4000.jpg`（内嵌 HEVC 副视频）、`IMG_2100.jpg` / `IMG_2101.jpg`（内嵌 H.264 视频 10,485,760 B / +1）、`IMG_3000.jpg`（改名）
 - Pixel（`PXL_*.MP.jpg`）、旧版 `MVIMG_*.jpg` 按同一 XMP 规则识别，不另备真机样本
 
 ## 产品需求来源
@@ -43,14 +43,14 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 切出的视频经 `processVideo`（大小与编码规则与任务 6 一致）
-- [ ] 上传的静态图不含内嵌视频字节
+- [x] 切出的视频经 `processVideo`（大小与编码规则与任务 6 一致）
+- [x] 上传的静态图不含内嵌视频字节
 - [ ] TC-US11-21（性能 < 15s）在 Sprint 末 verify 时跑
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/unit/upload/*`、`tests/e2e/live-photo-upload.spec.ts` 通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [ ] 影响范围回归（可做任务全部完成后统一跑；`tests/unit/upload/*`、`live-photo-upload.spec.ts` 两浏览器已在本任务跑过）：`tests/unit/upload/*`、`tests/e2e/live-photo-upload.spec.ts` 通过；E2E 补跑 webkit 一次
+- [ ] `npm run lint` 与 `npm run check` 无错误（统一跑；本任务 tsc、eslint 已过）
 
 ## 依赖
 

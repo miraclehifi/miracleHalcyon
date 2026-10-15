@@ -19,7 +19,7 @@
 | 4 | [add-article-image-display](add-article-image-display.md) | 预览单图 `ArticleImage`（宽图、图注、马赛克渐显） | article-writing, image-refine-loading | FRONTEND | 表现层 | US-12 | implement-markdown-image-plugins | 3 | 中 | completed |
 | 5 | [add-heic-upload](add-heic-upload.md) | 主色计算与"处理中"占位 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | — | 1 | 低 | completed |
 | 6 | [add-live-photo-pair-upload](add-live-photo-pair-upload.md) | 实况视频处理与图片 + 视频上传 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | spike-browser-media-processing, implement-live-photo-upload-api, add-heic-upload | 1 | 中 | completed |
-| 7 | [add-motion-photo-detection](add-motion-photo-detection.md) | 安卓动态照片识别与上传 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | add-live-photo-pair-upload | 0 | 中 | pending |
+| 7 | [add-motion-photo-detection](add-motion-photo-detection.md) | 安卓动态照片识别与上传 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | add-live-photo-pair-upload | 0 | 中 | completed |
 | 8 | [add-image-gallery-display](add-image-gallery-display.md) | 预览组图 `ImageGallery`（网格、手风琴） | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 2 | 中 | completed |
 | 9 | [add-live-photo-playback](add-live-photo-playback.md) | 预览实况照片播放与 `LiveBadge` | article-writing | FRONTEND | 表现层 | US-11 | add-article-image-display, add-image-gallery-display | 0 | 中 | completed |
 | 10 | [add-single-image-menu](add-single-image-menu.md) | 单图菜单切换宽图 | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 1 | 中 | completed |
