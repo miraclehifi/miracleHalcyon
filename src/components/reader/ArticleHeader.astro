@@ -1,0 +1,45 @@
+---
+// ArticleHeader（reader-post-detail.md"标题区"）：标题、发布日期 · 字数与阅读时长 · 更新于、标签
+import { TagChip } from "../ui/TagChip";
+import { plainText } from "../../lib/reader/excerpt";
+import { formatLongDate, readingStats, updatedDate } from "../../lib/reader/reading-stats";
+import { tagHref, tagSlug } from "../../lib/reader/tags";
+import type { ReaderPost } from "../../lib/reader/types";
+
+interface Props {
+  post: ReaderPost;
+}
+const { post } = Astro.props;
+const stats = readingStats(plainText(post.body));
+const updated = updatedDate(post);
+---
+
+<header class="flex flex-col gap-4 border-b border-line pb-7">
+  <h1 class="font-prose-heading text-display text-ink">{post.title}</h1>
+  <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+    <p class="flex flex-wrap items-center gap-x-2.5 font-prose text-meta text-ink-faint italic">
+      <time datetime={post.publishedAt}>{formatLongDate(post.publishedAt)}</time>
+      <span aria-hidden="true">·</span>
+      <span class="tabular-nums">约 {stats.displayWords.toLocaleString("en-US")} 字 · 阅读 {stats.minutes} 分钟</span>
+      {
+        updated && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>更新于 <time datetime={updated}>{formatLongDate(updated).split(" ")[0]}</time></span>
+          </>
+        )
+      }
+    </p>
+    {
+      post.tags.length > 0 && (
+        <ul class="flex flex-wrap gap-1.5" aria-label="标签">
+          {post.tags.map((tag) => (
+            <li>
+              <TagChip label={tag} href={tagHref(tagSlug(tag))} />
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</header>

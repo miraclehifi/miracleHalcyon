@@ -1,0 +1,9 @@
+---
+// ArticleContent（reader-post-detail.md"正文"）：renderMarkdown + prepareArticleHtml 的结果；与后台预览同一套 .prose 排版
+interface Props {
+  html: string;
+}
+const { html } = Astro.props;
+---
+
+<div class="article-content prose max-w-none" set:html={html} />

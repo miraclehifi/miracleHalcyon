@@ -1,0 +1,33 @@
+---
+// 文章详情（reader-post-detail.md，US-07–US-10）：构建时预渲染；数据来自 virtual:reader-data（ADR-007）
+import data from "virtual:reader-data";
+import ArticleContent from "../../components/reader/ArticleContent.astro";
+import ArticleHeader from "../../components/reader/ArticleHeader.astro";
+import ReaderLayout from "../../layouts/ReaderLayout.astro";
+import { renderMarkdown } from "../../lib/markdown/render";
+import { prepareArticleHtml } from "../../lib/reader/article-html";
+import type { ReaderPost } from "../../lib/reader/types";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return data.posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+
+interface Props {
+  post: ReaderPost;
+}
+const { post } = Astro.props;
+const article = prepareArticleHtml((await renderMarkdown(post.body)).html);
+---
+
+<ReaderLayout title={`${post.title} · miracleHalcyon`} description={post.summary || undefined} current="posts" back="/posts" width="wide">
+  <div class="flex justify-center">
+    <article
+      class="flex w-full max-w-[840px] flex-col gap-10 rounded-control border border-line px-[45px] pt-14 pb-12 [--article-bleed:45px] max-md:border-0 max-md:px-0 max-md:pt-0 max-md:[--article-bleed:20px]"
+    >
+      <ArticleHeader post={post} />
+      <ArticleContent html={article.html} />
+    </article>
+  </div>
+</ReaderLayout>

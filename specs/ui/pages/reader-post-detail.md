@@ -44,6 +44,8 @@
 | 标签 | 右侧 `TagChip` 链接到标签页 |
 | 字数 | 正文纯文本字符数（中文按字、英文按词），向上取整到百位显示"约 3,200 字"；阅读时长 = 字数 / 300，至少 1 分钟 |
 
+> 已实现（Sprint 4，add-article-page）：`src/pages/posts/[slug].astro`、`src/components/reader/ArticleHeader.astro`（`TagChip` 链接形态）、`ArticleContent.astro`；纸张、标题区、h1 降级与标题 id。
+
 ### 正文 `ArticleContent`
 
 渲染与写文章页预览同一实现（`renderMarkdown`，构建时执行）。正文中 Markdown 的 `#`（h1）降为 h2 显示，保证页面只有一个 h1。

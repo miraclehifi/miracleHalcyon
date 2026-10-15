@@ -53,7 +53,7 @@
 | 主体（居中，宽 640，上下留白 160 / 200） | "404"（`font-mono` 14px `ink-faint`）→ 标题"页面不存在"（`text-display`）→ 说明"这里没有你要找的内容：地址可能写错了，文章也可能已经撤回或删除。"（16px `ink-muted`）→ 链接"回首页"（`accent`）、"看看全部文章"（`ink-muted`） |
 | 顶栏 / 页脚 | 同其他读者页；顶栏不高亮任何项 |
 
-- HTTP 状态 404；静态构建产物为 `404.html`（Cloudflare 静态资源 `not_found_handling: "404-page"`，以 design-arch 为准）
+- HTTP 状态 404；静态构建产物为 `404.html`，未匹配路径由 Astro Cloudflare 适配器的错误页取回机制返回（无需配置 `not_found_handling`，ADR-007 验证结果⑤）
 - `/admin/**` 不使用本页（仍按 F-001 规则跳转登录）
 
 > 已实现（Sprint 4，add-reader-layout）：`src/layouts/ReaderLayout.astro`（`current`、`back`、`width`）、`src/components/reader/{SiteHeader,SiteNav,SiteFooter,BackLink,NotFound,GithubIcon}.astro`、`src/pages/404.astro`、`src/config/site.ts`（经 `normalizeSiteConfig`）。图标为 lucide-react 组件在 Astro 中静态渲染（不水合）；GitHub 标志用内联 SVG（lucide 1.x 无品牌图标）。主题切换交互见 add-theme-toggle。
