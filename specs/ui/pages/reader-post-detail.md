@@ -80,6 +80,8 @@
 
 小标题"同标签文章"（13px `ink-faint`）；每项：标题（14px `ink-muted`，最多 2 行）+ 下方 `#标签`（12px `font-mono` `ink-faint`，只列与本文共享的标签）；最多 8 篇，按共享标签数降序、发布时间降序；不含本文。悬停标题 `accent`。
 
+> 已实现（Sprint 4，add-reading-progress-toc）：`src/components/reader/TableOfContents.astro`、`ReadingProgress.astro`、`TocDrawer.astro`（原生 `<dialog>`）、`reading.ts`（`progressOf`、`currentHeading`、`bindTocLinks`、`bindReading`、`bindTocDrawer`）；`ReaderLayout` 新增 `before-main` 插槽放进度细条。
+
 ## 手机 / 窄屏（< 1280px）
 
 | 项 | 规则 |

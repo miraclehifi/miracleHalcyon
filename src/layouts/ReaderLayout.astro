@@ -19,6 +19,7 @@ const widths = { narrow: "max-w-[640px]", list: "max-w-[896px]", wide: "max-w-[1
 
 <BaseLayout title={title} description={description}>
   <SiteHeader current={current} />
+  <slot name="before-main" />
   <main class:list={["mx-auto w-full px-5 pt-14 pb-20 max-md:pt-8", widths[width]]}>
     <slot />
     {

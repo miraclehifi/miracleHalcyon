@@ -63,7 +63,7 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | `prepareArticleHtml(html)`（已实现：h1 降级、标题 id、目录、hasImages；`data-dropcap` 已实现） | `article-html.ts` | 在 `renderMarkdown` 结果上（rehype 解析 → 变换 → 序列化）：① 正文 `h1` 改为 `h2`；② 第一个顶层元素是 `p` 时加 `data-dropcap`；③ 给 h2 / h3 补 `id`（无 id 时按 `github-slugger` 规则生成，同名追加 `-1`、`-2`）；返回 `{ html, toc: TocItem[], hasImages }` | TC-US07-02、06、07、TC-US08-09 |
 | `normalizeSiteConfig(raw)`（已实现） | `site-config.ts` | `name`、`avatar`、`bio`（≥ 1 段）必填；`github` / `photo` 为空串或 `undefined` → 省略，否则必须 `http:` / `https:` URL；`email` 空 → 省略，否则 `^[^\s@]+@[^\s@]+\.[^\s@]+$`；不合法抛 `Error('site.{字段} …')`，构建失败 | TC-US02-03、04 |
 
-## 3. 运行时脚本（原生，ADR-008）
+## 3. 运行时脚本（原生，ADR-008；进度、目录、抽屉已实现：`src/components/reader/reading.ts`）
 
 | 脚本 | 文件 | 规则 |
 |------|------|------|

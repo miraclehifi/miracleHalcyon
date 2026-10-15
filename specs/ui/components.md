@@ -336,7 +336,7 @@
 | `PostsHeader` | `PostsHeader` | 07 / 07m（"文章"或"#标签" + 篇数） |
 | `TagIndex` | `TagIndex` | 07 / 07m（"按标签浏览" + `TagChip` 带文章数，只在 `/posts` 第 1 页）。已实现：`src/components/reader/TagIndex.astro` |
 | `PostCardList` | `PostCardList` | 07 / 07m（`PostCard` 列表 + `Pagination`；列表底层 AnimatedList，见"列表动效参数"） |
-| `TableOfContents` | `TableOfContents` | 05（右栏：阅读进度 + 目录，当前章节高亮） |
+| `TableOfContents` | `TableOfContents` | 05（右栏：阅读进度 + 目录，当前章节高亮）。已实现：`src/components/reader/TableOfContents.astro`；`ReadingProgress`、`TocDrawer` 同目录，原生脚本 `reading.ts` |
 | `ReadingProgress/Bar` | `ReadingProgress` | 05m / 05m-b（顶栏下 2px 进度细条，< 1280px） |
 | `TocButton` · `TocDrawer` | `TocDrawer` | 05m 右下角浮动按钮 / 05m-b 底部目录抽屉（< 1280px） |
 | `NotFound` | `NotFound` | 08（404：代码、标题、说明、回首页 / 看看全部文章） |

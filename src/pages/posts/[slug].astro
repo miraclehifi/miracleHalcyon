@@ -5,6 +5,9 @@ import ArticleContent from "../../components/reader/ArticleContent.astro";
 import ArticleHeader from "../../components/reader/ArticleHeader.astro";
 import ArticleImagesIsland from "../../components/reader/ArticleImagesIsland";
 import PostPager from "../../components/reader/PostPager.astro";
+import ReadingProgress from "../../components/reader/ReadingProgress.astro";
+import TableOfContents from "../../components/reader/TableOfContents.astro";
+import TocDrawer from "../../components/reader/TocDrawer.astro";
 import TagPostsNav from "../../components/reader/TagPostsNav.astro";
 import ReaderLayout from "../../layouts/ReaderLayout.astro";
 import { renderMarkdown } from "../../lib/markdown/render";
@@ -31,6 +34,7 @@ const article = prepareArticleHtml((await renderMarkdown(post.body)).html);
 ---
 
 <ReaderLayout title={`${post.title} · miracleHalcyon`} description={post.summary || undefined} current="posts" back="/posts" width="wide">
+  <ReadingProgress slot="before-main" />
   <!-- 三栏（≥ 1280）：同标签文章 190 · 纸张 840 · 目录 220，间距 44；没有同标签文章时不渲染左栏，其余整体居中 -->
   <div class="flex items-start justify-center gap-11">
     <TagPostsNav items={related} variant="aside" />
@@ -43,6 +47,9 @@ const article = prepareArticleHtml((await renderMarkdown(post.body)).html);
       <TagPostsNav items={related} variant="end" />
       <PostPager prev={prev} next={next} />
     </article>
-    <aside data-toc-column class="w-[220px] shrink-0 self-stretch max-xl:hidden"></aside>
+    <aside class="w-[220px] shrink-0 self-stretch max-xl:hidden">
+      <TableOfContents toc={article.toc} />
+    </aside>
   </div>
+  <TocDrawer toc={article.toc} />
 </ReaderLayout>

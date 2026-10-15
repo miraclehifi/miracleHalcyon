@@ -1,0 +1,70 @@
+---
+// TocButton + TocDrawer（components.md"页面区块"、admin.pen 05m / 05m-b）：< 1280px 右下角目录按钮 + 底部目录抽屉
+// （原生 <dialog>，showModal 提供焦点约束与 Esc）；无标题时不渲染
+import { List, X } from "lucide-react";
+import type { TocItem } from "../../lib/reader/types";
+
+interface Props {
+  toc: TocItem[];
+}
+const { toc } = Astro.props;
+---
+
+{
+  toc.length > 0 && (
+    <div class="xl:hidden">
+      <button
+        type="button"
+        data-toc-button
+        aria-label="目录"
+        class="fixed right-5 bottom-5 z-30 inline-flex size-12 cursor-pointer items-center justify-center rounded-full border border-line-strong bg-surface text-ink shadow-[0_6px_16px_rgb(0_0_0/0.15)]"
+      >
+        <List size={20} aria-hidden="true" />
+      </button>
+      <dialog
+        data-toc-drawer
+        aria-label="目录"
+        class="mx-0 mt-auto mb-0 max-h-[60vh] w-full max-w-full rounded-t-[16px] bg-surface px-5 pt-3 pb-6 text-ink backdrop:bg-scrim/37"
+      >
+        <div class="flex justify-center pb-2" aria-hidden="true">
+          <span class="h-1 w-9 rounded-full bg-line-strong" />
+        </div>
+        <div class="flex items-center justify-between pb-2">
+          <p class="flex items-baseline gap-2.5">
+            <span class="text-title-sm text-ink">目录</span>
+            <span data-reading-label class="text-meta text-ink-faint tabular-nums">已读 0%</span>
+          </p>
+          <button type="button" data-toc-close aria-label="关闭" class="inline-flex size-11 cursor-pointer items-center justify-center rounded-control text-ink-muted hover:bg-surface-sunken hover:text-ink">
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
+        <nav aria-label="目录">
+          <ul>
+            {toc.map((item) => (
+              <li>
+                <a
+                  href={`#${item.id}`}
+                  data-toc-link={item.id}
+                  class:list={[
+                    "flex min-h-11 items-center aria-[current=true]:font-semibold aria-[current=true]:text-accent",
+                    item.depth === 2 ? "text-body text-ink-muted" : "pl-4 text-[15px] text-ink-faint",
+                  ]}
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </dialog>
+    </div>
+  )
+}
+
+<script>
+  import { bindTocDrawer } from "./reading";
+
+  const button = document.querySelector<HTMLElement>("[data-toc-button]");
+  const dialog = document.querySelector<HTMLDialogElement>("[data-toc-drawer]");
+  if (button && dialog) bindTocDrawer(button, dialog);
+</script>

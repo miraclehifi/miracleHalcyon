@@ -26,7 +26,7 @@
 | 11 | [add-tag-pages](add-tag-pages.md) | 标签页与标签索引 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-05、US-04 | add-post-list-page | 1 | 中 | completed |
 | 12 | [add-article-typography](add-article-typography.md) | 阅读排版：段首缩进、首字下沉、引用署名、代码主题 | FRONTEND | 表现层 + 领域层（markdown 插件） | US-07 | add-article-page | 1 | 低 | completed |
 | 13 | [add-article-navigation](add-article-navigation.md) | 同标签文章与上一篇 / 下一篇 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-08、US-09 | add-article-page | 1 | 低 | completed |
-| 14 | [add-reading-progress-toc](add-reading-progress-toc.md) | 阅读进度、目录与窄屏目录抽屉 | FRONTEND | 表现层 | US-08 | add-article-navigation | 1 | 中 | pending |
+| 14 | [add-reading-progress-toc](add-reading-progress-toc.md) | 阅读进度、目录与窄屏目录抽屉 | FRONTEND | 表现层 | US-08 | add-article-navigation | 1 | 中 | completed |
 | 15 | [refine-lightbox](refine-lightbox.md) | 灯箱：实况播放、焦点与降级 | FRONTEND | 表现层 | US-10 | add-lightbox | 1 | 中 | pending |
 | 16 | [add-post-cover-api](add-post-cover-api.md) | 文章封面字段（数据 + 领域 + 接口） | API | 数据 + 领域 + 接口 | US-06 | — | 1 | 低 | pending |
 | 17 | [add-cover-field](add-cover-field.md) | 设置抽屉封面上传 | FRONTEND | 表现层 | US-06 | add-post-cover-api | 0 | 低 | pending |

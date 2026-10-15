@@ -1,0 +1,23 @@
+---
+// ReadingProgress/Bar（components.md"页面区块"、admin.pen 05m）：< 1280px 顶栏下方 2px 进度细条（sticky）；
+// 页面的阅读脚本（进度、当前章节）也从这里加载，原生脚本，不加载 React（ADR-008）
+---
+
+<div
+  role="progressbar"
+  aria-label="阅读进度"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  aria-valuenow="0"
+  data-reading-progress
+  class="sticky top-0 z-20 h-0.5 bg-line xl:hidden"
+>
+  <span class="absolute inset-y-0 left-0 w-(--reading-progress,0%) bg-accent"></span>
+</div>
+
+<script>
+  import { bindReading } from "./reading";
+
+  const article = document.getElementById("article-content");
+  if (article) bindReading(article);
+</script>
