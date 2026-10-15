@@ -104,7 +104,7 @@
 - `Lightbox`：`role="dialog" aria-modal="true" aria-label="图片查看"`；顶部左计数"3 / 12"（`overlay-ink-muted`）、右关闭 `OverlayButton`（48，手机 44）；底部居中图注；中间 DepthCarousel（参数见 [components.md](../components.md)"灯箱层叠参数"）；← / → 与左右箭头切换，首尾不循环、对应按钮 `disabled`；手机左右拖动切换、下滑超过 120px（或速度 > 0.5px/ms）关闭，不足回弹；打开时 `body` 锁定滚动（补偿滚动条宽度），焦点到关闭按钮并在灯箱内循环；关闭后焦点回到触发图片；当前图片加载失败显示"图片加载失败"+"重试"
 - 只有 1 张图片时不显示左右按钮
 
-> 已实现（Sprint 4，hydrate-article-images）：`src/components/reader/ArticleImagesIsland.tsx`（`client:idle`，仅含图片时渲染）+ `src/lib/reader/article-images.ts`（`collectArticleImages` 从静态 figure 读取数据并编号）；水合前的静态 figure / 组图由 `global.css` 的 `.article-content` 规则按最终版式占位。灯箱见 add-lightbox。
+> 已实现（Sprint 4，hydrate-article-images）：`src/components/reader/ArticleImagesIsland.tsx`（`client:idle`，仅含图片时渲染）+ `src/lib/reader/article-images.ts`（`collectArticleImages` 从静态 figure 读取数据并编号）；水合前的静态 figure / 组图由 `global.css` 的 `.article-content` 规则按最终版式占位。灯箱已实现（add-lightbox、refine-lightbox：实况播放、焦点循环、失败重试后焦点回关闭按钮、单张无切换按钮）。
 - 预览（写文章页）不传点击回调，不打开灯箱
 
 ## 页面状态

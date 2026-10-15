@@ -1,7 +1,9 @@
 // Lightbox（components.md"文章图片"`Lightbox`、reader-post-detail.md"图片与灯箱"）：scrim 底、计数、关闭、图注、下滑关闭；
-// 中间内容区为 React Bits DepthCarousel（参数见 components.md"灯箱层叠参数"）。由 ArticleImagesIsland 首次打开时动态加载
+// 中间内容区为 React Bits DepthCarousel（参数见 components.md"灯箱层叠参数"）。由 ArticleImagesIsland 首次打开时动态加载。
+// 焦点在灯箱内循环；实况照片在当前卡片上叠播放层；当前图片加载失败时显示"图片加载失败"+"重试"（地址带 ?retry=n）
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
+import { LivePhotoLayer } from "../article/live-photo";
 import DepthCarousel, { type DepthCarouselApi, type DepthCarouselItem } from "../vendor/react-bits/DepthCarousel";
 import { OverlayButton } from "../ui/OverlayButton";
 
@@ -60,6 +62,9 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const swipe = useRef<{ x: number; y: number; t: number; dy: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const [retries, setRetries] = useState<Record<number, number>>({});
+  const [failed, setFailed] = useState<ReadonlySet<number>>(new Set());
   useScrollLock();
 
   useEffect(() => {
@@ -69,15 +74,35 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
   // 当前图：桌面高 = 视口高 − 180（最高 760），手机宽 = 屏宽 − 60；每张按原图比例定宽，看完整原图
   const maxH = phone ? Math.max(200, h - 200) : Math.min(h - 180, 760);
   const maxW = phone ? w - 60 : Math.max(320, w - 2 * (120 + 90));
-  const items: DepthCarouselItem[] = images.map((image) => {
+  const items: DepthCarouselItem[] = images.map((image, i) => {
     const ratio = image.width && image.height ? image.width / image.height : 3 / 4;
     const width = Math.round(Math.min(maxW, maxH * ratio));
-    return { image: image.src, alt: image.alt, width, height: Math.round(width / ratio) };
+    const retry = retries[i];
+    const src = retry ? `${image.src}${image.src.includes("?") ? "&" : "?"}retry=${retry}` : image.src;
+    return { image: src, alt: image.alt, width, height: Math.round(width / ratio) };
   });
   const cardWidth = phone ? w - 60 : Math.max(...items.map((item) => item.width ?? 540));
 
+  const retry = (i: number) => {
+    setRetries((prev) => ({ ...prev, [i]: (prev[i] ?? 0) + 1 }));
+    setFailed((prev) => new Set([...prev].filter((n) => n !== i)));
+    closeRef.current?.focus(); // 重试按钮随失败层移除，焦点留在灯箱内
+  };
+
+  // 焦点陷阱：Tab / Shift+Tab 在灯箱内可聚焦元素间循环
+  const trapTab = (event: KeyboardEvent) => {
+    const focusables = [...(dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), [tabindex="0"]') ?? [])].filter((el) => !el.closest('[aria-hidden="true"]'));
+    if (focusables.length === 0) return;
+    const at = focusables.indexOf(document.activeElement as HTMLElement);
+    const next = event.shiftKey ? (at <= 0 ? focusables.length - 1 : at - 1) : at === focusables.length - 1 || at < 0 ? 0 : at + 1;
+    event.preventDefault();
+    focusables[next].focus();
+  };
+
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
+    if (event.key === "Tab") {
+      trapTab(event);
+    } else if (event.key === "Escape") {
       event.preventDefault();
       onClose();
     } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -124,6 +149,7 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
 
   return createPortal(
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="图片查看"
@@ -165,6 +191,30 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
           showControls={!phone && images.length > 1}
           showIndicators={false}
           apiRef={apiRef}
+          onImageError={(i) => setFailed((prev) => new Set(prev).add(i))}
+          renderOverlay={(_item, i, focused) => {
+            if (failed.has(i)) {
+              return focused ? (
+                <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-3 bg-[rgb(13_13_13/0.7)]">
+                  <p role="alert" className="text-ui text-overlay-ink">
+                    图片加载失败
+                  </p>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      retry(i);
+                    }}
+                    className="inline-flex min-h-11 cursor-pointer items-center rounded-full bg-overlay px-5 text-ui text-overlay-ink backdrop-blur-[12px]"
+                  >
+                    重试
+                  </button>
+                </div>
+              ) : null;
+            }
+            const live = images[i]?.live;
+            return live && focused ? <LivePhotoLayer videoSrc={live.videoSrc} radius={8} /> : null;
+          }}
           ariaLabel="文中图片"
           onChange={(i) => setCurrent(i)}
         />

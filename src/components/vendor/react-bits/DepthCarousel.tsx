@@ -12,6 +12,7 @@
  * 7. 不循环时第一张 / 最后一张对应方向的按钮 disabled
  * 8. 新增 apiRef：暴露 navigateBy / goTo，供 Lightbox 在对话框层面处理 ← / → 键
  * 9. 去掉 'use client' 与演示用 DEFAULT_ITEMS（items 默认为空）
+ * 11. 新增 onImageError(index)：卡片图片加载失败时通知外层（灯箱显示失败与重试）
  * 10. 白色类名改为 overlay-ink 令牌或 rgb 任意值（本项目移除了 Tailwind 默认色板）；拖动速度采样用事件 timeStamp
  * 其余逻辑（gsap 补间、拖动 / 滚轮切换、景深与倾斜、亮度与模糊衰减）与上游一致，仅供 Lightbox 使用。
  */
@@ -58,6 +59,7 @@ export interface DepthCarouselProps {
   showIndicators?: boolean;
   onChange?: (index: number, item: DepthCarouselItem) => void;
   renderOverlay?: (item: DepthCarouselItem, index: number, focused: boolean) => ReactNode;
+  onImageError?: (index: number) => void;
   apiRef?: RefObject<DepthCarouselApi | null>;
   ariaLabel?: string;
   className?: string;
@@ -117,6 +119,7 @@ const DepthCarousel = ({
   showIndicators = true,
   onChange,
   renderOverlay,
+  onImageError,
   apiRef,
   ariaLabel = "图片",
   className = "",
@@ -426,7 +429,7 @@ const DepthCarousel = ({
             aria-hidden={active !== i}
             onClick={() => onCardClick(i)}
           >
-            <img className="block h-full w-full object-cover select-none [-webkit-user-drag:none] [pointer-events:none]" src={item.image} alt={item.alt || ""} draggable={false} />
+            <img className="block h-full w-full object-cover select-none [-webkit-user-drag:none] [pointer-events:none]" src={item.image} alt={item.alt || ""} draggable={false} onError={() => onImageError?.(i)} />
             {renderOverlay?.(item, i, active === i)}
             <span
               className="pointer-events-none absolute inset-0 opacity-0 mix-blend-multiply"

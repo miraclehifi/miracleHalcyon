@@ -68,3 +68,44 @@ describe("Lightbox", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 });
+
+// UT-225–227、TC-US10-11（SC-LIGHTBOX-08、09、10）
+describe("Lightbox 细节", () => {
+  it("[TC-US10-09] Tab / Shift+Tab 在灯箱内循环", () => {
+    render(<Lightbox images={images} index={3} onClose={() => {}} />);
+    const close = screen.getByRole("button", { name: "关闭" });
+    const next = screen.getByRole("button", { name: "下一张" });
+    next.focus();
+    fireEvent.keyDown(dialog(), { key: "Tab" });
+    expect(document.activeElement).toBe(close);
+    fireEvent.keyDown(dialog(), { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(next);
+  });
+
+  it("[TC-US10-10] 当前图片加载失败：提示与重试，重试后地址带 retry", () => {
+    render(<Lightbox images={images} index={4} onClose={() => {}} />);
+    const img = () => dialog().querySelectorAll<HTMLImageElement>("[data-carousel-card] img")[4];
+    fireEvent.error(img());
+    expect(screen.getByRole("alert").textContent).toContain("图片加载失败");
+    fireEvent.click(screen.getByRole("button", { name: "重试" }));
+    expect(img().getAttribute("src")).toMatch(/[?&]retry=1$/);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("[TC-US10-11] 只有一张图片：计数 1 / 1，没有切换按钮，←→ 无效", () => {
+    render(<Lightbox images={images.slice(0, 1)} index={0} onClose={() => {}} />);
+    expect(counter()).toBe("1 / 1");
+    expect(screen.queryByRole("button", { name: "上一张" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "下一张" })).toBeNull();
+    fireEvent.keyDown(dialog(), { key: "ArrowRight" });
+    expect(counter()).toBe("1 / 1");
+  });
+
+  it("[TC-US10-08] 当前图为实况照片时叠加播放层", () => {
+    vi.spyOn(HTMLMediaElement.prototype, "canPlayType").mockReturnValue("probably"); // jsdom 默认返回空串（视为不支持）
+    const live = [{ ...images[0], live: { videoSrc: "/img/2026/10/jjjjjjjjjj_960x1280_6b7f8e.live.mp4" } }, images[1]];
+    render(<Lightbox images={live} index={0} onClose={() => {}} />);
+    expect(dialog().querySelector("[data-carousel-card='0'] [data-live-badge]")).not.toBeNull();
+    expect(dialog().querySelector("[data-carousel-card='1'] [data-live-badge]")).toBeNull();
+  });
+});

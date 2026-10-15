@@ -133,3 +133,46 @@ test("[TC-US10-12] 预览中点击图片不打开灯箱", async ({ page, baseURL
   await page.waitForTimeout(500);
   await expect(lightbox(page)).toHaveCount(0);
 });
+
+// [TC-US10-08][SC-LIGHTBOX-07] 灯箱内实况照片悬停播放
+test("[TC-US10-08] 灯箱内实况照片播放", async ({ page }) => {
+  await openHello(page);
+  await content(page).getByRole("button", { name: "查看大图：实况" }).click();
+  await expect(counter(page)).toHaveText("11 / 12");
+  const card = lightbox(page).locator("[data-carousel-card='10']");
+  await expect(card.locator("[data-live-badge]")).toBeVisible({ timeout: 15_000 });
+  await card.hover();
+  await expect.poll(() => card.locator("video").evaluate((v: HTMLVideoElement) => !v.paused && v.muted), { intervals: [100] }).toBe(true);
+});
+
+// [TC-US10-09][SC-LIGHTBOX-08] 焦点只在灯箱内循环；减弱动效下切换无位移过渡
+test("[TC-US10-09] 焦点循环与减弱动效", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openHello(page);
+  await content(page).getByRole("button", { name: "查看大图：山" }).click();
+  await expect(counter(page)).toHaveText("1 / 12"); // 灯箱动态加载，出现后再按键
+  await page.keyboard.press("ArrowRight");
+  for (let i = 0; i < 10; i++) {
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => !!document.activeElement?.closest('[role="dialog"]'))).toBe(true);
+  }
+  const card = lightbox(page).locator("[data-carousel-card='2']");
+  const before = await card.evaluate((el) => el.style.transform);
+  await page.keyboard.press("ArrowRight");
+  expect(await card.evaluate((el) => el.style.transform)).not.toBe(before);
+});
+
+// [TC-US10-10][SC-LIGHTBOX-09] 图片加载失败与重试
+test("[TC-US10-10] 灯箱中图片加载失败", async ({ page }) => {
+  await openHello(page);
+  await content(page).getByRole("button", { name: "查看大图：山" }).click();
+  await expect(counter(page)).toHaveText("1 / 12");
+  for (let i = 0; i < 11; i++) await page.keyboard.press("ArrowRight");
+  await expect(counter(page)).toHaveText("12 / 12");
+  await expect(lightbox(page).getByRole("alert")).toContainText("图片加载失败");
+  const retried = page.waitForRequest(/zzzzzzzzzz_800x600_808080\.jpg\?retry=1/);
+  await lightbox(page).getByRole("button", { name: "重试" }).click();
+  await retried;
+  await page.keyboard.press("ArrowLeft");
+  await expect(counter(page)).toHaveText("11 / 12");
+});
