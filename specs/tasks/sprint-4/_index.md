@@ -20,7 +20,7 @@
 | 5 | [add-post-list-page](add-post-list-page.md) | 文章列表 /posts 与分页 | FRONTEND | 表现层 | US-04 | build-reader-data-source、add-reader-layout | 2 | 中 | completed |
 | 6 | [hydrate-article-images](hydrate-article-images.md) | 详情页正文图片水合 | FRONTEND | 表现层 | US-10 | add-article-page | 1 | 中 | completed |
 | 7 | [add-lightbox](add-lightbox.md) | 灯箱：打开、切换、关闭 | FRONTEND | 表现层 | US-10 | hydrate-article-images | 1 | 高 | completed |
-| 8 | [add-theme-toggle](add-theme-toggle.md) | 主题切换与首屏主题 | FRONTEND | 表现层 | US-01 | add-reader-layout | 1 | 低 | pending |
+| 8 | [add-theme-toggle](add-theme-toggle.md) | 主题切换与首屏主题 | FRONTEND | 表现层 | US-01 | add-reader-layout | 1 | 低 | completed |
 | 9 | [add-home-intro](add-home-intro.md) | 首页自我介绍 | FRONTEND | 表现层 | US-02 | add-reader-layout | 1 | 低 | pending |
 | 10 | [add-post-card-details](add-post-card-details.md) | 卡片摘要、封面与悬停效果 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-04 | add-post-list-page | 1 | 低 | pending |
 | 11 | [add-tag-pages](add-tag-pages.md) | 标签页与标签索引 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-05、US-04 | add-post-list-page | 1 | 中 | pending |

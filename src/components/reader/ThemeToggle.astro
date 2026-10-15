@@ -1,6 +1,6 @@
 ---
-// ThemeToggle（reader-shell.md"主题切换"）：三态轮换的交互在 add-theme-toggle 实现；此处先输出按钮骨架
-import { SunMoon } from "lucide-react";
+// ThemeToggle（reader-shell.md"主题切换"、ADR-008）：原生脚本，不加载 React；三态图标按 data-mode 显示
+import { Moon, Sun, SunMoon } from "lucide-react";
 ---
 
 <button
@@ -8,7 +8,15 @@ import { SunMoon } from "lucide-react";
   data-theme-toggle
   data-mode="system"
   aria-label="主题：跟随系统"
-  class="inline-flex size-8 items-center justify-center rounded-control text-ink-muted transition-colors duration-200 hover:bg-surface-sunken hover:text-ink max-md:size-11"
+  class="group inline-flex size-8 cursor-pointer items-center justify-center rounded-control text-ink-muted transition-colors duration-200 hover:bg-surface-sunken hover:text-ink max-md:size-11"
 >
-  <SunMoon size={18} aria-hidden="true" />
+  <Sun size={18} aria-hidden="true" className="hidden group-data-[mode=light]:block" />
+  <Moon size={18} aria-hidden="true" className="hidden group-data-[mode=dark]:block" />
+  <SunMoon size={18} aria-hidden="true" className="hidden group-data-[mode=system]:block" />
 </button>
+
+<script>
+  import { bindThemeToggle } from "../../lib/reader/theme-toggle";
+
+  for (const button of document.querySelectorAll<HTMLElement>("[data-theme-toggle]")) bindThemeToggle(button);
+</script>

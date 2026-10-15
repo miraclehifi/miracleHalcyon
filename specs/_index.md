@@ -20,7 +20,7 @@
 | Feature | 名称 | 状态 | 当前阶段 |
 |---------|------|------|----------|
 | F-001 | 文章写作 | in_progress | implementation 完成（Sprint 1–3），code-review / verify 待 F-002 开发完成后统一进行 |
-| F-002 | 博客首页与阅读 | in_progress | implementation（Sprint 4，7 / 19） |
+| F-002 | 博客首页与阅读 | in_progress | implementation（Sprint 4，8 / 19） |
 
 ## 队列
 

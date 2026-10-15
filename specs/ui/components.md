@@ -122,7 +122,7 @@
 | `PostPager` | `PostPager` | `prev?`、`next?`（`title`、`slug`）；缺一侧时该侧留空，两侧都没有时不渲染；手机两项上下排列 | 文章详情页文末 |
 | `PostCard` · `PostCard/Hover` · `PostCard/Mobile` | `PostCard`（已实现：`src/components/reader/PostCard.tsx`、列表 `PostCardList.tsx`，Sprint 4） | `post`（`title`、`excerpt`、`publishedAt`、`tags`、`cover?`）；整卡可点进入详情；`excerpt`：有 `summary` 用 `summary`，否则由正文渲染后取纯文本前约 120 字，最多 3 行，为空时不渲染；没有 `cover` 时不显示右侧图片；`/Hover` 是悬停与键盘聚焦态（上层左上移 4px、下层右下移 4px，边框不换色，保持 `line-strong`），在列表中由 `active` 控制（见"列表动效参数"）；手机端标题与 72px 封面同行，摘要在下 | 文章列表页 `/posts` |
 | `SiteFooter` | `SiteFooter` | —（站点名、签名一句话、版权、RSS / GitHub 链接）。已实现：`src/components/reader/SiteFooter.astro`（与 `SiteHeader`、`SiteNav`、`BackLink`、`NotFound` 同为 Astro 组件，不水合） | 读者端全部页面 |
-| （SiteNav 内的主题切换按钮） | `ThemeToggle` | —；`IconButton/Ghost`，亮 / 暗 / 跟随系统三态轮换，图标 `sun` / `moon` / `sun-moon`，`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
+| （SiteNav 内的主题切换按钮） | `ThemeToggle`（已实现：`src/components/reader/ThemeToggle.astro`，原生脚本，不加载 React） | —；`IconButton/Ghost`，亮 / 暗 / 跟随系统三态轮换，图标 `sun` / `moon` / `sun-moon`，`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
 | `BackLink` | `BackLink` | `href`；文字 `> cd ..`，`font-mono` 14px `ink-muted`，上下内边距 12（可点高度 ≥ 44） | 读者端子页主体末尾（05、05m、07、07m；首页不用） |
 
 ### 列表动效参数

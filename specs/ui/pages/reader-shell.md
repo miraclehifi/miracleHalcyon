@@ -32,6 +32,8 @@
 | 跟随系统 | 选 `system` 时页面随系统切换实时变化，无需刷新 |
 | 后台 | 后台共用同一个存储键与内联脚本（后台无切换按钮，跟随读者端选择） |
 
+> 已实现（Sprint 4，add-theme-toggle）：`src/layouts/BaseLayout.astro` 内联脚本、`src/components/reader/ThemeToggle.astro`（原生脚本）、`src/lib/reader/theme-toggle.ts`。
+
 ## 页脚 `SiteFooter`
 
 站点名、签名一句话、版权"© 2026 miracleHalcyon"、RSS / GitHub 文字链接；上边框 `line`，内边距 32px 0 48px。
