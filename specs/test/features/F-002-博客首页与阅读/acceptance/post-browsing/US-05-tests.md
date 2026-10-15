@@ -101,7 +101,7 @@
 1. 在 Latest Post 卡片点击 `#C# 与 .NET/Core`
 
 **预期结果：**
-- 地址为该标签小写后 `encodeURIComponent` 的结果（`/tags/c%23%20%E4%B8%8E%20.net%2Fcore`）
+- 地址为 `/tags/c-与-net-core`（浏览器中百分号编码为 `/tags/c-%E4%B8%8E-net-core`）
 - 页面显示 Latest Post 与页头"#C# 与 .NET/Core"
 
 **清理：** 无（只读夹具）
@@ -187,7 +187,7 @@
 1. 调用 `tagSlug(name)` 与 `groupTags(posts)`
 
 **预期结果：**
-- `tagSlug` 统一小写后 `encodeURIComponent`，首尾空白已在 F-001 去除
+- `tagSlug`：`C# 与 .NET/Core` → `c-与-net-core`、`Astro` → `astro`、`#` → `tag`；`groupTags` 中 `C#` 与 `C` 两组同为 `c` 时，篇数少的一组带 `-{6 位哈希}`
 - `groupTags` 合并大小写，显示名取出现次数最多的写法（相同时取最早发布文章中的写法），计数为文章数
 
 **清理：** 无（只读夹具）

@@ -14,3 +14,8 @@ declare namespace App {
     session: import("./domains/auth/session-repo").AdminSession | null;
   }
 }
+
+declare module "virtual:reader-data" {
+  const data: { posts: Array<{ slug: string; title: string; tags: string[]; body: string }> };
+  export default data;
+}

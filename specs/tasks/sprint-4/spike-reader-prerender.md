@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 1
-**状态**: pending
+**状态**: completed
 **类别**: SETUP
 **架构层级**: 配置 + 表现层（spike）
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -32,12 +32,12 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 6 个假设各有结论（通过 / 失败 + 退路），写入 ADR-007"验证结果"
-- [ ] 若有失败，ADR-007、feature-architecture、reader module-spec 已按退路修订
-- [ ] spike 页面不进入正式路由（删除或仅 dev 注入）
+- [x] 6 个假设各有结论（通过 / 失败 + 退路），写入 ADR-007"验证结果"
+- [x] 若有失败，ADR-007、feature-architecture、reader module-spec 已按退路修订
+- [x] spike 页面不进入正式路由（删除或仅 dev 注入）
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：新建代码，影响范围为空集——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖

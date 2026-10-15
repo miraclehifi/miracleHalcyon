@@ -13,7 +13,7 @@
 
 | # | Task | 名称 | 类别 | 架构层级 | US | 依赖 | 被依赖数 | 不确定性 | 状态 |
 |---|------|------|------|---------|----|------|---------|---------|------|
-| 1 | [spike-reader-prerender](spike-reader-prerender.md) | 读者页预渲染验证（spike） | SETUP | 配置 + 表现层（spike） | US-03 | — | 2 | 高 | pending |
+| 1 | [spike-reader-prerender](spike-reader-prerender.md) | 读者页预渲染验证（spike） | SETUP | 配置 + 表现层（spike） | US-03 | — | 2 | 高 | completed |
 | 2 | [build-reader-data-source](build-reader-data-source.md) | 构建数据源与读者夹具 | SETUP | 配置 + 领域层（reader 纯函数） | US-03 | spike-reader-prerender | 2 | 中 | pending |
 | 3 | [add-reader-layout](add-reader-layout.md) | 读者端外壳：顶栏、页脚、返回与 404 | FRONTEND | 表现层 | US-01 | spike-reader-prerender | 4 | 低 | pending |
 | 4 | [add-article-page](add-article-page.md) | 文章详情页：正文渲染与标题区 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-07 | build-reader-data-source、add-reader-layout | 3 | 中 | pending |

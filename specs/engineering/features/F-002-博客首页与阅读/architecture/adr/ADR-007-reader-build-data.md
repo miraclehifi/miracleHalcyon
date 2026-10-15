@@ -45,7 +45,23 @@ README 增加步骤：首次部署时设置构建变量 `READER_BOOTSTRAP=1`（�
 ## 后果
 - 正面：构建只访问线上公开接口一次，不需要 D1 凭据；E2E 用固定夹具，结果确定；预渲染不依赖 workerd 的出网能力
 - 负面：文章数 N 时构建发出 ⌈N/20⌉ + N 个请求（千篇以内可接受）；作者改了 `READER_API_ORIGIN` 指向的站点数据，要等下一次构建
-- 风险（由 spike 验证，见 feature-architecture §7）：虚拟模块在 workerd 预渲染中可用；预渲染页面的 React island 正常输出；含 `%`、`#` 等编码字符的标签路径能被生成并由静态资源正确命中；404 页静态输出与 `not_found_handling`
+- 风险（已由 spike 验证，见"验证结果"；原文，见 feature-architecture §7）：虚拟模块在 workerd 预渲染中可用；预渲染页面的 React island 正常输出；含 `%`、`#` 等编码字符的标签路径能被生成并由静态资源正确命中；404 页静态输出与 `not_found_handling`
+
+## 验证结果（2026-10-15，spike-reader-prerender）
+
+在 `READER_FIXTURE=spike`、`CLOUDFLARE_ENV=e2e` 下 `astro build` + `astro preview` 实测（Astro 7.3.8、`@astrojs/cloudflare` 14.3.4）：
+
+| # | 假设 | 结果 |
+|---|------|------|
+| ① | `virtual:reader-data` 在 workerd 预渲染中可 import | ✅ `getStaticPaths` 与页面 frontmatter 都能读到数据 |
+| ② | 数据与 `renderMarkdown` 不进运行时 Worker 包 | ✅ `dist/server`（不含 `.prerender`）中搜不到夹具标记与 Shiki；只在 `dist/client` 的 HTML 中 |
+| ③ | 预渲染页面中 React 岛 | ✅ 输出 `astro-island … ssr client="idle"` 与组件、渲染器脚本 |
+| ④ | 标签参数含 `#`、空格、`/`、中文 | ❌ 预先 `encodeURIComponent` 的参数（含 `%2F`）在预渲染时匹配不到静态路径，构建失败 → **采用退路**：`tagSlug` = 小写后把非字母数字（`\p{L}\p{N}`）的连续字符换成 `-` 并去掉首尾 `-`（"C# 与 .NET/Core" → `c-与-net-core`，中文保留）；不同标签得到同一地址时，除篇数最多的一个外追加 `-{6 位哈希}`。实测中文与 `-` 路径生成与访问正常 |
+| ⑤ | `404.astro` 预渲染与未知路径 | ✅ 生成 `404.html`；`/nope`、`/media`、`/rss.xml` 返回 404 与该页（适配器的错误页取回机制，无需改 `wrangler.jsonc` 的 `not_found_handling`）；`/admin/posts/1` 未登录仍 302 |
+| ⑥ | preview 下读者页走静态资源 | ✅ 静态资源的 `html_handling` 生效（见下条） |
+| 附 | 尾斜杠 | 默认目录格式（`posts/hello/index.html`）下 `/posts/hello` 先 307 到带斜杠地址 → `astro.config.mjs` 设 `build: { format: "file" }`：产物为 `posts/hello.html`，`/posts/hello` 直接 200，带斜杠的 307 到不带斜杠；站内链接一律不带尾斜杠 |
+
+自动化：上述检查并入 `check-reader-build-output`（`npm run test:build`）。
 
 ## 退路
 - 虚拟模块在 workerd 预渲染中不可用 → 插件在 `astro:build:start` 把数据写到 `src/.reader-cache/data.json`，页面用 JSON import
