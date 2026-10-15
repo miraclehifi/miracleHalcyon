@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 12
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -33,14 +33,14 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `Popover` 按 components.md 规格（`surface` 底、1px `line` 边、12px 圆角）
-- [ ] 复制按钮用 `IconButton/Ghost` + `Tooltip`"复制"
-- [ ] components.md 中 `Popover`、`ImageSyntaxHelp` 标注"已实现"
+- [x] `Popover` 按 components.md 规格（`surface` 底、1px `line` 边、12px 圆角）
+- [x] 复制按钮用 `IconButton/Ghost` + `Tooltip`"复制"
+- [x] components.md 中 `Popover`、`ImageSyntaxHelp` 标注"已实现"
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`MarkdownEditor` / `PostSettingsDrawer` 现有单元测试、US-03 设置抽屉 E2E 通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [ ] 影响范围回归（可做任务全部完成后统一跑）：`MarkdownEditor` / `PostSettingsDrawer` 现有单元测试、US-03 设置抽屉 E2E 通过；E2E 补跑 webkit 一次
+- [ ] `npm run lint` 与 `npm run check` 无错误（统一跑；本任务 tsc、eslint 已过）
 
 ## ⚠️ 前置确认项
 

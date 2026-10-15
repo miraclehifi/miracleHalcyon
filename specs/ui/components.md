@@ -33,7 +33,7 @@
 | `SaveIndicator/Saved` · `Saving` · `Unsaved` · `Failed` | `SaveIndicator` | `state`：`saved` / `saving` / `unsaved` / `failed`；`savedAt?` | 写文章页顶栏（桌面、移动）、04 保存状态。已实现：`src/components/ui/SaveIndicator.tsx`（`role="status"`；保存中图标旋转，减弱动效时停止） |
 | `Pagination` | `Pagination` | `page`；`pageSize`；`total`；手机端页码可点区域 44px。已实现：`src/components/ui/Pagination.tsx`（另有 `href`、`onNavigate`；页码全部显示、可换行） | 文章列表 |
 | `Menu` · `MenuItem/Default` · `/Checked` · `/Disabled` | `Menu` + `Menu.Item` + `Menu.Separator` | Item：`type`：`action` / `checkbox` / `radio`（对应 `menuitem` / `menuitemcheckbox` / `menuitemradio`）；`checked?`；`disabled?`（`aria-disabled`，仍可聚焦，配 `Tooltip` 说明原因）；`children`。容器 `surface` 底、1px `line` 边、`radius`、阴影同悬停提示，内边距 4px；Item 高 32px（触屏 44px），左右内边距 12px，`text-ui`，选中时 ✓ 在右侧（`ink-muted`），悬停 / 键盘高亮底 `surface-sunken`，禁用 `ink-faint`。`/Checked`、`/Disabled` 对应 `checked`、`disabled`，**不是 variant** | 写文章页 `ImageMenu`；写文章页顶栏"更多"菜单（`IconButton/Ghost` `ellipsis` 触发，项：登出；04 "写文章页更多菜单"）。已实现：`src/components/ui/Menu.tsx`（action / checkbox / radio 项、禁用、分隔线；checkbox / radio 执行后菜单保持打开；`initialFocus` 指定打开时聚焦的项，菜单因改写重新挂载时停在原项） |
-| `Popover` | `Popover` | `anchor`；`side`：`top` / `bottom`；`title`；`children`；非模态 `role="dialog"`，Esc / 点外部关闭，焦点回到触发元素；`surface` 底、1px `line` 边、12px 圆角、阴影同弹窗 | 写文章页"图片写法"说明 |
+| `Popover` | `Popover` | `anchor`；`side`：`top` / `bottom`；`title`；`children`；非模态 `role="dialog"`，Esc / 点外部关闭，焦点回到触发元素；`surface` 底、1px `line` 边、12px 圆角、阴影同弹窗。已实现：`src/components/ui/Popover.tsx`（由使用方定位，`side` 决定上 / 下、左对齐；打开时焦点到标题；宽 360、最高 60vh 内部滚动） | 写文章页"图片写法"说明 |
 | `Tooltip` · `Tooltip/Shortcut` | `Tooltip` + `TooltipGroup` | Tooltip：`content`；`shortcut?`（按键数组，如 `['Mod', 'B']`，`Mod` 按平台显示 `⌘` 或 `Ctrl`）；`side`：`top` / `bottom`；`children`（触发按钮，一个元素）。`/Shortcut` 对应传了 `shortcut`，**不是 variant**。`TooltipGroup` 包住一组按钮，组内共用一个提示框。底层为 WarmTooltip，参数见"悬停提示参数"。已实现：`src/components/ui/Tooltip.tsx`（另有 `className` 加在触发包裹层） | 写文章页：`EditorToolbar`、手机顶栏返回 / 设置、设置抽屉关闭 |
 
 ### 按钮质感参数
@@ -339,7 +339,7 @@
 | `EditorTopBar` | `EditorTopBar` | 03 / 03m |
 | `MarkdownEditor` | `MarkdownEditor` | 03 / 03m |
 | `MarkdownPreview` | `MarkdownPreview` | 03 |
-| `ImageSyntaxHelp` | `ImageSyntaxHelp` | 03b（`Popover` 的内容：写法示例） |
+| `ImageSyntaxHelp` | `ImageSyntaxHelp` | 03b（`Popover` 的内容：写法示例）。已实现：`src/components/admin/editor/ImageSyntaxHelp.tsx`（组图两行显示说明、复制可直接粘贴的示例；桌面在底栏 Popover，与底栏文字左对齐；手机在设置面板最下方展开） |
 | `PostSettingsDrawer` | `PostSettingsDrawer` | 03 |
 
 预览区里的代码块、任务列表、上传中图片是 Markdown 渲染结果（代码块由 Expressive Code 输出），不作为独立组件。
@@ -359,7 +359,7 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
-| 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../backlog/drop-apple-live-photo.md)）：`ImageSyntaxHelp` 删去 iPhone 实况照片导出方法（admin.pen 03b 待同步） | miraclehifi |
+| 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../backlog/drop-apple-live-photo.md)）：`ImageSyntaxHelp` 删去 iPhone 实况照片导出方法（admin.pen 03b 已同步） | miraclehifi |
 | 2026-10-14 | `ArticleImage`、RefineFrame 标注已实现；宽图扩出量由 `--article-bleed` 决定 | miraclehifi |
 | 2026-10-14 | 写文章页顶栏新增"更多"菜单（`IconButton/Ghost` + `Menu`，项：登出），03 / 03m 顶栏最右、04 新增展开示例；不新增组件 | miraclehifi |
 | 2026-10-10 | 初始版本：admin.pen 分为组件区 / 页面区；7 个组件校正命名，新增 29 个组件，页面改为引用实例 | miraclehifi |

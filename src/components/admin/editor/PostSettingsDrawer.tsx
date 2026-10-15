@@ -1,10 +1,11 @@
 // PostSettingsDrawer（admin-post-editor.md"设置抽屉"）：Slug、标签、摘要、发布日期
 // 受控组件：字段值与 slug 跟随规则由 PostEditorPage 管理（标签输入、"撤回为草稿""删除文章"由其传入）
-import type { ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { isValidSlug } from "../../../domains/post/slug";
 import { Field, FIELD_CONTROL_CLASS } from "../../ui/Field";
 import { IconButton } from "../../ui/IconButton";
 import { Tooltip } from "../../ui/Tooltip";
+import { ImageSyntaxHelp } from "./ImageSyntaxHelp";
 
 export const SUMMARY_MAX = 200;
 
@@ -101,6 +102,34 @@ export function PostSettingsDrawer(props: PostSettingsDrawerProps) {
           {deleteAction}
         </div>
       )}
+      <MobileSyntaxHelp />
     </aside>
+  );
+}
+
+// 手机（< 768px，底栏隐藏）：设置面板最下方的"图片写法"，在面板内展开写法示例，不另开浮层（admin-post-editor"图片写法说明"）
+function MobileSyntaxHelp() {
+  const [open, setOpen] = useState(false);
+  const regionId = useId();
+  return (
+    <div className="hidden flex-col gap-3 border-t border-line pt-5 max-md:flex">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={regionId}
+        onClick={() => setOpen((value) => !value)}
+        className="flex h-11 cursor-pointer items-center justify-between text-ui text-ink"
+      >
+        图片写法
+        <span aria-hidden="true" className="text-ink-faint">
+          {open ? "收起" : "展开"}
+        </span>
+      </button>
+      {open && (
+        <section id={regionId} role="region" aria-label="图片写法">
+          <ImageSyntaxHelp />
+        </section>
+      )}
+    </div>
   );
 }

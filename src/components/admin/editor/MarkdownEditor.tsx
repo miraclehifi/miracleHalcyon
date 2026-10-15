@@ -5,8 +5,10 @@ import { applyEdit, applyFormat, type FormatCommand } from "../../../lib/editor/
 import { isMacPlatform, matchShortcut } from "../../../lib/editor/shortcuts";
 import { offsetFromPoint } from "../../../lib/editor/textarea-mirror";
 import { useImageUploads } from "../../../lib/upload/use-image-uploads";
+import { Popover } from "../../ui/Popover";
 import { useToast } from "../../ui/Toast";
 import { EditorToolbar } from "./EditorToolbar";
+import { ImageSyntaxHelp } from "./ImageSyntaxHelp";
 
 export interface MarkdownEditorProps {
   title: string;
@@ -20,6 +22,34 @@ export interface MarkdownEditorProps {
 
 const countFormat = new Intl.NumberFormat("en-US");
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif"; // heic / 实况视频在 Sprint 3（US-11）放开
+
+// 底栏"图片写法"：文字按钮打开 Popover（底栏上方、与底栏文字左对齐，admin.pen 03b）；关闭后焦点回到按钮
+function SyntaxHelpEntry() {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const close = () => {
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        onPointerDown={(event) => event.stopPropagation()} // 不让 Popover 的"点外部关闭"先关掉，再被这次点击重新打开
+        className="cursor-pointer text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+      >
+        图片写法
+      </button>
+      <Popover open={open} onClose={close} title="图片写法">
+        <ImageSyntaxHelp />
+      </Popover>
+    </>
+  );
+}
 
 // 底栏字数：不计空白的字符数（按码位，emoji 记 1）
 export function countChars(text: string): number {
@@ -147,7 +177,10 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
         className="min-h-0 w-full flex-1 resize-none bg-transparent font-mono text-ui leading-[1.5] text-ink outline-none max-md:text-base"
       />
       <footer className="flex items-center justify-between border-t border-line py-2.5 text-caption text-ink-faint max-md:hidden">
-        <span>Markdown (GFM)</span>
+        <span className="relative flex items-center gap-1.5">
+          Markdown (GFM) · 支持粘贴/拖入图片 ·
+          <SyntaxHelpEntry />
+        </span>
         <span className="tabular-nums">{countFormat.format(countChars(body))} 字</span>
       </footer>
       {dragging && (
