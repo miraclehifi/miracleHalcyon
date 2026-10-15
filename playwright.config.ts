@@ -30,7 +30,8 @@ export default defineConfig({
     : {
         // CLOUDFLARE_ENV=e2e：使用 wrangler.jsonc env.e2e 的测试账号；先把迁移应用到本地 D1、图片夹具写入本地 R2
         command: `npm run db:migrate:local && npm run e2e:seed && npm run build && npm run preview -- --port ${PORT}`,
-        env: { CLOUDFLARE_ENV: "e2e" },
+        // READER_FIXTURE：读者页构建数据用只读夹具（ADR-007，specs/test/features/F-002-博客首页与阅读/acceptance/_fixtures.md）
+        env: { CLOUDFLARE_ENV: "e2e", READER_FIXTURE: "reader-fixture" },
         port: PORT,
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,

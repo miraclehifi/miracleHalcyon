@@ -13,10 +13,10 @@
 | slug | 标题 | publishedAt | 标签 | 摘要 | 封面 | 正文要点 |
 |------|------|-------------|------|------|------|---------|
 | `latest-post` | Latest Post | 2026-10-14 | `C# 与 .NET/Core` | — | 无 | 两段文字 |
-| `hello` | Hello Halcyon | 2026-10-10（`lastPublishedAt` 2026-10-12，发布后更新过） | `Astro`、`Cloudflare` | 手写摘要 | 有（`/img/2026/10/cov0000001_1600x900_8a7b6c.jpg`） | 见下方"`hello` 正文" |
+| `hello` | Hello Halcyon | 2026-10-10（`lastPublishedAt` 2026-10-12，发布后更新过） | `Astro`、`Cloudflare` | 手写摘要 | 有（`/img/2026/10/aaaaaaaaaa_1600x900_556677.jpg`） | 见下方"`hello` 正文" |
 | `withdrawn-post` | Withdrawn | 2026-10-08 | `Astro` | — | — | **已撤回** |
 | `draft-post` | Draft | 2026-10-07 | `Secret` | — | — | **草稿**（从未发布） |
-| `prev-post` | Prev Post | 2026-10-05 | `Astro` | — | 无 | 以 `## 标题\n\n**粗体**文字 ![图](/img/2026/10/p000000001_800x600_808080.jpg)` 开头，纯文本超过 200 字 |
+| `prev-post` | Prev Post | 2026-10-05 | `Astro` | — | 无 | 以 `## 标题\n\n**粗体**文字 ![图](/img/2026/10/bbbbbbbbbb_1200x800_112233.jpg)` 开头，纯文本超过 200 字 |
 | `case-lower` | Case Lower | 2026-09-30 | `astro`（小写写法） | — | 无 | 一段文字 |
 | `filler-01` … `filler-36` | Filler 01 … 36 | 2026-09-29 起逐日往前 | `filler-01`：`Astro`、`Cloudflare`；`filler-02`…`filler-22`：`Astro`；其余无标签 | — | 无 | 一段文字 |
 | `first-post` | First Post | 2026-01-01（最早） | 无 | — | 无 | 以图片开头，无 h2 / h3 |
@@ -35,7 +35,7 @@
 
 依次为：文字段落（首段，首字下沉）→ `## 安装`（含 `### 依赖`）→ ts 代码块 → 表格、任务列表、删除线 → `## 配置`（含 `### 环境变量`）→ 引用（最后一段"— 鲁迅"）→ 单图（带 title"图注一"）→ 宽图 → 3 张网格组图 → 5 张手风琴组图 → 实况照片（静态图 + `.live.mp4`）→ `## 结语` → 单图（无 title）。共 12 张图片，3 个 h2、2 个 h3。
 
-图片地址都指向 E2E 种子（`npm run e2e:seed`）已写入 R2 的夹具；第 12 张使用不存在的 key（用于灯箱加载失败用例）。
+图片地址都指向 E2E 种子（`npm run e2e:seed`）已写入 R2 的 `tests/fixtures/images` 夹具（a–j），不新增种子；第 12 张使用不存在的 `zzzzzzzzzz_800x600_808080.jpg`（用于灯箱加载失败用例）。夹具文件由 `tests/fixtures/reader/reader-fixture.json` 提供。
 
 ## 2. `reader-fixture-empty`
 

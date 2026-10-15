@@ -15,7 +15,8 @@ declare namespace App {
   }
 }
 
+// 读者页构建数据（ADR-007）：只允许 prerender 页面引用
 declare module "virtual:reader-data" {
-  const data: { posts: Array<{ slug: string; title: string; tags: string[]; body: string }> };
+  const data: import("./lib/reader/types").ReaderData;
   export default data;
 }
