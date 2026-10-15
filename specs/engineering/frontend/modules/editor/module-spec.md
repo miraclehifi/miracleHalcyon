@@ -70,7 +70,7 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 |----|------|
 | slug 跟随 | 页面内存中的 `slugTouched` 标记，不持久化：用户编辑过 slug 输入框后为 true；打开已有文章时，`slug !== slugify(title)` 即视为改过（US-03-3） |
 | 标签补全 | 输入 debounce 200ms → `GET /api/admin/tags?q=` |
-| 封面（F-002 US-06） | `CoverField`：选择 / 拖入单个文件 → `validateFile` → `fileToItem`（动态照片只取 `still`，丢弃视频）→ `measureImage`（宽高、主色）→ `uploadImage`（无视频字段）→ `onChange(url)`；上传失败保留原值并显示错误；移除 `onChange(null)`。`cover` 是工作稿字段之一：进入自动保存请求体与本地暂存；旧版本地暂存缺 `cover` 时按 `null` 补齐 |
+| 封面（F-002 US-06，已实现） | `CoverField`：选择 / 拖入单个文件 → `validateFile` → `fileToItem`（动态照片只取 `still`，丢弃视频）→ `measureImage`（宽高、主色）→ `uploadImage`（无视频字段）→ `onChange(url)`；上传失败保留原值并显示错误；移除 `onChange(null)`。`cover` 是工作稿字段之一：进入自动保存请求体与本地暂存；旧版本地暂存缺 `cover` 时按 `null` 补齐 |
 | 发布结果 | 200 → 更新徽标与主按钮，`Toast/Success`；422 → 打开抽屉、聚焦首个缺失字段、`Toast/Error` 列出缺失项；409 → slug 字段错误。已实现：`src/components/admin/editor/PublishActions.tsx`（发布、发布更新及置灰；`UnpublishAction` 撤回为草稿） |
 
 ## 5. 单元测试

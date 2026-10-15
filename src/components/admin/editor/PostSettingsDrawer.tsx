@@ -1,10 +1,11 @@
-// PostSettingsDrawer（admin-post-editor.md"设置抽屉"）：Slug、标签、摘要、发布日期
+// PostSettingsDrawer（admin-post-editor.md"设置抽屉"）：Slug、标签、封面（F-002）、摘要、发布日期
 // 受控组件：字段值与 slug 跟随规则由 PostEditorPage 管理（标签输入、"撤回为草稿""删除文章"由其传入）
 import { useId, useState, type ReactNode } from "react";
 import { isValidSlug } from "../../../domains/post/slug";
 import { Field, FIELD_CONTROL_CLASS } from "../../ui/Field";
 import { IconButton } from "../../ui/IconButton";
 import { Tooltip } from "../../ui/Tooltip";
+import { CoverField } from "./CoverField";
 import { ImageSyntaxHelp } from "./ImageSyntaxHelp";
 
 export const SUMMARY_MAX = 200;
@@ -14,12 +15,14 @@ export interface PostSettingsDrawerProps {
   slugTitleFallback: boolean; // 标题非空但生成不出 slug（如中文标题）
   slugError?: string; // 服务端错误，如"slug 已存在，请换一个"
   summary: string;
+  cover?: string | null; // 封面（F-002 US-06）；不传 onCoverChange 时不显示封面区
   publishedAt: string; // YYYY-MM-DD；水合前为空串
   tagsField?: ReactNode;
   unpublishAction?: ReactNode; // 仅已发布时传入
   deleteAction?: ReactNode; // 新建且从未保存过时不传
   onSlugChange(slug: string): void;
   onSummaryChange(summary: string): void;
+  onCoverChange?(cover: string | null): void;
   onPublishedAtChange(date: string): void;
   onClose(): void;
 }
@@ -71,6 +74,7 @@ export function PostSettingsDrawer(props: PostSettingsDrawerProps) {
         />
       </Field>
       {tagsField}
+      {props.onCoverChange && <CoverField value={props.cover ?? null} onChange={props.onCoverChange} />}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-baseline justify-between">
           <label htmlFor="post-summary" className="text-meta font-medium text-ink-muted">

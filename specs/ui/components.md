@@ -340,7 +340,7 @@
 | `ReadingProgress/Bar` | `ReadingProgress` | 05m / 05m-b（顶栏下 2px 进度细条，< 1280px） |
 | `TocButton` · `TocDrawer` | `TocDrawer` | 05m 右下角浮动按钮 / 05m-b 底部目录抽屉（< 1280px） |
 | `NotFound` | `NotFound` | 08（404：代码、标题、说明、回首页 / 看看全部文章） |
-| `CoverField` | `CoverField` | 03 设置抽屉（封面：缩略图 + 更换 / 移除，空时为拖放区） |
+| `CoverField` | `CoverField` | 03 设置抽屉（封面：缩略图 + 更换 / 移除，空时为拖放区）。已实现：`src/components/admin/editor/CoverField.tsx` |
 | `LoginForm` | `LoginForm` | 01 / 01m |
 | `PageHeader` | `PageHeader` | 02 / 02m |
 | `PostList` | `PostList` | 02 / 02m（底层 AnimatedList，见"列表动效参数"） |

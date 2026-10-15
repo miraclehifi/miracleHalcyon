@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 17
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -35,11 +35,11 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `CoverField` 名称与 components.md 一致
-- [ ] 抽屉内字段顺序与 admin.pen 03 一致
+- [x] `CoverField` 名称与 components.md 一致
+- [x] 抽屉内字段顺序与 admin.pen 03 一致
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：`tests/e2e/editor-settings*.spec.ts`、`tests/unit/components/post-settings-drawer*.test.tsx`——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖

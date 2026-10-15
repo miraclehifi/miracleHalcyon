@@ -337,6 +337,8 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
                 )
               }
               summary={draft.summary}
+              cover={draft.cover}
+              onCoverChange={(cover) => update({ cover })}
               publishedAt={publishedAt}
               onSlugChange={onSlugChange}
               onSummaryChange={(summary) => update({ summary })}
