@@ -2,7 +2,8 @@
 // 主线程发 { seq, source }，只采用最新 seq；渲染中又有输入时只保留最后一次，避免长文连续输入时排队
 // 渲染结果的顶层块带 data-line，同步滚动由页面（useScrollSync）基于滚动容器处理
 // 单图 figure[data-article-image] 挂载为 ArticleImage（portal 到替换 figure 的宿主元素）；重新渲染时按 reconcileIslands
-// 复用 src 与标记未变的实例——把原宿主移回新位置，已加载的图片不重新请求、不重播马赛克。组图由 add-image-gallery-display 接管
+// 复用 src 与标记未变的实例——把原宿主移回新位置，已加载的图片不重新请求、不重播马赛克。组图 div[data-gallery] 同样
+// 挂载为 ImageGallery，按"模式 + 组内各图 key"复用
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { islandKey, reconcileIslands } from "../../../lib/markdown/reconcile-islands";
@@ -11,6 +12,7 @@ import type { ImageRef } from "../../../lib/markdown/render";
 import type { RenderRequest, RenderResponse } from "../../../lib/markdown/worker";
 import MarkdownWorker from "../../../lib/markdown/worker.ts?worker";
 import { ArticleImage } from "../../article/ArticleImage";
+import { ImageGallery, type GalleryImage } from "../../article/ImageGallery";
 import { Alert } from "../../ui/Alert";
 
 export interface MarkdownPreviewProps {
@@ -117,39 +119,60 @@ function usePreviewHtml(source: string): { rendered: Rendered | null; failed: bo
   return { rendered, failed };
 }
 
+type IslandContent = { kind: "image"; image: ImageRef } | { kind: "gallery"; variant: "grid" | "accordion"; images: ImageRef[] };
+
 interface Island {
   id: number; // portal key：复用时不变，组件实例随之保留
-  key: string; // islandKey：src + 标记
+  key: string; // 单图为 islandKey（src + 标记），组图为模式 + 组内各图 islandKey
   host: HTMLElement;
-  image: ImageRef;
+  content: IslandContent;
 }
+
+const contentKey = (content: IslandContent): string =>
+  content.kind === "image" ? islandKey(content.image) : `${content.variant}[${content.images.map(islandKey).join("|")}]`;
+
+const toGalleryImage = (image: ImageRef): GalleryImage => ({
+  src: image.src,
+  alt: image.alt,
+  caption: image.title,
+  width: image.w,
+  height: image.h,
+  accent: image.rgb ? `#${image.rgb}` : undefined,
+});
 
 const HOST_ATTRIBUTES = ["data-line", "data-source-start", "data-source-end"]; // 同步滚动、图片菜单定位用，随每次渲染更新
 
-// 把渲染结果写入 content，单图换成宿主元素（复用的沿用原宿主）；返回本次的 island 列表
+// 把渲染结果写入 content，单图与组图换成宿主元素（复用的沿用原宿主）；返回本次的 island 列表（按文档顺序）
 function mountIslands(content: HTMLElement, { html, images }: Rendered, prev: Island[], newId: () => number): Island[] {
   content.innerHTML = html;
   const byStart = new Map(images.map((image) => [image.sourceStart, image]));
-  const singles = [...content.querySelectorAll<HTMLElement>("figure[data-article-image]")]
-    .filter((figure) => !figure.closest("[data-gallery]"))
-    .flatMap((figure) => {
-      const image = byStart.get(Number(figure.dataset.sourceStart));
-      return image ? [{ figure, image }] : [];
+  const imageOf = (figure: HTMLElement) => byStart.get(Number(figure.dataset.sourceStart));
+  const found = [...content.querySelectorAll<HTMLElement>("figure[data-article-image], div[data-gallery]")]
+    .filter((element) => !element.parentElement?.closest("[data-gallery]"))
+    .flatMap((element): { element: HTMLElement; content: IslandContent }[] => {
+      if (element.tagName === "FIGURE") {
+        const image = imageOf(element);
+        return image ? [{ element, content: { kind: "image", image } }] : [];
+      }
+      const members = [...element.querySelectorAll<HTMLElement>(":scope > figure[data-article-image]")].map(imageOf);
+      if (members.some((image) => !image)) return [];
+      const variant = element.dataset.gallery === "accordion" ? "accordion" : "grid";
+      return [{ element, content: { kind: "gallery", variant, images: members as ImageRef[] } }];
     });
   const { matches } = reconcileIslands(
     prev.map((island) => island.key),
-    singles.map(({ image }) => islandKey(image)),
+    found.map(({ content }) => contentKey(content)),
   );
-  return singles.map(({ figure, image }, i) => {
+  return found.map(({ element, content }, i) => {
     const reused = matches[i] === null ? undefined : prev[matches[i]];
     const host = reused?.host ?? document.createElement("div");
     for (const name of HOST_ATTRIBUTES) {
-      const value = figure.getAttribute(name);
+      const value = element.getAttribute(name);
       if (value === null) host.removeAttribute(name);
       else host.setAttribute(name, value);
     }
-    figure.replaceWith(host);
-    return { id: reused?.id ?? newId(), key: islandKey(image), host, image };
+    element.replaceWith(host);
+    return { id: reused?.id ?? newId(), key: contentKey(content), host, content };
   });
 }
 
@@ -192,16 +215,20 @@ export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPrevi
         ) : (
           <div ref={contentRef} className="prose mt-6 max-w-none" />
         )}
-        {islands.map(({ id, host, image }) =>
+        {islands.map(({ id, host, content }) =>
           createPortal(
-            <ArticleImage
-              src={image.src}
-              alt={image.alt}
-              caption={image.title}
-              width={image.w}
-              height={image.h}
-              wide={image.marks.wide}
-            />,
+            content.kind === "image" ? (
+              <ArticleImage
+                src={content.image.src}
+                alt={content.image.alt}
+                caption={content.image.title}
+                width={content.image.w}
+                height={content.image.h}
+                wide={content.image.marks.wide}
+              />
+            ) : (
+              <ImageGallery variant={content.variant} images={content.images.map(toGalleryImage)} />
+            ),
             host,
             String(id),
           ),

@@ -20,7 +20,7 @@
 | 5 | [add-heic-upload](add-heic-upload.md) | HEIC 转换、主色与"处理中"占位 | article-writing | FRONTEND | 表现层 | US-11 | spike-browser-media-processing | 1 | 中 | pending |
 | 6 | [add-live-photo-pair-upload](add-live-photo-pair-upload.md) | 同名配对上传实况照片 | article-writing | FRONTEND | 表现层 | US-11 | spike-browser-media-processing, implement-live-photo-upload-api, add-heic-upload | 1 | 高 | pending |
 | 7 | [add-motion-photo-detection](add-motion-photo-detection.md) | 安卓动态照片识别 | article-writing | FRONTEND | 表现层 | US-11 | add-live-photo-pair-upload | 0 | 中 | pending |
-| 8 | [add-image-gallery-display](add-image-gallery-display.md) | 预览组图 `ImageGallery`（网格、手风琴） | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 2 | 中 | pending |
+| 8 | [add-image-gallery-display](add-image-gallery-display.md) | 预览组图 `ImageGallery`（网格、手风琴） | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 2 | 中 | completed |
 | 9 | [add-live-photo-playback](add-live-photo-playback.md) | 预览实况照片播放与 `LiveBadge` | article-writing | FRONTEND | 表现层 | US-11 | add-article-image-display, add-image-gallery-display | 0 | 中 | pending |
 | 10 | [add-single-image-menu](add-single-image-menu.md) | 单图菜单切换宽图 | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 1 | 中 | pending |
 | 11 | [add-gallery-menu](add-gallery-menu.md) | 组图菜单与手机点按 | article-writing | FRONTEND | 表现层 | US-12 | add-image-gallery-display, add-single-image-menu | 0 | 低 | pending |
@@ -53,7 +53,7 @@ add-image-syntax-help（独立）
 |------|------|
 | spike-browser-media-processing | ✅ 2026-10-14：安卓样本改用 OPPO 动态照片（保留原始 EXIF，不去 GPS）；iPhone 暂不考虑，spike 只验证视频处理与 OPPO 切视频 |
 | add-heic-upload、add-live-photo-pair-upload | ⏳ iPhone 样本（HEIC + MOV、单张 HEIC）到位前，HEIC 解码与 `heic-to` 的验证（原 spike 假设 ①）未做；开始这两个任务前需作者提供样本或确认改用公开样本 |
-| add-article-image-display | ✅ 2026-10-14：RefineFrame 取自 React Bits 仓库 `src/ts-tailwind/Micro/RefineFrame`，许可证 MIT + Commons Clause（同 SwipeRow）；ChromaGrid、AccordionGallery 在对应任务确认 |
+| add-article-image-display | ✅ 2026-10-14：RefineFrame 取自 React Bits 仓库 `src/ts-tailwind/Micro/RefineFrame`，许可证 MIT + Commons Clause（同 SwipeRow）；ChromaGrid、AccordionGallery 同仓库同许可证（2026-10-15 add-image-gallery-display 核对） |
 | add-image-syntax-help | 手机设置面板形态（页面规格"Sprint 3 前再定"）：默认按现状右侧抽屉铺满，把入口放在最下方 |
 
 ## US 覆盖（Sprint 3 范围）

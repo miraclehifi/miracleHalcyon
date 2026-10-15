@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 8
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,14 +34,14 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] ChromaGrid、AccordionGallery 源码改动按 components.md 表格逐项完成，文件头记录对上游的改动
-- [ ] 手风琴高度按断点传入（桌面 420；≤ 520px 640）
-- [ ] components.md 中 `ImageGallery` 标注"已实现"
+- [x] ChromaGrid、AccordionGallery 源码改动按 components.md 表格逐项完成，文件头记录对上游的改动
+- [x] 手风琴高度按断点传入（桌面 420；≤ 520px 640）
+- [x] components.md 中 `ImageGallery` 标注"已实现"
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/e2e/image-layout.spec.ts`（单图部分）、`tests/unit/editor/reconcile-islands.test.ts` 通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [x] 影响范围回归：`tests/e2e/image-layout.spec.ts`（单图部分）、`tests/unit/editor/reconcile-islands.test.ts` 通过；E2E 补跑 webkit 一次
+- [x] `npm run lint` 与 `npm run check` 无错误
 
 ## 依赖
 

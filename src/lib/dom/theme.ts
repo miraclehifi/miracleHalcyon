@@ -33,6 +33,17 @@ function subscribeTheme(onChange: () => void): () => void {
   };
 }
 
+// 当前主题（tokens.css：<html data-theme> 强制指定，否则跟随系统）；供只收 light / dark 字符串的组件使用
+function currentScheme(): "light" | "dark" {
+  const forced = document.documentElement.dataset.theme;
+  if (forced === "light" || forced === "dark") return forced;
+  return media(DARK_SCHEME)?.matches ? "dark" : "light";
+}
+
+export function useColorScheme(): "light" | "dark" {
+  return useSyncExternalStore(subscribeTheme, currentScheme, () => "light");
+}
+
 // 把 CSS 颜色令牌解析成实际颜色（如 rgb(63, 63, 70)），供 canvas / WebGL 使用；解析不到时用 fallback
 function resolveColor(token: string, fallback: string): string {
   const probe = document.createElement("span");

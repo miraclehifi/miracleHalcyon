@@ -94,7 +94,7 @@
 **预期结果：**
 - 共 3 个 `[data-gallery="grid"]`，分别含 2、3、9 张图
 - 列数按 components.md "组图网格参数"随张数决定（以 design-ui 为准）
-- 每个单元格内都是 `ArticleImage`，且带主色（`data-rgb`）
+- 每个单元格都是 RefineFrame 包裹的图片（components.md"图片加载参数"），且带主色（`[data-gallery-item][data-accent]`）
 
 **清理：** 删除草稿
 
