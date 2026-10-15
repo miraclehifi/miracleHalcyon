@@ -141,7 +141,9 @@ test("[TC-US10-08] 灯箱内实况照片播放", async ({ page }) => {
   await expect(counter(page)).toHaveText("11 / 12");
   const card = lightbox(page).locator("[data-carousel-card='10']");
   await expect(card.locator("[data-live-badge]")).toBeVisible({ timeout: 15_000 });
-  await card.hover();
+  // 不用 hover()：WebKit 下等待 3D 卡片"稳定"较久，返回时只播一次的视频可能已播完；直接把指针移到卡片中心
+  const box = (await card.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await expect.poll(() => card.locator("video").evaluate((v: HTMLVideoElement) => !v.paused && v.muted), { intervals: [100] }).toBe(true);
 });
 

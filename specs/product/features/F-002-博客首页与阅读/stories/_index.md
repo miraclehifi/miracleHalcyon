@@ -25,9 +25,9 @@
 
 | US ID | 名称 | 状态 | 说明 |
 |-------|------|------|------|
-| US-01 | reader-shell | draft | 顶栏、主题切换、`> cd ..`、读者端 404 |
-| US-02 | home-intro | draft | 首页自我介绍（配置文件驱动） |
-| US-03 | static-rebuild | draft | 读者页构建时预渲染；发布等操作后经 Deploy Hook 重建 |
+| US-01 | reader-shell | implemented | 顶栏、主题切换、`> cd ..`、读者端 404 |
+| US-02 | home-intro | implemented | 首页自我介绍（配置文件驱动） |
+| US-03 | static-rebuild | implemented | 读者页构建时预渲染；发布等操作后经 Deploy Hook 重建 |
 
 ### post-browsing
 
@@ -35,9 +35,9 @@
 
 | US ID | 名称 | 状态 | 说明 |
 |-------|------|------|------|
-| US-04 | post-list | draft | `/posts` 列表：卡片、摘要、封面、分页、悬停效果 |
-| US-05 | tag-page | draft | `/tags/:tag` 标签页 |
-| US-06 | post-cover | draft | 文章封面字段与设置抽屉上传（F-001 增量） |
+| US-04 | post-list | implemented | `/posts` 列表：卡片、摘要、封面、分页、悬停效果 |
+| US-05 | tag-page | implemented | `/tags/:tag` 标签页 |
+| US-06 | post-cover | implemented | 文章封面字段与设置抽屉上传（F-001 增量） |
 
 ### post-reading
 
@@ -45,10 +45,10 @@
 
 | US ID | 名称 | 状态 | 说明 |
 |-------|------|------|------|
-| US-07 | article-typography | draft | 正文渲染与阅读排版（纸张、缩进、首字下沉、引用署名） |
-| US-08 | reading-sidebars | draft | 三栏：同标签文章、阅读进度、目录；窄屏收起 |
-| US-09 | prev-next | draft | 文末上一篇 / 下一篇 |
-| US-10 | image-lightbox | draft | 正文图片展示与灯箱 |
+| US-07 | article-typography | implemented | 正文渲染与阅读排版（纸张、缩进、首字下沉、引用署名） |
+| US-08 | reading-sidebars | implemented | 三栏：同标签文章、阅读进度、目录；窄屏收起 |
+| US-09 | prev-next | implemented | 文末上一篇 / 下一篇 |
+| US-10 | image-lightbox | implemented | 正文图片展示与灯箱 |
 
 ---
 

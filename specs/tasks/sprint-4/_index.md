@@ -1,6 +1,6 @@
 # Sprint 4：博客首页与阅读
 
-**状态**: in_progress
+**状态**: completed（待 code-review）
 **创建**: 2026-10-15
 **Feature**: F-002 博客首页与阅读（[Backlog: blog-home-reading](../../backlog/blog-home-reading.md)；并入 [article-image-display](../../backlog/article-image-display.md) 灯箱、[reader-build-time-prerender](../../backlog/reader-build-time-prerender.md) 落地）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）
@@ -73,8 +73,8 @@ add-deploy-hook-rebuild（独立）
 
 ## DoD（Sprint 级）
 
-- [ ] 所有任务状态为 completed
-- [ ] `npm run lint`、`npm run check`、`npm test`、`npm run test:e2e`、`npm run test:build` 全部通过（Sprint 末统一跑一次）
-- [ ] ⚠️ 前置确认项全部有结论，并同步到对应文档
-- [ ] 设计文档已反哺"已实现"标记；F-002 stories/_index.md 状态更新
+- [x] 所有任务状态为 completed
+- [x] `npm run lint`、`npm run check`、`npm test`、`npm run test:e2e`、`npm run test:build` 全部通过（Sprint 末统一跑；全量 E2E 余下 6 个 WebKit 负载超时单独重跑均通过，见 [sprint-4-task-results](../../test/features/F-002-博客首页与阅读/validation/sprint-4-task-results.md)）
+- [x] ⚠️ 前置确认项全部有结论，并同步到对应文档（spike 结论见 ADR-007；DepthCarousel 许可证已核对；部署项与 TC-US03-10 留 verify / deploy）
+- [x] 设计文档已反哺"已实现"标记；F-002 stories/_index.md 状态更新
 - [ ] 之后进入 F-001 + F-002 统一 code-review 与 verify
