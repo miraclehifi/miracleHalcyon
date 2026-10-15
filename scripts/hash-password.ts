@@ -13,8 +13,8 @@ async function readAll(input: Readable): Promise<string> {
   return text.replace(/\r?\n$/, "");
 }
 
-// 终端原始模式逐字读取，不回显
-function readHidden(stdin: NodeJS.ReadStream): Promise<string> {
+// 终端原始模式逐字读取，不回显（dev-local 复用）
+export function readHidden(stdin: NodeJS.ReadStream): Promise<string> {
   return new Promise((resolve, reject) => {
     let password = "";
     stdin.setRawMode(true);

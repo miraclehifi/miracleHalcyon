@@ -6,9 +6,10 @@
 
 ```bash
 npm install
-npm run db:migrate:local   # 初始化本地 D1
-npm run dev                # http://localhost:4321
+npm run dev:local          # http://localhost:4321，后台 /admin
 ```
+
+`dev:local` 依次：补齐 `.dev.vars`（首次提示设置管理员密码，账号默认 `admin`，`SITE_ORIGIN` 跟随端口）→ 检查端口空闲 → 应用本地 D1 迁移 → `astro dev`。换端口：`npm run dev:local -- --port 4400`。只想启动、不做这些检查时用 `npm run dev`。
 
 | 命令 | 用途 |
 |------|------|
@@ -36,7 +37,7 @@ npm run hash-password --silent
 # pbkdf2$100000$...
 ```
 
-**2. 本地开发**：复制 `.dev.vars.example` 为 `.dev.vars`（已 gitignore），填入三项。
+**2. 本地开发**：`npm run dev:local` 自动生成 `.dev.vars`（已 gitignore）；也可复制 `.dev.vars.example` 手动填入三项。
 
 **3. 生产**：逐项写入 Cloudflare Secrets。
 

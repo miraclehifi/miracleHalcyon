@@ -31,7 +31,7 @@ miracleHalcyon 是一个个人技术博客兼作品集，读者端阅读体验�
 | 用途 | 命令 |
 |------|------|
 | 安装依赖 | `npm install` |
-| 开发服务器 | `npm run dev` |
+| 开发服务器 | `npm run dev:local`（补齐 `.dev.vars`、查端口、本地迁移后启动；`--port` 可选）、`npm run dev`（仅启动） |
 | 构建 | `npm run build` |
 | 预览构建产物 | `npm run preview`（workerd 本地运行） |
 | 生成绑定类型 | `npm run cf-typegen`（改 wrangler.jsonc 后执行） |
