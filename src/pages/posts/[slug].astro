@@ -7,6 +7,7 @@ import ArticleImagesIsland from "../../components/reader/ArticleImagesIsland";
 import ReaderLayout from "../../layouts/ReaderLayout.astro";
 import { renderMarkdown } from "../../lib/markdown/render";
 import { prepareArticleHtml } from "../../lib/reader/article-html";
+import { readerModel } from "../../lib/reader/model";
 import type { ReaderPost } from "../../lib/reader/types";
 
 export const prerender = true;
@@ -19,6 +20,7 @@ interface Props {
   post: ReaderPost;
 }
 const { post } = Astro.props;
+const { slugOf } = readerModel(data);
 const article = prepareArticleHtml((await renderMarkdown(post.body)).html);
 ---
 
@@ -27,7 +29,7 @@ const article = prepareArticleHtml((await renderMarkdown(post.body)).html);
     <article
       class="flex w-full max-w-[840px] flex-col gap-10 rounded-control border border-line px-[45px] pt-14 pb-12 [--article-bleed:45px] max-md:border-0 max-md:px-0 max-md:pt-0 max-md:[--article-bleed:20px]"
     >
-      <ArticleHeader post={post} />
+      <ArticleHeader post={post} slugOf={slugOf} />
       <ArticleContent html={article.html} />
       {article.hasImages && <ArticleImagesIsland client:idle rootSelector="#article-content" />}
     </article>

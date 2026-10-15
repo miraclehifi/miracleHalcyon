@@ -3,13 +3,14 @@
 import { TagChip } from "../ui/TagChip";
 import { plainText } from "../../lib/reader/excerpt";
 import { formatLongDate, readingStats, updatedDate } from "../../lib/reader/reading-stats";
-import { tagHref, tagSlug } from "../../lib/reader/tags";
+import { tagHref } from "../../lib/reader/tags";
 import type { ReaderPost } from "../../lib/reader/types";
 
 interface Props {
   post: ReaderPost;
+  slugOf: (tag: string) => string;
 }
-const { post } = Astro.props;
+const { post, slugOf } = Astro.props;
 const stats = readingStats(plainText(post.body));
 const updated = updatedDate(post);
 ---
@@ -35,7 +36,7 @@ const updated = updatedDate(post);
         <ul class="flex flex-wrap gap-1.5" aria-label="标签">
           {post.tags.map((tag) => (
             <li>
-              <TagChip label={tag} href={tagHref(tagSlug(tag))} />
+              <TagChip label={tag} href={tagHref(slugOf(tag))} />
             </li>
           ))}
         </ul>

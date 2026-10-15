@@ -3,6 +3,7 @@
 import data from "virtual:reader-data";
 import PostListView from "../../../components/reader/PostListView.astro";
 import PostsHeader from "../../../components/reader/PostsHeader.astro";
+import { readerModel } from "../../../lib/reader/model";
 import ReaderLayout from "../../../layouts/ReaderLayout.astro";
 import { pagePaths } from "../../../lib/reader/sort";
 
@@ -19,7 +20,7 @@ const { page } = Astro.props;
 ---
 
 <ReaderLayout title={`文章 · 第 ${page} 页 · miracleHalcyon`} current="posts" back="/">
-  <PostListView posts={data.posts} page={page} base="/posts">
+  <PostListView posts={data.posts} slugOf={readerModel(data).slugOf} page={page} base="/posts">
     <PostsHeader title="文章" count={data.posts.length} />
   </PostListView>
 </ReaderLayout>

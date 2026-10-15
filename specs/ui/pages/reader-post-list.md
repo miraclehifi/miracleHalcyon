@@ -49,6 +49,8 @@
 
 `/tags/{tagSlug}`：标签名转小写，非字母数字的连续字符换成 `-`，去掉首尾 `-`（"C# 与 .NET/Core" → `/tags/c-与-net-core`）；不同标签得到同一地址时追加短哈希（ADR-007 验证结果④）。站内链接不带尾斜杠。大小写不同的写法合并为同一页，显示名取出现最多的写法（相同时取最早发布文章中的写法）。
 
+> 已实现（Sprint 4，add-tag-pages）：`src/pages/tags/[tag]/index.astro`、`tags/[tag]/page/[page].astro`、`src/components/reader/TagIndex.astro`；卡片、标题区、标签页统一经 `readerModel(data).slugOf` 取地址。
+
 ## 页面状态
 
 | 状态 | 表现 |

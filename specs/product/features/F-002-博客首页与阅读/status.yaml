@@ -14,7 +14,7 @@ phases:
   architecture: done   # 不新增 Domain；ADR-007 构建数据（虚拟模块）与 Deploy Hook，ADR-008 原生脚本优先
   domain_design: done   # domain_model / api_contract / data_model: self-checked（post 封面增量、迁移 0003；markdown 引用署名；新模块 reader；us-to-domain）
   task_planning: done   # Sprint 4 共 19 个任务（按功能点粒度，.claude/rules/tasks.md）
-  implementation: in_progress   # Sprint 4：10 / 19
+  implementation: in_progress   # Sprint 4：11 / 19
   validation: pending
 current_phase: implementation
 blockers: []
@@ -26,8 +26,8 @@ approvals:
   tasks: true   # 2026-10-15 同上
 checkpoint:
   sprint: sprint-4
-  current_task: add-tag-pages
+  current_task: add-article-typography
   current_phase: implementation
-  completed_tasks: [spike-reader-prerender, build-reader-data-source, add-reader-layout, add-article-page, add-post-list-page, hydrate-article-images, add-lightbox, add-theme-toggle, add-home-intro, add-post-card-details]
+  completed_tasks: [spike-reader-prerender, build-reader-data-source, add-reader-layout, add-article-page, add-post-list-page, hydrate-article-images, add-lightbox, add-theme-toggle, add-home-intro, add-post-card-details, add-tag-pages]
   test_policy: "任务内只跑本任务测试清单；回归、lint、check、webkit、全量测试在 Sprint 4 全部任务完成后统一进行（2026-10-15 作者要求），随后 F-001 + F-002 统一 code-review / verify"
 notes: "依赖 F-001 post Domain（只读已发布文章）；读者页构建时预渲染（backlog/reader-build-time-prerender.md）；图片组件复用 F-001 Sprint 3 的 src/components/article/。2026-10-15 作者决定：F-002 开发全部完成后，再统一做 F-001 + F-002 的 code-review、verify 与全量回归"

@@ -3,13 +3,16 @@
 import data from "virtual:reader-data";
 import PostListView from "../../components/reader/PostListView.astro";
 import PostsHeader from "../../components/reader/PostsHeader.astro";
+import TagIndex from "../../components/reader/TagIndex.astro";
+import { readerModel } from "../../lib/reader/model";
 import ReaderLayout from "../../layouts/ReaderLayout.astro";
 
 export const prerender = true;
 ---
 
 <ReaderLayout title="文章 · miracleHalcyon" current="posts" back="/">
-  <PostListView posts={data.posts} page={1} base="/posts">
+  <PostListView posts={data.posts} slugOf={readerModel(data).slugOf} page={1} base="/posts">
     <PostsHeader title="文章" count={data.posts.length} />
+    <TagIndex groups={readerModel(data).groups} />
   </PostListView>
 </ReaderLayout>

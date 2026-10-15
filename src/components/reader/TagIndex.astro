@@ -1,0 +1,26 @@
+---
+// TagIndex（reader-post-list.md"布局"、admin.pen 07）："按标签浏览" + 全部已发布标签（带篇数），只在 /posts 第 1 页
+import { TagChip } from "../ui/TagChip";
+import { tagHref } from "../../lib/reader/tags";
+import type { TagGroup } from "../../lib/reader/types";
+
+interface Props {
+  groups: TagGroup[];
+}
+const { groups } = Astro.props;
+---
+
+{
+  groups.length > 0 && (
+    <nav aria-label="按标签浏览" class="flex flex-col gap-3">
+      <p class="text-meta text-ink-faint">按标签浏览</p>
+      <ul class="flex flex-wrap gap-2">
+        {groups.map((group) => (
+          <li>
+            <TagChip label={`# ${group.name} · ${group.count}`} href={tagHref(group.slug)} />
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

@@ -1,0 +1,27 @@
+---
+// 标签页第 1 页（reader-post-list.md，US-05）：只为已发布文章中出现的标签生成；地址见 tagSlug / groupTags
+import data from "virtual:reader-data";
+import PostListView from "../../../components/reader/PostListView.astro";
+import PostsHeader from "../../../components/reader/PostsHeader.astro";
+import ReaderLayout from "../../../layouts/ReaderLayout.astro";
+import { readerModel } from "../../../lib/reader/model";
+import { tagHref } from "../../../lib/reader/tags";
+import type { TagGroup } from "../../../lib/reader/types";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return readerModel(data).groups.map((group) => ({ params: { tag: group.slug }, props: { group } }));
+}
+
+interface Props {
+  group: TagGroup;
+}
+const { group } = Astro.props;
+---
+
+<ReaderLayout title={`#${group.name} · miracleHalcyon`} current="posts" back="/">
+  <PostListView posts={group.posts} page={1} base={tagHref(group.slug)} slugOf={readerModel(data).slugOf}>
+    <PostsHeader title={`#${group.name}`} count={group.count} backToAll />
+  </PostListView>
+</ReaderLayout>

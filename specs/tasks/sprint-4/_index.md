@@ -23,7 +23,7 @@
 | 8 | [add-theme-toggle](add-theme-toggle.md) | 主题切换与首屏主题 | FRONTEND | 表现层 | US-01 | add-reader-layout | 1 | 低 | completed |
 | 9 | [add-home-intro](add-home-intro.md) | 首页自我介绍 | FRONTEND | 表现层 | US-02 | add-reader-layout | 1 | 低 | completed |
 | 10 | [add-post-card-details](add-post-card-details.md) | 卡片摘要、封面与悬停效果 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-04 | add-post-list-page | 1 | 低 | completed |
-| 11 | [add-tag-pages](add-tag-pages.md) | 标签页与标签索引 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-05、US-04 | add-post-list-page | 1 | 中 | pending |
+| 11 | [add-tag-pages](add-tag-pages.md) | 标签页与标签索引 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-05、US-04 | add-post-list-page | 1 | 中 | completed |
 | 12 | [add-article-typography](add-article-typography.md) | 阅读排版：段首缩进、首字下沉、引用署名、代码主题 | FRONTEND | 表现层 + 领域层（markdown 插件） | US-07 | add-article-page | 1 | 低 | pending |
 | 13 | [add-article-navigation](add-article-navigation.md) | 同标签文章与上一篇 / 下一篇 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-08、US-09 | add-article-page | 1 | 低 | pending |
 | 14 | [add-reading-progress-toc](add-reading-progress-toc.md) | 阅读进度、目录与窄屏目录抽屉 | FRONTEND | 表现层 | US-08 | add-article-navigation | 1 | 中 | pending |

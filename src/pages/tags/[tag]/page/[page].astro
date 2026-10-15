@@ -1,0 +1,31 @@
+---
+// 标签页第 2 页起（/tags/x/page/n）
+import data from "virtual:reader-data";
+import PostListView from "../../../../components/reader/PostListView.astro";
+import PostsHeader from "../../../../components/reader/PostsHeader.astro";
+import ReaderLayout from "../../../../layouts/ReaderLayout.astro";
+import { readerModel } from "../../../../lib/reader/model";
+import { pagePaths } from "../../../../lib/reader/sort";
+import { tagHref } from "../../../../lib/reader/tags";
+import type { TagGroup } from "../../../../lib/reader/types";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return readerModel(data).groups.flatMap((group) =>
+    pagePaths(group.count).map((page) => ({ params: { tag: group.slug, page: String(page) }, props: { group, page } })),
+  );
+}
+
+interface Props {
+  group: TagGroup;
+  page: number;
+}
+const { group, page } = Astro.props;
+---
+
+<ReaderLayout title={`#${group.name} · 第 ${page} 页 · miracleHalcyon`} current="posts" back="/">
+  <PostListView posts={group.posts} page={page} base={tagHref(group.slug)} slugOf={readerModel(data).slugOf}>
+    <PostsHeader title={`#${group.name}`} count={group.count} backToAll />
+  </PostListView>
+</ReaderLayout>

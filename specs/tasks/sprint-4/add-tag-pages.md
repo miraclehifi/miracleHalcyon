@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 11
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层 + 领域层（reader 纯函数）
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -35,11 +35,11 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 标签地址与 spike 结论一致（若走退路，TC-US05-03 期望已同步修订）
-- [ ] `TagChip` 链接形态写入 components.md
+- [x] 标签地址与 spike 结论一致（若走退路，TC-US05-03 期望已同步修订）
+- [x] `TagChip` 链接形态写入 components.md
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：`tests/unit/components/tag-chip*.test.tsx`、设置抽屉标签输入 E2E——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖

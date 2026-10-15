@@ -11,10 +11,11 @@ interface Props {
   posts: ReaderPost[]; // 已排序的全部文章
   page: number;
   base: string;
+  slugOf: (tag: string) => string;
 }
-const { posts, page, base } = Astro.props;
+const { posts, page, base, slugOf } = Astro.props;
 const current = paginate(posts, page);
-const cards = current.items.map(toCardModel);
+const cards = current.items.map((post) => toCardModel(post, slugOf));
 ---
 
 <div class="flex flex-col gap-8">

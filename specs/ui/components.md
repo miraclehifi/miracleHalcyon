@@ -334,7 +334,7 @@
 | `ArticleContent` | `ArticleContent` | 05 / 05m（Markdown 渲染：段首缩进、首字下沉、引用署名） |
 | `HomeIntro` | `HomeIntro` | 06 / 06m（头像、问候语、多段简介、GitHub / 摄影 / 邮箱；内容来自 `site.ts`）。已实现：`src/components/reader/HomeIntro.astro` |
 | `PostsHeader` | `PostsHeader` | 07 / 07m（"文章"或"#标签" + 篇数） |
-| `TagIndex` | `TagIndex` | 07 / 07m（"按标签浏览" + `TagChip` 带文章数，只在 `/posts` 第 1 页） |
+| `TagIndex` | `TagIndex` | 07 / 07m（"按标签浏览" + `TagChip` 带文章数，只在 `/posts` 第 1 页）。已实现：`src/components/reader/TagIndex.astro` |
 | `PostCardList` | `PostCardList` | 07 / 07m（`PostCard` 列表 + `Pagination`；列表底层 AnimatedList，见"列表动效参数"） |
 | `TableOfContents` | `TableOfContents` | 05（右栏：阅读进度 + 目录，当前章节高亮） |
 | `ReadingProgress/Bar` | `ReadingProgress` | 05m / 05m-b（顶栏下 2px 进度细条，< 1280px） |
