@@ -1,0 +1,15 @@
+---
+// 文章列表第 1 页（reader-post-list.md，US-04）
+import data from "virtual:reader-data";
+import PostListView from "../../components/reader/PostListView.astro";
+import PostsHeader from "../../components/reader/PostsHeader.astro";
+import ReaderLayout from "../../layouts/ReaderLayout.astro";
+
+export const prerender = true;
+---
+
+<ReaderLayout title="文章 · miracleHalcyon" current="posts" back="/">
+  <PostListView posts={data.posts} page={1} base="/posts">
+    <PostsHeader title="文章" count={data.posts.length} />
+  </PostListView>
+</ReaderLayout>

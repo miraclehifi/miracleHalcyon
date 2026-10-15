@@ -1,0 +1,32 @@
+---
+// 列表页主体（reader-post-list.md）：/posts、/posts/page/n、/tags/x、/tags/x/page/n 共用
+import { EmptyState } from "../ui/EmptyState";
+import { Pagination } from "../ui/Pagination";
+import { listHref, toCardModel } from "../../lib/reader/cards";
+import { paginate, PAGE_SIZE } from "../../lib/reader/sort";
+import type { ReaderPost } from "../../lib/reader/types";
+import PostCardList from "./PostCardList";
+
+interface Props {
+  posts: ReaderPost[]; // 已排序的全部文章
+  page: number;
+  base: string;
+}
+const { posts, page, base } = Astro.props;
+const current = paginate(posts, page);
+const cards = current.items.map(toCardModel);
+---
+
+<div class="flex flex-col gap-8">
+  <slot />
+  {
+    posts.length === 0 ? (
+      <EmptyState icon="feather" title="还没有文章" description="第一篇正在写。" />
+    ) : (
+      <>
+        <PostCardList client:visible cards={cards} />
+        <Pagination page={page} pageSize={PAGE_SIZE} total={posts.length} href={(p: number) => listHref(base, p)} />
+      </>
+    )
+  }
+</div>

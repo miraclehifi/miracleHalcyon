@@ -1,0 +1,17 @@
+---
+// PostsHeader（reader-post-list.md"布局"）："文章"或"#标签" + 篇数
+interface Props {
+  title: string;
+  count: number;
+  backToAll?: boolean; // 标签页：标题下一行"全部文章"
+}
+const { title, count, backToAll = false } = Astro.props;
+---
+
+<header class="flex flex-col gap-2">
+  <div class="flex items-end justify-between gap-4">
+    <h1 class="text-display text-ink max-md:text-title">{title}</h1>
+    <p class="pb-1 text-ui text-ink-faint tabular-nums">{count} 篇文章</p>
+  </div>
+  {backToAll && <a href="/posts" class="self-start text-meta text-ink-muted hover:text-accent">全部文章</a>}
+</header>

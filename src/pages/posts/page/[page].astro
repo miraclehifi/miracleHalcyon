@@ -1,0 +1,25 @@
+---
+// 文章列表第 2 页起（/posts/page/n；第 1 页只有 /posts）
+import data from "virtual:reader-data";
+import PostListView from "../../../components/reader/PostListView.astro";
+import PostsHeader from "../../../components/reader/PostsHeader.astro";
+import ReaderLayout from "../../../layouts/ReaderLayout.astro";
+import { pagePaths } from "../../../lib/reader/sort";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return pagePaths(data.posts.length).map((page) => ({ params: { page: String(page) }, props: { page } }));
+}
+
+interface Props {
+  page: number;
+}
+const { page } = Astro.props;
+---
+
+<ReaderLayout title={`文章 · 第 ${page} 页 · miracleHalcyon`} current="posts" back="/">
+  <PostListView posts={data.posts} page={page} base="/posts">
+    <PostsHeader title="文章" count={data.posts.length} />
+  </PostListView>
+</ReaderLayout>
