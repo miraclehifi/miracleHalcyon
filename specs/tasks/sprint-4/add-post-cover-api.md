@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 16
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 数据 + 领域 + 接口
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -34,12 +34,12 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 本地 D1 应用 0003 后原有数据保留
-- [ ] api-contract、data-model 标注已实现
-- [ ] F-001 前端请求体已带 `cover`（否则保存会 400）
+- [x] 本地 D1 应用 0003 后原有数据保留
+- [x] api-contract、data-model 标注已实现
+- [x] F-001 前端请求体已带 `cover`（否则保存会 400）
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：`tests/unit/post/*`、`tests/integration/post/*`、F-001 自动保存与本地暂存相关单元测试、`tests/e2e/editor-autosave*.spec.ts`——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖

@@ -8,7 +8,7 @@ export const QUERY_MAX = 100; // 列表搜索与标签补全的 q 上限（字�
 export { isPageParam } from "../admin/list-query"; // 与列表页 URL 解析共用同一规则
 
 type DraftField = keyof DraftInput;
-const DRAFT_FIELDS: DraftField[] = ["title", "slug", "tags", "summary", "body", "publishedAt"];
+const DRAFT_FIELDS: DraftField[] = ["title", "slug", "tags", "summary", "body", "publishedAt", "cover"];
 
 const FIELD_MESSAGES: Record<string, string> = {
   title: "标题不能超过 200 字",
@@ -17,6 +17,7 @@ const FIELD_MESSAGES: Record<string, string> = {
   summary: "摘要不能超过 200 字",
   body: "正文不能超过 200,000 字",
   publishedAt: "发布日期格式不正确",
+  cover: "封面必须是本站上传的图片",
   status: "状态只能是 all、draft 或 published",
   page: "页码必须是正整数",
   q: "搜索词不能超过 100 字",
@@ -31,7 +32,7 @@ export class BadJsonError extends Error {
   readonly code = "BAD_JSON";
 }
 
-// PUT 必须带齐六个字段（防止部分覆盖丢数据），缺字段单独提示
+// PUT 必须带齐七个字段（防止部分覆盖丢数据；cover 自 F-002 起），缺字段单独提示
 export class IncompleteDraftError extends ValidationError {}
 
 // 路由参数中的文章 id：只接受正整数，其余视为不存在（404，不暴露格式错误）
@@ -60,8 +61,9 @@ const FIELD_TYPES: Record<DraftField, (value: unknown) => boolean> = {
   summary: isString,
   body: isString,
   publishedAt: (value) => value === null || isString(value),
+  cover: (value) => value === null || isString(value),
 };
-const EMPTY_DRAFT: DraftInput = { title: "", slug: "", tags: [], summary: "", body: "", publishedAt: null };
+const EMPTY_DRAFT: DraftInput = { title: "", slug: "", tags: [], summary: "", body: "", publishedAt: null, cover: null };
 
 // 类型错误、缺字段（requireAll 时）与领域校验错误合并成一次 VALIDATION_FAILED，字段按固定顺序
 export function parseDraftInput(raw: unknown, { requireAll }: { requireAll: boolean }): DraftInput {

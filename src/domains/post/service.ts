@@ -15,6 +15,7 @@ export interface PostView {
   summary: string;
   body: string;
   publishedAt: string | null;
+  cover: string | null; // 工作稿封面（F-002）
   status: PostStatus;
   hasUnpublishedChanges: boolean;
   lastPublishedAt: string | null;
@@ -27,6 +28,7 @@ export function toPostView(post: Post): PostView {
     id: String(post.id),
     ...post.draft,
     tags: [...post.draft.tags],
+    cover: post.draft.cover ?? null,
     ...deriveStatus(post),
     lastPublishedAt: post.lastPublishedAt?.toISOString() ?? null,
     createdAt: post.createdAt.toISOString(),

@@ -45,7 +45,7 @@
 | summary | string | 去首尾空白；≤ 200 字符（按 Unicode 码点计） |
 | body | string | GFM Markdown 原文；≤ 200,000 字符 |
 | publishedAt | 日期? | 作者填写的"发布日期"；新建默认当天（由前端按作者本地日期填入） |
-| cover | `CoverUrl?` | 封面图片地址（F-002 US-06）；`null` = 无封面。必须是站内图片地址（`parseImageKey` 能解析：`/img/yyyy/mm/{10 位 id}_{宽}x{高}_{6 位 hex}.{jpg|png|webp|gif}`，不带查询串与片段）；不校验对象是否存在（与正文图片一致）|
+| cover | `CoverUrl?`（已实现：`isCoverUrl`，`src/domains/post/content.ts`） | 封面图片地址（F-002 US-06）；`null` = 无封面。必须是站内图片地址（`parseImageKey` 能解析：`/img/yyyy/mm/{10 位 id}_{宽}x{高}_{6 位 hex}.{jpg|png|webp|gif}`，不带查询串与片段）；不校验对象是否存在（与正文图片一致）|
 
 `contentHash(c)` = SHA-256（规范化 JSON：title、slug、tags、summary、body、publishedAt 按固定顺序组成数组；**`cover` 非空时追加为第 7 项，为空时不追加**——迁移 0003 前存下的哈希保持有效，旧文章不会因迁移变成"有未发布修改"）。已实现：`src/domains/post/content-hash.ts`（标签顺序计入哈希）。
 

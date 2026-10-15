@@ -46,6 +46,7 @@ export interface DraftState {
   summary: string;
   body: string;
   publishedAt: string | null; // null：新建未选择，按今天
+  cover: string | null; // 封面（F-002 US-06）
 }
 
 interface ServerState {
@@ -54,9 +55,9 @@ interface ServerState {
 }
 
 function initialDraft(post: PostView | null): DraftState {
-  if (!post) return { title: "", slug: "", tags: [], summary: "", body: "", publishedAt: null };
-  const { title, slug, tags, summary, body, publishedAt } = post;
-  return { title, slug, tags, summary, body, publishedAt };
+  if (!post) return { title: "", slug: "", tags: [], summary: "", body: "", publishedAt: null, cover: null };
+  const { title, slug, tags, summary, body, publishedAt, cover } = post;
+  return { title, slug, tags, summary, body, publishedAt, cover: cover ?? null };
 }
 
 // 自动保存状态 → 顶栏保存状态（idle：新建未保存过，不显示）。冲突 / 校验错误显示在字段上，这里只显示"未保存"
@@ -165,7 +166,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const restoreLocal = () => {
     if (!stash) return;
     const content = stash.content;
-    setDraft({ title: content.title, slug: content.slug, tags: content.tags, summary: content.summary, body: content.body, publishedAt: content.publishedAt });
+    setDraft({ title: content.title, slug: content.slug, tags: content.tags, summary: content.summary, body: content.body, publishedAt: content.publishedAt, cover: content.cover ?? null });
     setSlugTouched(content.slug !== slugify(content.title));
     setRestoreSettled(true);
     flushAfterRestore.current = true;

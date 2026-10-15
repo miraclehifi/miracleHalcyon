@@ -1,4 +1,5 @@
 // PostContent 值对象（post domain-model §2.2、§3）：规范化 + 校验，出错时一次报出全部字段
+import { parseImageKey } from "../../lib/markdown/plugins/image-key";
 import { ValidationError } from "./errors";
 import { isValidSlug } from "./slug";
 
@@ -18,9 +19,17 @@ export interface DraftInput {
   summary: string;
   body: string;
   publishedAt: string | null;
+  cover?: string | null; // F-002 封面：站内图片地址，null = 无封面；API 层要求必填，领域层缺省按 null
 }
 
-export type PostContent = Readonly<DraftInput>;
+export type PostContent = Readonly<Omit<DraftInput, "cover"> & { cover: string | null }>;
+
+const COVER_MAX = 200;
+
+// 封面只接受本站上传的图片地址（自描述 key，不带查询串与片段），见 post domain-model §3 CoverUrl
+export function isCoverUrl(value: unknown): value is string {
+  return typeof value === "string" && value.length <= COVER_MAX && !/[?#]/.test(value) && value.startsWith("/img/") && parseImageKey(value) !== null;
+}
 
 // 字符数按 Unicode 码点计
 const length = (value: string) => [...value].length;
@@ -58,6 +67,7 @@ export function normalizeContent(input: DraftInput): PostContent {
     summary: input.summary.trim(),
     body: input.body,
     publishedAt: input.publishedAt,
+    cover: input.cover ?? null,
   };
 
   const invalid: Record<keyof DraftInput, boolean> = {
@@ -67,6 +77,7 @@ export function normalizeContent(input: DraftInput): PostContent {
     summary: length(content.summary) > SUMMARY_MAX,
     body: content.body.length > BODY_MAX,
     publishedAt: content.publishedAt !== null && !isValidPublishDate(content.publishedAt),
+    cover: content.cover !== null && !isCoverUrl(content.cover),
   };
   const fields = (Object.keys(invalid) as (keyof DraftInput)[]).filter((field) => invalid[field]);
   if (fields.length > 0) throw new ValidationError(fields);

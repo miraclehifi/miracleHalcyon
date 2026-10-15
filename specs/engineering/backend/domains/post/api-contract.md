@@ -109,7 +109,7 @@
 
 ### PUT /api/admin/posts/:id
 
-自动保存。请求体为完整 `DraftInput`（七个字段都必须出现：title、slug、tags、summary、body、publishedAt、cover；缺字段 → 400，防止部分覆盖丢数据。`cover` 自 F-002 起必填，值为 `null` 或站内图片地址，不合法时 `VALIDATION_FAILED`，`fields` 含 `cover`，message"封面必须是本站上传的图片"）。已实现（`createPostHandlers().PUT`）；缺字段的 `message` 为"请求缺少字段：{字段名}"。请求体中的 `status`、`id`、`hasUnpublishedChanges` 等字段一律忽略（不能通过保存改变发布状态，US-06 约束）。
+自动保存。请求体为完整 `DraftInput`（七个字段都必须出现：title、slug、tags、summary、body、publishedAt、cover；缺字段 → 400，防止部分覆盖丢数据。`cover` 自 F-002 起必填（已实现），值为 `null` 或站内图片地址，不合法时 `VALIDATION_FAILED`，`fields` 含 `cover`，message"封面必须是本站上传的图片"）。已实现（`createPostHandlers().PUT`）；缺字段的 `message` 为"请求缺少字段：{字段名}"。请求体中的 `status`、`id`、`hasUnpublishedChanges` 等字段一律忽略（不能通过保存改变发布状态，US-06 约束）。
 
 | 状态 | 体 |
 |------|----|

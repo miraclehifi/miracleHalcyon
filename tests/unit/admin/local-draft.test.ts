@@ -84,7 +84,7 @@ describe("自动保存写本地暂存", () => {
     expect({ first, throttled, written, afterFailure, afterSuccess: readLocalDraft("7") }).toEqual({
       first: "a", // 第一次编辑下一轮事件循环即写
       throttled: "a", // 500ms 内的编辑合并到一次
-      written: { savedAt: "2026-10-10T06:35:00.500Z", content: { ...CONTENT, body: "ab" } },
+      written: { savedAt: "2026-10-10T06:35:00.500Z", content: { ...CONTENT, body: "ab", cover: null } }, // 读出时补齐 cover（F-002）
       afterFailure: "ab",
       afterSuccess: null,
     });
@@ -154,5 +154,15 @@ describe("会话过期", () => {
       after: "saved",
       stash: null,
     });
+  });
+});
+
+// F-002 US-06：旧版暂存没有 cover 时按 null 读出（editor module-spec §4"封面"）
+describe("readLocalDraft 兼容旧暂存", () => {
+  it("[SC-COVER-01] 缺 cover 的暂存读出为 cover: null", async () => {
+    const { readLocalDraft } = await import("../../../src/lib/autosave/local-draft");
+    localStorage.setItem("mh:draft:7", JSON.stringify({ savedAt: "2026-10-01T00:00:00.000Z", content: { title: "t", slug: "", tags: [], summary: "", body: "b", publishedAt: null } }));
+    expect(readLocalDraft("7")?.content.cover).toBeNull();
+    localStorage.removeItem("mh:draft:7");
   });
 });

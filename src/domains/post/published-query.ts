@@ -7,6 +7,7 @@ export interface PublishedPostSummary {
   tags: string[];
   publishedAt: string;
   lastPublishedAt: string;
+  cover: string | null; // 快照封面（F-002）
 }
 
 export interface PublishedPost extends PublishedPostSummary {
@@ -26,10 +27,11 @@ interface SnapshotRow {
   pub_tags: string;
   pub_published_at: string;
   last_published_at: string;
+  pub_cover: string | null;
   pub_body?: string;
 }
 
-const SUMMARY_COLUMNS = "pub_slug, pub_title, pub_summary, pub_tags, pub_published_at, last_published_at";
+const SUMMARY_COLUMNS = "pub_slug, pub_title, pub_summary, pub_tags, pub_published_at, pub_cover, last_published_at";
 // 标签过滤不区分大小写；未传 tag 时 ?1 为 ''
 const LIST_FILTER =
   "pub_hash IS NOT NULL AND (?1 = '' OR EXISTS (SELECT 1 FROM json_each(posts.pub_tags) WHERE lower(value) = lower(?1)))";
@@ -42,6 +44,7 @@ function toSummary(row: SnapshotRow): PublishedPostSummary {
     tags: JSON.parse(row.pub_tags) as string[],
     publishedAt: row.pub_published_at,
     lastPublishedAt: row.last_published_at,
+    cover: row.pub_cover,
   };
 }
 

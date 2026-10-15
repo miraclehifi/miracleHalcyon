@@ -81,7 +81,7 @@ ALTER TABLE posts ADD COLUMN pub_cover TEXT;  -- 已发布快照封面
 
 ## 迁移
 
-`src/db/migrations/0001_init.sql`（已实现）：本文件与 auth、media 的全部建表语句；`0002_raise_image_size_limit.sql`（已实现，media）；`0003_post_cover.sql`（F-002）。本地执行 `npm run db:migrate:local`。
+`src/db/migrations/0001_init.sql`（已实现）：本文件与 auth、media 的全部建表语句；`0002_raise_image_size_limit.sql`（已实现，media）；`0003_post_cover.sql`（F-002，已实现；线上执行见 [ddl-changes](../../../../deploy/ddl-changes.md)）。本地执行 `npm run db:migrate:local`。
 
 ---
 

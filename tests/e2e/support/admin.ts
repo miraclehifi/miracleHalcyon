@@ -24,7 +24,7 @@ export interface DraftFields {
 // 经接口造数据：写操作需带同源 Origin（middleware 校验）
 export function adminApi(page: Page, baseURL: string) {
   const headers = { Origin: new URL(baseURL).origin };
-  const draft = ({ title, slug = "", body = "" }: DraftFields) => ({ title, slug, tags: [], summary: "", body, publishedAt: null });
+  const draft = ({ title, slug = "", body = "" }: DraftFields) => ({ title, slug, tags: [], summary: "", body, publishedAt: null, cover: null });
   return {
     async create(fields: DraftFields): Promise<string> {
       const response = await page.request.post("/api/admin/posts", { headers, data: draft(fields) });

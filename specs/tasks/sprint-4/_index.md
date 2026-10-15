@@ -28,7 +28,7 @@
 | 13 | [add-article-navigation](add-article-navigation.md) | 同标签文章与上一篇 / 下一篇 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-08、US-09 | add-article-page | 1 | 低 | completed |
 | 14 | [add-reading-progress-toc](add-reading-progress-toc.md) | 阅读进度、目录与窄屏目录抽屉 | FRONTEND | 表现层 | US-08 | add-article-navigation | 1 | 中 | completed |
 | 15 | [refine-lightbox](refine-lightbox.md) | 灯箱：实况播放、焦点与降级 | FRONTEND | 表现层 | US-10 | add-lightbox | 1 | 中 | completed |
-| 16 | [add-post-cover-api](add-post-cover-api.md) | 文章封面字段（数据 + 领域 + 接口） | API | 数据 + 领域 + 接口 | US-06 | — | 1 | 低 | pending |
+| 16 | [add-post-cover-api](add-post-cover-api.md) | 文章封面字段（数据 + 领域 + 接口） | API | 数据 + 领域 + 接口 | US-06 | — | 1 | 低 | completed |
 | 17 | [add-cover-field](add-cover-field.md) | 设置抽屉封面上传 | FRONTEND | 表现层 | US-06 | add-post-cover-api | 0 | 低 | pending |
 | 18 | [add-deploy-hook-rebuild](add-deploy-hook-rebuild.md) | 发布后触发读者页重建 | API | 接口层（适配器） | US-03 | — | 0 | 低 | pending |
 | 19 | [check-reader-build-output](check-reader-build-output.md) | 读者页构建产物检查 | TEST | 构建 | US-03、US-01 | add-home-intro、add-tag-pages、add-reading-progress-toc、refine-lightbox、add-post-card-details、add-article-typography、add-theme-toggle | 0 | 低 | pending |

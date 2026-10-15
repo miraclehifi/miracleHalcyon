@@ -57,6 +57,7 @@ interface PostRow {
   summary: string;
   body: string;
   published_at: string | null;
+  cover: string | null;
   draft_hash: string;
   pub_title: string | null;
   pub_slug: string | null;
@@ -64,6 +65,7 @@ interface PostRow {
   pub_summary: string | null;
   pub_body: string | null;
   pub_published_at: string | null;
+  pub_cover: string | null;
   pub_hash: string | null;
   last_published_at: string | null;
   created_at: string;
@@ -71,7 +73,7 @@ interface PostRow {
 }
 
 const COLUMNS =
-  "id, title, slug, tags, summary, body, published_at, draft_hash, pub_title, pub_slug, pub_tags, pub_summary, pub_body, pub_published_at, pub_hash, last_published_at, created_at, updated_at";
+  "id, title, slug, tags, summary, body, published_at, cover, draft_hash, pub_title, pub_slug, pub_tags, pub_summary, pub_body, pub_published_at, pub_cover, pub_hash, last_published_at, created_at, updated_at";
 
 // 标题包含匹配（ASCII 不区分大小写）。用 instr 而不是 LIKE：D1 限制 LIKE 模式 ≤ 50 字节，
 // 100 字的搜索词（中文每字 3 字节）会报 "pattern too complex"；instr 也不需要转义 % _ \
@@ -109,6 +111,7 @@ function toPost(row: PostRow): Post {
           summary: row.pub_summary ?? "",
           body: row.pub_body ?? "",
           publishedAt: row.pub_published_at,
+          cover: row.pub_cover,
         };
   return {
     id: row.id,
@@ -119,6 +122,7 @@ function toPost(row: PostRow): Post {
       summary: row.summary,
       body: row.body,
       publishedAt: row.published_at,
+      cover: row.cover,
     },
     draftHash: row.draft_hash,
     published,
@@ -136,9 +140,9 @@ export class D1PostRepo implements PostRepo {
     const at = createdAt.toISOString();
     const { meta } = await this.db
       .prepare(
-        "INSERT INTO posts (title, slug, tags, summary, body, published_at, draft_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO posts (title, slug, tags, summary, body, published_at, cover, draft_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       )
-      .bind(draft.title, draft.slug, JSON.stringify(draft.tags), draft.summary, draft.body, draft.publishedAt, draftHash, at, at)
+      .bind(draft.title, draft.slug, JSON.stringify(draft.tags), draft.summary, draft.body, draft.publishedAt, draft.cover, draftHash, at, at)
       .run();
     return meta.last_row_id;
   }
@@ -158,9 +162,9 @@ export class D1PostRepo implements PostRepo {
   async updateDraft(id: PostId, content: PostContent, draftHash: string, now: Date): Promise<boolean> {
     const { meta } = await this.db
       .prepare(
-        "UPDATE posts SET title = ?, slug = ?, tags = ?, summary = ?, body = ?, published_at = ?, draft_hash = ?, updated_at = ? WHERE id = ?",
+        "UPDATE posts SET title = ?, slug = ?, tags = ?, summary = ?, body = ?, published_at = ?, cover = ?, draft_hash = ?, updated_at = ? WHERE id = ?",
       )
-      .bind(content.title, content.slug, JSON.stringify(content.tags), content.summary, content.body, content.publishedAt, draftHash, now.toISOString(), id)
+      .bind(content.title, content.slug, JSON.stringify(content.tags), content.summary, content.body, content.publishedAt, content.cover, draftHash, now.toISOString(), id)
       .run();
     return meta.changes > 0;
   }
@@ -169,7 +173,7 @@ export class D1PostRepo implements PostRepo {
   async setPublished(id: PostId, content: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean> {
     const { meta } = await this.db
       .prepare(
-        "UPDATE posts SET pub_title = ?, pub_slug = ?, pub_tags = ?, pub_summary = ?, pub_body = ?, pub_published_at = ?, pub_hash = ?, last_published_at = ? WHERE id = ?",
+        "UPDATE posts SET pub_title = ?, pub_slug = ?, pub_tags = ?, pub_summary = ?, pub_body = ?, pub_published_at = ?, pub_cover = ?, pub_hash = ?, last_published_at = ? WHERE id = ?",
       )
       .bind(
         content?.title ?? null,
@@ -178,6 +182,7 @@ export class D1PostRepo implements PostRepo {
         content?.summary ?? null,
         content?.body ?? null,
         content?.publishedAt ?? null,
+        content?.cover ?? null,
         pubHash,
         at?.toISOString() ?? null,
         id,

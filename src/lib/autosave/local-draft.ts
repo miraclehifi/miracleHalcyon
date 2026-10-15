@@ -26,7 +26,8 @@ export function readLocalDraft(postId: string | null): LocalDraft | null {
     const raw = localStorage.getItem(draftKey(postId));
     if (raw === null) return null;
     const value: unknown = JSON.parse(raw);
-    return isDraft(value) ? value : null;
+    // F-002 之前的暂存没有 cover：按无封面读出
+    return isDraft(value) ? { ...value, content: { ...value.content, cover: value.content.cover ?? null } } : null;
   } catch {
     return null;
   }
@@ -48,7 +49,7 @@ export function clearLocalDraft(postId: string | null) {
   }
 }
 
-const FIELDS = ["title", "slug", "tags", "summary", "body", "publishedAt"] as const satisfies readonly (keyof DraftInput)[];
+const FIELDS = ["title", "slug", "tags", "summary", "body", "publishedAt", "cover"] as const satisfies readonly (keyof DraftInput)[];
 const sameContent = (a: DraftInput, b: DraftInput) => FIELDS.every((field) => JSON.stringify(a[field] ?? null) === JSON.stringify(b[field] ?? null));
 const isBlank = (content: DraftInput) => [content.title, content.slug, content.summary, content.body].every((text) => !text?.trim()) && content.tags.length === 0;
 

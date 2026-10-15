@@ -10,7 +10,7 @@ import { createPostHandlers } from "../../../src/pages/api/admin/posts/[id]";
 const CREATED = new Date("2026-10-13T00:00:00.000Z");
 const SAVED = new Date("2026-10-13T06:30:00.000Z");
 const handlers = createPostHandlers({ db: env.DB, now: () => SAVED });
-const draft = (slug: string, body = "正文"): DraftInput => ({ title: "Hello", slug, tags: [], summary: "", body, publishedAt: "2026-10-13" });
+const draft = (slug: string, body = "正文"): DraftInput => ({ title: "Hello", slug, tags: [], summary: "", body, publishedAt: "2026-10-13", cover: null });
 
 async function put(id: string, body: unknown) {
   const text = typeof body === "string" ? body : JSON.stringify(body);

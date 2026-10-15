@@ -135,7 +135,7 @@
 | 字段 | 值 |
 |------|------|
 | 非法 cover | `'https://evil.example.com/a.jpg'`；`'/img/../etc/passwd'`；`'/img/2026/10/abc.jpg'`（key 格式不符）；`123`；`'javascript:alert(1)'` |
-| 合法 cover | `null`；`'/img/2026/10/k3j9x2m4q1_4032x3024_8a7b6c.jpg'` |
+| 合法 cover | `null`；`'/img/2026/10/aaaaaaaaaa_1600x900_556677.jpg'`（key 的 10 位 id 为 base32 `[a-z2-7]`） |
 
 **步骤：**
 1. `PUT /api/admin/posts/:id` 携带完整 DraftInput 与各 cover 值
