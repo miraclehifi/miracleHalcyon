@@ -32,9 +32,13 @@ test("[TC-US09-02] 写文章页删除后回到列表", async ({ page, baseURL },
     dialogs.push(dialog.type());
     void dialog.dismiss();
   });
+  // 只统计 DELETE 发出之后的 PUT：删除流程超过防抖时，删除前先自动保存一次属正常行为
+  let deleted = false;
   const saves: string[] = [];
   page.on("request", (request) => {
-    if (request.method() === "PUT" && request.url().endsWith(`/api/admin/posts/${id}`)) saves.push(request.url());
+    if (!request.url().endsWith(`/api/admin/posts/${id}`)) return;
+    if (request.method() === "DELETE") deleted = true;
+    if (request.method() === "PUT" && deleted) saves.push(request.url());
   });
 
   await page.getByRole("textbox", { name: "正文" }).fill("B1 未保存");

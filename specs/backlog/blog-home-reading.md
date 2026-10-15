@@ -85,6 +85,7 @@
 
 - **依赖项**: [article-writing.md](article-writing.md)（post Domain）
 - **渲染方式（已定）**: 读者页构建时预渲染，发布等操作通过 Deploy Hook 触发重建；待 design-arch 验证的事项见 [reader-build-time-prerender.md](reader-build-time-prerender.md)
+- **图片组件（F-001 Sprint 3 已实现）**: `ArticleImage`、`ImageGallery`、`LiveBadge` 在 `src/components/article/`，读者页直接复用；灯箱（`Lightbox`）归 F-002（[article-image-display](article-image-display.md)）。预渲染下图片加载的待定项（hydrate 前已加载完是否跳过马赛克、`<noscript>` 兜底、`placeholder` 字段去留、多图离屏画布开销）见 [image-refine-loading](image-refine-loading.md)"待 design-arch 解决"
 - **跨 Feature**: 文章列表的封面图需要 F-001 新增"封面"字段（post 数据模型 + 写文章页设置抽屉上传，复用 US-05 图片上传能力），待在 F-001 内走需求变更；参考站的评论区属 F-004（Giscus）；阅读数 / 在读人数 / 喜欢需要新的数据能力，不在 F-002 当前范围内，是否纳入待 define-feature 决策
 
 ## 估算

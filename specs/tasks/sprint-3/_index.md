@@ -1,6 +1,6 @@
 # Sprint 3：图片增强
 
-**状态**: in_progress
+**状态**: completed（待 code-review）
 **创建**: 2026-10-14
 **Feature**: F-001 文章写作（[Backlog: article-writing](../../backlog/article-writing.md)）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）
@@ -54,7 +54,7 @@ add-image-syntax-help（独立）
 | spike-browser-media-processing | ✅ 2026-10-14：安卓样本改用 OPPO 动态照片（保留原始 EXIF，不去 GPS）；iPhone 暂不考虑，spike 只验证视频处理与 OPPO 切视频 |
 | add-heic-upload、add-live-photo-pair-upload | ✅ 2026-10-15：作者决定不考虑 iPhone / 苹果系统，HEIC 解码与 `heic-to` 不再验证，任务 5–7 只做安卓动态照片（[drop-apple-live-photo](../../backlog/drop-apple-live-photo.md)） |
 | add-article-image-display | ✅ 2026-10-14：RefineFrame 取自 React Bits 仓库 `src/ts-tailwind/Micro/RefineFrame`，许可证 MIT + Commons Clause（同 SwipeRow）；ChromaGrid、AccordionGallery 同仓库同许可证（2026-10-15 add-image-gallery-display 核对） |
-| add-image-syntax-help | 手机设置面板形态（页面规格"Sprint 3 前再定"）：默认按现状右侧抽屉铺满，把入口放在最下方 |
+| add-image-syntax-help | ✅ 手机设置面板形态：按现状右侧抽屉铺满，入口放在最下方（任务 12 已实现） |
 
 ## US 覆盖（Sprint 3 范围）
 
@@ -73,7 +73,7 @@ add-image-syntax-help（独立）
 
 ## DoD（Sprint 级）
 
-- [ ] 所有任务状态为 completed
-- [ ] `npm test` 与 `npm run test:e2e` 全部通过（Sprint 末跑一次）
-- [ ] ⚠️ 前置确认项全部有结论，并同步到对应文档
-- [ ] 设计文档已反哺"已实现"标记；[image-refine-loading](../../backlog/image-refine-loading.md) 验收项已勾选
+- [x] 所有任务状态为 completed
+- [x] `npm test` 与 `npm run test:e2e` 全部通过（Sprint 末跑一次；全量 E2E 第 3 轮余下 7 个失败单独重跑均通过，其中 TC-US09-02 为用例竞态，已改为只统计 DELETE 之后的保存，见 [sprint-3-task-results](../../test/features/F-001-文章写作/validation/sprint-3-task-results.md)）
+- [x] ⚠️ 前置确认项全部有结论，并同步到对应文档
+- [x] 设计文档已反哺"已实现"标记；[image-refine-loading](../../backlog/image-refine-loading.md) 验收项已勾选

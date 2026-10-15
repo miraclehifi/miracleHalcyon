@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | ready |
+| 状态 | done |
 | 类型 | Task |
 | 优先级 | P2-Medium |
 | 来源 | 作者需求 |
@@ -37,6 +37,8 @@
 
 ## 待 design-arch 解决
 
+> 2026-10-15：预览部分已在 F-001 Sprint 3 实现（add-article-image-display、add-image-gallery-display）。以下事项都在读者页才出现，转入 F-002 design-arch（[blog-home-reading](blog-home-reading.md)"影响分析"）。
+
 - **SSR / 缓存命中**：Astro 预渲染的 `<img>` 在 hydrate 前就开始加载，hydrate 时可能已加载完，组件会照样从马赛克播一遍。需要决定：hydrate 前是否先隐藏图片（JS 晚到会空白，要 `<noscript>` 兜底），已在缓存中的图片是否跳过动画
 - **模糊缩略图**：加载态不再显示 `placeholder`。组图网格的主色 `accent` 仍走上传时同一流程；`placeholder` 字段是否保留、要不要改成画布背景，随图片数据模型一起定
 - **跨域画布**：马赛克用 canvas 绘制，图片若放在 R2 自定义域名下（与站点不同源），只画不读不会出错；如果以后要读像素（如取主色），需要 R2 配 CORS 并给 `<img>` 加 `crossOrigin`
@@ -49,3 +51,4 @@
 ## 备注
 
 - 当前处于 F-001 `ui_design` 阶段，本条先更新设计规格；代码在 plan-tasks 之后按 Sprint 任务实现
+- 2026-10-15 完成：`src/components/article/` 的 `ArticleImage`、`ImageGallery` 底层用 RefineFrame（F-001 Sprint 3）

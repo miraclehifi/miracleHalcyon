@@ -1,6 +1,6 @@
 # miracleHalcyon Specs 索引
 
-**最后更新**: 2026-10-14
+**最后更新**: 2026-10-15
 
 > 个人技术博客兼作品集。Astro 7 + React 19 + Cloudflare（D1 / R2）。
 
@@ -19,7 +19,7 @@
 
 | Feature | 名称 | 状态 | 当前阶段 |
 |---------|------|------|----------|
-| F-001 | 文章写作 | in_progress | implementation：Sprint 1、2 完成（待 code-review），Sprint 3 进行中（3 / 12） |
+| F-001 | 文章写作 | in_progress | implementation 完成（Sprint 1–3），code-review / verify 待 F-002 开发完成后统一进行 |
 | F-002 | 博客首页与阅读 | planning | — |
 
 ## 队列
