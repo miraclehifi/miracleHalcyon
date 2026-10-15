@@ -1,0 +1,14 @@
+---
+// 首页（reader-home.md，US-02）：自我介绍，不列文章；只有主题切换的原生脚本，不加载 React（ADR-008）
+import HomeIntro from "../components/reader/HomeIntro.astro";
+import ReaderLayout from "../layouts/ReaderLayout.astro";
+import { site } from "../config/site";
+
+export const prerender = true;
+---
+
+<ReaderLayout title="miracleHalcyon" description={site.bio[0]} width="narrow">
+  <div class="pt-10 pb-10 max-md:pt-2">
+    <HomeIntro />
+  </div>
+</ReaderLayout>

@@ -1,0 +1,40 @@
+---
+// HomeIntro（reader-home.md、admin.pen 06 / 06m）：头像、问候语、多段简介、GitHub / 摄影 / 邮箱；内容全部来自 site.ts
+import { Camera, Mail } from "lucide-react";
+import { site } from "../../config/site";
+import GithubIcon from "./GithubIcon.astro";
+
+const external = { target: "_blank", rel: "noopener noreferrer" };
+const link = "inline-flex items-center gap-1.5 border-b border-transparent text-ui text-ink-muted transition-colors duration-200 hover:border-current hover:text-accent max-md:min-h-11";
+---
+
+<section class="flex flex-col gap-7">
+  <div class="flex flex-col gap-7 max-md:flex-row max-md:items-center max-md:gap-4">
+    <img src={site.avatar} alt={`${site.name} 的头像`} width="96" height="96" class="size-24 rounded-full object-cover max-md:size-16" />
+    <h1 class="text-display text-ink max-md:text-title">你好，我是 {site.name}</h1>
+  </div>
+  <div class="flex flex-col gap-4">
+    {site.bio.map((paragraph, i) => <p data-bio class:list={["text-body", i === 0 ? "text-ink" : "text-ink-muted"]}>{paragraph}</p>)}
+  </div>
+  {
+    (site.github || site.photo || site.email) && (
+      <p class="flex flex-wrap items-center gap-x-5 gap-y-1">
+        {site.github && (
+          <a href={site.github} {...external} class={link}>
+            <span class="text-ink-faint"><GithubIcon size={14} /></span>GitHub
+          </a>
+        )}
+        {site.photo && (
+          <a href={site.photo} {...external} class={link}>
+            <Camera size={14} aria-hidden="true" className="text-ink-faint" />摄影
+          </a>
+        )}
+        {site.email && (
+          <a href={`mailto:${site.email}`} class={link}>
+            <Mail size={14} aria-hidden="true" className="text-ink-faint" />{site.email}
+          </a>
+        )}
+      </p>
+    )
+  }
+</section>

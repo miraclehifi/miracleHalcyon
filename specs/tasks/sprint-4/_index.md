@@ -21,7 +21,7 @@
 | 6 | [hydrate-article-images](hydrate-article-images.md) | 详情页正文图片水合 | FRONTEND | 表现层 | US-10 | add-article-page | 1 | 中 | completed |
 | 7 | [add-lightbox](add-lightbox.md) | 灯箱：打开、切换、关闭 | FRONTEND | 表现层 | US-10 | hydrate-article-images | 1 | 高 | completed |
 | 8 | [add-theme-toggle](add-theme-toggle.md) | 主题切换与首屏主题 | FRONTEND | 表现层 | US-01 | add-reader-layout | 1 | 低 | completed |
-| 9 | [add-home-intro](add-home-intro.md) | 首页自我介绍 | FRONTEND | 表现层 | US-02 | add-reader-layout | 1 | 低 | pending |
+| 9 | [add-home-intro](add-home-intro.md) | 首页自我介绍 | FRONTEND | 表现层 | US-02 | add-reader-layout | 1 | 低 | completed |
 | 10 | [add-post-card-details](add-post-card-details.md) | 卡片摘要、封面与悬停效果 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-04 | add-post-list-page | 1 | 低 | pending |
 | 11 | [add-tag-pages](add-tag-pages.md) | 标签页与标签索引 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-05、US-04 | add-post-list-page | 1 | 中 | pending |
 | 12 | [add-article-typography](add-article-typography.md) | 阅读排版：段首缩进、首字下沉、引用署名、代码主题 | FRONTEND | 表现层 + 领域层（markdown 插件） | US-07 | add-article-page | 1 | 低 | pending |

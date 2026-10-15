@@ -332,7 +332,7 @@
 | `TagPostsNav` · `TagPostsNav/Mobile` | `TagPostsNav` | 05 文章详情左栏 / 05m 文末（同标签文章，最多 8 篇，不含本文，每项标题 + 共享标签；`/Mobile` 为文末形态，每项高 44） |
 | `ArticleHeader` | `ArticleHeader` | 05 / 05m（标题、日期、字数与阅读时长、更新于（有更新时）、标签） |
 | `ArticleContent` | `ArticleContent` | 05 / 05m（Markdown 渲染：段首缩进、首字下沉、引用署名） |
-| `HomeIntro` | `HomeIntro` | 06 / 06m（头像、问候语、多段简介、GitHub / 摄影 / 邮箱；内容来自 `site.ts`） |
+| `HomeIntro` | `HomeIntro` | 06 / 06m（头像、问候语、多段简介、GitHub / 摄影 / 邮箱；内容来自 `site.ts`）。已实现：`src/components/reader/HomeIntro.astro` |
 | `PostsHeader` | `PostsHeader` | 07 / 07m（"文章"或"#标签" + 篇数） |
 | `TagIndex` | `TagIndex` | 07 / 07m（"按标签浏览" + `TagChip` 带文章数，只在 `/posts` 第 1 页） |
 | `PostCardList` | `PostCardList` | 07 / 07m（`PostCard` 列表 + `Pagination`；列表底层 AnimatedList，见"列表动效参数"） |

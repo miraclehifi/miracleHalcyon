@@ -25,6 +25,8 @@
 | 简介 | 第一段 `ink`，其余段 `ink-muted`；16px，行高 1.7，段间 16px；段数不限 |
 | 链接行 | 图标 14px `ink-faint` + 文字 14px `ink-muted`，间距 20px：GitHub、摄影、邮箱（文字为邮箱地址）；悬停 `accent` + 底边线；手机可点高度 44px |
 
+> 已实现（Sprint 4，add-home-intro）：`src/pages/index.astro`、`src/components/reader/HomeIntro.astro`；占位头像 `public/avatar.png`（192×192 渐变，作者提供真实头像后替换）。
+
 ## 内容来源 `src/config/site.ts`
 
 | 字段 | 类型 | 规则 |
