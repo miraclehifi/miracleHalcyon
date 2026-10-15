@@ -43,3 +43,32 @@ export function toggleMark(source: string, location: ImageLocation, mark: ImageM
   const insert = toggleMarkInUrl(found.url, mark, on ?? !parseMarks(found.url)[mark]);
   return insert === found.url ? null : { from: found.from, to: found.to, insert };
 }
+
+export type GalleryMode = "grid" | "accordion" | "split";
+
+// 地址之后：可选的 title（"…" / '…' / (…)，可含括号）和右括号；返回右括号之后的偏移，不合语法返回 -1
+const TAIL = /^(?:>)?\s*(?:"[^"]*"|'[^']*'|\([^)]*\))?\s*\)/;
+function syntaxEnd(source: string, urlEnd: number): number {
+  const match = TAIL.exec(source.slice(urlEnd));
+  return match ? urlEnd + match[0].length : -1;
+}
+
+// 组图形态（admin-post-editor"图片菜单"组图菜单）：accordion 首张加 #accordion、grid 去掉；split 把图片之间的空白换成空行，
+// 拆成单图。组内每张都要按位置 + 地址核对通过，图片之间只能是空白，否则返回 null 不改写
+export function setGalleryMode(source: string, members: readonly ImageLocation[], mode: GalleryMode): Edit | null {
+  if (members.length < 2) return null;
+  if (mode !== "split") return toggleMark(source, members[0], "accordion", mode === "accordion");
+  const found = members.map((member) => locateImageUrl(source, member));
+  if (found.some((item) => item === null)) return null;
+  const ends = found.map((item) => syntaxEnd(source, item!.to));
+  if (ends.some((end) => end < 0)) return null;
+  const parts: string[] = [];
+  for (let i = 0; i < members.length; i++) {
+    if (i > 0) {
+      if (source.slice(ends[i - 1], members[i].start).trim() !== "") return null;
+      parts.push("\n\n");
+    }
+    parts.push(source.slice(members[i].start, ends[i]));
+  }
+  return { from: members[0].start, to: ends[ends.length - 1], insert: parts.join("") };
+}

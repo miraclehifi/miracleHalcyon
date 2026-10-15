@@ -12,13 +12,14 @@ export interface MenuProps {
   onClose(): void;
   "aria-label": string;
   className?: string; // 定位，默认 top-full right-0 mt-1.5
+  initialFocus?: number; // 打开时聚焦的项（默认第一项）；菜单因改写重新挂载时用来停在原项
   children: ReactNode;
 }
 
 const ITEM_ROLES = { action: "menuitem", checkbox: "menuitemcheckbox", radio: "menuitemradio" } as const;
 const items = (menu: HTMLElement | null) => [...(menu?.querySelectorAll<HTMLElement>('[role^="menuitem"]') ?? [])];
 
-export function Menu({ open, onClose, className = "top-full right-0 mt-1.5", children, ...rest }: MenuProps) {
+export function Menu({ open, onClose, className = "top-full right-0 mt-1.5", initialFocus = 0, children, ...rest }: MenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -27,14 +28,15 @@ export function Menu({ open, onClose, className = "top-full right-0 mt-1.5", chi
 
   useEffect(() => {
     if (!open) return;
-    items(ref.current)[0]?.focus();
+    const list = items(ref.current);
+    (list[initialFocus] ?? list[0])?.focus();
     // 点外部关闭：触发按钮自己的 click 负责开合，这里只看菜单外的按下
     const onPointerDown = (event: PointerEvent) => {
       if (!ref.current?.contains(event.target as Node)) onCloseRef.current();
     };
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps -- 只在打开时定位焦点，initialFocus 之后变化不再移动焦点
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const list = items(ref.current);
@@ -78,10 +80,11 @@ export interface MenuItemProps {
   type?: keyof typeof ITEM_ROLES; // action（默认）/ checkbox / radio
   checked?: boolean; // checkbox / radio
   disabled?: boolean;
+  "aria-describedby"?: string; // 包在 Tooltip 里时由 Tooltip 注入（禁用原因）
   children: ReactNode;
 }
 
-function MenuItem({ onSelect, type = "action", checked = false, disabled = false, children }: MenuItemProps) {
+function MenuItem({ onSelect, type = "action", checked = false, disabled = false, children, ...rest }: MenuItemProps) {
   const menu = useContext(MenuContext);
   if (!menu) throw new Error("Menu.Item 需要放在 <Menu> 内");
   const select = () => {
@@ -97,6 +100,7 @@ function MenuItem({ onSelect, type = "action", checked = false, disabled = false
       tabIndex={-1}
       aria-checked={type === "action" ? undefined : checked}
       aria-disabled={disabled || undefined}
+      aria-describedby={rest["aria-describedby"]}
       onClick={select}
       className="flex h-8 w-full cursor-pointer items-center justify-between gap-3 rounded-[6px] px-3 text-left text-ui text-ink outline-none hover:bg-surface-sunken focus-visible:bg-surface-sunken aria-disabled:cursor-default aria-disabled:text-ink-faint aria-disabled:hover:bg-transparent max-md:h-11"
     >

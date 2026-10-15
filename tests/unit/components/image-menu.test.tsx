@@ -70,3 +70,48 @@ describe("ImageMenu 单图", () => {
     });
   });
 });
+
+// UT-137（组图）
+describe("ImageMenu 组图", () => {
+  const renderGallery = (count: number, mode: "grid" | "accordion" = "grid") => {
+    const onModeChange = vi.fn();
+    const onSplit = vi.fn();
+    render(<ImageMenu kind="gallery" open onOpenChange={() => {}} mode={mode} count={count} onModeChange={onModeChange} onSplit={onSplit} />);
+    return { onModeChange, onSplit };
+  };
+  const state = () =>
+    [...screen.getByRole("menu").querySelectorAll('[role^="menuitem"]')].map((item) => [item.getAttribute("role"), item.textContent, item.getAttribute("aria-checked"), item.getAttribute("aria-disabled")]);
+
+  it("网格 / 手风琴为 radio、当前形态勾选，分隔线后为「拆成单图」；3–7 张手风琴可用", () => {
+    const { onModeChange } = renderGallery(3, "accordion");
+    const items = state();
+    fireEvent.click(screen.getByRole("menuitemradio", { name: "网格" }));
+    expect({ trigger: screen.getByRole("button", { name: "组图选项" }) !== null, menu: screen.getByRole("menu").getAttribute("aria-label"), items, separator: screen.getAllByRole("separator").length, calls: onModeChange.mock.calls }).toEqual({
+      trigger: true,
+      menu: "组图",
+      items: [
+        ["menuitemradio", "网格", "false", null],
+        ["menuitemradio", "手风琴", "true", null],
+        ["menuitem", "拆成单图", null, null],
+      ],
+      separator: 1,
+      calls: [["grid"]],
+    });
+  });
+
+  it("张数不在 3–7 时手风琴 aria-disabled，点击不触发；拆成单图触发 onSplit", () => {
+    const results = [2, 7, 8].map((count) => {
+      const { onModeChange, onSplit } = renderGallery(count);
+      fireEvent.click(screen.getByRole("menuitemradio", { name: "手风琴" }));
+      fireEvent.click(screen.getByRole("menuitem", { name: "拆成单图" }));
+      const result = { disabled: screen.getByRole("menuitemradio", { name: "手风琴" }).getAttribute("aria-disabled"), mode: onModeChange.mock.calls.length, split: onSplit.mock.calls.length };
+      cleanup();
+      return result;
+    });
+    expect(results).toEqual([
+      { disabled: "true", mode: 0, split: 1 },
+      { disabled: null, mode: 1, split: 1 },
+      { disabled: "true", mode: 0, split: 1 },
+    ]);
+  });
+});

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toggleMark, type ImageLocation } from "../../../src/lib/editor/image-marks";
+import { setGalleryMode, toggleMark, type ImageLocation } from "../../../src/lib/editor/image-marks";
 
 const SRC = "/img/2026/10/aaaaaaaaaa_1600x900_556677.jpg";
 
@@ -49,6 +49,40 @@ describe("toggleMark", () => {
       `![a](${SRC})\n\n![b](${SRC}#wide)`,
       `![c](<${SRC}#live,wide>)`,
     ]);
+  });
+});
+
+// UT-135：组图形态
+describe("setGalleryMode", () => {
+  const IMG2 = "/img/2026/10/bbbbbbbbbb_1200x800_112233.jpg";
+  const members = (source: string, srcs: string[]) => srcs.map((src, i) => at(source, i, src));
+  const run = (source: string, srcs: string[], mode: "grid" | "accordion" | "split") => {
+    const edit = setGalleryMode(source, members(source, srcs), mode);
+    return edit && source.slice(0, edit.from) + edit.insert + source.slice(edit.to);
+  };
+
+  it("accordion 首张加 #accordion（与已有标记合并）、grid 去掉；split 图片之间换成空行，图注含括号也不受影响；其他文本不变", () => {
+    const source = `前文\n\n![a](${SRC}#live "图注 (一)")\n![b](${IMG2})  ![c](${SRC})\n\n后文`;
+    const srcs = [SRC, IMG2, SRC];
+    const accordion = run(source, srcs, "accordion")!;
+    expect({
+      accordion,
+      grid: run(accordion, srcs, "grid"),
+      split: run(source, srcs, "split"),
+    }).toEqual({
+      accordion: `前文\n\n![a](${SRC}#live,accordion "图注 (一)")\n![b](${IMG2})  ![c](${SRC})\n\n后文`,
+      grid: source,
+      split: `前文\n\n![a](${SRC}#live "图注 (一)")\n\n![b](${IMG2})\n\n![c](${SRC})\n\n后文`,
+    });
+  });
+
+  it("组内任一张定位不上、或图片之间混入文字时返回 null", () => {
+    const source = `![a](${SRC})\n![b](${IMG2})`;
+    const stale = members(source, [SRC, IMG2]);
+    expect([
+      setGalleryMode(`![a](${SRC})\n文字![b](${IMG2})`, stale, "split"),
+      setGalleryMode(source, [stale[0], { ...stale[1], src: SRC }], "split"),
+    ]).toEqual([null, null]);
   });
 });
 

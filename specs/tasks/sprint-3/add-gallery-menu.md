@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 11
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（编辑器源码改写 + 预览组件）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,13 +34,13 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] "拆成单图"后菜单关闭、焦点回到预览区
-- [ ] components.md 中 `ImageMenu/Gallery`、`ImageMenu/Mobile` 标注"已实现"
+- [x] "拆成单图"后菜单关闭、焦点回到预览区
+- [x] components.md 中 `ImageMenu/Gallery`、`ImageMenu/Mobile` 标注"已实现"
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/unit/editor/image-marks.test.ts`、`tests/unit/components/image-menu.test.tsx`、`tests/e2e/image-menu.spec.ts`、`tests/e2e/live-photo-playback.spec.ts`（长按不开菜单）通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [ ] 影响范围回归（可做任务全部完成后统一跑；`image-menu.spec.ts` 两浏览器、TC-US11-24 长按不开菜单已在本任务跑过）：`tests/unit/editor/image-marks.test.ts`、`tests/unit/components/image-menu.test.tsx`、`tests/e2e/image-menu.spec.ts`、`tests/e2e/live-photo-playback.spec.ts`（长按不开菜单）通过；E2E 补跑 webkit 一次
+- [ ] `npm run lint` 与 `npm run check` 无错误（统一跑；本任务 tsc、eslint 已过）
 
 ## 依赖
 

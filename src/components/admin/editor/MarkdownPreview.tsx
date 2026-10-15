@@ -6,10 +6,10 @@
 // 挂载为 ImageGallery，按"模式 + 组内各图 key"复用。
 // 图片菜单（admin-post-editor"图片菜单"）：单图右上角"图片选项"，经 onSourceEdit 改写源码；哪张图的菜单开着按"源码起点 +
 // 地址"记录，改写后图片重新挂载菜单仍打开；该图片在新的渲染结果里找不到时关闭（焦点无处可去时回到预览区）
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import type { Edit } from "../../../lib/editor/format-commands";
-import { toggleMark } from "../../../lib/editor/image-marks";
+import { setGalleryMode, toggleMark, type ImageLocation } from "../../../lib/editor/image-marks";
 import { liveVideoSrc } from "../../../lib/markdown/plugins/image-key";
 import { islandKey, reconcileIslands } from "../../../lib/markdown/reconcile-islands";
 import { PLACEHOLDER_LABELS } from "../../../lib/markdown/plugins/upload-placeholder";
@@ -29,10 +29,15 @@ export interface MarkdownPreviewProps {
   onSourceEdit?: (compute: (source: string) => Edit | null) => boolean;
 }
 
+// 打开着的图片菜单：单图按其源码起点 + 地址，组图按首张；focus 为菜单重新挂载后停留的项
 interface MenuAnchor {
+  kind: IslandContent["kind"];
   start: number;
   src: string;
+  focus?: number;
 }
+
+const TAP_MAX_MS = 300; // 手机点按开菜单；更长的按压留给实况照片长按播放
 
 // 进入写文章页即预热：Shiki 按需编译语法规则，首次遇到某类语法（如类型注解）在 WebKit 上要近 1 秒；
 // 预热样例覆盖常见 TS 写法与 GFM 结构，作者开始输入时不再冷启动
@@ -188,11 +193,17 @@ function mountIslands(content: HTMLElement, { html, images }: Rendered, prev: Is
       else host.setAttribute(name, value);
     }
     element.replaceWith(host);
-    return { id: reused?.id ?? newId(), key: contentKey(content), host, content };
+    const id = reused?.id ?? newId();
+    host.dataset.islandId = String(id); // 手机点按时由点中的元素找到所属图片
+    return { id, key: contentKey(content), host, content };
   });
 }
 
-const anchors = (anchor: MenuAnchor | null, image: ImageRef) => anchor !== null && anchor.start === image.sourceStart && anchor.src === image.src;
+const leadImage = (content: IslandContent) => (content.kind === "image" ? content.image : content.images[0]);
+const anchorOf = (content: IslandContent): MenuAnchor => ({ kind: content.kind, start: leadImage(content).sourceStart, src: leadImage(content).src });
+const anchors = (anchor: MenuAnchor | null, content: IslandContent) =>
+  anchor !== null && anchor.kind === content.kind && anchor.start === leadImage(content).sourceStart && anchor.src === leadImage(content).src;
+const locationOf = (image: ImageRef): ImageLocation => ({ start: image.sourceStart, end: image.sourceEnd, src: image.src });
 
 export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }: MarkdownPreviewProps) {
   const { rendered, failed } = usePreviewHtml(body);
@@ -203,6 +214,7 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
   const lastId = useRef(0);
   const [menu, setMenu] = useState<MenuAnchor | null>(null);
   const menuRef = useRef<MenuAnchor | null>(null);
+  const press = useRef({ touch: false, at: 0 });
 
   // 在下方补占位文件名之前执行：先写入新 HTML
   useLayoutEffect(() => {
@@ -210,9 +222,9 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
     const next = content ? mountIslands(content, rendered ?? { html: "", images: [] }, islandsRef.current, () => ++lastId.current) : [];
     islandsRef.current = next;
     setIslands(next);
-    // 菜单所在的图片已不在（源码被删改）：关闭菜单；焦点随按钮一起被移除时回到预览区
+    // 菜单所在的图片 / 组图已不在（源码被删改、拆成单图）：关闭菜单；焦点随按钮一起被移除时回到预览区
     const anchor = menuRef.current;
-    if (anchor && !next.some(({ content }) => content.kind === "image" && anchors(anchor, content.image))) {
+    if (anchor && !next.some(({ content }) => anchors(anchor, content))) {
       menuRef.current = null;
       setMenu(null);
       if (document.activeElement === document.body) contentRef.current?.focus();
@@ -224,21 +236,59 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
     setMenu(anchor);
   };
 
-  const imageMenu = (image: ImageRef) =>
-    onSourceEdit && (
+  // 改写源码：定位不上时关闭菜单；写入时焦点被移到源码区（原生撤销需要），立即还给菜单项，Esc / 方向键继续作用于菜单
+  const rewrite = (compute: (source: string) => Edit | null, focusAfter: HTMLElement | null) => {
+    if (!onSourceEdit?.(compute)) {
+      setMenuAnchor(null);
+      return;
+    }
+    focusAfter?.focus();
+  };
+
+  const menuFor = (content: IslandContent) => {
+    if (!onSourceEdit) return undefined;
+    const open = anchors(menu, content);
+    const onOpenChange = (next: boolean) => setMenuAnchor(next ? anchorOf(content) : null);
+    if (content.kind === "image") {
+      const { image } = content;
+      return (
+        <ImageMenu
+          kind="image"
+          open={open}
+          onOpenChange={onOpenChange}
+          wide={image.marks.wide}
+          onToggleWide={() => rewrite((source) => toggleMark(source, locationOf(image), "wide"), document.activeElement as HTMLElement | null)}
+        />
+      );
+    }
+    const members = content.images.map(locationOf);
+    return (
       <ImageMenu
-        kind="image"
-        open={anchors(menu, image)}
-        onOpenChange={(open) => setMenuAnchor(open ? { start: image.sourceStart, src: image.src } : null)}
-        wide={image.marks.wide}
-        onToggleWide={() => {
-          const location = { start: image.sourceStart, end: image.sourceEnd, src: image.src };
-          const item = document.activeElement as HTMLElement | null;
-          if (!onSourceEdit((source) => toggleMark(source, location, "wide"))) setMenuAnchor(null);
-          else item?.focus(); // 写入时焦点被移到源码区（原生撤销需要），立即还给菜单项，Esc / 方向键继续作用于菜单
+        kind="gallery"
+        open={open}
+        onOpenChange={onOpenChange}
+        initialFocus={open ? menu?.focus : undefined}
+        mode={content.variant}
+        count={content.images.length}
+        onModeChange={(mode) => {
+          setMenuAnchor({ ...anchorOf(content), focus: mode === "grid" ? 0 : 1 });
+          rewrite((source) => setGalleryMode(source, members, mode), document.activeElement as HTMLElement | null);
         }}
+        onSplit={() => rewrite((source) => setGalleryMode(source, members, "split"), contentRef.current)} // 组图随之消失，焦点回到预览区
       />
     );
+  };
+
+  // 手机：点按图片或组图直接展开菜单（长按留给实况照片播放；点在按钮或菜单上的不算）
+  const onTap = (event: MouseEvent) => {
+    const { touch, at } = press.current;
+    if (!onSourceEdit || !touch || event.timeStamp - at > TAP_MAX_MS) return;
+    const target = event.target as Element;
+    if (target.closest('button, [role="menu"]')) return;
+    const id = target.closest<HTMLElement>("[data-island-id]")?.dataset.islandId;
+    const island = islands.find((item) => String(item.id) === id);
+    if (island) setMenuAnchor(anchorOf(island.content));
+  };
 
   // 占位块"图片上传中… 文件名"：渲染结果不含文件名（源码里没有），按出现顺序补上
   useLayoutEffect(() => {
@@ -256,7 +306,11 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
           <Alert tone="error">预览渲染失败，继续编辑会自动重试</Alert>
         </div>
       )}
-      <article className="mx-auto mt-4 max-w-prose">
+      <article
+        className="mx-auto mt-4 max-w-prose"
+        onPointerDown={(event) => (press.current = { touch: event.pointerType === "touch", at: event.timeStamp })}
+        onClick={onTap}
+      >
         <h1 className="font-prose-heading text-display font-bold text-ink">{title || "无标题"}</h1>
         {empty ? (
           <p className="mt-6 text-ui text-ink-faint">在左侧开始写作，这里会显示预览</p>
@@ -274,10 +328,10 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
                 height={content.image.h}
                 wide={content.image.marks.wide}
                 live={liveOf(content.image)}
-                actions={imageMenu(content.image)}
+                actions={menuFor(content)}
               />
             ) : (
-              <ImageGallery variant={content.variant} images={content.images.map(toGalleryImage)} />
+              <ImageGallery variant={content.variant} images={content.images.map(toGalleryImage)} actions={menuFor(content)} />
             ),
             host,
             String(id),

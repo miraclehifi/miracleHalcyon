@@ -14,7 +14,7 @@ phases:
   architecture: done
   domain_design: done   # domain_model / api_contract / data_model: self-checked
   task_planning: done   # self-checked；Sprint 1 共 72 个任务（已关闭）；Sprint 2 共 18 个任务（2026-10-14，按功能点粒度，.claude/rules/tasks.md）；Sprint 3 共 12 个任务（2026-10-14）
-  implementation: in_progress   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18，待 code-review）；Sprint 3 进行中（9 / 14；插入任务 13 raise-image-size-limit、14 fix-jpeg-sniff-large-metadata）
+  implementation: in_progress   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18，待 code-review）；Sprint 3 进行中（10 / 14；插入任务 13 raise-image-size-limit、14 fix-jpeg-sniff-large-metadata）
   code_review: pending   # Sprint 1、Sprint 2 待审查（2026-10-14 作者决定延后，先做 Sprint 3）
   validation: pending
 current_phase: implementation
@@ -29,9 +29,9 @@ approvals:
 has_ui_changes: true
 checkpoint:
   sprint: sprint-3
-  current_task: add-gallery-menu   # 任务 10 已完成；2026-10-15 作者决定不考虑苹果（backlog drop-apple-live-photo），任务 5–7 改为主色 / 处理中占位、视频处理与上传、安卓动态照片，不再等样本，排在 11、12 之后；任务内只跑本任务测试，回归 / lint / check 等可做任务全部完成后统一跑（2026-10-15 作者要求）；E2E 回归统一留到 Sprint 末；Sprint 2 code-review 延后
+  current_task: add-image-syntax-help   # 任务 11 已完成；2026-10-15 作者决定不考虑苹果（backlog drop-apple-live-photo），任务 5–7 改为主色 / 处理中占位、视频处理与上传、安卓动态照片，不再等样本，排在 11、12 之后；任务内只跑本任务测试，回归 / lint / check 等可做任务全部完成后统一跑（2026-10-15 作者要求）；E2E 回归统一留到 Sprint 末；Sprint 2 code-review 延后
   current_phase: implementation
-  completed_tasks: [spike-browser-media-processing, implement-markdown-image-plugins, implement-live-photo-upload-api, add-article-image-display, raise-image-size-limit, fix-jpeg-sniff-large-metadata, add-image-gallery-display, add-live-photo-playback, add-single-image-menu]   # Sprint 3
+  completed_tasks: [spike-browser-media-processing, implement-markdown-image-plugins, implement-live-photo-upload-api, add-article-image-display, raise-image-size-limit, fix-jpeg-sniff-large-metadata, add-image-gallery-display, add-live-photo-playback, add-single-image-menu, add-gallery-menu]   # Sprint 3
   sprint2_completed_tasks: [build-format-toolbar, implement-image-upload-api, add-image-read-route, add-image-paste-upload, add-image-drop-and-pick-upload, handle-image-upload-errors, add-icon-button-tooltips, implement-delete-post-api, add-post-list-animated-entry, add-swipe-row-delete, add-list-delete-undo, add-editor-delete-action, add-editor-view-modes, add-preview-scroll-sync, add-local-draft-restore, handle-session-expired-save, implement-logout-endpoint, add-logout-entry]   # 18 / 18（Sprint 1 的 72 个见 sprint-1/_index.md）
   blocked_tasks: []
   test_command: "npm test（vitest 4.1：unit + workers）/ npm run test:e2e（E2E 前 npm run e2e:seed 写入图片夹具，webServer 已自动执行；@timing 用例在 *-timing 项目最后串行；交互前 waitForHydration）/ npm run test:spike（spike：chromium + astro dev）"

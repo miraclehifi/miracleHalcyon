@@ -3,7 +3,7 @@
 // AccordionGallery（3–7 张，默认展开中间一张，高度按断点传入）。实况照片的播放层经 renderOverlay 叠加：网格单元格在
 // 图片加载完成后、手风琴只在展开项上（不受网格聚光的灰度滤镜影响）。onImageClick 留给读者端打开 Lightbox，预览中不传。
 // 渲染期不依赖 window（媒体查询、主题在服务端取默认值），可在构建时预渲染
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import AccordionGallery from "../vendor/react-bits/AccordionGallery";
 import ChromaGrid from "../vendor/react-bits/ChromaGrid";
 import RefineFrame from "../vendor/react-bits/RefineFrame";
@@ -27,6 +27,7 @@ export interface ImageGalleryProps {
   images: GalleryImage[];
   caption?: string; // 组图图注；不传时由各图 title 拼成一行
   onImageClick?: (index: number) => void;
+  actions?: ReactNode; // 组图右上角内侧 8px 的操作（后台预览的组图菜单）；悬停组图或焦点进入时显示
 }
 
 const ACCORDION_PHONE_QUERY = "(max-width: 520px)";
@@ -74,7 +75,15 @@ function GridCell({ image, onComplete }: { image: GalleryImage; onComplete: (com
   );
 }
 
-export function ImageGallery({ variant, images, caption, onImageClick }: ImageGalleryProps) {
+function Actions({ children }: { children: ReactNode }) {
+  return (
+    <div className="absolute top-2 right-2 z-[4] opacity-0 transition-opacity duration-200 group-hover/image-gallery:opacity-100 focus-within:opacity-100 has-[[aria-expanded=true]]:opacity-100">
+      {children}
+    </div>
+  );
+}
+
+export function ImageGallery({ variant, images, caption, onImageClick, actions }: ImageGalleryProps) {
   const narrow = useMediaQuery(NARROW_QUERY);
   const phone = useMediaQuery(ACCORDION_PHONE_QUERY);
   const theme = useColorScheme();
@@ -96,7 +105,8 @@ export function ImageGallery({ variant, images, caption, onImageClick }: ImageGa
 
   if (variant === "accordion") {
     return (
-      <figure data-image-gallery="accordion" data-count={images.length} className="not-prose my-8">
+      <figure data-image-gallery="accordion" data-count={images.length} className="group/image-gallery not-prose relative my-8">
+        {actions && <Actions>{actions}</Actions>}
         <AccordionGallery
           items={images.map((image) => ({ image: image.src, label: image.caption, alt: image.alt }))}
           defaultIndex={Math.floor(images.length / 2)}
@@ -121,7 +131,8 @@ export function ImageGallery({ variant, images, caption, onImageClick }: ImageGa
   }
 
   return (
-    <figure data-image-gallery="grid" data-count={images.length} className="not-prose my-8">
+    <figure data-image-gallery="grid" data-count={images.length} className="group/image-gallery not-prose relative my-8">
+      {actions && <Actions>{actions}</Actions>}
       <ChromaGrid
         items={images.map((image) => ({ image: image.src, alt: image.alt, accent: image.accent }))}
         columns={galleryColumns(images.length, narrow)}

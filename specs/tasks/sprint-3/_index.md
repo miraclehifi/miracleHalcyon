@@ -23,7 +23,7 @@
 | 8 | [add-image-gallery-display](add-image-gallery-display.md) | 预览组图 `ImageGallery`（网格、手风琴） | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 2 | 中 | completed |
 | 9 | [add-live-photo-playback](add-live-photo-playback.md) | 预览实况照片播放与 `LiveBadge` | article-writing | FRONTEND | 表现层 | US-11 | add-article-image-display, add-image-gallery-display | 0 | 中 | completed |
 | 10 | [add-single-image-menu](add-single-image-menu.md) | 单图菜单切换宽图 | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 1 | 中 | completed |
-| 11 | [add-gallery-menu](add-gallery-menu.md) | 组图菜单与手机点按 | article-writing | FRONTEND | 表现层 | US-12 | add-image-gallery-display, add-single-image-menu | 0 | 低 | pending |
+| 11 | [add-gallery-menu](add-gallery-menu.md) | 组图菜单与手机点按 | article-writing | FRONTEND | 表现层 | US-12 | add-image-gallery-display, add-single-image-menu | 0 | 低 | completed |
 | 12 | [add-image-syntax-help](add-image-syntax-help.md) | 底栏"图片写法"说明 | article-writing | FRONTEND | 表现层 | US-12 | — | 0 | 低 | pending |
 | 13 | [raise-image-size-limit](raise-image-size-limit.md) | 图片上传上限放宽到 50MB（2026-10-14 插入） | raise-image-size-limit | API + FRONTEND | 数据 + 领域 + 接口 + 表现 | US-05 | — | 0 | 低 | completed |
 | 14 | [fix-jpeg-sniff-large-metadata](fix-jpeg-sniff-large-metadata.md) | 元数据超过 64KB 的 JPEG 可上传（Bug，2026-10-14 插入） | sniff-jpeg-large-metadata | API | 领域层 | US-05 | — | 0 | 低 | completed |
