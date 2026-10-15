@@ -12,6 +12,7 @@ import type { AutosaveState } from "../../../lib/autosave/controller";
 import { clearLocalDraft, compareLocalStash, readLocalDraft, writeLocalDraft } from "../../../lib/autosave/local-draft";
 import { logout } from "../../../lib/admin/logout";
 import { useAutosave } from "../../../lib/autosave/useAutosave";
+import { applyEdit, type Edit } from "../../../lib/editor/format-commands";
 import { useScrollSync } from "../../../lib/editor/scroll-sync";
 import { useEditorView, type NarrowTab, type ViewMode } from "../../../lib/editor/view-mode";
 import { useHydrated } from "../../../lib/dom/hydration";
@@ -95,6 +96,19 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const getBody = useCallback(() => document.getElementById(FIELD_INPUT_IDS.body) as HTMLTextAreaElement | null, []);
   const getPreview = useCallback(() => previewRef.current, []);
   useScrollSync(getBody, getPreview, view.mode === "split");
+  // 预览图片菜单改写源码：与工具栏同一套写入（applyEdit，可撤销），作者原来的选区按长度差平移保留
+  const onSourceEdit = useCallback(
+    (compute: (source: string) => Edit | null) => {
+      const element = getBody();
+      const edit = element && compute(element.value);
+      if (!element || !edit) return false;
+      const delta = edit.insert.length - (edit.to - edit.from);
+      const shift = (pos: number) => (pos <= edit.from ? pos : pos >= edit.to ? pos + delta : edit.from + edit.insert.length);
+      applyEdit(element, { ...edit, select: [shift(element.selectionStart), shift(element.selectionEnd)] });
+      return true;
+    },
+    [getBody],
+  );
   // 发布日期默认浏览器本地的今天；服务端不知道作者时区，水合前留空
   const publishedAt = draft.publishedAt ?? (hydrated ? localDate(new Date()) : "");
   // 保存、发布、撤回的响应都带最新状态：更新徽标与主按钮
@@ -305,7 +319,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
             hidden={view.mode === "edit"}
             className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 [--article-bleed:40px] max-md:px-4 max-md:py-4 max-md:[--article-bleed:16px]"
           >
-            <MarkdownPreview title={draft.title} body={draft.body} uploadNames={uploadNames} />
+            <MarkdownPreview title={draft.title} body={draft.body} uploadNames={uploadNames} onSourceEdit={onSourceEdit} />
           </section>
           {settingsOpen && (
             <PostSettingsDrawer

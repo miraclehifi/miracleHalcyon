@@ -1,5 +1,5 @@
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { ArticleImage } from "../../../src/components/article/ArticleImage";
 
 const SRC = "/img/2026/10/jjjjjjjjjj_960x1280_6b7f8e.jpg";
@@ -10,8 +10,8 @@ const layer = () => figure().querySelector<HTMLElement>("[data-live-photo]");
 const video = () => figure().querySelector("video")!;
 const badge = () => figure().querySelector<HTMLElement>("[data-live-badge]");
 
-let play: ReturnType<typeof vi.fn>;
-let pause: ReturnType<typeof vi.fn>;
+let play: Mock<() => Promise<void>>;
+let pause: Mock<() => void>;
 
 beforeEach(() => {
   vi.useFakeTimers();

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 10
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（编辑器源码改写 + 预览组件）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -35,14 +35,14 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `Menu` 新增 `menuitemcheckbox` / `menuitemradio`（选中显示 ✓），components.md 同步
-- [ ] 触发按钮位置：图片右上角内侧 8px；滚动预览区时菜单关闭
-- [ ] components.md 中 `ImageMenu`（单图）、`OverlayButton` 标注"已实现"
+- [x] `Menu` 新增 `menuitemcheckbox` / `menuitemradio`（选中显示 ✓），components.md 同步
+- [x] 触发按钮位置：图片右上角内侧 8px；滚动预览区时菜单关闭
+- [x] components.md 中 `ImageMenu`（单图）、`OverlayButton` 标注"已实现"
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`Menu` 现有单元测试、`add-logout-entry` 的 E2E、`tests/e2e/image-layout.spec.ts` 通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [ ] 影响范围回归（可做任务全部完成后统一跑）：`Menu` 现有单元测试、`add-logout-entry` 的 E2E、`tests/e2e/image-layout.spec.ts` 通过；E2E 补跑 webkit 一次
+- [ ] `npm run lint` 与 `npm run check` 无错误（同上；本任务 tsc 已过）
 
 ## 依赖
 

@@ -3,9 +3,13 @@
 // 渲染结果的顶层块带 data-line，同步滚动由页面（useScrollSync）基于滚动容器处理
 // 单图 figure[data-article-image] 挂载为 ArticleImage（portal 到替换 figure 的宿主元素）；重新渲染时按 reconcileIslands
 // 复用 src 与标记未变的实例——把原宿主移回新位置，已加载的图片不重新请求、不重播马赛克。组图 div[data-gallery] 同样
-// 挂载为 ImageGallery，按"模式 + 组内各图 key"复用
+// 挂载为 ImageGallery，按"模式 + 组内各图 key"复用。
+// 图片菜单（admin-post-editor"图片菜单"）：单图右上角"图片选项"，经 onSourceEdit 改写源码；哪张图的菜单开着按"源码起点 +
+// 地址"记录，改写后图片重新挂载菜单仍打开；该图片在新的渲染结果里找不到时关闭（焦点无处可去时回到预览区）
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import type { Edit } from "../../../lib/editor/format-commands";
+import { toggleMark } from "../../../lib/editor/image-marks";
 import { liveVideoSrc } from "../../../lib/markdown/plugins/image-key";
 import { islandKey, reconcileIslands } from "../../../lib/markdown/reconcile-islands";
 import { PLACEHOLDER_LABELS } from "../../../lib/markdown/plugins/upload-placeholder";
@@ -15,11 +19,19 @@ import MarkdownWorker from "../../../lib/markdown/worker.ts?worker";
 import { ArticleImage } from "../../article/ArticleImage";
 import { ImageGallery, type GalleryImage } from "../../article/ImageGallery";
 import { Alert } from "../../ui/Alert";
+import { ImageMenu } from "./ImageMenu";
 
 export interface MarkdownPreviewProps {
   title: string;
   body: string;
   uploadNames?: string[]; // 进行中上传的文件名，按占位出现顺序补到占位块上
+  // 图片菜单改写源码：compute 拿到当前源码算出 Edit（定位不上返回 null）；返回是否已写入。不传时不显示图片菜单
+  onSourceEdit?: (compute: (source: string) => Edit | null) => boolean;
+}
+
+interface MenuAnchor {
+  start: number;
+  src: string;
 }
 
 // 进入写文章页即预热：Shiki 按需编译语法规则，首次遇到某类语法（如类型注解）在 WebKit 上要近 1 秒；
@@ -180,13 +192,17 @@ function mountIslands(content: HTMLElement, { html, images }: Rendered, prev: Is
   });
 }
 
-export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPreviewProps) {
+const anchors = (anchor: MenuAnchor | null, image: ImageRef) => anchor !== null && anchor.start === image.sourceStart && anchor.src === image.src;
+
+export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }: MarkdownPreviewProps) {
   const { rendered, failed } = usePreviewHtml(body);
   const empty = body.trim() === "";
   const contentRef = useRef<HTMLDivElement>(null);
   const [islands, setIslands] = useState<Island[]>([]);
   const islandsRef = useRef<Island[]>([]);
   const lastId = useRef(0);
+  const [menu, setMenu] = useState<MenuAnchor | null>(null);
+  const menuRef = useRef<MenuAnchor | null>(null);
 
   // 在下方补占位文件名之前执行：先写入新 HTML
   useLayoutEffect(() => {
@@ -194,7 +210,35 @@ export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPrevi
     const next = content ? mountIslands(content, rendered ?? { html: "", images: [] }, islandsRef.current, () => ++lastId.current) : [];
     islandsRef.current = next;
     setIslands(next);
+    // 菜单所在的图片已不在（源码被删改）：关闭菜单；焦点随按钮一起被移除时回到预览区
+    const anchor = menuRef.current;
+    if (anchor && !next.some(({ content }) => content.kind === "image" && anchors(anchor, content.image))) {
+      menuRef.current = null;
+      setMenu(null);
+      if (document.activeElement === document.body) contentRef.current?.focus();
+    }
   }, [rendered, empty]);
+
+  const setMenuAnchor = (anchor: MenuAnchor | null) => {
+    menuRef.current = anchor;
+    setMenu(anchor);
+  };
+
+  const imageMenu = (image: ImageRef) =>
+    onSourceEdit && (
+      <ImageMenu
+        kind="image"
+        open={anchors(menu, image)}
+        onOpenChange={(open) => setMenuAnchor(open ? { start: image.sourceStart, src: image.src } : null)}
+        wide={image.marks.wide}
+        onToggleWide={() => {
+          const location = { start: image.sourceStart, end: image.sourceEnd, src: image.src };
+          const item = document.activeElement as HTMLElement | null;
+          if (!onSourceEdit((source) => toggleMark(source, location, "wide"))) setMenuAnchor(null);
+          else item?.focus(); // 写入时焦点被移到源码区（原生撤销需要），立即还给菜单项，Esc / 方向键继续作用于菜单
+        }}
+      />
+    );
 
   // 占位块"图片上传中… 文件名"：渲染结果不含文件名（源码里没有），按出现顺序补上
   useLayoutEffect(() => {
@@ -217,7 +261,7 @@ export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPrevi
         {empty ? (
           <p className="mt-6 text-ui text-ink-faint">在左侧开始写作，这里会显示预览</p>
         ) : (
-          <div ref={contentRef} className="prose mt-6 max-w-none" />
+          <div ref={contentRef} tabIndex={-1} className="prose mt-6 max-w-none outline-none" />
         )}
         {islands.map(({ id, host, content }) =>
           createPortal(
@@ -230,6 +274,7 @@ export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPrevi
                 height={content.image.h}
                 wide={content.image.marks.wide}
                 live={liveOf(content.image)}
+                actions={imageMenu(content.image)}
               />
             ) : (
               <ImageGallery variant={content.variant} images={content.images.map(toGalleryImage)} />
