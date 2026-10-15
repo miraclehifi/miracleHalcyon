@@ -3,12 +3,12 @@
 **Feature**: F-002-博客首页与阅读
 **最后更新**: 2026-10-15
 
-> 读者页在构建时预渲染，E2E 无法按用例临时造数据后立即看到页面。读者端用例统一使用下面的**只读**构建夹具：构建时数据源指向夹具（注入方式以 design-arch 为准），`npm run test:e2e` 的 webServer 构建一次，所有读者端用例共用。
+> 读者页在构建时预渲染，E2E 无法按用例临时造数据后立即看到页面。读者端用例统一使用下面的**只读**构建夹具：构建时设置 `READER_FIXTURE=reader-fixture`，由 Vite 插件 `readerData()` 读取 `tests/fixtures/reader/reader-fixture.json` 注入（[ADR-007](../../../../engineering/features/F-002-博客首页与阅读/architecture/adr/ADR-007-reader-build-data.md)），`npm run test:e2e` 的 webServer 构建一次，所有读者端用例共用。
 > 需要写入的用例（发布触发重建、封面上传）走后台接口与 workers 集成测试，用 Factory 造数据，不依赖本夹具，也不修改本夹具。
 
 ## 1. `reader-fixture`（默认）
 
-已发布 41 篇，草稿 1 篇，已撤回 1 篇。日期为 `publishedAt`（`yyyy-MM-dd`）。
+已发布 41 篇，草稿 1 篇，已撤回 1 篇。日期为 `publishedAt`（`yyyy-MM-dd`）。夹具文件的形状与公开接口一致（`PublishedPost[]`），**只含已发布的 41 篇**；表中的 `withdrawn-post`、`draft-post` 代表线上存在但接口不返回的文章，用来确定"相邻 / 同标签 / 标签页"的期望值，草稿不可见本身由 F-001 公开接口与 workers 集成测试保证（TC-US03-09 检查产物中确实没有这些标识）。
 
 | slug | 标题 | publishedAt | 标签 | 摘要 | 封面 | 正文要点 |
 |------|------|-------------|------|------|------|---------|
@@ -39,7 +39,7 @@
 
 ## 2. `reader-fixture-empty`
 
-0 篇已发布文章，用于构建空站点（TC-US03-07）。
+0 篇已发布文章，用于构建空站点（TC-US03-07、TC-US04-08）：`READER_FIXTURE=reader-fixture-empty` 构建到临时目录。
 
 ## 3. 站点配置夹具 `site.ts`
 
