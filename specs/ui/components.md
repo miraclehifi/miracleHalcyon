@@ -119,7 +119,7 @@
 |-----------|-----------|-------|---------|
 | `SiteNav` · `SiteNav/Mobile` | `SiteNav` | `current?`（`posts` / `media`，首页、404 不传）；摄影 / GitHub 地址来自 `site.ts`，为空的项不渲染；桌面：文字项 文章 / 书影音（当前项 `accent` + 600）+ 图标 摄影（外链）/ GitHub / RSS / 主题切换（`IconButton/Ghost`，图标 18px）；手机：全部为 44px 图标按钮 文章 / 书影音 / 摄影 / 主题切换，GitHub / RSS 不显示，当前项图标 `accent`；文章详情、标签页传 `posts`（见 [site-map.md](site-map.md)"全局导航"） | `SiteHeader` 内 |
 | `SiteHeader` · `SiteHeader/Mobile` | `SiteHeader` | `current?`（透传给 `SiteNav`）；左侧站点名（回首页），右侧 `SiteNav` / `SiteNav/Mobile` | 读者端全部页面 |
-| `PostPager` | `PostPager` | `prev?`、`next?`（`title`、`slug`）；缺一侧时该侧留空，两侧都没有时不渲染；手机两项上下排列 | 文章详情页文末 |
+| `PostPager` | `PostPager`（已实现：`src/components/reader/PostPager.astro`） | `prev?`、`next?`（`title`、`slug`）；缺一侧时该侧留空，两侧都没有时不渲染；手机两项上下排列 | 文章详情页文末 |
 | `PostCard` · `PostCard/Hover` · `PostCard/Mobile` | `PostCard`（已实现：`src/components/reader/PostCard.tsx`、列表 `PostCardList.tsx`，Sprint 4） | `post`（`title`、`excerpt`、`publishedAt`、`tags`、`cover?`）；整卡可点进入详情；`excerpt`：有 `summary` 用 `summary`，否则由正文渲染后取纯文本前约 120 字，最多 3 行，为空时不渲染；没有 `cover` 时不显示右侧图片；`/Hover` 是悬停与键盘聚焦态（上层左上移 4px、下层右下移 4px，边框不换色，保持 `line-strong`），在列表中由 `active` 控制（见"列表动效参数"）；手机端标题与 72px 封面同行，摘要在下 | 文章列表页 `/posts` |
 | `SiteFooter` | `SiteFooter` | —（站点名、签名一句话、版权、RSS / GitHub 链接）。已实现：`src/components/reader/SiteFooter.astro`（与 `SiteHeader`、`SiteNav`、`BackLink`、`NotFound` 同为 Astro 组件，不水合） | 读者端全部页面 |
 | （SiteNav 内的主题切换按钮） | `ThemeToggle`（已实现：`src/components/reader/ThemeToggle.astro`，原生脚本，不加载 React） | —；`IconButton/Ghost`，亮 / 暗 / 跟随系统三态轮换，图标 `sun` / `moon` / `sun-moon`，`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
@@ -329,7 +329,7 @@
 
 | 图层名 | React 组件 | 所在画板 |
 |-------|-----------|---------|
-| `TagPostsNav` · `TagPostsNav/Mobile` | `TagPostsNav` | 05 文章详情左栏 / 05m 文末（同标签文章，最多 8 篇，不含本文，每项标题 + 共享标签；`/Mobile` 为文末形态，每项高 44） |
+| `TagPostsNav` · `TagPostsNav/Mobile` | `TagPostsNav`（已实现：`src/components/reader/TagPostsNav.astro`，`variant` = `aside` / `end`） | 05 文章详情左栏 / 05m 文末（同标签文章，最多 8 篇，不含本文，每项标题 + 共享标签；`/Mobile` 为文末形态，每项高 44） |
 | `ArticleHeader` | `ArticleHeader` | 05 / 05m（标题、日期、字数与阅读时长、更新于（有更新时）、标签） |
 | `ArticleContent` | `ArticleContent` | 05 / 05m（Markdown 渲染：段首缩进、首字下沉、引用署名） |
 | `HomeIntro` | `HomeIntro` | 06 / 06m（头像、问候语、多段简介、GitHub / 摄影 / 邮箱；内容来自 `site.ts`）。已实现：`src/components/reader/HomeIntro.astro` |

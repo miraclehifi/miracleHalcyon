@@ -1,0 +1,35 @@
+---
+// PostPager（components.md"读者端区块"、admin.pen 05 / 05m）：纸张内最后一块。左"← 上一篇"（更早发布）、
+// 右"下一篇 →"（更新发布）；缺一侧时该侧留空，两侧都没有时不渲染；手机上下排列
+import type { ReaderPost } from "../../lib/reader/types";
+
+interface Props {
+  prev: ReaderPost | null;
+  next: ReaderPost | null;
+}
+const { prev, next } = Astro.props;
+const title = "text-body text-ink transition-colors duration-200 group-hover:text-accent";
+---
+
+{
+  (prev || next) && (
+    <nav aria-label="上一篇 / 下一篇" class="grid grid-cols-2 gap-8 border-t border-line pt-5 max-md:grid-cols-1 max-md:gap-4">
+      <div>
+        {prev && (
+          <a href={`/posts/${prev.slug}`} class="group flex flex-col gap-1">
+            <span class="text-caption text-ink-faint">← 上一篇</span>
+            <span class={title}>{prev.title}</span>
+          </a>
+        )}
+      </div>
+      <div class="text-end max-md:text-start">
+        {next && (
+          <a href={`/posts/${next.slug}`} class="group flex flex-col gap-1 md:items-end">
+            <span class="text-caption text-ink-faint">下一篇 →</span>
+            <span class={title}>{next.title}</span>
+          </a>
+        )}
+      </div>
+    </nav>
+  )
+}

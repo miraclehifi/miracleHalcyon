@@ -55,8 +55,8 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | `excerptOf(post)`（已实现） | `excerpt.ts` | `summary.trim()` 非空 → 原样；否则 `plainText(body)` 前 120 个码点，超出时去尾部空白加"…"；结果可为空字符串 | TC-US04-03 |
 | `tagSlug(name)`（已实现） | `tags.ts` | `name.trim().toLowerCase().normalize('NFKC')`，把非 `\p{L}\p{N}` 的连续字符换成 `-`，去掉首尾 `-`；结果为空时用 `tag`（ADR-007 验证结果④） | TC-US05-06 |
 | `groupTags(posts)`（已实现；另有 `tagSlugMap` 供链接统一取地址，`readerModel` 按数据缓存） | `tags.ts` | 按小写名分组（`C#` 与 `c#` 同组，`C#` 与 `C` 不同组）；组的 `slug` 取 `tagSlug`，多个组 `slug` 相同时除篇数最多（平手按名称升序第一个）的组外追加 `-{FNV-1a(小写名) 前 6 位}`（构建时在 workerd 中运行，`crypto.subtle` 只有异步接口，改用同步哈希）；`name` 取组内出现次数最多的写法，平手取最早发布文章中的写法；`count` = 文章数；`posts` 保持 `sortPublished` 顺序；返回按 `count` 降序、`name` 升序（`localeCompare('zh')`） | TC-US05-06、TC-US04-10 |
-| `relatedPosts(post, all, max=8)` | `related.ts` | 候选：除本文外与本文有共享标签（按 `tagSlug` 比较）的文章；排序：共享标签数降序 → 发布时间降序（`sortPublished` 次序）；取前 `max`；每项附 `sharedTags`（本文中的写法） | TC-US08-02 |
-| `adjacentPosts(slug, sorted)` | `adjacent.ts` | 在 `sortPublished` 序列中：`prev` = 下一个（更早发布），`next` = 上一个（更新发布）；不存在为 `null` | TC-US09-03 |
+| `relatedPosts(post, all, max=8)`（已实现） | `related.ts` | 候选：除本文外与本文有共享标签（按 `tagSlug` 比较）的文章；排序：共享标签数降序 → 发布时间降序（`sortPublished` 次序）；取前 `max`；每项附 `sharedTags`（本文中的写法） | TC-US08-02 |
+| `adjacentPosts(slug, sorted)`（已实现） | `adjacent.ts` | 在 `sortPublished` 序列中：`prev` = 下一个（更早发布），`next` = 上一个（更新发布）；不存在为 `null` | TC-US09-03 |
 | `readingStats(text)`（已实现） | `reading-stats.ts` | 计数 = 汉字（`\p{Script=Han}`）个数 + 其余按 `[\p{L}\p{N}]+` 匹配的词数；`displayWords` = 向上取整到百（< 100 时为实际数）；`minutes = max(1, ceil(count/300))` | TC-US07-05 |
 | `updatedDate(post)`（已实现） | `reading-stats.ts` | `lastPublishedAt` 取 UTC 日期；晚于 `publishedAt` 时返回该日期，否则 `null` | TC-US07-05 |
 | `formatLongDate(date)`（已实现） | `reading-stats.ts` | `yyyy-MM-dd` → "2026年10月10日 星期六"（按日历计算星期，不依赖时区） | TC-US07-04 |

@@ -4,10 +4,14 @@ import data from "virtual:reader-data";
 import ArticleContent from "../../components/reader/ArticleContent.astro";
 import ArticleHeader from "../../components/reader/ArticleHeader.astro";
 import ArticleImagesIsland from "../../components/reader/ArticleImagesIsland";
+import PostPager from "../../components/reader/PostPager.astro";
+import TagPostsNav from "../../components/reader/TagPostsNav.astro";
 import ReaderLayout from "../../layouts/ReaderLayout.astro";
 import { renderMarkdown } from "../../lib/markdown/render";
+import { adjacentPosts } from "../../lib/reader/adjacent";
 import { prepareArticleHtml } from "../../lib/reader/article-html";
 import { readerModel } from "../../lib/reader/model";
+import { relatedPosts } from "../../lib/reader/related";
 import type { ReaderPost } from "../../lib/reader/types";
 
 export const prerender = true;
@@ -20,18 +24,25 @@ interface Props {
   post: ReaderPost;
 }
 const { post } = Astro.props;
-const { slugOf } = readerModel(data);
+const { slugOf, posts } = readerModel(data);
+const related = relatedPosts(post, posts);
+const { prev, next } = adjacentPosts(post.slug, posts);
 const article = prepareArticleHtml((await renderMarkdown(post.body)).html);
 ---
 
 <ReaderLayout title={`${post.title} · miracleHalcyon`} description={post.summary || undefined} current="posts" back="/posts" width="wide">
-  <div class="flex justify-center">
+  <!-- 三栏（≥ 1280）：同标签文章 190 · 纸张 840 · 目录 220，间距 44；没有同标签文章时不渲染左栏，其余整体居中 -->
+  <div class="flex items-start justify-center gap-11">
+    <TagPostsNav items={related} variant="aside" />
     <article
-      class="flex w-full max-w-[840px] flex-col gap-10 rounded-control border border-line px-[45px] pt-14 pb-12 [--article-bleed:45px] max-md:border-0 max-md:px-0 max-md:pt-0 max-md:[--article-bleed:20px]"
+      class="flex w-full max-w-[840px] min-w-0 flex-col gap-10 rounded-control border border-line px-[45px] pt-14 pb-12 [--article-bleed:45px] max-md:border-0 max-md:px-0 max-md:pt-0 max-md:[--article-bleed:20px]"
     >
       <ArticleHeader post={post} slugOf={slugOf} />
       <ArticleContent html={article.html} />
       {article.hasImages && <ArticleImagesIsland client:idle rootSelector="#article-content" />}
+      <TagPostsNav items={related} variant="end" />
+      <PostPager prev={prev} next={next} />
     </article>
+    <aside data-toc-column class="w-[220px] shrink-0 self-stretch max-xl:hidden"></aside>
   </div>
 </ReaderLayout>
