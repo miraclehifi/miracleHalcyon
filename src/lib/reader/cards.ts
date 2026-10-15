@@ -1,4 +1,5 @@
 // 列表卡片模型与分页地址（reader-post-list.md）
+import { excerptOf } from "./excerpt";
 import { tagSlug } from "./tags";
 import type { CardModel, ReaderPost } from "./types";
 
@@ -9,7 +10,7 @@ export function toCardModel(post: ReaderPost): CardModel {
   return {
     slug: post.slug,
     title: post.title,
-    excerpt: post.summary.trim(),
+    excerpt: excerptOf(post),
     publishedAt: post.publishedAt,
     tags: post.tags.map((name) => ({ name, slug: tagSlug(name) })),
     cover: post.cover,

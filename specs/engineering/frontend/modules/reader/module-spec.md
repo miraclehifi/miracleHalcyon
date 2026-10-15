@@ -52,7 +52,7 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | `paginate(items, page, size=20)`（已实现） | `sort.ts` | 返回 `{ items, page, totalPages, total, from, to }`；`totalPages = max(1, ceil(total/size))` | US-04、US-05 |
 | `pagePaths(total, size=20)`（已实现） | `sort.ts` | 生成 2…totalPages（第 1 页不生成 `/page/1`） | US-04 |
 | `plainText(markdown)`（已实现） | `excerpt.ts` | remark 解析 GFM → 去掉 `image`、`code`、`html`、`footnoteDefinition`、`definition` 节点 → `mdast-util-to-string`，块之间以空格连接，合并空白 | US-04、US-07 |
-| `excerptOf(post)` | `excerpt.ts` | `summary.trim()` 非空 → 原样；否则 `plainText(body)` 前 120 个码点，超出时去尾部空白加"…"；结果可为空字符串 | TC-US04-03 |
+| `excerptOf(post)`（已实现） | `excerpt.ts` | `summary.trim()` 非空 → 原样；否则 `plainText(body)` 前 120 个码点，超出时去尾部空白加"…"；结果可为空字符串 | TC-US04-03 |
 | `tagSlug(name)`（已实现） | `tags.ts` | `name.trim().toLowerCase().normalize('NFKC')`，把非 `\p{L}\p{N}` 的连续字符换成 `-`，去掉首尾 `-`；结果为空时用 `tag`（ADR-007 验证结果④） | TC-US05-06 |
 | `groupTags(posts)` | `tags.ts` | 按小写名分组（`C#` 与 `c#` 同组，`C#` 与 `C` 不同组）；组的 `slug` 取 `tagSlug`，多个组 `slug` 相同时除篇数最多（平手按名称升序第一个）的组外追加 `-{sha1(小写名) 前 6 位}`；`name` 取组内出现次数最多的写法，平手取最早发布文章中的写法；`count` = 文章数；`posts` 保持 `sortPublished` 顺序；返回按 `count` 降序、`name` 升序（`localeCompare('zh')`） | TC-US05-06、TC-US04-10 |
 | `relatedPosts(post, all, max=8)` | `related.ts` | 候选：除本文外与本文有共享标签（按 `tagSlug` 比较）的文章；排序：共享标签数降序 → 发布时间降序（`sortPublished` 次序）；取前 `max`；每项附 `sharedTags`（本文中的写法） | TC-US08-02 |

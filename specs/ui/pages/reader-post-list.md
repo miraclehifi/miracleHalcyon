@@ -28,7 +28,7 @@
 4. **分页 `Pagination`**：左"第 21–40 篇，共 41 篇"，右"上一页 1 2 3 下一页"；只有 1 页时不显示
 5. `> cd ..`
 
-> 已实现（Sprint 4，add-post-list-page）：`src/pages/posts/index.astro`、`posts/page/[page].astro`、`src/components/reader/{PostListView,PostsHeader}.astro`、`PostCardList.tsx`（React 岛 `client:visible`）、`PostCard.tsx`；`Pagination` 在 SSR 中静态输出（不水合）。摘要暂只用 `summary`，正文截取与封面见 add-post-card-details。
+> 已实现（Sprint 4，add-post-list-page）：`src/pages/posts/index.astro`、`posts/page/[page].astro`、`src/components/reader/{PostListView,PostsHeader}.astro`、`PostCardList.tsx`（React 岛 `client:visible`）、`PostCard.tsx`；`Pagination` 在 SSR 中静态输出（不水合）。正文截取摘要（`excerptOf`）、封面、手机布局与悬停只在 `(hover: hover)` 且未开启减弱动效时错位已实现（add-post-card-details）。
 
 ## 文章卡片 `PostCard`
 

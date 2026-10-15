@@ -20,3 +20,13 @@ function text(node: Nodes): string {
 export function plainText(markdown: string): string {
   return text(parser.parse(markdown)).replace(/\s+/g, " ").trim();
 }
+
+const EXCERPT_LENGTH = 120;
+
+// 列表卡片摘要（reader-post-list.md"文章卡片"）：有 summary 用 summary；否则取正文纯文本前 120 个字符（码点），超出加"…"
+export function excerptOf(post: { summary: string; body: string }): string {
+  const summary = post.summary.trim();
+  if (summary) return summary;
+  const chars = [...plainText(post.body)];
+  return chars.length > EXCERPT_LENGTH ? `${chars.slice(0, EXCERPT_LENGTH).join("").trimEnd()}…` : chars.join("");
+}
