@@ -79,10 +79,11 @@ describe("useImageUploads 错误处理", () => {
     });
   });
 
-  it("混合一批：只为合法图片插占位并上传，被拒的带文件名提示", () => {
+  it("混合一批：只为合法图片插占位并上传，被拒的带文件名提示", async () => {
     const upload = vi.fn<(file: File) => Promise<never>>(() => new Promise(() => {}));
     const { onError, textarea, uploadFiles } = setup(upload);
     uploadFiles([file("a.png", "image/png"), file("over.png", "image/png", MB50 + 1), file("logo.svg", "image/svg+xml"), file("c.png", "image/png")]);
+    await act(async () => void (await new Promise((r) => setTimeout(r, 0)))); // 处理中（算主色）→ 上传中
     expect({ uploads: upload.mock.calls.map(([f]) => f.name), value: textarea.value, errors: onError.mock.calls.map((c) => c[0]) }).toEqual({
       uploads: ["a.png", "c.png"],
       value: "原文![上传中…]()\n![上传中…]()",

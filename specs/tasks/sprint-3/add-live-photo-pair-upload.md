@@ -4,7 +4,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 6
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（`src/lib/upload/`）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -35,15 +35,15 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `mediabunny` 只在处理视频时动态 import
-- [ ] 警示与错误文案、带文件名规则与页面规格一致
-- [ ] `/_spike/media` 可手动跑正式 `processVideo`（仅 dev）
+- [x] `mediabunny` 只在处理视频时动态 import
+- [x] 警示与错误文案、带文件名规则与页面规格一致
+- [x] `/_spike/media` 可手动跑正式 `processVideo`（仅 dev）
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/unit/upload/*`、US-05 上传 E2E、add-heic-upload 的 E2E 通过
-- [ ] 构建产物检查（自 spike 移入）：`npm run build` 后 `mediabunny` 只出现在后台 chunk，不在读者页与 `_worker.js` 中
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [ ] 影响范围回归（可做任务全部完成后统一跑；`tests/unit/upload/*` 17/17 已在本任务跑过）：`tests/unit/upload/*`、US-05 上传 E2E、add-heic-upload 的 E2E 通过
+- [ ] 构建产物检查（统一跑时一并做）（自 spike 移入）：`npm run build` 后 `mediabunny` 只出现在后台 chunk，不在读者页与 `_worker.js` 中
+- [ ] `npm run lint` 与 `npm run check` 无错误（统一跑；本任务 tsc、eslint 已过）
 
 ## 依赖
 

@@ -46,7 +46,7 @@ function uploadItem(item: Item, cb: Callbacks): Promise<UploadResult>;
 | 失败 | 任一步失败 → 移除占位 → `Toast/Error`（带文件名），不影响其他项；实况照片的图片与视频不留半对 |
 | 懒加载 | `mediabunny` 只在识别出动态照片时加载；加载与处理期间占位显示"处理中…" |
 
-> 已实现（Sprint 2，静态图）：`src/lib/upload/upload-client.ts`、`upload-queue.ts`（并发 2）、`validate-file.ts`、`use-image-uploads.ts`。Sprint 3：主色与宽高 `dominant-color.ts`（`measureImage` 用 `createImageBitmap` 解码，解码失败或不支持时返回 null、按缺省主色上传；纯函数 `dominantColorFromPixels` 便于测试）；占位阶段（先插"处理中…"，算完主色经 `markUploading` 改为"上传中…"，再替换 / 移除）。实况照片在任务 6、7。
+> 已实现（Sprint 2，静态图）：`src/lib/upload/upload-client.ts`、`upload-queue.ts`（并发 2）、`validate-file.ts`、`use-image-uploads.ts`。Sprint 3：主色与宽高 `dominant-color.ts`（`measureImage` 用 `createImageBitmap` 解码，解码失败或不支持时返回 null、按缺省主色上传；纯函数 `dominantColorFromPixels` 便于测试）；占位阶段（先插"处理中…"，算完主色经 `markUploading` 改为"上传中…"，再替换 / 移除）。视频处理 `process-video.ts`（`planVideo` 决定原样 / 转码 / 只转封装，mediabunny 由参数注入便于测试）、单项流程 `upload-item.ts`（实况项同一请求上传、警示在上传成功后发出）；`use-image-uploads.ts` 每项经 `toItem`（任务 7 接入动态照片识别）→ `uploadItem`。
 
 ## 4. 单元测试
 

@@ -64,7 +64,8 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const showUploadError = useCallback((message: string) => toast.show({ tone: "error", message }), [toast]);
-  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange, onError: showUploadError });
+  const showUploadWarning = useCallback((message: string) => toast.show({ tone: "warning", message }), [toast]);
+  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange, onError: showUploadError, onWarning: showUploadWarning });
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0); // dragenter / dragleave 在子元素间成对出现，计数归零才算离开
 

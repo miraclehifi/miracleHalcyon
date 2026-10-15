@@ -1,6 +1,6 @@
 // 编辑器中的图片上传（editor module-spec §1、media-upload module-spec §1）：一批文件在光标处一次插入"处理中…"占位，
 // 解码算出主色与宽高后改为"上传中…"并随请求上报；进行中的任务按占位出现顺序排成有序列表；完成时替换对应占位
-// （保留作者选区、可撤销），失败时移除占位。
+// （保留作者选区、可撤销），失败时移除占位。每项经 uploadItem 处理（实况项另处理视频、同一请求上传），警示与错误带文件名。
 // 作者删掉了占位（占位数少于任务数）时，该任务完成后不再插入引用。上传前校验类型与大小，被拒的不插占位、不上传
 import { useCallback, useRef, useState, type RefObject } from "react";
 import {
@@ -15,7 +15,9 @@ import {
   replacePlaceholder,
 } from "../editor/format-commands";
 import { measureImage, type ImageMeta } from "./dominant-color";
-import { altFromFileName, imageMarkdown, uploadImage, type UploadedImage } from "./upload-client";
+import { processVideo as processVideoDefault, type ProcessedVideo } from "./process-video";
+import { uploadImage, type UploadedImage, type UploadExtras } from "./upload-client";
+import { uploadItem, type UploadItem } from "./upload-item";
 import { createLimiter, UPLOAD_CONCURRENCY } from "./upload-queue";
 import { uploadErrorMessage, validateImageFile, withFileName } from "./validate-file";
 
@@ -26,12 +28,26 @@ interface UploadTask {
 
 export interface UseImageUploadsOptions {
   onTasksChange?: (names: string[]) => void; // 进行中任务的文件名（按占位顺序），供预览占位块显示
-  upload?: (file: File, meta: ImageMeta | null) => Promise<UploadedImage>;
-  measure?: (file: File) => Promise<ImageMeta | null>;
+  upload?: (file: File, extras: UploadExtras) => Promise<UploadedImage>;
+  measure?: (file: Blob) => Promise<ImageMeta | null>;
+  processVideo?: (video: Blob) => Promise<ProcessedVideo>;
+  toItem?: (file: File) => Promise<UploadItem>; // 文件 → 上传项（安卓动态照片展开为实况项，add-motion-photo-detection）
   onError?: (message: string) => void; // 被拒或上传失败的提示文案（一批多张时带文件名）
+  onWarning?: (message: string) => void; // 做成了但打了折扣（实况视频被丢弃 / 只在部分浏览器播放），带文件名规则同上
 }
 
-export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | null>, { onTasksChange, upload = uploadImage, measure = measureImage, onError }: UseImageUploadsOptions = {}) {
+const asImage = async (file: File): Promise<UploadItem> => ({ kind: "image", file });
+
+export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | null>, {
+    onTasksChange,
+    upload = uploadImage,
+    measure = measureImage,
+    processVideo = processVideoDefault,
+    toItem = asImage,
+    onError,
+    onWarning,
+  }: UseImageUploadsOptions = {},
+) {
   const tasks = useRef<UploadTask[]>([]);
   const [limit] = useState(() => createLimiter(UPLOAD_CONCURRENCY));
   const notify = () => onTasksChange?.(tasks.current.map((task) => task.file.name));
@@ -71,21 +87,23 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
       tasks.current = [...tasks.current.slice(0, position), ...batch, ...tasks.current.slice(position)];
       notify();
       for (const task of batch) {
-        limit(async () => {
-          const meta = await measure(task.file);
-          rewrite(task, markUploading);
-          return upload(task.file, meta);
-        }).then(
-          (image) => finish(task, imageMarkdown(altFromFileName(task.file.name), image.url)),
+        const named = (message: string) => withFileName(message, task.file.name, task.batchSize);
+        limit(async () =>
+          uploadItem(await toItem(task.file), { measure, upload, processVideo }, {
+            onUploading: () => rewrite(task, markUploading),
+            onWarning: (message) => onWarning?.(named(message)),
+          }),
+        ).then(
+          (markdown) => finish(task, markdown),
           (error: unknown) => {
             finish(task, null);
-            onError?.(withFileName(uploadErrorMessage(error), task.file.name, task.batchSize));
+            onError?.(named(uploadErrorMessage(error)));
           },
         );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 任务列表在 ref 中，回调只依赖 ref 与上传函数
-    [textareaRef, upload, measure, onTasksChange, onError, limit],
+    [textareaRef, upload, measure, processVideo, toItem, onTasksChange, onError, onWarning, limit],
   );
 
   return { uploadFiles };

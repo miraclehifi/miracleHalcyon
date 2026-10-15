@@ -103,7 +103,17 @@ export const prerender = false;
         return { ...(await describe(new Uint8Array(target.buffer!))), mode, ms, libMs };
       }
 
-      Object.assign(window, { __spikeMedia: { extract, process } });
+      // 正式实现（add-live-photo-pair-upload）：对切出的视频跑 src/lib/upload/process-video.ts，手动演示转码 / 只转封装 / 丢弃
+      async function processFormal(url: string) {
+        const { processVideo } = await import("../../lib/upload/process-video");
+        const { video } = motionPhotoVideo(await load(url));
+        const started = performance.now();
+        const result = await processVideo(new Blob([video], { type: "video/mp4" }));
+        const ms = Math.round(performance.now() - started);
+        return "dropVideo" in result ? { result: "dropVideo", ms } : { result: result.warning ?? "ok", size: result.blob.size, ms };
+      }
+
+      Object.assign(window, { __spikeMedia: { extract, process, processFormal } });
     </script>
   </body>
 </html>

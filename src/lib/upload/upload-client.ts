@@ -24,9 +24,15 @@ export class UploadError extends Error {
 
 export const UPLOAD_TIMEOUT_MS = 60_000; // 无响应超过 60 秒按失败处理
 
-export async function uploadImage(file: File, meta: ImageMeta | null = null, fetchImpl: typeof fetch = fetch): Promise<UploadedImage> {
+export interface UploadExtras {
+  meta?: ImageMeta | null; // 浏览器算出的主色与宽高
+  video?: Blob; // 实况视频（与静态图同一请求，api-contract `video` 字段）
+}
+
+export async function uploadImage(file: File, { meta, video }: UploadExtras = {}, fetchImpl: typeof fetch = fetch): Promise<UploadedImage> {
   const body = new FormData();
   body.append("file", file);
+  if (video) body.append("video", video, file.name.replace(/\.[^.]*$/, "") + ".mp4");
   if (meta) {
     body.append("rgb", meta.rgb);
     body.append("width", String(meta.width));

@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createLimiter } from "../../../src/lib/upload/upload-queue";
 import { useImageUploads } from "../../../src/lib/upload/use-image-uploads";
 import type { ImageMeta } from "../../../src/lib/upload/dominant-color";
-import type { UploadedImage } from "../../../src/lib/upload/upload-client";
+import type { UploadedImage, UploadExtras } from "../../../src/lib/upload/upload-client";
 
 afterEach(cleanup);
 
@@ -92,12 +92,12 @@ describe("useImageUploads", () => {
     const measured = new Map<string, ReturnType<typeof deferred<ImageMeta | null>>>();
     const uploads = new Map<string, ReturnType<typeof deferred<UploadedImage>>>();
     const metas: [string, ImageMeta | null][] = [];
-    const measure = (file: File) => {
+    const measure = (file: Blob) => {
       const d = deferred<ImageMeta | null>();
-      measured.set(file.name, d);
+      measured.set((file as File).name, d);
       return d.promise;
     };
-    const upload = (file: File, meta: ImageMeta | null) => {
+    const upload = (file: File, { meta = null }: UploadExtras) => {
       metas.push([file.name, meta]);
       const d = deferred<UploadedImage>();
       uploads.set(file.name, d);
@@ -119,6 +119,7 @@ describe("useImageUploads", () => {
 
     act(() => uploadFiles(["a.png", "b.png"].map((name) => new File(["x"], name, { type: "image/png" }))));
     const steps = [textarea.value];
+    await settle(() => {}); // 转成上传项后才开始算主色
     await settle(() => measured.get("a.png")!.resolve({ width: 640, height: 480, rgb: "8a7b6c" }));
     steps.push(textarea.value);
     await settle(() => measured.get("b.png")!.resolve(null));
