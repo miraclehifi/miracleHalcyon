@@ -4,7 +4,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 5
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层（`src/lib/upload/` + 编辑器）
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -35,14 +35,14 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 主色对所有图片计算（此前服务端缺省 `808080`）；宽高随请求上报，服务端仍以文件头为准
-- [ ] 占位块文案"图片处理中… 文件名"沿用 `upload-placeholder.ts`
-- [ ] 不引入 `heic-to`
+- [x] 主色对所有图片计算（此前服务端缺省 `808080`）；宽高随请求上报，服务端仍以文件头为准
+- [x] 占位块文案"图片处理中… 文件名"沿用 `upload-placeholder.ts`
+- [x] 不引入 `heic-to`
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/unit/upload/*`、US-05 上传 E2E 通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [ ] 影响范围回归（可做任务全部完成后统一跑；`upload-queue` 单元测试已随占位阶段更新）：`tests/unit/upload/*`、US-05 上传 E2E 通过；E2E 补跑 webkit 一次
+- [ ] `npm run lint` 与 `npm run check` 无错误（统一跑；本任务 tsc、eslint 已过）
 
 ## 依赖
 

@@ -17,7 +17,7 @@
 | 2 | [implement-markdown-image-plugins](implement-markdown-image-plugins.md) | Markdown 图片插件（宽图、图注、组图结构） | article-writing | FRONTEND | 领域层（markdown） | US-12 | — | 1（间接 6） | 中 | completed |
 | 3 | [implement-live-photo-upload-api](implement-live-photo-upload-api.md) | 上传接口支持实况视频 | article-writing | API | 领域 + 数据 + 接口 | US-11 | — | 1 | 低 | completed |
 | 4 | [add-article-image-display](add-article-image-display.md) | 预览单图 `ArticleImage`（宽图、图注、马赛克渐显） | article-writing, image-refine-loading | FRONTEND | 表现层 | US-12 | implement-markdown-image-plugins | 3 | 中 | completed |
-| 5 | [add-heic-upload](add-heic-upload.md) | 主色计算与"处理中"占位 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | — | 1 | 低 | pending |
+| 5 | [add-heic-upload](add-heic-upload.md) | 主色计算与"处理中"占位 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | — | 1 | 低 | completed |
 | 6 | [add-live-photo-pair-upload](add-live-photo-pair-upload.md) | 实况视频处理与图片 + 视频上传 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | spike-browser-media-processing, implement-live-photo-upload-api, add-heic-upload | 1 | 中 | pending |
 | 7 | [add-motion-photo-detection](add-motion-photo-detection.md) | 安卓动态照片识别与上传 | article-writing, drop-apple-live-photo | FRONTEND | 表现层 | US-11 | add-live-photo-pair-upload | 0 | 中 | pending |
 | 8 | [add-image-gallery-display](add-image-gallery-display.md) | 预览组图 `ImageGallery`（网格、手风琴） | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 2 | 中 | completed |

@@ -1,5 +1,6 @@
 // 上传客户端（media-upload module-spec §2、§3）：POST /api/admin/images（multipart），错误按契约的 code / message 抛出
-// 主色计算（dominantColor）在 Sprint 3 接入，此前不传 rgb，服务端按中性灰 808080 记录
+// 浏览器算出的主色与宽高随请求上报（dominant-color.ts）；算不出时不传，服务端按中性灰 808080 记录
+import type { ImageMeta } from "./dominant-color";
 
 export interface UploadedImage {
   url: string;
@@ -23,9 +24,14 @@ export class UploadError extends Error {
 
 export const UPLOAD_TIMEOUT_MS = 60_000; // 无响应超过 60 秒按失败处理
 
-export async function uploadImage(file: File, fetchImpl: typeof fetch = fetch): Promise<UploadedImage> {
+export async function uploadImage(file: File, meta: ImageMeta | null = null, fetchImpl: typeof fetch = fetch): Promise<UploadedImage> {
   const body = new FormData();
   body.append("file", file);
+  if (meta) {
+    body.append("rgb", meta.rgb);
+    body.append("width", String(meta.width));
+    body.append("height", String(meta.height));
+  }
   const response = await fetchImpl("/api/admin/images", { method: "POST", body, signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS) });
   if (response.ok) return (await response.json()) as UploadedImage;
   const error = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;

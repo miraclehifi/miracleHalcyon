@@ -3,14 +3,19 @@ import { useRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { createLimiter } from "../../../src/lib/upload/upload-queue";
 import { useImageUploads } from "../../../src/lib/upload/use-image-uploads";
+import type { ImageMeta } from "../../../src/lib/upload/dominant-color";
 import type { UploadedImage } from "../../../src/lib/upload/upload-client";
 
 afterEach(cleanup);
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((r) => (resolve = r));
-  return { promise, resolve };
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
 }
 
 const image = (name: string): UploadedImage => ({ url: `/img/2026/10/${name}aaaaaaaaa_1x1_808080.png`, width: 1, height: 1, rgb: "808080", live: false, videoUrl: null });
@@ -76,9 +81,58 @@ describe("useImageUploads", () => {
     });
 
     expect({ withPlaceholders, final: textarea.value, uploaded: [...pending.keys()].sort() }).toEqual({
-      withPlaceholders: "![上传中…]()\n![上传中…]()\n![上传中…]()",
+      withPlaceholders: "![处理中…]()\n![处理中…]()\n![处理中…]()",
       final: ["a", "b", "c"].map((n) => `![${n}](${image(n).url})`).join("\n"),
       uploaded: ["a.png", "b.png", "c.png"],
+    });
+  });
+
+  // UT-146（SC-LIVE-05）：占位阶段 处理中 → 上传中 → 替换 / 移除；算出的主色与宽高交给上传
+  it("占位按阶段改写，主色与宽高随上传传入", async () => {
+    const measured = new Map<string, ReturnType<typeof deferred<ImageMeta | null>>>();
+    const uploads = new Map<string, ReturnType<typeof deferred<UploadedImage>>>();
+    const metas: [string, ImageMeta | null][] = [];
+    const measure = (file: File) => {
+      const d = deferred<ImageMeta | null>();
+      measured.set(file.name, d);
+      return d.promise;
+    };
+    const upload = (file: File, meta: ImageMeta | null) => {
+      metas.push([file.name, meta]);
+      const d = deferred<UploadedImage>();
+      uploads.set(file.name, d);
+      return d.promise;
+    };
+    let uploadFiles!: (files: File[]) => void;
+    function Harness() {
+      const ref = useRef<HTMLTextAreaElement>(null);
+      uploadFiles = useImageUploads(ref, { upload, measure }).uploadFiles;
+      return <textarea ref={ref} defaultValue="" />;
+    }
+    const { container } = render(<Harness />);
+    const textarea = container.querySelector("textarea")!;
+    const settle = (fn: () => void) =>
+      act(async () => {
+        fn();
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+    act(() => uploadFiles(["a.png", "b.png"].map((name) => new File(["x"], name, { type: "image/png" }))));
+    const steps = [textarea.value];
+    await settle(() => measured.get("a.png")!.resolve({ width: 640, height: 480, rgb: "8a7b6c" }));
+    steps.push(textarea.value);
+    await settle(() => measured.get("b.png")!.resolve(null));
+    steps.push(textarea.value);
+    await settle(() => uploads.get("a.png")!.resolve(image("a")));
+    await settle(() => uploads.get("b.png")!.reject(new Error("网络错误")));
+    steps.push(textarea.value);
+
+    expect({ steps, metas }).toEqual({
+      steps: ["![处理中…]()\n![处理中…]()", "![上传中…]()\n![处理中…]()", "![上传中…]()\n![上传中…]()", `![a](${image("a").url})\n`],
+      metas: [
+        ["a.png", { width: 640, height: 480, rgb: "8a7b6c" }],
+        ["b.png", null],
+      ],
     });
   });
 });

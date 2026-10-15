@@ -113,3 +113,6 @@ export function replacePlaceholder(text: string, index: number, markdown: string
 }
 
 export const removePlaceholder = (text: string, index: number) => replacePlaceholder(text, index, "");
+
+// 占位阶段（media-upload module-spec §1）：处理中 → 上传中 → 替换为引用 / 移除；只改第 index 个占位的文字，序号不变
+export const markUploading = (text: string, index: number) => replacePlaceholder(text, index, PLACEHOLDER_UPLOADING);

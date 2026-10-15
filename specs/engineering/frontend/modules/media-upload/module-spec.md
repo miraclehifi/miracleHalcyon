@@ -46,7 +46,7 @@ function uploadItem(item: Item, cb: Callbacks): Promise<UploadResult>;
 | 失败 | 任一步失败 → 移除占位 → `Toast/Error`（带文件名），不影响其他项；实况照片的图片与视频不留半对 |
 | 懒加载 | `mediabunny` 只在识别出动态照片时加载；加载与处理期间占位显示"处理中…" |
 
-> 已实现（Sprint 2，静态图）：`src/lib/upload/upload-client.ts`、`upload-queue.ts`（并发 2）、`validate-file.ts`、`use-image-uploads.ts`；主色、实况照片在 Sprint 3。
+> 已实现（Sprint 2，静态图）：`src/lib/upload/upload-client.ts`、`upload-queue.ts`（并发 2）、`validate-file.ts`、`use-image-uploads.ts`。Sprint 3：主色与宽高 `dominant-color.ts`（`measureImage` 用 `createImageBitmap` 解码，解码失败或不支持时返回 null、按缺省主色上传；纯函数 `dominantColorFromPixels` 便于测试）；占位阶段（先插"处理中…"，算完主色经 `markUploading` 改为"上传中…"，再替换 / 移除）。实况照片在任务 6、7。
 
 ## 4. 单元测试
 
