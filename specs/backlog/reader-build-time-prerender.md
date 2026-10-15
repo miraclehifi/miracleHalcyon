@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | ready |
+| 状态 | scheduled |
 | 类型 | Task |
 | 优先级 | P1-High |
 | 来源 | spike-markdown-workers-runtime 结论 |
