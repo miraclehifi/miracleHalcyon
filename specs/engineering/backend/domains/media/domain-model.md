@@ -9,7 +9,7 @@
 ## 1. 职责与边界
 
 - 负责：上传校验（魔数、大小、配对）、生成自描述 key、写 R2、记录 `images`、公开读取 `/img/*`
-- 不负责：HEIC 转换、视频转封装 / 转码、主色计算、实况照片配对识别——都在浏览器端完成（[media-upload 模块](../../../frontend/modules/media-upload/module-spec.md)）；Markdown 引用的生成与解析（编辑器 / `markdown` 模块）
+- 不负责：安卓动态照片识别与切视频、视频转封装 / 转码、主色计算——都在浏览器端完成（[media-upload 模块](../../../frontend/modules/media-upload/module-spec.md)）；Markdown 引用的生成与解析（编辑器 / `markdown` 模块）
 - 与 `post` 无关联：正文只存 URL 字符串；删除文章不删图片（US-09 约束）
 
 ## 2. 聚合：Image
@@ -143,3 +143,4 @@ interface ImageRepo {            // D1
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-14 | 1.1 | 图片上限 5 MiB → 50 MiB，请求体上限 16 MiB → 64 MiB（[raise-image-size-limit](../../../../backlog/raise-image-size-limit.md)） | miraclehifi |
 | 2026-10-14 | 1.2 | `sniffImage` 改为扫描整个图片字节（[sniff-jpeg-large-metadata](../../../../backlog/sniff-jpeg-large-metadata.md)） | miraclehifi |
+| 2026-10-15 | 1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：只改职责描述，接口与数据结构不变 | miraclehifi |

@@ -239,20 +239,23 @@
 | UT-136 | S | 定位校验 | `range` 内的文本与渲染时记录的 URL 不一致时，返回 `null`，不改写 | SC-LAYOUT-11 |
 | UT-137 | R | `ImageMenu` 单图 / 组图 | 单图：`menuitemcheckbox` "宽图"；组图：`menuitemradio` "网格 / 手风琴" + `menuitem` "拆成单图"；张数不在 3–7 时"手风琴"带 `aria-disabled` | SC-LAYOUT-07, SC-LAYOUT-08 |
 | UT-138 | A | 菜单键盘 | Enter 打开、焦点落在第一项；↑ / ↓ 循环移动；Esc 关闭，焦点回到触发按钮 | SC-LAYOUT-07, SC-LAYOUT-08 |
-| UT-139 | R | 写法帮助 | 内容包含 5 个示例和"从 iPhone 上传实况照片"一节；`role="dialog"`，有可访问名称"图片写法" | SC-LAYOUT-12 |
+| UT-139 | R | 写法帮助 | 内容包含 5 个示例（不含 iPhone 导出说明，2026-10-15）；`role="dialog"`，有可访问名称"图片写法" | SC-LAYOUT-12 |
 | UT-140 | S | 预览挂载复用 `reconcileIslands(prev, next)` | 两次渲染中 `src` 和标记都相同的图片复用原实例；`src` 变化的重新挂载；被删除的卸载（已实现：`tests/unit/editor/reconcile-islands.test.ts`） | SC-LAYOUT-13 |
 
 ## 14. 照片预处理（纯函数 / 浏览器 API mock）
 
+> 编号不重排：2026-10-15 去掉苹果相关后，UT-141、UT-143 标为已删除（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）；UT-152 为同日新增，接在本节末尾。
+
 | UT-ID | 类 | 用例 | 预期 | covers |
 |------|------|------|------|------|
-| UT-141 | S | `pairFiles(files)` | 按 basename 配对，大小写不敏感，保持输入顺序；只有视频的条目返回 `{ error: 'VIDEO_WITHOUT_PHOTO' }`；同名有多张图片时只取第一张配对 | SC-LIVE-01, SC-LIVE-04, SC-LIVE-07, SC-LIVE-12 |
-| UT-142 | S | `extractMotionPhoto(bytes)` | MotionPhoto（`Item:Length`）与 MicroVideoOffset 两种格式都能切出以 `ftyp` 开头的 mp4，静态图部分等于剩余字节；没有 XMP 或 `ftyp` 校验失败 → `null` | SC-LIVE-03 |
-| UT-143 | S | `decodeHeic` 分支 | 原生 `createImageBitmap` 成功 → 不加载 `heic-to`；原生失败 → 加载 `heic-to`；两者都失败 → 抛出 `HEIC_DECODE_FAILED` | SC-LIVE-02, SC-LIVE-13 |
-| UT-144 | S | `processVideo` 分支 | avc 编码可用 → 转码；不可用 → 只转封装，并返回 `warning: 'HEVC_KEPT'`；结果 > 10MB → 返回 `{ dropVideo: true }` | SC-LIVE-06, SC-LIVE-09 |
-| UT-145 | S | `dominantColor(bitmap)` | 纯色图返回该颜色；黑白各半的图片避开极暗和极亮像素后返回中性色；输出为 6 位小写 hex | SC-LIVE-01 |
-| UT-146 | S | 占位阶段 | 占位文本的状态机：`processing` → `uploading` → 替换为引用 / 移除；配对失败时一次性移除 | SC-LIVE-05, SC-LIVE-08 |
+| UT-141 | — | ~~`pairFiles(files)` 同名配对~~ | 已删除（2026-10-15） | — |
+| UT-142 | S | `extractMotionPhoto(bytes)` | MotionPhoto（`Item:Length`）与 MicroVideoOffset 两种格式都能切出以 `ftyp` 开头的 mp4，静态图部分等于剩余字节；`Item:Length` 覆盖副视频与私有尾部时（OPPO）按 MP4 顶层 box 截到主视频 `mdat` 结束；没有 XMP 或 `ftyp` 校验失败 → `null` | SC-LIVE-03 |
+| UT-143 | — | ~~`decodeHeic` 分支~~ | 已删除（2026-10-15） | — |
+| UT-144 | S | `processVideo` 分支 | avc 编码可用 → 转码；不可用（或源编码无法解码）→ 只转封装，并返回 `warning: 'HEVC_KEPT'`；源已是无音轨的 H.264 mp4 → 原样返回；结果 10,485,760 B 保留、+1 → 返回 `{ dropVideo: true }` | SC-LIVE-06, SC-LIVE-09 |
+| UT-145 | S | `dominantColor(bitmap)` | 纯色图返回该颜色；黑白各半的图片避开极暗和极亮像素后返回中性色；输出为 6 位小写 hex | SC-LIVE-01, SC-LIVE-05 |
+| UT-146 | S | 占位阶段 | 占位文本的状态机：`processing` → `uploading` → 替换为引用 / 移除；实况照片任一步失败时一次性移除 | SC-LIVE-05, SC-LIVE-08 |
 | UT-147 | R | `LiveBadge` 与播放 | 悬停时 `play()`，离开时 `pause()` 并把 `currentTime` 设为 0；`video` 触发 `error` 后隐藏 badge，悬停不再播放 | SC-LIVE-10, SC-LIVE-11 |
+| UT-152 | S | `uploadItem` 实况项（`processVideo`、上传 mock） | `{ kind: 'live' }` 的静态图与视频在同一请求中（`file` + `video`），引用追加 `#live`；`dropVideo` → 请求不含 `video`、引用不带 `#live`、`Toast/Warning`"实况视频超过 10MB…"；`HEVC_KEPT` → 带 `video` 与 `#live`、`Toast/Warning`；上传失败 → 移除占位、`Toast/Error`（带文件名） | SC-LIVE-06, SC-LIVE-08, SC-LIVE-09 |
 
 ## 15. 列表删除的延迟提交 `createPendingDelete`（fake timers）
 
@@ -280,7 +283,7 @@
 | US-08 发布 | SC-PUBLISH-03 ~ 05, 08 ~ 10 |
 | US-09 删除 | SC-DELETE-01 ~ 03, 07, 08 |
 | US-10 工具栏 | SC-TOOLBAR-01 ~ 05, 07 ~ 10 |
-| US-11 实况照片 | SC-LIVE-01 ~ 11, 13 |
+| US-11 实况照片 | SC-LIVE-01, 03 ~ 06, 08 ~ 11（02、07、13 已删除） |
 | US-12 图片排版 | SC-LAYOUT-01 ~ 08, 10 ~ 13 |
 
 未在单元层覆盖（纯服务端 / 跨系统，由 acceptance 覆盖）：SC-LOGIN-02/03/07/08/09、SC-LOGOUT-*、SC-POSTINFO-02/11、SC-IMAGE-08、SC-AUTOSAVE-03、SC-POSTLIST-03、SC-PUBLISH-01/02/06/07、SC-DELETE-04 ~ 06、SC-TOOLBAR-06（原生撤销栈）、SC-TOOLBAR-11（页面级接线）、SC-LIVE-12（文件选择器接线）、SC-LAYOUT-09（触屏手势）。
@@ -297,6 +300,7 @@
 | 2026-10-13 | v1.3 | 新增 §12 图片插件、§13 图片菜单、§14 照片预处理（UT-126 ~ UT-147，US-11、US-12） | miraclehifi |
 | 2026-10-14 | v1.4 | 新增 §15 列表删除的延迟提交（UT-148 ~ UT-151，US-09 撤销） | miraclehifi |
 | 2026-10-14 | v1.9 | UT-63 改为跳登录页（作者确认）；UT-77 补充同步暂存 | miraclehifi |
+| 2026-10-15 | v1.10 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：UT-141 `pairFiles`、UT-143 `decodeHeic` 删除；UT-139、142、144、146 改写；新增 UT-152 `uploadItem` 实况项 | miraclehifi |
 | 2026-10-14 | v1.8 | UT-76 暂存时机与 key；UT-79 横幅文案按设计稿 | miraclehifi |
 | 2026-10-14 | v1.7 | UT-53 由按标题映射改为按 `data-line` 行映射（editor module-spec §3，作者确认） | miraclehifi |
 | 2026-10-14 | v1.6 | UT-52 补充默认视图与存储；UT-55 宽屏视图切换按设计稿改为单选组 | miraclehifi |

@@ -29,7 +29,7 @@
   - 文章信息表单：标题、slug（由标题生成，可修改）、标签、摘要、发布日期、草稿/发布状态
   - Markdown 编辑区 + 实时预览（GFM、代码高亮）
   - 图片上传：粘贴或拖入图片 → 上传至 R2 → 自动在光标处插入 Markdown 图片引用
-  - 手机照片与实况照片：HEIC 转 JPEG、iPhone 实况照片（同名图 + 视频）与安卓动态照片识别上传
+  - 实况照片：安卓动态照片（一个 JPEG 内嵌视频）识别上传；iPhone / 苹果系统（HEIC、HEIC + MOV）不支持（2026-10-15 作者决定）
   - 图片排版：宽图、组图网格、手风琴组图的写法与预览图片菜单；预览中的图片展示与读者端一致（`ArticleImage`、`LiveBadge`、`ImageGallery` 由本 Feature 实现）
   - 自动保存草稿：编辑停止后自动保存到服务端，显示保存状态；关闭页面重开后内容恢复
 - **发布 / 更新 / 撤回**：将草稿发布为已发布状态；已发布文章可修改后更新；可撤回为草稿
@@ -111,3 +111,4 @@
 | 2026-10-10 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-12 | 1.1 | 纳入实况照片上传、图片排版写法（US-11、US-12；design-arch 决策） | miraclehifi |
 | 2026-10-13 | 1.2 | 读者页缓存失效改为触发重建（[Backlog](../../../backlog/reader-build-time-prerender.md)） | miraclehifi |
+| 2026-10-15 | 1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../backlog/drop-apple-live-photo.md)） | miraclehifi |

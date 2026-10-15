@@ -37,7 +37,7 @@
 | US-05 | image-upload | implemented | 粘贴/拖入图片上传 R2 并插入引用 |
 | US-06 | autosave-draft | draft | 停止输入后自动保存，显示保存状态，重开恢复 |
 | US-10 | format-toolbar | implemented | 工具栏格式命令、格式快捷键、按钮悬停提示 |
-| US-11 | live-photo-upload | draft | HEIC 转换、实况照片 / 安卓动态照片配对上传 |
+| US-11 | live-photo-upload | draft | 安卓动态照片（JPEG 内嵌视频）识别为实况照片上传 |
 | US-12 | image-layout-marks | in_progress | 宽图、组图网格 / 手风琴写法，预览图片菜单（已实现：预览单图 `ArticleImage`、宽图、图注） |
 
 ### post-management
@@ -99,3 +99,4 @@ US-01 admin-login（基础：所有后台功能的前提）
 | 2026-10-10 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-12 | 1.1 | 新增 US-10 format-toolbar（[Backlog](../../../../backlog/editor-warm-tooltip.md)） | miraclehifi |
 | 2026-10-12 | 1.2 | 新增 US-11 live-photo-upload、US-12 image-layout-marks（design-arch 范围变更，[Backlog](../../../../backlog/article-image-display.md)） | miraclehifi |
+| 2026-10-15 | 1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)） | miraclehifi |

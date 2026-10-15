@@ -10,7 +10,7 @@
 
 ## 意图声明
 
-- **改动意图**: 编辑区底栏左侧变为"Markdown (GFM) · 支持粘贴/拖入图片 · 图片写法"，"图片写法"文字按钮打开 `Popover`（非模态 `role="dialog"`，`aria-label`"图片写法"，宽 360、最高 60vh）内的 `ImageSyntaxHelp`：5 行写法示例（宽图、实况照片、图注、组图网格、手风琴，每行带复制按钮，复制后 ✓ 1.5 秒）+"从 iPhone 上传实况照片"一节。打开时焦点到浮层标题，Esc / 点外部关闭、焦点回到按钮。手机：入口放在设置面板最下方，在面板内展开
+- **改动意图**: 编辑区底栏左侧变为"Markdown (GFM) · 支持粘贴/拖入图片 · 图片写法"，"图片写法"文字按钮打开 `Popover`（非模态 `role="dialog"`，`aria-label`"图片写法"，宽 360、最高 60vh）内的 `ImageSyntaxHelp`：5 行写法示例（宽图、实况照片、图注、组图网格、手风琴，每行带复制按钮，复制后 ✓ 1.5 秒；实况照片说明"拖入安卓动态照片会自动生成"）。原"从 iPhone 上传实况照片"一节随 [drop-apple-live-photo](../../backlog/drop-apple-live-photo.md) 删除。打开时焦点到浮层标题，Esc / 点外部关闭、焦点回到按钮。手机：入口放在设置面板最下方，在面板内展开
 - **影响范围**: `src/components/ui/Popover.tsx`（新建）、`src/components/admin/editor/ImageSyntaxHelp.tsx`（新建）、`MarkdownEditor.tsx`（底栏）、`PostSettingsDrawer.tsx`（手机入口）
 - **不变量**: 底栏字数统计不变；设置抽屉已有字段不变
 - **不在本任务**: —
@@ -26,7 +26,7 @@
 
 | # | 测试 | 层级 |
 |---|------|------|
-| 1 | [UT-139](../../test/features/F-001-文章写作/unit/frontend-unit-tests.md)：5 个示例与"从 iPhone 上传实况照片"一节；`role="dialog"`、可访问名称"图片写法" | 组件（R） |
+| 1 | [UT-139](../../test/features/F-001-文章写作/unit/frontend-unit-tests.md)：5 个示例；`role="dialog"`、可访问名称"图片写法" | 组件（R） |
 | 2 | [TC-US12-16](../../test/features/F-001-文章写作/acceptance/post-editor/US-12-tests.md)：打开、内容、Esc 关闭、焦点回归（桌面） | E2E |
 | 3 | 手机视口：设置面板最下方"图片写法"展开同样内容 | E2E（手机视口） |
 

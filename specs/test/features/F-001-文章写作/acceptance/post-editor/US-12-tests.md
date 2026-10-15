@@ -483,16 +483,16 @@ await expect(editor).toHaveValue('新内容');
 | covers | SC-LAYOUT-12 |
 | Scenario | 写法帮助 |
 | Priority | P2 |
-| Version Tag | v1.0 |
+| Version Tag | v1.3 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | ui-interaction |
-| Change History | 2026-10-13 v1.0 初始创建 |
+| Change History | 2026-10-13 v1.0 初始创建；2026-10-15 v1.3 删去 iPhone 一节断言（drop-apple-live-photo） |
 
 **步骤：** 用键盘聚焦并打开底栏的"图片写法"；按 Esc；再点击打开一次，然后点击外部
 
 **预期结果：**
 - 说明中包含 5 个示例：宽图 `#wide`、实况照片 `#live`、图注 `"图注"`、组图网格（连续图片）、手风琴 `#accordion`
-- 说明中包含"从 iPhone 上传实况照片"一节（电脑导出原件 / 存储到文件后多选）
+- 说明中没有"从 iPhone 上传实况照片"一节（2026-10-15 删除）
 - 按 Esc 后关闭，焦点回到"图片写法"按钮；点击外部也会关闭
 
 **playwright_hint：**
@@ -610,3 +610,4 @@ await page.keyboard.press('Escape');
 | 2026-10-13 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-13 | v1.1 | TC-US12-16 增加 iPhone 导出方法断言 | miraclehifi |
 | 2026-10-13 | v1.2 | 菜单改为"悬停出按钮 → 点击展开"（design-ui），同步 TC-US12-09/11/15/18 步骤 | miraclehifi |
+| 2026-10-15 | v1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../../backlog/drop-apple-live-photo.md)）：TC-US12-16 删去 iPhone 一节断言 | miraclehifi |

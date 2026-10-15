@@ -20,7 +20,7 @@
 | US-07 | post-list | 文章列表：列表行、状态筛选、标题搜索、分页、空状态 | ✅ |
 | US-08 | publish-post | 写文章页：主按钮随状态变化（发布/更新/置灰）、撤回确认框、发布校验、成功提示 | ✅ |
 | US-10 | format-toolbar | 写文章页：工具栏格式按钮与快捷键、图标按钮悬停提示（`Tooltip`，见"工具栏与悬停提示"） | ✅ |
-| US-11 | live-photo-upload | 写文章页：拖入 / 多选配对、"处理中… → 上传中…"占位、预览 `LiveBadge` 悬停 / 长按播放、实况照片错误与警示提示（`Toast/Warning`） | ✅ |
+| US-11 | live-photo-upload | 写文章页：拖入 / 选择安卓动态照片、"处理中… → 上传中…"占位、预览 `LiveBadge` 悬停 / 长按播放、实况照片错误与警示提示（`Toast/Warning`） | ✅ |
 | US-12 | image-layout-marks | 写文章页：预览中的宽图 / 图注 / 组图（`ArticleImage`、`ImageGallery`）、图片菜单（`ImageMenu`）、底栏"图片写法"说明（手机在设置面板） | ✅ |
 | US-09 | delete-post | 文章列表行左滑抽屉"删除" / 全滑删除 + 撤销提示；写文章页设置抽屉"删除文章" + 删除确认框 | ✅ |
 
@@ -52,3 +52,4 @@
 | 2026-10-10 | better-interface 界面审阅 13 项全部修复（令牌对比度、可点区域、文案、焦点、字号收敛）；按钮名改为"发布更新"并同步 US-06/US-08 及测试规格 | miraclehifi |
 | 2026-10-12 | 新增 US-10 format-toolbar 覆盖（[Backlog](../../../backlog/editor-warm-tooltip.md)） | miraclehifi |
 | 2026-10-13 | 新增 US-11、US-12 覆盖（design-arch 范围变更） | miraclehifi |
+| 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../backlog/drop-apple-live-photo.md)） | miraclehifi |

@@ -42,7 +42,7 @@
 
 7. Given 我在编辑器底栏打开写法帮助
    When 查看
-   Then 能看到宽图、实况照片、组图、手风琴的写法示例，以及从 iPhone 导出实况照片原件的方法
+   Then 能看到宽图、实况照片、组图、手风琴的写法示例
 
 ---
 
@@ -73,3 +73,4 @@
 |------|------|----------|------|
 | 2026-10-12 | 1.0 | 初始版本（design-arch 范围变更：宽图 / 组图 F-001 全做） | miraclehifi |
 | 2026-10-13 | 1.1 | 写法帮助增加 iPhone 实况照片导出方法 | miraclehifi |
+| 2026-10-15 | 1.2 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../../../backlog/drop-apple-live-photo.md)）：AC7 删去 iPhone 导出方法 | miraclehifi |

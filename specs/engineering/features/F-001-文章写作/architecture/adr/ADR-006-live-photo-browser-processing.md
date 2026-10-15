@@ -1,7 +1,10 @@
 # ADR-006: 实况照片在浏览器端配对与转换
 
 ## 状态
-Accepted（2026-10-12）
+Accepted（2026-10-12）；2026-10-15 范围调整，见下
+
+## 范围调整（2026-10-15）
+作者决定不考虑 iPhone / 苹果系统（[drop-apple-live-photo](../../../../../backlog/drop-apple-live-photo.md)）：实况照片只来自安卓动态照片（一个 JPEG 内嵌 mp4）。决策第 1 点的同名"图片 + 视频"配对、第 2 点的 HEIC / HEIF 转换取消，HEIC、单独的 mov / mp4 按 US-05 的类型错误处理；视频处理、元数据、服务端校验、读者端降级不变。下文"背景"保留当时的调研记录。
 
 ## 背景
 iPhone 导出的实况照片是 HEIC + MOV（通常为 HEVC 编码），安卓的 Motion Photo 是把 mp4 嵌在 JPEG 里。Chrome、Firefox 不能显示 HEIC，很多环境也播放不了 HEVC。Workers 里不能运行 sharp、ffmpeg、exiftool 这类原生程序。
@@ -15,16 +18,16 @@ iPhone 导出的实况照片是 HEIC + MOV（通常为 HEVC 编码），安卓�
 ## 决策
 借鉴 Afilmory 的识别逻辑，但把转换放在**浏览器上传前**完成；Worker 只做校验和存储。
 
-1. **配对**：同一批粘贴/拖入的文件中，图片与同 basename 的 `.mov` / `.mp4` 配成一对。JPEG 带 Motion Photo XMP 时，从文件末尾按 `Length` / `MicroVideoOffset` 定位视频起点（校验 `ftyp`），再按 MP4 顶层 box 走到 `mdat` 结束为止截断——OPPO 等厂商在主视频后追加副视频与私有数据，`Length` 覆盖到文件末尾（见"验证结果"）。
-2. **HEIC/HEIF**：先尝试浏览器原生解码（Safari 17+ 的 `createImageBitmap`）；失败时按需加载 `heic-to`（libheif WASM）。转成 JPEG（质量 0.9）后再上传。
-3. **视频**：用 `mediabunny` 把 MOV 转封装为 MP4。如果 `VideoEncoder` 支持 H.264（avc1），就转码为 H.264（片段约 3 秒，去掉音轨，**长边缩到 1920、码率 6 Mbps**）；不支持编码、或源编码无法解码（转换报 `undecodable_source_codec`）时只转封装，保留原编码。上传前检查结果 ≤ 10MB。
+1. **识别**：~~同一批粘贴/拖入的文件中，图片与同 basename 的 `.mov` / `.mp4` 配成一对~~（2026-10-15 取消）。JPEG 带 Motion Photo XMP（`Item:Length` 或旧版 `MicroVideoOffset`）时，从文件末尾按 `Length` / `MicroVideoOffset` 定位视频起点（校验 `ftyp`），再按 MP4 顶层 box 走到 `mdat` 结束为止截断——OPPO 等厂商在主视频后追加副视频与私有数据，`Length` 覆盖到文件末尾（见"验证结果"）。
+2. ~~**HEIC/HEIF**：先尝试浏览器原生解码（Safari 17+ 的 `createImageBitmap`）；失败时按需加载 `heic-to`（libheif WASM）。转成 JPEG（质量 0.9）后再上传。~~（2026-10-15 取消，不引入 `heic-to`）
+3. **视频**：用 `mediabunny` 处理切出的内嵌视频，输出 MP4。如果 `VideoEncoder` 支持 H.264（avc1），就转码为 H.264（片段约 3 秒，去掉音轨，**长边缩到 1920、码率 6 Mbps**）；不支持编码、或源编码无法解码（转换报 `undecodable_source_codec`）时只转封装，保留原编码。上传前检查结果 ≤ 10MB。
 4. **元数据**：从解码后的位图计算主色；宽高同时上报，但服务端以文件头解析结果为准（缩到 32×32 后取平均色，避开过暗或过亮像素）。
-5. **服务端**：校验魔数（图片 png/jpg/webp/gif，视频 `ftyp` mp4）与大小，写入 R2。配对上传在同一个 multipart 请求中完成：图片成功、视频失败时整体失败，不留半对。
+5. **服务端**：校验魔数（图片 png/jpg/webp/gif，视频 `ftyp` mp4；`qt  ` MOV 与 HEIF brand 拒绝）与大小，写入 R2。静态图与视频在同一个 multipart 请求中上传：图片成功、视频失败时整体失败，不留半对。
 6. **读者端**：播放失败（`error` 事件或 `canPlayType` 不支持）时只显示静态图，隐藏 `LIVE` 标记。
 
 ## 验证结果（spike-browser-media-processing，2026-10-14）
 
-> 范围：作者暂不提供 iPhone 样本，HEIC 解码与 `heic-to` 未验证（留到 add-heic-upload 前）；构建产物检查移到 add-live-photo-pair-upload。样本为 OPPO（ColorOS）动态照片 `tests/fixtures/live/IMG20260516172228.jpg`。环境：Windows 11，Playwright 1.64，Chromium 156，`mediabunny` 1.61.4。
+> 范围：作者暂不提供 iPhone 样本，HEIC 解码与 `heic-to` 未验证（2026-10-15 起不再需要，见"范围调整"）；构建产物检查移到 add-live-photo-pair-upload。样本为 OPPO（ColorOS）动态照片 `tests/fixtures/live/IMG20260516172228.jpg`。环境：Windows 11，Playwright 1.64，Chromium 156，`mediabunny` 1.61.4。
 
 | 项 | 结果 |
 |----|------|
@@ -42,4 +45,4 @@ iPhone 导出的实况照片是 HEIC + MOV（通常为 HEVC 编码），安卓�
 
 ## 后果
 - 正面：不需要服务端媒体处理，Workers 可以承受；大多数现代浏览器上传后读者都能播放。
-- 负面：首次处理 HEIC 或视频时，后台要按需下载 WASM 或库（数 MB）；在不支持 H.264 编码的浏览器上上传的 HEVC 视频，部分读者无法播放（会退回静态图）。
+- 负面：首次处理动态照片的视频时，后台要按需下载 `mediabunny`（gzip ≈ 177KB）；在不支持 H.264 编码的浏览器上上传的 HEVC 视频，部分读者无法播放（会退回静态图）。

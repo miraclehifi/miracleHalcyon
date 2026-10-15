@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | idea |
+| 状态 | discarded |
 | 类型 | Feature 增量 |
 | 优先级 | P3-Low |
 | 来源 | 作者需求（F-001 US-11 讨论） |
@@ -25,3 +25,7 @@ iOS 网页端从相册选择实况照片时，系统只把静态图交给网页�
 
 - [US-11 live-photo-upload](../product/features/F-001-文章写作/stories/post-editor/US-11-live-photo-upload/story.md)
 - [ADR-006](../engineering/features/F-001-文章写作/architecture/adr/ADR-006-live-photo-browser-processing.md)
+
+## 丢弃（2026-10-15）
+
+作者决定实况照片不考虑 iPhone / 苹果系统，本条目不再需要，见 [drop-apple-live-photo](drop-apple-live-photo.md)。

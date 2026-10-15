@@ -32,7 +32,7 @@
 | `TabItem/Selected` · `Default` | `Tabs` + `Tabs.Item` | 容器：`value`；`onChange`；`aria-label`（`tablist`，← / → 切换并选中）。Item：`value`；`controls`（面板 id）；`children`；`selected` 由容器 `value` 推导 | 写文章页（移动）编辑 / 预览。已实现：`src/components/ui/Tabs.tsx` |
 | `SaveIndicator/Saved` · `Saving` · `Unsaved` · `Failed` | `SaveIndicator` | `state`：`saved` / `saving` / `unsaved` / `failed`；`savedAt?` | 写文章页顶栏（桌面、移动）、04 保存状态。已实现：`src/components/ui/SaveIndicator.tsx`（`role="status"`；保存中图标旋转，减弱动效时停止） |
 | `Pagination` | `Pagination` | `page`；`pageSize`；`total`；手机端页码可点区域 44px。已实现：`src/components/ui/Pagination.tsx`（另有 `href`、`onNavigate`；页码全部显示、可换行） | 文章列表 |
-| `Menu` · `MenuItem/Default` · `/Checked` · `/Disabled` | `Menu` + `Menu.Item` + `Menu.Separator` | Item：`type`：`action` / `checkbox` / `radio`（对应 `menuitem` / `menuitemcheckbox` / `menuitemradio`）；`checked?`；`disabled?`（`aria-disabled`，仍可聚焦，配 `Tooltip` 说明原因）；`children`。容器 `surface` 底、1px `line` 边、`radius`、阴影同悬停提示，内边距 4px；Item 高 32px（触屏 44px），左右内边距 12px，`text-ui`，选中时 ✓ 在右侧（`ink-muted`），悬停 / 键盘高亮底 `surface-sunken`，禁用 `ink-faint`。`/Checked`、`/Disabled` 对应 `checked`、`disabled`，**不是 variant** | 写文章页 `ImageMenu`；写文章页顶栏"更多"菜单（`IconButton/Ghost` `ellipsis` 触发，项：登出；04 "写文章页更多菜单"）。已实现：`src/components/ui/Menu.tsx`（action 项、禁用、分隔线；checkbox / radio 随 `ImageMenu`） |
+| `Menu` · `MenuItem/Default` · `/Checked` · `/Disabled` | `Menu` + `Menu.Item` + `Menu.Separator` | Item：`type`：`action` / `checkbox` / `radio`（对应 `menuitem` / `menuitemcheckbox` / `menuitemradio`）；`checked?`；`disabled?`（`aria-disabled`，仍可聚焦，配 `Tooltip` 说明原因）；`children`。容器 `surface` 底、1px `line` 边、`radius`、阴影同悬停提示，内边距 4px；Item 高 32px（触屏 44px），左右内边距 12px，`text-ui`，选中时 ✓ 在右侧（`ink-muted`），悬停 / 键盘高亮底 `surface-sunken`，禁用 `ink-faint`。`/Checked`、`/Disabled` 对应 `checked`、`disabled`，**不是 variant** | 写文章页 `ImageMenu`；写文章页顶栏"更多"菜单（`IconButton/Ghost` `ellipsis` 触发，项：登出；04 "写文章页更多菜单"）。已实现：`src/components/ui/Menu.tsx`（action / checkbox / radio 项、禁用、分隔线；checkbox / radio 执行后菜单保持打开；`initialFocus` 指定打开时聚焦的项，菜单因改写重新挂载时停在原项） |
 | `Popover` | `Popover` | `anchor`；`side`：`top` / `bottom`；`title`；`children`；非模态 `role="dialog"`，Esc / 点外部关闭，焦点回到触发元素；`surface` 底、1px `line` 边、12px 圆角、阴影同弹窗 | 写文章页"图片写法"说明 |
 | `Tooltip` · `Tooltip/Shortcut` | `Tooltip` + `TooltipGroup` | Tooltip：`content`；`shortcut?`（按键数组，如 `['Mod', 'B']`，`Mod` 按平台显示 `⌘` 或 `Ctrl`）；`side`：`top` / `bottom`；`children`（触发按钮，一个元素）。`/Shortcut` 对应传了 `shortcut`，**不是 variant**。`TooltipGroup` 包住一组按钮，组内共用一个提示框。底层为 WarmTooltip，参数见"悬停提示参数"。已实现：`src/components/ui/Tooltip.tsx`（另有 `className` 加在触发包裹层） | 写文章页：`EditorToolbar`、手机顶栏返回 / 设置、设置抽屉关闭 |
 
@@ -110,7 +110,7 @@
 |-----------|-----------|-------|---------|
 | `AdminHeader` · `AdminHeader/Mobile` | `AdminHeader` | —（站点名、"查看博客"、"登出"）；手机端两个操作只留图标。已实现：`src/components/admin/AdminHeader.tsx`（"登出"已接线，Sprint 2）；同目录 `PageHeader.tsx` | 文章列表 |
 | `PostListItem` · `PostListItem/Mobile` · `/Open` · `/Mobile/Open` · `/Mobile/Commit` | `PostListItem` | `post`（`title`、`status`、`updatedAt`）；`onDelete`；`active`（由 `PostList` 传入，为真时显示悬停态，见"列表动效参数"）；`open` / `onOpenChange`（抽屉开合，由 `PostList` 控制，同一时间只开一行）；外框与 `PostCard` 一致（悬停同 `PostCard/Hover`），内容只有标题、状态徽标 + 更新时间和右侧 `IconButton/Ghost`（`⋯` 更多操作）。卡片本身是 SwipeRow 的拖动面，左滑露出抽屉"编辑 / 删除"，参数见"行滑动参数"。`/Open`（抽屉展开）、`/Mobile/Commit`（全滑、删除块铺满）是运行时状态，**不是 prop**；规则见 [admin-post-list.md](pages/admin-post-list.md)"行操作"。已实现：`src/components/admin/PostListItem.tsx`——外框、`active` 双层错位、标题链接、徽标 + 相对时间（Sprint 1）；SwipeRow 抽屉、`⋯`、全滑删除、删除后撤销（Sprint 2；`onDelete(post, index)` 带删除前位置，撤销时插回） | 文章列表 |
-| `ImageMenu` · `ImageMenu/Gallery` · `ImageMenu/Mobile` | `ImageMenu` | `kind`：`image` / `gallery`；`wide?`（单图）；`mode?`：`grid` / `accordion`，`count`（组图）；`onToggleWide` / `onModeChange` / `onSplit`。由触发按钮 `OverlayButton`（`size` 32）+ `Menu` 组成；`/Gallery` 对应 `kind="gallery"`，`/Mobile` 为触屏形态（菜单项 44px），**都不是 variant**；规则见 [admin-post-editor.md](pages/admin-post-editor.md)"图片菜单" | 写文章页 `MarkdownPreview` |
+| `ImageMenu` · `ImageMenu/Gallery` · `ImageMenu/Mobile` | `ImageMenu` | `kind`：`image` / `gallery`；`wide?`（单图）；`mode?`：`grid` / `accordion`，`count`（组图）；`onToggleWide` / `onModeChange` / `onSplit`。由触发按钮 `OverlayButton`（`size` 32）+ `Menu` 组成；`/Gallery` 对应 `kind="gallery"`，`/Mobile` 为触屏形态（菜单项 44px），**都不是 variant**；规则见 [admin-post-editor.md](pages/admin-post-editor.md)"图片菜单"。已实现（单图）：`src/components/admin/editor/ImageMenu.tsx`（开合由 `MarkdownPreview` 按图片的源码起点 + 地址记录；改写经 `src/lib/editor/image-marks.ts` 双重定位，挂在 `ArticleImage` 的 `actions` 插槽，即图片右上角内侧 8px） | 写文章页 `MarkdownPreview` |
 | `EditorToolbar` · `EditorToolbar/Mobile` | `EditorToolbar` | `onCommand`；桌面 8 个格式按钮 + 插入图片（9 个都是 `IconButton/Ghost`，插入图片前加竖分隔线）；手机 7 个、固定在键盘上方；全部按钮包在一个 `TooltipGroup` 里，每个按钮一个 `Tooltip`（桌面 `side="bottom"`，手机 `side="top"`），名称与快捷键见 [admin-post-editor.md](pages/admin-post-editor.md)"工具栏与悬停提示" | 写文章页 |
 
 ## 读者端区块
@@ -204,7 +204,7 @@
 | `ArticleImage` · `/Loading` · `/Live` · `/LivePlaying` · `/Wide` | `ArticleImage` | `src`；`alt`；`caption?`（Markdown title）；`width`、`height`（原图尺寸，用来预留宽高比）；`placeholder?`（模糊缩略图）；`live?`（`{ videoSrc }`）；`wide?`。图片外层渲染 React Bits RefineFrame，负责加载中、马赛克渐显和失败重试（见下方"图片加载参数"）。`/Loading`、`/LivePlaying` 是运行时状态，**不是 prop**；`/Live` 对应传了 `live`，`/Wide` 对应 `wide`。已实现（`placeholder` 除外）：`src/components/article/ArticleImage.tsx`（宽图向两侧扩出 `--article-bleed`，由版心所在容器设置，后台预览区为左右内边距；图注对齐正文；根节点加载中带 `data-loading`） | 文章详情正文（05 / 05m）、后台 `MarkdownPreview` |
 | `LiveBadge` · `LiveBadge/Playing` | `LiveBadge` | `playing`；图标 + `LIVE`，`overlay` 底 + 背景模糊，播放中换成 `overlay-ink` 底。已实现：`src/components/article/LiveBadge.tsx`（`[data-live-badge][data-playing]`）；播放层 `src/components/article/live-photo.tsx` 由 `ArticleImage`、`ImageGallery` 共用（图片加载完成后叠加、badge 左上 12px，视频 `preload="none"` 静音内联只播一次，指针移入 / 长按 0.3s 后播放、播放时放大 1.06 倍并显示 3px 进度条，`error` 或 `play()` 报 NotSupportedError 或 `canPlayType` 为空时隐藏） | `ArticleImage`、`ImageGallery` 单元格、`Lightbox` |
 | `ImageGallery/Grid` · `/Grid/Hover` · `/Accordion` · `/Accordion/Mobile` | `ImageGallery` | `variant`：`grid` / `accordion`；`images`（每项同 `ArticleImage` 的数据，另带 `accent` 主色）；`caption?`。grid 按张数自动定列数（2–9 张），内部渲染 React Bits ChromaGrid（见下方"组图网格参数"）；accordion 适合 3–7 张，内部渲染 React Bits AccordionGallery（见下方"组图手风琴参数"）。`/Grid/Hover` 是鼠标在组图内的运行时状态，`/Accordion/Mobile` 为 ≤ 520px 形态（竖向条带），都不是 prop。`onImageClick?(index)` 供读者端打开 `Lightbox`，预览中不传（卡片不可点、不可聚焦）。`caption` 不传时由组内各图 title 用"；"拼成一行（网格显示在下方；手风琴各图注显示在面板上，组图注只用于 `aria-label`）。已实现：`src/components/article/ImageGallery.tsx`（根节点 `figure[data-image-gallery=grid|accordion]`；网格单元格 `[data-gallery-item][data-accent]`；加载状态与 `ArticleImage` 共用 `image-load.ts`） | 文章详情正文、后台 `MarkdownPreview` |
-| `OverlayButton` | `OverlayButton` | `icon`；`aria-label`（必填）；`size`：48（灯箱桌面）/ 44（灯箱手机、`ImageMenu` 手机）/ 32（`ImageMenu` 桌面，图标 16px） | `Lightbox` 关闭按钮（左右切换用 DepthCarousel 自带箭头）；`ImageMenu` 触发按钮 |
+| `OverlayButton` | `OverlayButton` | `icon`；`aria-label`（必填）；`size`：48（灯箱桌面）/ 44（灯箱手机、`ImageMenu` 手机）/ 32（`ImageMenu` 桌面，图标 16px）。已实现：`src/components/ui/OverlayButton.tsx` | `Lightbox` 关闭按钮（左右切换用 DepthCarousel 自带箭头）；`ImageMenu` 触发按钮 |
 | `Lightbox` · `Lightbox/Mobile` | `Lightbox` | `images`（文中全部图片，按出现顺序）；`index`；`onClose`；中间内容区内部渲染 React Bits DepthCarousel（见下方"灯箱层叠参数"），`Lightbox` 自己负责 scrim 底、计数、关闭、图注、下滑关闭；`/Mobile` 为 `< 768px` 形态（拖动切换、下滑关闭，不显示左右箭头） | 文章详情页（点击任意图片打开） |
 
 ### 图片加载参数
@@ -339,7 +339,7 @@
 | `EditorTopBar` | `EditorTopBar` | 03 / 03m |
 | `MarkdownEditor` | `MarkdownEditor` | 03 / 03m |
 | `MarkdownPreview` | `MarkdownPreview` | 03 |
-| `ImageSyntaxHelp` | `ImageSyntaxHelp` | 03b（`Popover` 的内容：写法示例 + iPhone 实况照片导出方法） |
+| `ImageSyntaxHelp` | `ImageSyntaxHelp` | 03b（`Popover` 的内容：写法示例） |
 | `PostSettingsDrawer` | `PostSettingsDrawer` | 03 |
 
 预览区里的代码块、任务列表、上传中图片是 Markdown 渲染结果（代码块由 Expressive Code 输出），不作为独立组件。
@@ -359,6 +359,7 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../backlog/drop-apple-live-photo.md)）：`ImageSyntaxHelp` 删去 iPhone 实况照片导出方法（admin.pen 03b 待同步） | miraclehifi |
 | 2026-10-14 | `ArticleImage`、RefineFrame 标注已实现；宽图扩出量由 `--article-bleed` 决定 | miraclehifi |
 | 2026-10-14 | 写文章页顶栏新增"更多"菜单（`IconButton/Ghost` + `Menu`，项：登出），03 / 03m 顶栏最右、04 新增展开示例；不新增组件 | miraclehifi |
 | 2026-10-10 | 初始版本：admin.pen 分为组件区 / 页面区；7 个组件校正命名，新增 29 个组件，页面改为引用实例 | miraclehifi |

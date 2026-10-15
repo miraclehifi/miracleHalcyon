@@ -46,7 +46,7 @@ F-001 design-arch 决定：实况照片上传、宽图 / 组图写法与预览�
 - **影响范围**: `specs/ui/admin.pen`（组件区、05 / 05m）、`specs/ui/components.md`、`specs/ui/design-tokens.md`（如需新增动效 / 遮罩规则）
 - **跨 Feature**:
   - F-002：文章详情页渲染，组件本身归 F-002
-  - F-001：上传需支持动态照片（静态图 + mov/mp4 视频成对上传，或 HEIC 拆分），并扩展 NFR 中"仅允许 png/jpg/webp/gif、≤ 5MB"的限制；Markdown 中如何表示动态照片 / 宽图 / 组图的写法需在 F-001 design-arch 时定
+  - F-001：上传需支持动态照片（静态图 + mov/mp4 视频成对上传，或 HEIC 拆分；2026-10-15 收窄为只支持安卓动态照片，见 [drop-apple-live-photo](drop-apple-live-photo.md)），并扩展 NFR 中"仅允许 png/jpg/webp/gif、≤ 5MB"的限制；Markdown 中如何表示动态照片 / 宽图 / 组图的写法需在 F-001 design-arch 时定
   - 图片尺寸、模糊缩略图与主色（组图网格聚光用）需在上传时生成并存储（影响 post / 图片数据模型）
 - **新增依赖**: `gsap`（AccordionGallery、DepthCarousel 使用），在 F-002 design-arch 时登记到技术选型；组件源码在 implement 阶段按 Sprint 任务引入，不提前放入仓库
 - **决策**: 与 05 文章详情一样作为先行稿，不等 F-002 define-feature；设计中的写法约定为待定项

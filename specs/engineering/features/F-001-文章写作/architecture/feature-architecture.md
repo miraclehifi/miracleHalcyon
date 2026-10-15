@@ -28,7 +28,7 @@ graph TB
     Worker --> Secrets
 ```
 
-浏览器侧承担的重计算（不进 Worker，见 ADR-001、ADR-006）：Markdown 预览渲染、HEIC 转 JPEG、MOV 转封装/转码、图片宽高与主色计算。
+浏览器侧承担的重计算（不进 Worker，见 ADR-001、ADR-006）：Markdown 预览渲染、安卓动态照片切视频、视频转封装/转码、图片宽高与主色计算。
 
 ### 1.2 技术栈
 
@@ -39,7 +39,7 @@ graph TB
 | 样式 | Tailwind CSS 4 + `@tailwindcss/typography` | 令牌来自 [design-tokens.md](../../../../ui/design-tokens.md) |
 | Markdown | unified：`remark-parse` → `remark-gfm` → `remark-rehype` → `rehype-sanitize` → `rehype-expressive-code` → 自定义图片插件 | 同构模块，见 ADR-001 |
 | 编辑器 | 原生 `<textarea>` | 见 ADR-004 |
-| 图片处理（浏览器） | `heic-to`（libheif WASM，按需加载）、`mediabunny`（MOV→MP4 转封装/转码，按需加载） | 见 ADR-006 |
+| 图片处理（浏览器） | `mediabunny`（内嵌视频 → MP4 转封装/转码，按需加载）；`heic-to` 随苹果支持取消（2026-10-15） | 见 ADR-006 |
 | 动效组件 | React Bits：SwipeRow、AnimatedList、RefineFrame、ChromaGrid、AccordionGallery；`gsap` | 预览需与读者端一致，图片组件在 F-001 实现（§6） |
 | 测试 | Vitest 4.1 + `@cloudflare/vitest-plugin`（原 vitest-pool-workers；D1/R2 本地模拟）；Playwright（E2E） | 写入 CLAUDE.md 命令表（✅ 已实现：setup-workers-test-pool） |
 
@@ -109,7 +109,7 @@ graph LR
 | US-03 / US-06 新建与自动保存 | 输入 → 2s 防抖 → 同步写 localStorage → 首次 `POST /api/admin/posts`（返回 id，`history.replaceState`）/ 之后 `PUT /api/admin/posts/:id`（整份工作稿）→ `post.saveDraft` 校验 slug 唯一 → 返回 `updatedAt`；失败指数退避重试 |
 | US-03 编辑加载 | SSR：`/admin/posts/[id].astro` 读 `post.getForEdit(id)` → 作为 props 交给 island（无需首屏请求） |
 | US-04 预览 | 源码变化 → Web Worker 中 `renderMarkdown` → HTML 回主线程 → 注入预览区；同步滚动用渲染结果上的 `data-line` 映射 |
-| US-05 图片上传 | 粘贴/拖入/选择 → 浏览器预处理（配对、HEIC 转换、宽高/主色、视频转封装，见 ADR-006）→ 占位文本 → `POST /api/admin/images`（multipart）→ `media.upload` 校验后写 R2 + `images` → 返回 URL → 替换占位 |
+| US-05 图片上传 | 粘贴/拖入/选择 → 浏览器预处理（动态照片切视频、宽高/主色、视频转封装/转码，见 ADR-006）→ 占位文本 → `POST /api/admin/images`（multipart）→ `media.upload` 校验后写 R2 + `images` → 返回 URL → 替换占位 |
 | US-07 列表 | SSR 首屏 + 筛选/搜索/翻页 `GET /api/admin/posts?status&q&page` → `post.list`（含各状态计数） |
 | US-08 发布 / 发布更新 / 撤回 | `POST /api/admin/posts/:id/publish` 或 `/unpublish` → `post.publish / unpublish`（校验必填 → 复制/清空快照）→ `onPublicationChanged` |
 | US-09 删除 | 写文章页：确认框 → `DELETE /api/admin/posts/:id`；列表：6s 撤销期后 `fetch(…, { method: 'DELETE', keepalive: true })` → `post.delete` → `onPublicationChanged` |
@@ -213,7 +213,7 @@ src/components/
     ├── markdown/  render.ts  plugins/{images,line-map}.ts  sanitize-schema.ts  worker.ts
     ├── editor/    format-commands.ts（纯函数 + execCommand 适配）  shortcuts.ts  scroll-sync.ts
     ├── autosave/  useAutosave.ts  local-draft.ts
-    └── upload/    pair-files.ts  heic.ts  motion-photo.ts  video-remux.ts  image-meta.ts  upload-client.ts
+    └── upload/    extract-motion-photo.ts  process-video.ts  dominant-color.ts  upload-client.ts
 ```
 
 后端：
@@ -271,9 +271,9 @@ src/
 
 | 变更 | 需回补的上游 |
 |------|-------------|
-| 新增 US-11 实况照片上传（图 + 视频配对、HEIC、Motion Photo） | feature-scope、write-story、write-behavior、design-acceptance |
+| 新增 US-11 实况照片上传（Motion Photo；图 + 视频配对、HEIC 已于 2026-10-15 取消） | feature-scope、write-story、write-behavior、design-acceptance |
 | 新增 US-12 图片排版标记（`#wide` / 组图 / 手风琴写法 + 预览图片菜单） | 同上 + design-ui（图片菜单的页面规格与设计稿） |
-| NFR 上传限制：增加 heic/heif（浏览器端转换后实际上传 jpg）与配对 mp4 ≤ 10MB | nfr.md |
+| NFR 上传限制：实况视频 mp4 ≤ 10MB（heic/heif 浏览器端转换已于 2026-10-15 取消） | nfr.md |
 | Backlog `article-image-display` 中 F-001 部分转入本 Feature | backlog 条目 |
 
 上述回补完成前，本 Feature 不进入 plan-tasks。
@@ -301,3 +301,4 @@ src/
 | 2026-10-13 | 1.1 | design-domain 回写：认证路径改为 `/api/admin/login`、`/api/admin/logout`（与验收用例一致）；新增读者只读接口分组；详细契约见 `backend/domains/*/api-contract.md` | miraclehifi |
 | 2026-10-13 | 1.2 | 框架由 Astro 5 改为 Astro 7（作者决定，implement 开始时）| miraclehifi |
 | 2026-10-13 | 1.3 | 读者页改为构建时预渲染，缓存失效钩子改为触发重建（ADR-001 修订） | miraclehifi |
+| 2026-10-15 | 1.4 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：技术选型去掉 `heic-to`，浏览器预处理与 `upload/` 目录同步 | miraclehifi |
