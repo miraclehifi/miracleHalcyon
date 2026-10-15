@@ -26,13 +26,16 @@
 
 | 项 | 规则 |
 |----|------|
-| 三态 | 亮色 → 暗色 → 跟随系统 → 亮色；图标分别 `sun` / `moon` / `sun-moon`；`aria-label="主题：亮色|暗色|跟随系统"` |
-| 存储 | `localStorage` 键 `theme`，值 `light` / `dark` / `system`；读写失败时只在本次会话生效 |
-| 首屏 | `<head>` 内联脚本在样式前读取存储，设置 `<html data-theme>`（`system` 时不设，交给 `light-dark()` 跟随 `prefers-color-scheme`），避免闪烁 |
-| 跟随系统 | 选 `system` 时页面随系统切换实时变化，无需刷新 |
+| 两态 | 点击在亮 / 暗之间翻转（以当前实际配色为准）；`aria-label` 为"主题：亮色"或"主题：暗色"，表示当前实际配色 |
+| 图标 | 固定为"半填充圆"（圆 + 竖线 + 右半三条斜线，24 视图框、描边 2、显示 18px），不随状态变化 |
+| 扩散动画 | View Transitions：新主题以按钮中心为圆心圆形扩散至覆盖整页，400ms `ease-in-out`；clip-path 用百分比坐标；动画进行中再次点击忽略；只作用于本次切换，不影响其他过渡 |
+| 降级 | 浏览器不支持 View Transitions，或 `prefers-reduced-motion: reduce` 时直接切换，无动画 |
+| 存储 | `localStorage` 键 `theme`，值 `light` / `dark`；无值（含旧值 `system`）视为未选择；读写失败时只在本次会话生效 |
+| 首屏 | `<head>` 内联脚本在样式前读取存储，设置 `<html data-theme>`（未选择时不设，交给 `light-dark()` 跟随 `prefers-color-scheme`），避免闪烁 |
+| 跟随系统 | 从未点过切换时页面随系统切换实时变化，无需刷新，按钮名称同步；点过一次后固定为所选主题 |
 | 后台 | 后台共用同一个存储键与内联脚本（后台无切换按钮，跟随读者端选择） |
 
-> 已实现（Sprint 4，add-theme-toggle）：`src/layouts/BaseLayout.astro` 内联脚本、`src/components/reader/ThemeToggle.astro`（原生脚本）、`src/lib/reader/theme-toggle.ts`。
+> 已实现（Sprint 4，add-theme-toggle；2026-10-15 改两态 + 扩散动画，[animated-theme-toggle](../../backlog/animated-theme-toggle.md)）：`src/layouts/BaseLayout.astro` 内联脚本、`src/components/reader/ThemeToggle.astro`（原生脚本）、`src/lib/reader/theme-toggle.ts`、`src/styles/global.css`（过渡样式）。
 
 ## 页脚 `SiteFooter`
 

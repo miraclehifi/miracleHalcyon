@@ -25,9 +25,10 @@
 
 | UT-ID | 类 | 用例 | 预期 | covers |
 |------|------|------|------|------|
-| UT-201 | S | 轮换 | 初始\"亮色\"，点击依次为暗色 → 跟随系统 → 亮色；每次写入 localStorage 并设置 `html` 标记 | SC-SHELL-02 |
-| UT-202 | S | 跟随系统 | 选\"跟随系统\"后 `matchMedia('(prefers-color-scheme: dark)')` 触发 change → `html` 标记随之变化；选亮 / 暗后不再跟随 | SC-SHELL-04 |
+| UT-201 | S | 翻转 | 未选择且系统为亮色时，点击依次为暗色 → 亮色；每次写入 localStorage 并设置 `html` 标记；存储旧值 `system` 视为未选择 | SC-SHELL-02 |
+| UT-202 | S | 跟随系统 | 未选择时 `matchMedia('(prefers-color-scheme: dark)')` 触发 change → 按钮名称随之变化；点过后不再跟随 | SC-SHELL-04 |
 | UT-203 | S | 存储不可用 | localStorage 读写抛错时仍可切换（只在本次会话生效），不抛出 | SC-SHELL-02 |
+| UT-237 | S | 扩散动画 | `circleClipPath`：按钮中心与视口算出起止 clip-path（百分比坐标，终点半径覆盖最远角）；不支持 `startViewTransition` 或减少动效时直接切换 | SC-SHELL-02 |
 | UT-204 | A | 名称 | 按钮可访问名称为\"主题：{当前}\"，图标 `aria-hidden` | SC-SHELL-02 |
 
 ## 2. ReaderHeader（Astro）

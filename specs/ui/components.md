@@ -122,7 +122,7 @@
 | `PostPager` | `PostPager`（已实现：`src/components/reader/PostPager.astro`） | `prev?`、`next?`（`title`、`slug`）；缺一侧时该侧留空，两侧都没有时不渲染；手机两项上下排列 | 文章详情页文末 |
 | `PostCard` · `PostCard/Hover` · `PostCard/Mobile` | `PostCard`（已实现：`src/components/reader/PostCard.tsx`、列表 `PostCardList.tsx`，Sprint 4） | `post`（`title`、`excerpt`、`publishedAt`、`tags`、`cover?`）；整卡可点进入详情；`excerpt`：有 `summary` 用 `summary`，否则由正文渲染后取纯文本前约 120 字，最多 3 行，为空时不渲染；没有 `cover` 时不显示右侧图片；`/Hover` 是悬停与键盘聚焦态（上层左上移 4px、下层右下移 4px，边框不换色，保持 `line-strong`），在列表中由 `active` 控制（见"列表动效参数"）；手机端标题与 72px 封面同行，摘要在下 | 文章列表页 `/posts` |
 | `SiteFooter` | `SiteFooter` | —（站点名、签名一句话、版权、RSS / GitHub 链接）。已实现：`src/components/reader/SiteFooter.astro`（与 `SiteHeader`、`SiteNav`、`BackLink`、`NotFound` 同为 Astro 组件，不水合） | 读者端全部页面 |
-| （SiteNav 内的主题切换按钮） | `ThemeToggle`（已实现：`src/components/reader/ThemeToggle.astro`，原生脚本，不加载 React） | —；`IconButton/Ghost`，亮 / 暗 / 跟随系统三态轮换，图标 `sun` / `moon` / `sun-moon`，`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
+| （SiteNav 内的主题切换按钮） | `ThemeToggle`（已实现：`src/components/reader/ThemeToggle.astro`，原生脚本，不加载 React） | —；`IconButton/Ghost`，亮 / 暗两态翻转 + 圆形扩散动画（View Transitions），图标固定为半填充圆（自绘 SVG），`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
 | `BackLink` | `BackLink` | `href`；文字 `> cd ..`，`font-mono` 14px `ink-muted`，上下内边距 12（可点高度 ≥ 44） | 读者端子页主体末尾（05、05m、07、07m；首页不用） |
 
 ### 列表动效参数
@@ -366,6 +366,7 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-15 | `ThemeToggle` 改两态 + 圆形扩散动画，图标换成半填充圆；admin.pen `SiteNav` / `SiteNav/Mobile` 同步（[animated-theme-toggle](../backlog/animated-theme-toggle.md)） | miraclehifi |
 | 2026-10-15 | F-002 design-ui：06 拆为首页（06 / 06m）与 `/posts`（07 / 07m），`HomeTags` / `HomePosts` 改名 `TagIndex` / `PostCardList`，新增 `PostsHeader`；05 补左栏 `TagPostsNav`、文末 `PostPager`、`BackLink`，05m 目录改为 `TocButton` + `TocDrawer`（05m-b）、新增 `ReadingProgress/Bar`、`TagPostsNav/Mobile`；新增 08 `NotFound`、`ThemeToggle`、03 `CoverField`；`PostCard` 摘要优先用 `summary` | miraclehifi |
 | 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../backlog/drop-apple-live-photo.md)）：`ImageSyntaxHelp` 删去 iPhone 实况照片导出方法（admin.pen 03b 已同步） | miraclehifi |
 | 2026-10-14 | `ArticleImage`、RefineFrame 标注已实现；宽图扩出量由 `--article-bleed` 决定 | miraclehifi |

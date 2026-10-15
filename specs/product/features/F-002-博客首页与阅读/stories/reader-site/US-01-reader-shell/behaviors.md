@@ -5,7 +5,7 @@
 | ID | SC-ID | 场景 | 类型 |
 |----|-------|------|------|
 | BH-01 | SC-SHELL-01 | 桌面顶栏导航与当前项高亮 | 正常 |
-| BH-02 | SC-SHELL-02 | 主题切换轮换并持久 | 正常 |
+| BH-02 | SC-SHELL-02 | 主题切换翻转并持久 | 正常 |
 | BH-03 | SC-SHELL-03 | 首屏不闪主题 | 边界 |
 | BH-04 | SC-SHELL-04 | 跟随系统时随系统变化 | 边界 |
 | BH-05 | SC-SHELL-05 | 手机顶栏换成图标 | UI |
@@ -28,18 +28,22 @@ Then 依次看到站点名（链接 /）、文章、书影音、摄影、GitHub�
   And 摄影、GitHub 链接带 target="_blank" 与 rel="noopener noreferrer"
 ```
 
-## BH-02: 主题切换轮换并持久
+## BH-02: 主题切换翻转并持久
 
 **SC-ID**: SC-SHELL-02
 
 ```gherkin
 Given 我从未切换过主题，系统为亮色
 When 我点击主题切换
-Then 页面变为暗色，按钮名称为"主题：暗色"
+Then 暗色以按钮为圆心扩散覆盖整页，按钮名称为"主题：暗色"
 When 我再点击
-Then 变为"跟随系统"
+Then 变回亮色，按钮名称为"主题：亮色"
 When 我刷新页面或进入另一读者页
 Then 保持上次选择
+
+Given 我的系统设置了"减少动态效果"，或浏览器不支持 View Transitions
+When 我点击主题切换
+Then 主题直接切换，没有扩散动画
 ```
 
 ## BH-03: 首屏不闪主题
@@ -57,7 +61,7 @@ Then 首次绘制即为暗色（html 在样式加载前已带暗色标记）
 **SC-ID**: SC-SHELL-04
 
 ```gherkin
-Given 主题为"跟随系统"
+Given 我从未切换过主题（跟随系统）
 When 系统从亮色切到暗色
 Then 页面无需刷新即变为暗色
 ```

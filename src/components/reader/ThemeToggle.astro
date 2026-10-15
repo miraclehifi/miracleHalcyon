@@ -1,18 +1,31 @@
 ---
-// ThemeToggle（reader-shell.md"主题切换"、ADR-008）：原生脚本，不加载 React；三态图标按 data-mode 显示
-import { Moon, Sun, SunMoon } from "lucide-react";
+// ThemeToggle（reader-shell.md"主题切换"、ADR-008）：原生脚本，不加载 React；图标固定为半填充圆，名称由脚本按当前配色设置
 ---
 
 <button
   type="button"
   data-theme-toggle
-  data-mode="system"
-  aria-label="主题：跟随系统"
-  class="group inline-flex size-8 cursor-pointer items-center justify-center rounded-control text-ink-muted transition-colors duration-200 hover:bg-surface-sunken hover:text-ink max-md:size-11"
+  aria-label="主题：切换"
+  class="inline-flex size-8 cursor-pointer items-center justify-center rounded-control text-ink-muted transition-colors duration-200 hover:bg-surface-sunken hover:text-ink max-md:size-11"
 >
-  <Sun size={18} aria-hidden="true" className="hidden group-data-[mode=light]:block" />
-  <Moon size={18} aria-hidden="true" className="hidden group-data-[mode=dark]:block" />
-  <SunMoon size={18} aria-hidden="true" className="hidden group-data-[mode=system]:block" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+    <path d="M12 3l0 18"></path>
+    <path d="M12 9l4.65 -4.65"></path>
+    <path d="M12 14.3l7.37 -7.37"></path>
+    <path d="M12 19.6l8.85 -8.85"></path>
+  </svg>
 </button>
 
 <script>

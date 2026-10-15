@@ -18,6 +18,22 @@
   }
 }
 
+/* 主题切换扩散动画（reader-shell.md"主题切换"）：只在切换期间（html[data-theme-vt]）生效，不影响其他 View Transitions；
+   新快照的 clip-path 由脚本动画驱动，起始值先用变量固定 */
+html[data-theme-vt="active"]::view-transition-old(root),
+html[data-theme-vt="active"]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-theme-vt="active"]::view-transition-new(root) {
+  clip-path: var(--theme-vt-clip-from);
+}
+
+html[data-theme-vt="active"]::view-transition-group(root) {
+  animation-duration: var(--theme-vt-duration);
+}
+
 /* 文章区排版（design-tokens.md"字体"）：@tailwindcss/typography 的颜色与字体换成站点令牌；后台预览与读者端共用。
    不放进 @layer：需覆盖插件在 utilities 层设置的 --tw-prose-* */
 .prose {

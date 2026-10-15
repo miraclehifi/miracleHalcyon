@@ -16,7 +16,7 @@
 | TC ID | covers | 场景 | Priority | type |
 |-------|--------|------|----------|------|
 | TC-US01-01 | SC-SHELL-01 | 桌面顶栏导航项、外链属性与当前项高亮 | P0 | e2e |
-| TC-US01-02 | SC-SHELL-02 | 主题三态轮换并跨页保持 | P0 | ui-interaction |
+| TC-US01-02 | SC-SHELL-02 | 主题翻转（扩散动画）并跨页保持 | P0 | ui-interaction |
 | TC-US01-03 | SC-SHELL-03 | 首屏即为已选主题（不闪烁） | P1 | e2e |
 | TC-US01-04 | SC-SHELL-04 | 跟随系统时随系统切换 | P1 | e2e |
 | TC-US01-05 | SC-SHELL-05 | 手机顶栏图标化与触控尺寸 | P1 | ui-interaction |
@@ -198,28 +198,31 @@
 
 ## UI 交互测试
 
-### TC-US01-02: 主题三态轮换并跨页保持
+### TC-US01-02: 主题翻转（扩散动画）并跨页保持
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US01-02 |
 | covers | SC-SHELL-02 |
-| Scenario | 主题三态轮换并跨页保持 |
+| Scenario | 主题翻转（扩散动画）并跨页保持 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | ui-interaction |
-| Change History | 2026-10-15 v1.0 初始创建 |
+| Change History | 2026-10-15 v1.0 初始创建；2026-10-15 v1.1 三态改两态 + 扩散动画（[animated-theme-toggle](../../../../../backlog/animated-theme-toggle.md)） |
 
 **前置条件：**
 - 【环境前置】`colorScheme: 'light'`，清空 localStorage
 
 **步骤：**
-1. 访问 `/posts`，点主题切换 3 次，每次读取 `html` 的主题标记与按钮名称
+1. 访问 `/posts`，点主题切换，切换过程中读取 `html` 是否带过渡标记；再点一次
 2. 选"暗色"后刷新，再进入 `/posts/hello`
+3. 以 `reducedMotion: 'reduce'` 再点一次
 
 **预期结果：**
-- 按钮名称依次为"主题：暗色""主题：跟随系统""主题：亮色"
+- 初始名称"主题：亮色"（跟随系统亮色）；点击后依次为"主题：暗色""主题：亮色"
+- 支持 View Transitions 的浏览器在切换中 `html` 带 `data-theme-vt="active"`，动画结束后移除
+- 减少动效时立即切换，不出现过渡标记
 - 暗色时 `html` 带暗色标记（`data-theme="dark"`，以 design-ui 为准），背景色为暗色令牌
 - 刷新与换页后仍为暗色
 
