@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 2
-**状态**: pending
+**状态**: completed
 **类别**: SETUP
 **架构层级**: 配置 + 领域层（reader 纯函数）
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -34,13 +34,13 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 插件按 module-spec §1.2 表格逐项实现
-- [ ] `virtual:reader-data` 有类型声明，`npm run check` 不报未知模块
-- [ ] 夹具与 _fixtures.md 一致（篇数、标签计数、`hello` 的图片顺序）
-- [ ] README 增加读者数据变量说明（`READER_API_ORIGIN`、`READER_FIXTURE`、`READER_BOOTSTRAP`）
+- [x] 插件按 module-spec §1.2 表格逐项实现
+- [x] `virtual:reader-data` 有类型声明，`npm run check` 不报未知模块
+- [x] 夹具与 _fixtures.md 一致（篇数、标签计数、`hello` 的图片顺序）
+- [x] README 增加读者数据变量说明（`READER_API_ORIGIN`、`READER_FIXTURE`、`READER_BOOTSTRAP`）
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：`tests/e2e/support/*` 种子脚本；`playwright.config.ts` 变更后跑任意一个 F-001 E2E 文件确认能启动——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖
