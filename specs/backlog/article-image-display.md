@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | triaged |
+| 状态 | ready |
 | 类型 | Feature 增量 |
 | 优先级 | P1-High |
 | 来源 | 作者需求 |
@@ -39,7 +39,7 @@
 
 ## 去向（2026-10-12）
 
-F-001 design-arch 决定：实况照片上传、宽图 / 组图写法与预览中的图片组件**在 F-001 全做**——转为 [US-11 live-photo-upload](../product/features/F-001-文章写作/stories/post-editor/US-11-live-photo-upload/story.md)、[US-12 image-layout-marks](../product/features/F-001-文章写作/stories/post-editor/US-12-image-layout-marks/story.md)；写法见 ADR-005，上传处理见 ADR-006（参考 Afilmory，浏览器端转换）。灯箱与文章详情页仍归 F-002。
+F-001 design-arch 决定：实况照片上传、宽图 / 组图写法与预览中的图片组件**在 F-001 全做**——转为 [US-11 live-photo-upload](../product/features/F-001-文章写作/stories/post-editor/US-11-live-photo-upload/story.md)、[US-12 image-layout-marks](../product/features/F-001-文章写作/stories/post-editor/US-12-image-layout-marks/story.md)；写法见 ADR-005，上传处理见 ADR-006（参考 Afilmory，浏览器端转换）。灯箱与文章详情页仍归 F-002（2026-10-15 F-002 define-feature 确认纳入）。
 
 ## 影响分析
 

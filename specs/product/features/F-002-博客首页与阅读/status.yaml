@@ -1,0 +1,24 @@
+feature: F-002
+name: "博客首页与阅读"
+status: in_progress
+created: 2026-10-15
+updated: 2026-10-15
+backlog: specs/backlog/blog-home-reading.md
+phases:
+  feature_overview: done
+  story_grouping: done
+  user_stories: done   # 10 个 US（2026-10-15；作者授权文档不逐项确认）
+  behaviors: done   # 10 个 US 共 76 个 BH
+  acceptance_tests: done   # 82 个 TC（gap 0）+ 36 条前端单元规格 UT-201…236；共享夹具 test/features/F-002-博客首页与阅读/acceptance/_fixtures.md
+  ui_design: pending
+  architecture: pending
+  domain_design: pending
+  task_planning: pending
+  implementation: pending
+  validation: pending
+current_phase: ui_design
+blockers: []
+has_ui_changes: true
+approvals:
+  requirements: true   # 2026-10-15 作者授权文档不逐项确认
+notes: "依赖 F-001 post Domain（只读已发布文章）；读者页构建时预渲染（backlog/reader-build-time-prerender.md）；图片组件复用 F-001 Sprint 3 的 src/components/article/。2026-10-15 作者决定：F-002 开发全部完成后，再统一做 F-001 + F-002 的 code-review、verify 与全量回归"
