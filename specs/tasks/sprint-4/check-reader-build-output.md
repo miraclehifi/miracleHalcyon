@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 19
-**状态**: pending
+**状态**: completed
 **类别**: TEST
 **架构层级**: 构建
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -34,11 +34,11 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `npm run test:build` 可单独执行
-- [ ] CLAUDE.md 命令表补 `test:build`
+- [x] `npm run test:build` 可单独执行
+- [x] CLAUDE.md 命令表补 `test:build`
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：无（只读产物）——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖

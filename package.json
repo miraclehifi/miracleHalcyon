@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:spike": "playwright test -c playwright.spike.config.ts"
+    "test:spike": "playwright test -c playwright.spike.config.ts",
+    "test:build": "vitest run -c vitest.build.config.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.4",
