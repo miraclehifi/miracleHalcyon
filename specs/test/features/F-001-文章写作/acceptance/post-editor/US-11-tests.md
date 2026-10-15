@@ -739,11 +739,11 @@ await expect(page.getByRole('menu', { name: '图片' })).toHaveCount(0);
 | type | ui-interaction |
 | Change History | 2026-10-12 v1.0 初始创建 |
 
-**前置条件：** 【环境前置】`page.route('**/*.live.mp4', r => r.fulfill({ body: 'xx', contentType: 'video/mp4' }))`
+**前置条件：** 【数据前置】R2 夹具 `kkkkkkkkkk_960x1280_6b7f8e.jpg`，同名 `.live.mp4` 为损坏字节（WebKit 的媒体请求不经过 `page.route`，不能用路由模拟；2026-10-15 改）
 
 **步骤：** 打开带 `#live` 引用的草稿，悬停图片
 
-**预期结果：** `[data-live-badge]` 不可见；悬停后不显示 `video`；静态图正常显示
+**预期结果：** 加载完成后先显示 `[data-live-badge]`（视频 `preload="none"`，首次播放时才知道失败）；悬停后 LIVE 消失、不显示 `video`；静态图正常显示
 
 **playwright_hint：**
 ```ts

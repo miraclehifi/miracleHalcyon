@@ -21,7 +21,7 @@
 | 6 | [add-live-photo-pair-upload](add-live-photo-pair-upload.md) | 同名配对上传实况照片 | article-writing | FRONTEND | 表现层 | US-11 | spike-browser-media-processing, implement-live-photo-upload-api, add-heic-upload | 1 | 高 | pending |
 | 7 | [add-motion-photo-detection](add-motion-photo-detection.md) | 安卓动态照片识别 | article-writing | FRONTEND | 表现层 | US-11 | add-live-photo-pair-upload | 0 | 中 | pending |
 | 8 | [add-image-gallery-display](add-image-gallery-display.md) | 预览组图 `ImageGallery`（网格、手风琴） | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 2 | 中 | completed |
-| 9 | [add-live-photo-playback](add-live-photo-playback.md) | 预览实况照片播放与 `LiveBadge` | article-writing | FRONTEND | 表现层 | US-11 | add-article-image-display, add-image-gallery-display | 0 | 中 | pending |
+| 9 | [add-live-photo-playback](add-live-photo-playback.md) | 预览实况照片播放与 `LiveBadge` | article-writing | FRONTEND | 表现层 | US-11 | add-article-image-display, add-image-gallery-display | 0 | 中 | completed |
 | 10 | [add-single-image-menu](add-single-image-menu.md) | 单图菜单切换宽图 | article-writing | FRONTEND | 表现层 | US-12 | add-article-image-display | 1 | 中 | pending |
 | 11 | [add-gallery-menu](add-gallery-menu.md) | 组图菜单与手机点按 | article-writing | FRONTEND | 表现层 | US-12 | add-image-gallery-display, add-single-image-menu | 0 | 低 | pending |
 | 12 | [add-image-syntax-help](add-image-syntax-help.md) | 底栏"图片写法"说明 | article-writing | FRONTEND | 表现层 | US-12 | — | 0 | 低 | pending |

@@ -1,13 +1,16 @@
 // ImageGallery（components.md"文章图片""组图网格参数""组图手风琴参数"）：正文组图，读者端与后台预览共用。
 // grid 渲染 ChromaGrid，每个单元格用 RefineFrame 包图片（正方形裁切、马赛克渐显、失败重试）；accordion 渲染
-// AccordionGallery（3–7 张，默认展开中间一张，高度按断点传入）。onImageClick 留给读者端打开 Lightbox，预览中不传。
+// AccordionGallery（3–7 张，默认展开中间一张，高度按断点传入）。实况照片的播放层经 renderOverlay 叠加：网格单元格在
+// 图片加载完成后、手风琴只在展开项上（不受网格聚光的灰度滤镜影响）。onImageClick 留给读者端打开 Lightbox，预览中不传。
 // 渲染期不依赖 window（媒体查询、主题在服务端取默认值），可在构建时预渲染
+import { useEffect, useState } from "react";
 import AccordionGallery from "../vendor/react-bits/AccordionGallery";
 import ChromaGrid from "../vendor/react-bits/ChromaGrid";
 import RefineFrame from "../vendor/react-bits/RefineFrame";
 import { NARROW_QUERY, useMediaQuery } from "../../lib/dom/media";
 import { useColorScheme } from "../../lib/dom/theme";
 import { IMAGE_RADIUS, LOAD_LABELS, STAGE_MS, useImageLoad } from "./image-load";
+import { LivePhotoLayer, type LiveSource } from "./live-photo";
 
 export interface GalleryImage {
   src: string;
@@ -16,6 +19,7 @@ export interface GalleryImage {
   width?: number;
   height?: number;
   accent?: string; // 图片主色 "#rrggbb"；无主色时卡片描边用白色
+  live?: LiveSource;
 }
 
 export interface ImageGalleryProps {
@@ -37,8 +41,9 @@ export function galleryColumns(count: number, narrow: boolean): number {
   return count === 3 ? 3 : 2;
 }
 
-function GridCell({ image }: { image: GalleryImage }) {
+function GridCell({ image, onComplete }: { image: GalleryImage; onComplete: (complete: boolean) => void }) {
   const { status, url, imgRef, onLoad, onError, onRetry } = useImageLoad(image.src);
+  useEffect(() => onComplete(status === "complete"), [status, onComplete]); // 上报幂等，回调每次渲染都是新的也不会循环
   return (
     <span data-gallery-item="" data-accent={image.accent} className="block h-full w-full">
       <RefineFrame
@@ -73,6 +78,15 @@ export function ImageGallery({ variant, images, caption, onImageClick }: ImageGa
   const narrow = useMediaQuery(NARROW_QUERY);
   const phone = useMediaQuery(ACCORDION_PHONE_QUERY);
   const theme = useColorScheme();
+  const [loaded, setLoaded] = useState<ReadonlySet<string>>(new Set());
+  const markLoaded = (src: string, complete: boolean) =>
+    setLoaded((prev) => {
+      if (prev.has(src) === complete) return prev;
+      const next = new Set(prev);
+      if (complete) next.add(src);
+      else next.delete(src);
+      return next;
+    });
   const groupCaption =
     caption ??
     images
@@ -97,6 +111,10 @@ export function ImageGallery({ variant, images, caption, onImageClick }: ImageGa
           showLabels={images.some((image) => image.caption)}
           ariaLabel={groupCaption ? `组图：${groupCaption}` : "组图"}
           onActiveClick={onImageClick}
+          renderOverlay={(_, index, active) => {
+            const live = images[index].live;
+            return active && live ? <LivePhotoLayer videoSrc={live.videoSrc} radius={IMAGE_RADIUS} /> : null;
+          }}
         />
       </figure>
     );
@@ -116,7 +134,11 @@ export function ImageGallery({ variant, images, caption, onImageClick }: ImageGa
         frame={false}
         theme={theme}
         onItemClick={onImageClick}
-        renderMedia={(_, index) => <GridCell image={images[index]} />}
+        renderMedia={(_, index) => <GridCell image={images[index]} onComplete={(complete) => markLoaded(images[index].src, complete)} />}
+        renderOverlay={(_, index) => {
+          const { src, live } = images[index];
+          return live && loaded.has(src) ? <LivePhotoLayer videoSrc={live.videoSrc} radius={IMAGE_RADIUS} /> : null;
+        }}
       />
       {groupCaption && <figcaption className="mt-3 text-center font-prose text-meta text-ink-faint italic">{groupCaption}</figcaption>}
     </figure>

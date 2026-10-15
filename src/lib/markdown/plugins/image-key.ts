@@ -9,6 +9,9 @@ export type ImageMarks = Record<ImageMark, boolean>;
 
 export const stripFragment = (url: string) => url.split("#")[0];
 
+// 实况照片视频地址（markdown module-spec §3 live）：图片地址去扩展名 + .live.mp4，与服务端 videoKeyFor 一致
+export const liveVideoSrc = (src: string) => stripFragment(src).replace(/[.][a-z]+$/, ".live.mp4");
+
 const fragmentOf = (url: string) => {
   const i = url.indexOf("#");
   return i < 0 ? "" : url.slice(i + 1);

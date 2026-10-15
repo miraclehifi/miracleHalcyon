@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 3
 **序号**: 9
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-001 文章写作](../../product/features/F-001-文章写作/feature-scope.md)
@@ -34,14 +34,14 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 测试环境 R2 预置一组实况照片夹具（jpg + `.live.mp4`）
-- [ ] 视频 `muted`、`playsInline`、只播一次；`preload` 不在页面加载时下载视频
-- [ ] components.md 中 `LiveBadge` 标注"已实现"
+- [x] 测试环境 R2 预置一组实况照片夹具（jpg + `.live.mp4`）
+- [x] 视频 `muted`、`playsInline`、只播一次；`preload` 不在页面加载时下载视频
+- [x] components.md 中 `LiveBadge` 标注"已实现"
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿
-- [ ] 影响范围回归：`tests/unit/components/article-image.test.tsx`、`image-gallery.test.tsx`、`tests/e2e/image-layout.spec.ts` 通过；E2E 补跑 webkit 一次
-- [ ] `npm run lint` 与 `npm run check` 无错误
+- [x] 变更点测试：上述测试清单全部由红变绿
+- [ ] 影响范围回归（2026-10-15 作者要求：可做任务全部完成后统一跑）：`tests/unit/components/article-image.test.tsx`、`image-gallery.test.tsx`、`tests/e2e/image-layout.spec.ts` 通过；E2E 补跑 webkit 一次
+- [ ] `npm run lint`（同上，统一跑） 与 `npm run check` 无错误
 
 ## 依赖
 

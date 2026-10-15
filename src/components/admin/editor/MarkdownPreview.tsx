@@ -6,6 +6,7 @@
 // 挂载为 ImageGallery，按"模式 + 组内各图 key"复用
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { liveVideoSrc } from "../../../lib/markdown/plugins/image-key";
 import { islandKey, reconcileIslands } from "../../../lib/markdown/reconcile-islands";
 import { PLACEHOLDER_LABELS } from "../../../lib/markdown/plugins/upload-placeholder";
 import type { ImageRef } from "../../../lib/markdown/render";
@@ -131,6 +132,8 @@ interface Island {
 const contentKey = (content: IslandContent): string =>
   content.kind === "image" ? islandKey(content.image) : `${content.variant}[${content.images.map(islandKey).join("|")}]`;
 
+const liveOf = (image: ImageRef) => (image.marks.live ? { videoSrc: liveVideoSrc(image.src) } : undefined);
+
 const toGalleryImage = (image: ImageRef): GalleryImage => ({
   src: image.src,
   alt: image.alt,
@@ -138,6 +141,7 @@ const toGalleryImage = (image: ImageRef): GalleryImage => ({
   width: image.w,
   height: image.h,
   accent: image.rgb ? `#${image.rgb}` : undefined,
+  live: liveOf(image),
 });
 
 const HOST_ATTRIBUTES = ["data-line", "data-source-start", "data-source-end"]; // 同步滚动、图片菜单定位用，随每次渲染更新
@@ -225,6 +229,7 @@ export function MarkdownPreview({ title, body, uploadNames = [] }: MarkdownPrevi
                 width={content.image.w}
                 height={content.image.h}
                 wide={content.image.marks.wide}
+                live={liveOf(content.image)}
               />
             ) : (
               <ImageGallery variant={content.variant} images={content.images.map(toGalleryImage)} />
