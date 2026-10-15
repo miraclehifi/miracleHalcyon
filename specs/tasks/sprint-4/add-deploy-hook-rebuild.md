@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 18
-**状态**: pending
+**状态**: completed
 **类别**: API
 **架构层级**: 接口层（适配器）
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -34,11 +34,11 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `DEPLOY_HOOK_URL` 不出现在 `wrangler.jsonc`
-- [ ] README 写明 Secret 与 `READER_BOOTSTRAP` 首次部署步骤
+- [x] `DEPLOY_HOOK_URL` 不出现在 `wrangler.jsonc`
+- [x] README 写明 Secret 与 `READER_BOOTSTRAP` 首次部署步骤
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：`tests/integration/post/*`（发布、撤回、删除接口）——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖

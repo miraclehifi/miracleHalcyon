@@ -1,19 +1,22 @@
 // /api/admin/posts/:id（post api-contract §3）：GET 读取、PUT 自动保存、DELETE 删除。会话与 Origin 已由 middleware 校验
-import type { APIRoute } from "astro";
+import type { APIContext, APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { NotFoundError } from "../../../../domains/post/errors";
+import { noopHooks, type PublicationHooks } from "../../../../domains/post/hooks";
 import { D1PostRepo } from "../../../../domains/post/repo";
 import { createPostService } from "../../../../domains/post/service";
 import { errorResponse, parseDraftInput, parsePostId, readJson } from "../../../../lib/api/http";
+import { deployHooksFor } from "../../../../lib/rebuild/route-hooks";
 
 export const prerender = false;
 
 export interface PostHandlerDeps {
   db: D1Database;
   now?: () => Date;
+  hooksFor?: (context: APIContext) => PublicationHooks; // 删除已发布文章后触发读者页重建（F-002）
 }
 
-export function createPostHandlers({ db, now = () => new Date() }: PostHandlerDeps) {
+export function createPostHandlers({ db, now = () => new Date(), hooksFor = () => noopHooks }: PostHandlerDeps) {
   const service = createPostService({ repo: new D1PostRepo(db) });
 
   const GET: APIRoute = async ({ params }) => {
@@ -40,11 +43,11 @@ export function createPostHandlers({ db, now = () => new Date() }: PostHandlerDe
   };
 
   // 204 无响应体；不存在或 id 不合法 404（不删除任何数据）
-  const DELETE: APIRoute = async ({ params }) => {
+  const DELETE: APIRoute = async (context) => {
     try {
-      const id = parsePostId(params.id);
+      const id = parsePostId(context.params.id);
       if (id === null) throw new NotFoundError(0);
-      await service.delete(id);
+      await createPostService({ repo: new D1PostRepo(db), hooks: hooksFor(context) }).delete(id);
       return new Response(null, { status: 204 });
     } catch (error) {
       return errorResponse(error);
@@ -56,4 +59,4 @@ export function createPostHandlers({ db, now = () => new Date() }: PostHandlerDe
 
 export const GET: APIRoute = (context) => createPostHandlers({ db: env.DB }).GET(context);
 export const PUT: APIRoute = (context) => createPostHandlers({ db: env.DB }).PUT(context);
-export const DELETE: APIRoute = (context) => createPostHandlers({ db: env.DB }).DELETE(context);
+export const DELETE: APIRoute = (context) => createPostHandlers({ db: env.DB, hooksFor: deployHooksFor }).DELETE(context);

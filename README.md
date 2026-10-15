@@ -60,6 +60,14 @@ npx wrangler secret put SITE_ORIGIN
 
 取数失败时构建失败，线上保持上一版。
 
+**发布后自动重建**：在 Workers Builds 为生产分支创建 Deploy Hook，把它的地址写入 Worker Secret（发布 / 发布更新 / 撤回 / 删除已发布文章后，后台会 POST 这个地址；失败只记日志，可在控制台手动重建）：
+
+```bash
+npx wrangler secret put DEPLOY_HOOK_URL
+```
+
+**首次部署**：线上还没有接口时，构建变量设 `READER_BOOTSTRAP=1` 与 `READER_API_ORIGIN`；站点上线后删除 `READER_BOOTSTRAP`。部署前先执行待执行的 D1 迁移（[ddl-changes](specs/deploy/ddl-changes.md)）。
+
 ## 文档
 
 需求、设计与任务在 [specs/](specs/_index.md)，开发流程见 [CLAUDE.md](CLAUDE.md)。

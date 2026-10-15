@@ -39,6 +39,8 @@ ADR-001 修订后读者页在构建时预渲染。[reader-build-time-prerender](
 - 发布 / 撤回 / 删除三个路由改为注入该钩子；`post` 领域本身不变（钩子已在 F-001 定义）
 - 不在应用内合并多次触发：Workers Builds 对同一分支排队构建，连续发布各触发一次，最后一次构建包含全部变化
 
+> 已实现（Sprint 4，add-deploy-hook-rebuild）：`src/lib/rebuild/deploy-hook.ts`、`route-hooks.ts`；发布、撤回、删除三个路由注入。
+
 ### 4. 首次部署
 README 增加步骤：首次部署时设置构建变量 `READER_BOOTSTRAP=1`（站点上线后删除），并配置 `READER_API_ORIGIN` 为站点自身域名。
 

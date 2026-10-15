@@ -30,7 +30,7 @@
 | 15 | [refine-lightbox](refine-lightbox.md) | 灯箱：实况播放、焦点与降级 | FRONTEND | 表现层 | US-10 | add-lightbox | 1 | 中 | completed |
 | 16 | [add-post-cover-api](add-post-cover-api.md) | 文章封面字段（数据 + 领域 + 接口） | API | 数据 + 领域 + 接口 | US-06 | — | 1 | 低 | completed |
 | 17 | [add-cover-field](add-cover-field.md) | 设置抽屉封面上传 | FRONTEND | 表现层 | US-06 | add-post-cover-api | 0 | 低 | completed |
-| 18 | [add-deploy-hook-rebuild](add-deploy-hook-rebuild.md) | 发布后触发读者页重建 | API | 接口层（适配器） | US-03 | — | 0 | 低 | pending |
+| 18 | [add-deploy-hook-rebuild](add-deploy-hook-rebuild.md) | 发布后触发读者页重建 | API | 接口层（适配器） | US-03 | — | 0 | 低 | completed |
 | 19 | [check-reader-build-output](check-reader-build-output.md) | 读者页构建产物检查 | TEST | 构建 | US-03、US-01 | add-home-intro、add-tag-pages、add-reading-progress-toc、refine-lightbox、add-post-card-details、add-article-typography、add-theme-toggle | 0 | 低 | pending |
 
 共 19 个任务：spike 1、构建 / 配置 1、接口 2、前端 14、构建检查 1。US 覆盖：US-01 2 个、US-02 1、US-03 4（含 spike 与产物检查）、US-04 3、US-05 1、US-06 2、US-07 2、US-08 2、US-09 1（与 US-08 合并）、US-10 3。

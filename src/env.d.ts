@@ -6,6 +6,7 @@ declare namespace Cloudflare {
     ADMIN_USERNAME?: string;
     ADMIN_PASSWORD_HASH?: string;
     SITE_ORIGIN?: string;
+    DEPLOY_HOOK_URL?: string; // Workers Builds Deploy Hook（Secret，ADR-007）；本地 / E2E 不配置
   }
 }
 

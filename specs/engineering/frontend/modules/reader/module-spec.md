@@ -93,7 +93,7 @@ Props：`cards: CardModel[]`。渲染 `AnimatedList`（`bare`，参数见 compon
 
 Props：`images`、`index`、`onClose`。规则见 reader-post-detail.md"图片与灯箱"、components.md"灯箱层叠参数"。滚动锁：打开时记录 `body.style.overflow` / `paddingRight`，设 `overflow: hidden` + 滚动条宽度补偿，关闭恢复。焦点陷阱：Tab / Shift+Tab 在灯箱内可聚焦元素间循环。下滑关闭：指针纵向位移 > 120px 或速度 > 0.5px/ms 且纵向大于横向 → `onClose`；横向拖动交给 DepthCarousel。
 
-## 5. 重建钩子（`src/lib/rebuild/deploy-hook.ts`）
+## 5. 重建钩子（`src/lib/rebuild/deploy-hook.ts`，已实现；路由用 `src/lib/rebuild/route-hooks.ts` 的 `deployHooksFor(context)`，handler 工厂改为 `hooksFor` 参数）
 
 ```ts
 export function createDeployHookHooks(deps: {
