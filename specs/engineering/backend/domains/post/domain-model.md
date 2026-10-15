@@ -1,6 +1,6 @@
 # post 领域模型
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-15
 **状态**: self-checked
 **来源**: [feature-architecture.md](../../../features/F-001-文章写作/architecture/feature-architecture.md) §2、§3 · [ADR-002](../../../features/F-001-文章写作/architecture/adr/ADR-002-post-snapshot-model.md)
 
@@ -45,8 +45,9 @@
 | summary | string | 去首尾空白；≤ 200 字符（按 Unicode 码点计） |
 | body | string | GFM Markdown 原文；≤ 200,000 字符 |
 | publishedAt | 日期? | 作者填写的"发布日期"；新建默认当天（由前端按作者本地日期填入） |
+| cover | `CoverUrl?` | 封面图片地址（F-002 US-06）；`null` = 无封面。必须是站内图片地址（`parseImageKey` 能解析：`/img/yyyy/mm/{10 位 id}_{宽}x{高}_{6 位 hex}.{jpg|png|webp|gif}`，不带查询串与片段）；不校验对象是否存在（与正文图片一致）|
 
-`contentHash(c)` = SHA-256（规范化 JSON：上表 6 个字段按固定顺序）。已实现：`src/domains/post/content-hash.ts`（标签顺序计入哈希）。
+`contentHash(c)` = SHA-256（规范化 JSON：title、slug、tags、summary、body、publishedAt 按固定顺序组成数组；**`cover` 非空时追加为第 7 项，为空时不追加**——迁移 0003 前存下的哈希保持有效，旧文章不会因迁移变成"有未发布修改"）。已实现：`src/domains/post/content-hash.ts`（标签顺序计入哈希）。
 
 ### 2.3 不变量
 
@@ -83,6 +84,7 @@
 | `Slug` | `^[a-z0-9]+(?:-[a-z0-9]+)*$`，1–80 字符 |
 | `Tag` | 去首尾空白后 1–32 字符，不含 `,` 和换行 |
 | `PublishDate` | `yyyy-MM-dd`，合法日历日期 |
+| `CoverUrl` | 站内图片地址，`parseImageKey(url) != null` 且以 `/img/` 开头；≤ 200 字符 |
 
 **slugify（前端在标题变化时调用，纯函数，放在 `src/domains/post/slug.ts` 供前后端共用；已实现，含 `isValidSlug`）**：
 `NFKD` 规范化 → 去掉组合附加符号 → 小写 → 非 `[a-z0-9]` 替换为 `-` → 合并连续 `-` → 去首尾 `-` → 截断到 80 字符（不在 `-` 处结尾）。结果为空（如纯中文标题）时返回 `''`，前端提示"请填写英文 slug"（US-03-2）。
@@ -161,7 +163,8 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 | US-07 post-list | `list`（筛选、搜索、分页、计数、`hasUnpublishedChanges`） |
 | US-08 publish-post | `publish`、`unpublish`、`PublishedPostQuery`（读者可见性）、`onPublicationChanged` |
 | US-09 delete-post | `delete`、`onPublicationChanged` |
-| F-002 | `PublishedPostQuery` |
+| F-002 US-03、US-04、US-05、US-07–US-10 | `PublishedPostQuery`（经公开接口，构建时读取）、`onPublicationChanged`（Deploy Hook 实现） |
+| F-002 US-06 post-cover | `PostContent.cover`、`saveDraft`、`publish`（快照含封面）、`contentHash` 兼容 |
 
 ## 8. 单元测试规格
 
@@ -178,6 +181,9 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 | POST-UT-09 | slug 唯一 | 与他人工作稿冲突；与他人快照冲突；与自己快照相同；空 slug | 前两个 `SLUG_TAKEN`；后两个通过 |
 | POST-UT-10 | 列表（Workers 集成 + D1） | 25 篇混合状态；`q` 含 `%`、`_`；page 3 | 计数口径、排序、转义、空页如 §6 |
 | POST-UT-11 | `PublishedPostQuery` | 草稿、有修改的已发布文章 | 草稿查不到；有修改的返回快照内容而非工作稿 |
+| POST-UT-12 | `normalizeContent` 封面 | `null`；合法站内地址；外链、`/img/../x`、key 格式不符、带 `?x=1`、数字、`javascript:` | 前两项通过；其余抛 `VALIDATION_FAILED`（`fields` 含 `cover`）（TC-US06-08） |
+| POST-UT-13 | `contentHash` 兼容 | 同一内容 `cover: null` 与 0003 前的 6 字段结果；`cover` 非空 | 前者相等（与旧算法同值）；后者不同（TC-US06-09） |
+| POST-UT-14 | 封面随快照（Workers 集成 + D1） | 已发布 clean 文章改封面后保存；再发布 | 保存后 `hasUnpublishedChanges` 为 true、公开接口 cover 不变；发布后为新封面（TC-US06-05、06） |
 
 ---
 
@@ -187,3 +193,4 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-13 | 1.1 | `onPublicationChanged` 用途改为触发读者页重建（ADR-001 修订） | miraclehifi |
+| 2026-10-15 | 1.2 | F-002：`PostContent` 新增 `cover`（`CoverUrl`），`contentHash` 兼容规则；POST-UT-12–14 | miraclehifi |

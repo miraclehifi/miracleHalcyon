@@ -17,3 +17,17 @@
 - 用户：「Sprint 3 收尾，然后开始F-002 博客首页与阅读的开发，全部开发完成后再做测试」
 - AI：Sprint 3 收尾（修 TC-US09-02 竞态、DoD 勾选、状态收口）后建 F-002；就封面、灯箱、摘要来源、未上线入口、成功指标、首页内容维护方式提问
 - 用户：封面「F-002 一起做」；灯箱纳入；摘要优先用字段；未完成入口「照常显示」；成功指标按推荐；首页内容用配置文件
+
+## [design-domain] 2026-10-15 · miraclehifi
+
+**关键决策**
+- 用户授权「文档都按照你的设计来，不要找我确认」：write-story 起各文档阶段由 AI 直接定稿
+- design-ui：06 先行稿拆为首页（自我介绍）与 `/posts`（07）；窄屏目录改为浮动按钮 + 底部抽屉；新增 404（08）与 `BackLink` 组件；`/posts` 第 1 页加标签索引（补 US-04 验收 8）
+- design-arch：不新增 Domain；构建数据经 Vite 虚拟模块 `virtual:reader-data` 一次性注入（`READER_API_ORIGIN` / `READER_FIXTURE` / `READER_BOOTSTRAP`），预渲染保持 workerd（middleware 依赖 `cloudflare:workers`）；Deploy Hook 经 `locals.cfContext.waitUntil` 触发，失败只记日志（ADR-007）
+- 读者页交互原生脚本优先，React 岛只用于正文图片 + 灯箱、文章列表；首页与 404 不加载 React（ADR-008）
+- 封面存为站内图片地址字符串（自描述 key 已含宽高与主色），迁移 0003 加 `cover` / `pub_cover`；`contentHash` 仅在封面非空时追加第 7 项，旧数据哈希不变
+- 引用署名放进 markdown 共享内核（`rehypeQuoteAttribution`），预览与读者页一致；h1 降级、首字下沉标记、标题 id 在读者页后处理
+
+**对话摘要**
+- 用户：「文档都按照你的设计来，不要找我确认」
+- AI：按 Backlog 与先行稿定 UI，按适配器实测能力（预渲染默认 workerd、`cfContext.waitUntil`）定构建与重建方案，spike 列为 Sprint 首个任务

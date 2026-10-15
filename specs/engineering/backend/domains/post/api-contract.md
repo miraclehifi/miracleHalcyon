@@ -1,6 +1,6 @@
 # post API 契约
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-15
 **状态**: self-checked
 
 > 通用约定（错误体、401/403、字段格式）见 [domains/_index.md](../_index.md) 与 [auth/api-contract.md](../auth/api-contract.md)"通用 401 / 403"。
@@ -37,6 +37,7 @@
   "summary": "Astro 5 入门笔记",
   "body": "# Hello\n\n正文第一段。",
   "publishedAt": "2026-10-10",
+  "cover": "/img/2026/10/k3j9x2m4q1_1600x900_8a7b6c.jpg",
   "status": "published",
   "hasUnpublishedChanges": true,
   "lastPublishedAt": "2026-10-12T08:00:00.000Z",
@@ -48,7 +49,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `id` | string | 文章 ID |
-| `title` / `slug` / `tags` / `summary` / `body` / `publishedAt` | — | **工作稿**内容（编辑页显示的是最新保存内容，含未发布修改）；`slug` 可为 `""`，`publishedAt` 可为 `null` |
+| `title` / `slug` / `tags` / `summary` / `body` / `publishedAt` / `cover` | — | **工作稿**内容（编辑页显示的是最新保存内容，含未发布修改）；`slug` 可为 `""`，`publishedAt`、`cover` 可为 `null` |
 | `status` | `draft` \| `published` | — |
 | `hasUnpublishedChanges` | boolean | 草稿恒为 false |
 | `lastPublishedAt` | 时间戳 \| null | — |
@@ -56,11 +57,11 @@
 
 ### PostListItem
 
-`{ id, title, status, hasUnpublishedChanges, tags, updatedAt }`（不含正文）
+`{ id, title, status, hasUnpublishedChanges, tags, updatedAt }`（不含正文；后台列表不显示封面，不返回 `cover`）
 
 ### PublishedPost（公开）
 
-`{ slug, title, summary, tags, publishedAt, body, lastPublishedAt }`，全部取自**已发布快照**。`PublishedPostSummary` 同上但不含 `body`。
+`{ slug, title, summary, tags, publishedAt, body, lastPublishedAt, cover }`，全部取自**已发布快照**（`cover` 为快照的封面地址或 `null`，F-002）。`PublishedPostSummary` 同上但不含 `body`。
 
 ## 3. 后台端点
 
@@ -108,7 +109,7 @@
 
 ### PUT /api/admin/posts/:id
 
-自动保存。请求体为完整 `DraftInput`（六个字段都必须出现，缺字段 → 400，防止部分覆盖丢数据）。已实现（`createPostHandlers().PUT`）；缺字段的 `message` 为"请求缺少字段：{字段名}"。请求体中的 `status`、`id`、`hasUnpublishedChanges` 等字段一律忽略（不能通过保存改变发布状态，US-06 约束）。
+自动保存。请求体为完整 `DraftInput`（七个字段都必须出现：title、slug、tags、summary、body、publishedAt、cover；缺字段 → 400，防止部分覆盖丢数据。`cover` 自 F-002 起必填，值为 `null` 或站内图片地址，不合法时 `VALIDATION_FAILED`，`fields` 含 `cover`，message"封面必须是本站上传的图片"）。已实现（`createPostHandlers().PUT`）；缺字段的 `message` 为"请求缺少字段：{字段名}"。请求体中的 `status`、`id`、`hasUnpublishedChanges` 等字段一律忽略（不能通过保存改变发布状态，US-06 约束）。
 
 | 状态 | 体 |
 |------|----|
@@ -194,3 +195,4 @@
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-13 | 1.1 | 公开端点说明改为供构建时预渲染读取（ADR-001 修订） | miraclehifi |
+| 2026-10-15 | 1.2 | F-002：`PostView`、`PublishedPost`、`PublishedPostSummary`、`DraftInput` 新增 `cover`（`DraftInput` 七字段必填）；后台列表不含封面 | miraclehifi |

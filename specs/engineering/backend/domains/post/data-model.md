@@ -1,6 +1,6 @@
 # post 数据模型
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-15
 **状态**: self-checked
 **存储**: Cloudflare D1（SQLite）
 
@@ -56,6 +56,18 @@ END;
 - 派生字段：`status = CASE WHEN pub_hash IS NULL THEN 'draft' ELSE 'published' END`；`has_unpublished_changes = pub_hash IS NOT NULL AND pub_hash <> draft_hash`
 - 标签以 JSON 数组存储；标签查询用 `json_each`（千篇以内，见 US-07 假设），不建标签表
 
+## posts 增量：封面（迁移 0003，F-002 US-06）
+
+```sql
+-- src/db/migrations/0003_post_cover.sql
+ALTER TABLE posts ADD COLUMN cover     TEXT;  -- 工作稿封面：站内图片地址，NULL = 无封面
+ALTER TABLE posts ADD COLUMN pub_cover TEXT;  -- 已发布快照封面
+```
+
+- 只加可空列，不改约束与索引；已有行两列均为 NULL，`draft_hash` / `pub_hash` 不需要重算（`contentHash` 兼容规则，见 domain-model §2.2）
+- `STRICT` 表 `ADD COLUMN` 允许 `TEXT` 可空列；不需要重建表
+- 公开查询（详情、列表）补选 `pub_cover AS cover`；`setPublished` 同时写 `pub_cover`，撤回时清空
+
 ## 查询路径
 
 | 操作 | SQL 要点 | 索引 |
@@ -69,7 +81,7 @@ END;
 
 ## 迁移
 
-`src/db/migrations/0001_init.sql`（已实现）：本文件与 auth、media 的全部建表语句；本地执行 `npm run db:migrate:local`。
+`src/db/migrations/0001_init.sql`（已实现）：本文件与 auth、media 的全部建表语句；`0002_raise_image_size_limit.sql`（已实现，media）；`0003_post_cover.sql`（F-002）。本地执行 `npm run db:migrate:local`。
 
 ---
 
@@ -78,3 +90,4 @@ END;
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-15 | 1.1 | 迁移 0003：`cover`、`pub_cover`（F-002 US-06） | miraclehifi |

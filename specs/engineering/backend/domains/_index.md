@@ -1,14 +1,14 @@
 # Domain 注册表
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-15
 
 | Domain | 类型 | 职责 | 引入 Feature | 使用 Feature | 文档 |
 |--------|------|------|-------------|-------------|------|
 | `auth` | 支撑 | 管理员凭据校验、会话、登录限流 | F-001 | F-001 | [domain-model](auth/domain-model.md) · [api](auth/api-contract.md) · [data](auth/data-model.md) |
-| `post` | 核心 | 文章工作稿 / 已发布快照、发布状态流转、已发布只读查询 | F-001 | F-001（写）、F-002（读） | [domain-model](post/domain-model.md) · [api](post/api-contract.md) · [data](post/data-model.md) |
+| `post` | 核心 | 文章工作稿 / 已发布快照、发布状态流转、已发布只读查询；封面（F-002 增量） | F-001 | F-001（写）、F-002（读；封面字段） | [domain-model](post/domain-model.md) · [api](post/api-contract.md) · [data](post/data-model.md) |
 | `media` | 支撑 | 图片与实况视频上传、R2 存取、图片读取路由 | F-001 | F-001（写）、F-002（读 URL） | [domain-model](media/domain-model.md) · [api](media/api-contract.md) · [data](media/data-model.md) |
 
-非 Domain 的共享模块（前端 / 同构）：[markdown](../../frontend/modules/markdown/module-spec.md)、[editor](../../frontend/modules/editor/module-spec.md)、[media-upload](../../frontend/modules/media-upload/module-spec.md)。
+非 Domain 的共享模块（前端 / 同构）：[markdown](../../frontend/modules/markdown/module-spec.md)、[editor](../../frontend/modules/editor/module-spec.md)、[media-upload](../../frontend/modules/media-upload/module-spec.md)、[reader](../../frontend/modules/reader/module-spec.md)（F-002，读者页构建期视图模型与运行时脚本）。
 
 ## 通用约定
 

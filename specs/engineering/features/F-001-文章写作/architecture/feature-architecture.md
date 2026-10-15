@@ -265,7 +265,8 @@ src/
 | `post` 只读接口 | F-002 只能用 `published-query.ts`，读不到工作稿 |
 | 渲染规则 | F-002 使用 `src/lib/markdown`，不得另写渲染 |
 | 图片组件 | `ArticleImage`、`LiveBadge`、`ImageGallery` 由 F-001 实现；`Lightbox` 仍归 F-002 |
-| 读者页重建 | 读者页构建时预渲染；F-002 实现 `onPublicationChanged` 为调用 Workers Builds Deploy Hook，重建完成后可见（P95 ≤ 5 分钟） |
+| 读者页重建 | 读者页构建时预渲染；F-002 实现 `onPublicationChanged` 为调用 Workers Builds Deploy Hook，重建完成后可见（P95 ≤ 5 分钟）（F-002 ADR-007） |
+| F-002 反向增量 | `post` 新增 `cover`（迁移 0003）、`markdown` 新增引用署名插件、`ArticleImage` 新增可选 `onClick`、`BaseLayout` 首屏主题脚本——见 [F-002 feature-architecture](../../F-002-博客首页与阅读/architecture/feature-architecture.md) §6 |
 
 ### 8.2 范围变更（本阶段决策：实况照片 / 宽图 / 组图 F-001 全做）
 

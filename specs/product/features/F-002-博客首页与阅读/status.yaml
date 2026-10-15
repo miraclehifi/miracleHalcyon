@@ -12,11 +12,11 @@ phases:
   acceptance_tests: done   # 83 个 TC（gap 0）+ 36 条前端单元规格 UT-201…236；共享夹具 test/features/F-002-博客首页与阅读/acceptance/_fixtures.md
   ui_design: done   # Pencil 05/05m/05m-b/06/06m/07/07m/08 + 03 CoverField；页面规格 reader-shell / reader-home / reader-post-list / reader-post-detail；flows §5–7
   architecture: done   # 不新增 Domain；ADR-007 构建数据（虚拟模块）与 Deploy Hook，ADR-008 原生脚本优先
-  domain_design: pending
+  domain_design: done   # domain_model / api_contract / data_model: self-checked（post 封面增量、迁移 0003；markdown 引用署名；新模块 reader；us-to-domain）
   task_planning: pending
   implementation: pending
   validation: pending
-current_phase: domain_design
+current_phase: task_planning
 blockers: []
 has_ui_changes: true
 approvals:

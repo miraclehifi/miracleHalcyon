@@ -45,6 +45,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | `rehypeAfterSanitize` | `src` 的 `data:` 只保留 `data:image/*`；sanitize 给 id 加 `user-content-` 前缀，脚注页内链接同步加前缀（remark-rehype 不再加前缀，避免双重前缀） |
 | `rehypeImageFigures` | sanitize 之后执行，只生成白名单属性（下表），因此不会引入可注入内容。已实现：`src/lib/markdown/plugins/image-figures.ts`（在上传占位之后、`rehypeSourceLines` 之前）；`parseImageKey` / `parseMarks` 在 `plugins/image-key.ts`，经 `render.ts` 导出 |
 | `rehype-expressive-code` | Shiki 使用 JavaScript 正则引擎；语言白名单：ts、tsx、js、jsx、json、bash、shell、css、html、md、yaml、toml、sql、python、go、rust、diff；主题跟随站点亮 / 暗主题（两套主题，CSS 变量切换）。已实现：`src/lib/markdown/ec-config.ts`——github-light 为基础主题，选择器按主题类型生成 `[data-theme='light|dark']`，系统暗色经 `prefers-color-scheme` 媒体查询切换 |
+| `rehypeQuoteAttribution`（F-002） | sanitize 之后、`rehypeImageFigures` 之前：`blockquote` 有 ≥ 2 个直接子级 `p`，且最后一个 `p` 的文本以"— "（U+2014 + 空格）或"—— "开头 → 该 `p` 换成 `<footer data-attribution>`（内容不变，含开头破折号）；单段引用、`-- `、无空格、非最后一段都不处理。只生成白名单属性。文件 `plugins/quote-attribution.ts`。预览与读者页同时生效 |
 | `rehypeSourceLines` | 仅 `sourceMap: true`：顶层块级元素加 `data-line`（源码起始行，供同步滚动）。已实现：`src/lib/markdown/plugins/source-lines.ts`——EC 会替换顶层 `<pre>`，故先记录后写回；开关经 `file.data.sourceMap` |
 
 > 已实现（implement-markdown-gfm-render）：GFM 处理链与 `RenderOptions` 签名；脚注区无障碍文案为中文（标题「脚注」、回链「返回引用 N」）。
@@ -82,7 +83,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | 环境 | 加载方式 |
 |------|---------|
 | 后台预览 | `src/lib/markdown/worker.ts` 作为 Web Worker（Vite `?worker`，已实现）；主线程发送 `{ seq, source }`，Worker 回 `{ seq, html, images }`，只采用最新 `seq` 的结果；首次进入写文章页预热。渲染出错时 Worker 回 `{ seq, error: true }`（不吞掉请求），主线程照常复位"渲染中"、发出排队的输入，并保留上次结果显示错误提示（US-04 BH-09，已实现）。已实现：`src/components/admin/editor/MarkdownPreview.tsx`（渲染中又有输入时只保留最后一次；Expressive Code 的 style / 复制脚本提到 `<head>` 只加载一次；单图 `figure` 换成宿主元素并 portal 渲染 `ArticleImage`，组图 `div[data-gallery]` 同样渲染为 `ImageGallery`；重新渲染时按 `src/lib/markdown/reconcile-islands.ts` 复用未变的实例——单图按 src 与标记，组图按模式 + 组内各图的 src 与标记）。Worker 中无 `document`：`decode-named-character-reference` 经 alias 使用非 DOM 入口（见 `astro.config.mjs`） |
-| F-002 构建时 | 预渲染页面中直接 import；不进入线上 Worker 包 |
+| F-002 构建时 | 预渲染页面（workerd）中直接 import；不进入线上 Worker 包（构建产物检查，ADR-007） |
 
 ## 5. 性能目标
 
@@ -101,6 +102,7 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | MD-UT-03 | 代码块 `ts` 与未知语言 `foo` | 前者高亮；后者按纯文本输出，不报错 |
 | MD-UT-04 | 图片插件 | 见 [frontend-unit-tests.md](../../../../test/features/F-001-文章写作/unit/frontend-unit-tests.md) UT-126 – UT-133（已实现：`tests/unit/markdown/image-plugins.test.ts`） |
 | MD-UT-05 | `sourceMap` | 每个顶层块级元素 `data-line` 与源码起始行一致；关闭时不输出（已实现：`tests/unit/editor/scroll-sync.test.ts`） |
+| MD-UT-07 | `rehypeQuoteAttribution` | 末段 `— 鲁迅`、`—— 鲁迅` → `footer[data-attribution]`；`-- 鲁迅`、`—鲁迅`、署名在中间段、只有一段 `— 鲁迅` → 保持 `p`；署名段内含 `<script>` 仍被 sanitize 去除（TC-US07-09） |
 | MD-UT-06 | 同一输入在 Node 与 Worker 环境渲染 | 输出字节一致（同构保证）。已实现：jsdom 单元测试写出快照 `tests/unit/markdown/__snapshots__/images-sample.html`，workerd 集成测试（`tests/integration/markdown/isomorphic.test.ts`）与之逐字节比对 |
 
 ---
@@ -116,3 +118,4 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | 2026-10-14 | 1.4 | `rehypeSourceLines` 已实现（顶层块，记录 / 写回两步） | miraclehifi |
 | 2026-10-14 | 1.5 | 图片插件已实现：组图判定改在 sanitize 之后进行；混有文字段落的拆分规则 | miraclehifi |
 | 2026-10-14 | 1.6 | §4：Worker 回传 `images`；预览单图挂载与 `reconcileIslands`（add-article-image-display） | miraclehifi |
+| 2026-10-15 | 1.7 | F-002：新增 `rehypeQuoteAttribution`（引用署名）与 MD-UT-07 | miraclehifi |
