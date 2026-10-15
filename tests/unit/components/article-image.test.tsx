@@ -91,3 +91,23 @@ describe("ArticleImage", () => {
     });
   });
 });
+
+// F-002 hydrate-article-images：读者页传 onClick 打开灯箱；不传时结构不变（预览）
+describe("ArticleImage onClick", () => {
+  it("[SC-LIGHTBOX-02] 不传 onClick 时没有按钮语义", () => {
+    render(<ArticleImage src={SRC} alt="山" width={1600} height={900} />);
+    expect(screen.queryByRole("button", { name: /查看大图/ })).toBeNull();
+  });
+
+  it("[SC-LIGHTBOX-02] 传 onClick 时图片区为按钮：点击与 Enter 触发；加载失败时不触发", () => {
+    const onClick = vi.fn();
+    render(<ArticleImage src={SRC} alt="山" width={1600} height={900} onClick={onClick} />);
+    const button = screen.getByRole("button", { name: "查看大图：山" });
+    fireEvent.click(button);
+    fireEvent.keyDown(button, { key: "Enter" });
+    expect(onClick).toHaveBeenCalledTimes(2);
+    fireEvent.error(img());
+    fireEvent.click(button);
+    expect(onClick).toHaveBeenCalledTimes(2);
+  });
+});

@@ -3,6 +3,7 @@
 import data from "virtual:reader-data";
 import ArticleContent from "../../components/reader/ArticleContent.astro";
 import ArticleHeader from "../../components/reader/ArticleHeader.astro";
+import ArticleImagesIsland from "../../components/reader/ArticleImagesIsland";
 import ReaderLayout from "../../layouts/ReaderLayout.astro";
 import { renderMarkdown } from "../../lib/markdown/render";
 import { prepareArticleHtml } from "../../lib/reader/article-html";
@@ -28,6 +29,7 @@ const article = prepareArticleHtml((await renderMarkdown(post.body)).html);
     >
       <ArticleHeader post={post} />
       <ArticleContent html={article.html} />
+      {article.hasImages && <ArticleImagesIsland client:idle rootSelector="#article-content" />}
     </article>
   </div>
 </ReaderLayout>

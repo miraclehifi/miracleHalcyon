@@ -51,6 +51,78 @@
   }
 }
 
+/* 读者页正文图片（reader-post-detail.md"图片与灯箱"）：岛水合前的静态 figure / 组图按最终版式占位，
+   水合时 ArticleImage / ImageGallery 替换它们，避免布局跳动（TC-US10-02）；无 JS 时也是可读的版式 */
+.article-content {
+  > figure[data-article-image] {
+    margin-block: 2rem;
+    img {
+      margin: 0;
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+    }
+    figcaption {
+      margin-top: 12px;
+      text-align: center;
+      font-family: var(--font-prose);
+      font-size: var(--text-meta);
+      font-style: italic;
+      color: var(--color-ink-faint);
+    }
+  }
+  > figure[data-wide] {
+    margin-inline: calc(var(--article-bleed) * -1);
+  }
+  > [data-gallery] {
+    margin-block: 2rem;
+    gap: 8px;
+    > figure {
+      margin: 0;
+      min-width: 0;
+      img {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: var(--radius);
+      }
+      figcaption {
+        display: none;
+      }
+    }
+  }
+  > [data-gallery="grid"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    > figure {
+      aspect-ratio: 1;
+      padding: 8px;
+    }
+  }
+  > [data-gallery="grid"]:is([data-count="3"], [data-count="5"], [data-count="6"], [data-count="7"], [data-count="8"], [data-count="9"]) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  > [data-gallery="accordion"] {
+    display: flex;
+    height: 420px;
+    > figure {
+      flex: 1;
+    }
+  }
+}
+@media (max-width: 767px) {
+  .article-content > [data-gallery="grid"][data-count="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  .article-content > [data-gallery="accordion"] {
+    flex-direction: column;
+    height: 640px;
+  }
+}
+
 /* 图片加载（design-tokens.md"图片加载"）：RefineFrame 的动画，从组件内 <style> 移出，全站只定义一次 */
 @keyframes refine-frame-sweep {
   from {

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 6
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -34,11 +34,11 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] `ArticleImage.onClick` 写入 components.md
-- [ ] 无图文章页面不包含 React 运行时脚本
+- [x] `ArticleImage.onClick` 写入 components.md
+- [x] 无图文章页面不包含 React 运行时脚本
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：`tests/unit/components/article-image.test.tsx`、`tests/e2e/image-layout.spec.ts`（预览图片）——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖
