@@ -1,0 +1,13 @@
+---
+// 读者端 404（reader-shell.md"404 页"）：预渲染为 404.html，未匹配路径由适配器取回并返回 404（ADR-007 验证结果⑤）
+import NotFound from "../components/reader/NotFound.astro";
+import ReaderLayout from "../layouts/ReaderLayout.astro";
+
+export const prerender = true;
+---
+
+<ReaderLayout title="页面不存在 · miracleHalcyon" back="/" width="narrow">
+  <div class="pt-[104px] pb-[120px] max-md:pt-12 max-md:pb-16">
+    <NotFound />
+  </div>
+</ReaderLayout>

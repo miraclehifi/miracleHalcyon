@@ -1,0 +1,17 @@
+---
+// SiteHeader（components.md"读者端区块"）：左侧站点名回首页，右侧 SiteNav；桌面高 68、手机 60
+import type { NavCurrent } from "../../lib/reader/nav";
+import SiteNav from "./SiteNav.astro";
+
+interface Props {
+  current?: NavCurrent;
+}
+const { current } = Astro.props;
+---
+
+<header class="border-b border-line">
+  <div class="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-[50px] max-md:h-[60px] max-md:pr-2 max-md:pl-5">
+    <a href="/" class="font-body text-title-sm font-semibold text-ink">miracleHalcyon</a>
+    <SiteNav current={current} />
+  </div>
+</header>

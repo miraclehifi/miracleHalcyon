@@ -1,0 +1,33 @@
+---
+// ReaderLayout（reader-shell.md）：读者端全部页面共用的外壳——SiteHeader + 主体 + BackLink + SiteFooter
+import BackLink from "../components/reader/BackLink.astro";
+import SiteFooter from "../components/reader/SiteFooter.astro";
+import SiteHeader from "../components/reader/SiteHeader.astro";
+import type { NavCurrent } from "../lib/reader/nav";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  current?: NavCurrent;
+  back?: string; // `> cd ..` 的目标；首页不传
+  width?: "narrow" | "list" | "wide"; // 主体版心：首页 640、列表 896、详情三栏 1338
+}
+const { title, description, current, back, width = "list" } = Astro.props;
+const widths = { narrow: "max-w-[640px]", list: "max-w-[896px]", wide: "max-w-[1338px]" };
+---
+
+<BaseLayout title={title} description={description}>
+  <SiteHeader current={current} />
+  <main class:list={["mx-auto w-full px-5 pt-14 pb-20 max-md:pt-8", widths[width]]}>
+    <slot />
+    {
+      back && (
+        <div class="pt-10">
+          <BackLink href={back} />
+        </div>
+      )
+    }
+  </main>
+  <SiteFooter />
+</BaseLayout>

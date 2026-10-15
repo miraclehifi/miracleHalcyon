@@ -15,7 +15,7 @@
 |---|------|------|------|---------|----|------|---------|---------|------|
 | 1 | [spike-reader-prerender](spike-reader-prerender.md) | 读者页预渲染验证（spike） | SETUP | 配置 + 表现层（spike） | US-03 | — | 2 | 高 | completed |
 | 2 | [build-reader-data-source](build-reader-data-source.md) | 构建数据源与读者夹具 | SETUP | 配置 + 领域层（reader 纯函数） | US-03 | spike-reader-prerender | 2 | 中 | completed |
-| 3 | [add-reader-layout](add-reader-layout.md) | 读者端外壳：顶栏、页脚、返回与 404 | FRONTEND | 表现层 | US-01 | spike-reader-prerender | 4 | 低 | pending |
+| 3 | [add-reader-layout](add-reader-layout.md) | 读者端外壳：顶栏、页脚、返回与 404 | FRONTEND | 表现层 | US-01 | spike-reader-prerender | 4 | 低 | completed |
 | 4 | [add-article-page](add-article-page.md) | 文章详情页：正文渲染与标题区 | FRONTEND | 表现层 + 领域层（reader 纯函数） | US-07 | build-reader-data-source、add-reader-layout | 3 | 中 | pending |
 | 5 | [add-post-list-page](add-post-list-page.md) | 文章列表 /posts 与分页 | FRONTEND | 表现层 | US-04 | build-reader-data-source、add-reader-layout | 2 | 中 | pending |
 | 6 | [hydrate-article-images](hydrate-article-images.md) | 详情页正文图片水合 | FRONTEND | 表现层 | US-10 | add-article-page | 1 | 中 | pending |

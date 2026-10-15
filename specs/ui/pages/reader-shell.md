@@ -56,6 +56,8 @@
 - HTTP 状态 404；静态构建产物为 `404.html`（Cloudflare 静态资源 `not_found_handling: "404-page"`，以 design-arch 为准）
 - `/admin/**` 不使用本页（仍按 F-001 规则跳转登录）
 
+> 已实现（Sprint 4，add-reader-layout）：`src/layouts/ReaderLayout.astro`（`current`、`back`、`width`）、`src/components/reader/{SiteHeader,SiteNav,SiteFooter,BackLink,NotFound,GithubIcon}.astro`、`src/pages/404.astro`、`src/config/site.ts`（经 `normalizeSiteConfig`）。图标为 lucide-react 组件在 Astro 中静态渲染（不水合）；GitHub 标志用内联 SVG（lucide 1.x 无品牌图标）。主题切换交互见 add-theme-toggle。
+
 ## 页面状态
 
 读者页都是构建时生成的静态页，没有加载中 / 接口错误态；数据为空的情况在各页面规格中定义。

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 4
 **序号**: 3
-**状态**: pending
+**状态**: completed
 **类别**: FRONTEND
 **架构层级**: 表现层
 **所属 Feature**: [F-002 博客首页与阅读](../../product/features/F-002-博客首页与阅读/feature-scope.md)
@@ -38,12 +38,12 @@
 ## DoD（完成定义）
 
 ### 实现类
-- [ ] 组件名、variant 与 components.md 一致；`BackLink` 引用设计稿组件
-- [ ] `normalizeSiteConfig` 对空外链省略
-- [ ] 404 页返回 HTTP 404
+- [x] 组件名、variant 与 components.md 一致；`BackLink` 引用设计稿组件
+- [x] `normalizeSiteConfig` 对空外链省略
+- [x] 404 页返回 HTTP 404
 
 ### 测试类
-- [ ] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
+- [x] 变更点测试：上述测试清单全部由红变绿（只跑本任务的测试文件）
 - [ ] 影响范围回归：F-001 中未登录访问 `/admin/**` 的用例（`tests/e2e/auth*.spec.ts`）——按 2026-10-15 作者要求，回归、lint、check、webkit 补跑统一放到 Sprint 4 全部任务完成后
 
 ## 依赖

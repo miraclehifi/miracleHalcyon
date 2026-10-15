@@ -1,0 +1,51 @@
+---
+// SiteNav（components.md"读者端区块"、reader-shell.md"顶栏"）：桌面文字项 + 图标；手机全部为 44px 图标，GitHub / RSS 收起
+// 摄影、GitHub 地址来自 site.ts，为空的项不渲染；书影音、RSS 在 F-005 / F-004 上线前照常显示（点进去为 404）
+import { Camera, Clapperboard, FileText, Rss } from "lucide-react";
+import { site } from "../../config/site";
+import GithubIcon from "./GithubIcon.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+
+import type { NavCurrent } from "../../lib/reader/nav";
+interface Props {
+  current?: NavCurrent;
+}
+const { current } = Astro.props;
+const external = { target: "_blank", rel: "noopener noreferrer" };
+const textItem = (active: boolean) =>
+  `border-b border-transparent text-ui transition-colors duration-200 hover:border-current ${active ? "font-semibold text-accent" : "text-ink-muted hover:text-ink"}`;
+const iconItem = "inline-flex size-8 items-center justify-center rounded-control text-ink-muted transition-colors duration-200 hover:bg-surface-sunken hover:text-ink max-md:size-11";
+---
+
+<nav aria-label="站点导航" class="flex items-center gap-6 max-md:gap-0">
+  <div class="flex items-center gap-6 max-md:hidden">
+    <a href="/posts" class={textItem(current === "posts")} aria-current={current === "posts" ? "page" : undefined}>文章</a>
+    <a href="/media" class={textItem(current === "media")} aria-current={current === "media" ? "page" : undefined}>书影音</a>
+  </div>
+  <div class="flex items-center gap-1 max-md:gap-0">
+    <a href="/posts" class:list={[iconItem, "md:hidden", current === "posts" && "text-accent"]} aria-label="文章" aria-current={current === "posts" ? "page" : undefined}>
+      <FileText size={20} aria-hidden="true" />
+    </a>
+    <a href="/media" class:list={[iconItem, "md:hidden", current === "media" && "text-accent"]} aria-label="书影音" aria-current={current === "media" ? "page" : undefined}>
+      <Clapperboard size={20} aria-hidden="true" />
+    </a>
+    {
+      site.photo && (
+        <a href={site.photo} {...external} class={iconItem} aria-label="摄影（新标签页）">
+          <Camera size={18} aria-hidden="true" />
+        </a>
+      )
+    }
+    {
+      site.github && (
+        <a href={site.github} {...external} class:list={[iconItem, "max-md:hidden"]} aria-label="GitHub（新标签页）">
+          <GithubIcon />
+        </a>
+      )
+    }
+    <a href="/rss.xml" class:list={[iconItem, "max-md:hidden"]} aria-label="RSS">
+      <Rss size={18} aria-hidden="true" />
+    </a>
+    <ThemeToggle />
+  </div>
+</nav>

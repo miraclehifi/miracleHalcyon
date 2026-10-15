@@ -1,0 +1,9 @@
+---
+// BackLink（components.md）：子页主体末尾的 `> cd ..`，普通链接（无 JS 可用）；首页不用
+interface Props {
+  href: string;
+}
+const { href } = Astro.props;
+---
+
+<a href={href} class="inline-flex py-3 font-mono text-ui text-ink-muted transition-colors duration-200 hover:text-accent">&gt; cd ..</a>
