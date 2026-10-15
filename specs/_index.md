@@ -19,8 +19,8 @@
 
 | Feature | 名称 | 状态 | 当前阶段 |
 |---------|------|------|----------|
-| F-001 | 文章写作 | in_progress | implementation 完成（Sprint 1–3），code-review / verify 待 F-002 开发完成后统一进行 |
-| F-002 | 博客首页与阅读 | in_progress | code_review（Sprint 4 实现完成，与 F-001 一起审查） |
+| F-001 | 文章写作 | in_progress | validation（code-review 完成，与 F-002 一起 verify） |
+| F-002 | 博客首页与阅读 | in_progress | validation（code-review 完成，与 F-001 一起 verify） |
 
 ## 队列
 

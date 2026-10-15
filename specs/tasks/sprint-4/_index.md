@@ -1,6 +1,6 @@
 # Sprint 4：博客首页与阅读
 
-**状态**: completed（待 code-review）
+**状态**: completed（code-review 完成，待 verify）
 **创建**: 2026-10-15
 **Feature**: F-002 博客首页与阅读（[Backlog: blog-home-reading](../../backlog/blog-home-reading.md)；并入 [article-image-display](../../backlog/article-image-display.md) 灯箱、[reader-build-time-prerender](../../backlog/reader-build-time-prerender.md) 落地）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）
@@ -32,8 +32,10 @@
 | 17 | [add-cover-field](add-cover-field.md) | 设置抽屉封面上传 | FRONTEND | 表现层 | US-06 | add-post-cover-api | 0 | 低 | completed |
 | 18 | [add-deploy-hook-rebuild](add-deploy-hook-rebuild.md) | 发布后触发读者页重建 | API | 接口层（适配器） | US-03 | — | 0 | 低 | completed |
 | 19 | [check-reader-build-output](check-reader-build-output.md) | 读者页构建产物检查 | TEST | 构建 | US-03、US-01 | add-home-intro、add-tag-pages、add-reading-progress-toc、refine-lightbox、add-post-card-details、add-article-typography、add-theme-toggle | 0 | 低 | completed |
+| 20 | [animate-theme-toggle](animate-theme-toggle.md) | 主题切换两态 + 圆形扩散动画（增量，[animated-theme-toggle](../../backlog/animated-theme-toggle.md)） | FRONTEND | 表现层 | US-01 | add-theme-toggle | 0 | 低 | completed |
+| 21 | [add-local-dev-script](add-local-dev-script.md) | 本地一键启动脚本 `npm run dev:local`（开发工具，[local-dev-script](../../backlog/local-dev-script.md)） | SETUP | 工具脚本 | — | — | 0 | 低 | completed |
 
-共 19 个任务：spike 1、构建 / 配置 1、接口 2、前端 14、构建检查 1。US 覆盖：US-01 2 个、US-02 1、US-03 4（含 spike 与产物检查）、US-04 3、US-05 1、US-06 2、US-07 2、US-08 2、US-09 1（与 US-08 合并）、US-10 3。
+共 21 个任务（第 20、21 项为 2026-10-15 追加：20 为增量，21 为开发工具）：spike 1、构建 / 配置 1、接口 2、前端 14、构建检查 1。US 覆盖：US-01 2 个、US-02 1、US-03 4（含 spike 与产物检查）、US-04 3、US-05 1、US-06 2、US-07 2、US-08 2、US-09 1（与 US-08 合并）、US-10 3。
 
 ## 依赖图
 

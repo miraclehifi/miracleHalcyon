@@ -98,6 +98,9 @@ function placeholderAt(text: string, index: number): RegExpExecArray | null {
 }
 
 export const countPlaceholders = (text: string) => text.match(PLACEHOLDER)?.length ?? 0;
+
+// 各占位在源码中的 [起, 止)，按出现顺序
+export const placeholderRanges = (text: string): [number, number][] => [...text.matchAll(PLACEHOLDER)].map((m) => [m.index, m.index + m[0].length]);
 export const placeholdersBefore = (text: string, pos: number) => countPlaceholders(text.slice(0, pos));
 
 // 一批 count 张：一次插在光标处，各占一行，光标落在最后一个占位之后

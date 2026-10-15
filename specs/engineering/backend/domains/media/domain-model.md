@@ -92,9 +92,9 @@ function buildImageKey(p: { id: string; w: number; h: number; rgb: string; ext: 
 
 **upload 流程**
 1. 校验字段（§4.3、`rgb` 格式、`width`/`height` 若提供须为 1–20000 的整数）
-2. `sniffImage(整个图片字节)`（JPEG 的 SOF 可能在大段 EXIF / 厂商私有段之后，远超 64KB，如 OPPO 动态照片在第 450KB 处；扫描只沿段头跳转）；有 `video` 则 `sniffVideo(前 64KB)`
+2. `sniffImage(前 64KB)`；JPEG 在前缀中找不到 SOF 时依次扩大到 1MB、8MB、整个文件（SOF 可能在大段 EXIF / 厂商私有段之后，如 OPPO 动态照片在第 450KB 处；扫描只沿段头跳转）；有 `video` 则 `sniffVideo(前 64KB)`。只读前缀切片，不把整个文件复制成字节数组（Workers 每个 isolate 128MB，表单解析已占一份）
 3. 生成 key（R2 `head` 命中则重新生成，最多 3 次）
-4. `put` 图片（`httpMetadata.contentType` = 判定的 mime，`cacheControl` = `public, max-age=31536000, immutable`）
+4. `put` 图片（直接传表单里的 `Blob`；`httpMetadata.contentType` = 判定的 mime，`cacheControl` = `public, max-age=31536000, immutable`）
 5. 有视频则 `put` 视频（`contentType: video/mp4`）；失败 → `delete` 图片 → 500 `UPLOAD_FAILED`
 6. 插入 `images`；失败 → `delete` 图片与视频 → 500 `UPLOAD_FAILED`
 

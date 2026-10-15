@@ -29,13 +29,18 @@ export function prepareArticleHtml(html: string): PreparedArticle {
   const transform = () => (tree: Root) => {
     const first = tree.children.find((child): child is Element => child.type === "element");
     if (first?.tagName === "p") first.properties = { ...first.properties, dataDropcap: "" };
-    visit(tree, "element", (node) => {
+    visit(tree, "element", (node, _index, parent) => {
       if (node.tagName === "h1") node.tagName = "h2";
-      if (node.tagName === "h2" || node.tagName === "h3") {
+      // 只有正文顶层的标题进目录（当前章节高亮与跳转留白也只认顶层）：引用、列表、脚注区里的标题不收；
+      // 已有 id 的不覆盖（脚注区标题被 aria-describedby 引用）；空标题不进目录
+      if ((node.tagName === "h2" || node.tagName === "h3") && parent === tree) {
         const text = textOf(node).replace(/\s+/g, " ").trim();
-        const id = slugger.slug(text);
-        node.properties = { ...node.properties, id };
-        toc.push({ id, text, depth: node.tagName === "h2" ? 2 : 3 });
+        const existing = node.properties?.id;
+        if (text && existing === undefined) {
+          const id = slugger.slug(text);
+          node.properties = { ...node.properties, id };
+          toc.push({ id, text, depth: node.tagName === "h2" ? 2 : 3 });
+        }
       }
       if (node.tagName === "figure" && node.properties?.dataArticleImage !== undefined) hasImages = true;
     });

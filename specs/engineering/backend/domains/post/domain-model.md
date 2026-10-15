@@ -126,10 +126,10 @@ interface PublicationHooks { onPublicationChanged(e: PublicationChange): Promise
 
 ```ts
 interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / slugTaken：D1PostRepo（src/domains/post/repo.ts）
-  insert(p: NewPostRow): Promise<PostId>;
+  insert(p: NewPostRow): Promise<PostId | null>;   // null = slug 已被占用
   get(id: PostId): Promise<Post | null>;
-  updateDraft(id: PostId, c: PostContent, draftHash: string, now: Date): Promise<boolean>;   // false = 不存在
-  setPublished(id: PostId, c: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean>;
+  updateDraft(id: PostId, c: PostContent, draftHash: string, now: Date): Promise<boolean>;   // false = 不存在或 slug 已被占用
+  setPublished(id: PostId, c: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean>;   // 同上
   delete(id: PostId): Promise<Post | null>;     // 返回被删行（用于钩子）
   slugTaken(slug: string, exceptId?: PostId): Promise<boolean>;
   list(q: ListQuery): Promise<{ rows: Post[]; total: number; counts: StatusCounts }>;
@@ -137,7 +137,7 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 }
 ```
 
-`publish` 在一个 D1 `batch` 中完成"slug 检查 + 写快照"，避免并发下的 slug 冲突（单作者场景下以防多标签页）。
+`insert` / `updateDraft` / `setPublished` 的写入语句自带"slug 未被其他文章的工作稿或快照占用"条件（`WHERE NOT EXISTS …`），检查与写入原子完成，并发写同一 slug 只有一个成功（单作者场景下以防多标签页）。服务层仍先 `slugTaken` 预检以便给出 `SLUG_TAKEN`；写入未生效时再查一次，区分 `SLUG_TAKEN` 与 `POST_NOT_FOUND`。
 
 ## 6. 列表查询（US-07）
 

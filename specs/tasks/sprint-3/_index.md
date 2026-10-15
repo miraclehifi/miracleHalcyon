@@ -1,6 +1,6 @@
 # Sprint 3：图片增强
 
-**状态**: completed（待 code-review）
+**状态**: completed（code-review 完成，待 verify）
 **创建**: 2026-10-14
 **Feature**: F-001 文章写作（[Backlog: article-writing](../../backlog/article-writing.md)）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）

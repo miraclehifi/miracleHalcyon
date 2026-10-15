@@ -11,6 +11,7 @@
  * 6. 无 label 的面板不渲染标签行（上游展开时仍显示一根孤立的竖条）
  * 7. "已展开"按按下时的状态判断：触屏轻点会先触发兼容的 mouseenter / focus 把面板展开，再触发 click；
  *    按下前未展开的面板这次点击只展开，不调用 onActiveClick（F-002 读者端灯箱，TC-US10-04）
+ * 8. 无 link 的面板聚焦后 Enter / 空格调用 onActiveClick（面板是 div，键盘不会产生 click；聚焦时已展开）
  * 其余逻辑（gsap 展开 / 倾斜 / 视差 / 标签错开、≤ 520px 竖向条带、键盘方向键切换）与上游一致，仅供 ImageGallery 使用。
  */
 
@@ -207,6 +208,10 @@ const AccordionGallery = ({
     } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
       e.preventDefault();
       setActive((i - 1 + count) % count);
+    } else if ((e.key === "Enter" || e.key === " ") && !items[i]?.link) {
+      e.preventDefault(); // 改动 8：面板是 div，Enter / 空格不会产生 click
+      setActive(i);
+      onActiveClick?.(i);
     }
   };
 

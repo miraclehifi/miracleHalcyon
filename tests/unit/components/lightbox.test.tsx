@@ -40,6 +40,27 @@ describe("Lightbox", () => {
     expect(counter()).toBe("1 / 12");
   });
 
+  // 焦点在轮播区（它自己处理方向键）时，事件冒泡到对话框不能再切一次
+  it("[TC-US10-05] 焦点在轮播区时按 → 只前进一张", () => {
+    render(<Lightbox images={images} index={0} onClose={() => {}} />);
+    const carousel = dialog().querySelector<HTMLElement>('[aria-label="文中图片"]')!;
+    fireEvent.keyDown(carousel, { key: "ArrowRight" });
+    expect(counter()).toBe("2 / 12");
+  });
+
+  // 点图注、计数等不可聚焦区域时焦点落在对话框本身（tabIndex -1），Esc 与焦点陷阱仍生效
+  it("[TC-US10-09] 对话框根节点可接收焦点：焦点在根节点时 Esc 关闭、Tab 进入灯箱内", () => {
+    const onClose = vi.fn();
+    render(<Lightbox images={images} index={0} onClose={onClose} />);
+    dialog().focus();
+    const focusedRoot = document.activeElement === dialog();
+    fireEvent.keyDown(dialog(), { key: "Tab" });
+    const afterTab = dialog().contains(document.activeElement) && document.activeElement !== dialog();
+    dialog().focus();
+    fireEvent.keyDown(dialog(), { key: "Escape" });
+    expect({ focusedRoot, afterTab, closed: onClose.mock.calls.length }).toEqual({ focusedRoot: true, afterTab: true, closed: 1 });
+  });
+
   it("[TC-US10-07] Esc、关闭按钮、点遮罩关闭；点图片本身不关闭；卸载后恢复滚动", () => {
     const onClose = vi.fn();
     const { unmount } = render(<Lightbox images={images} index={3} onClose={onClose} />);

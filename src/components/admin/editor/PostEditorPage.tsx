@@ -124,24 +124,6 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
     navigate(`/admin/login?next=${encodeURIComponent(window.location.pathname)}`);
   };
 
-  const autosave = useAutosave({
-    postId: initial?.id ?? null,
-    getContent,
-    onCreated: (id) => {
-      postIdRef.current = id;
-      setPostId(id);
-      window.history.replaceState(null, "", `/admin/posts/${id}`); // 不刷新，光标与内容保留
-    },
-    onSaved: syncServer,
-    onError: (error) => {
-      if (error.kind === "unauthenticated") return onSessionExpired();
-      if (error.code !== "SLUG_TAKEN") return;
-      setSlugError(error.message ?? "slug 已存在，请换一个");
-      setSettingsOpen(true); // 自动打开设置抽屉，让作者看到字段错误
-    },
-  });
-  const { edit, flush, disable, enable, clearStash } = autosave;
-
   // 本地暂存恢复（editor module-spec §2"恢复判断"）：水合后读一次；比服务端新且内容不同 → 横幅，否则清掉过期暂存
   const stash = useMemo(() => (hydrated ? readLocalDraft(initial?.id ?? null) : null), [hydrated, initial]);
   const [restoreSettled, setRestoreSettled] = useState(false);
@@ -154,6 +136,27 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
       ),
     [stash, initial],
   );
+  const bannerPending = restoreDecision === "promptRestore" && !restoreSettled;
+
+  const autosave = useAutosave({
+    postId: initial?.id ?? null,
+    getContent,
+    onCreated: (id) => {
+      postIdRef.current = id;
+      setPostId(id);
+      window.history.replaceState(null, "", `/admin/posts/${id}`); // 不刷新，光标与内容保留
+    },
+    onSaved: syncServer,
+    holdStash: bannerPending,
+    onError: (error) => {
+      if (error.kind === "unauthenticated") return onSessionExpired();
+      if (error.code !== "SLUG_TAKEN") return;
+      setSlugError(error.message ?? "slug 已存在，请换一个");
+      setSettingsOpen(true); // 自动打开设置抽屉，让作者看到字段错误
+    },
+  });
+  const { edit, flush, disable, enable, clearStash } = autosave;
+
   useEffect(() => {
     if (restoreDecision === "discard") clearLocalDraft(initial?.id ?? null);
   }, [restoreDecision, initial]);
@@ -166,6 +169,11 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const restoreLocal = () => {
     if (!stash) return;
     const content = stash.content;
+    // 新建页在横幅期间已创建了文章（暂缓期间没有迁移）：把暂存从 new 迁到 id，之后保存成功时按 id 清除
+    if (postIdRef.current !== (initial?.id ?? null)) {
+      clearLocalDraft(initial?.id ?? null);
+      writeLocalDraft(postIdRef.current, content, stash.savedAt);
+    }
     setDraft({ title: content.title, slug: content.slug, tags: content.tags, summary: content.summary, body: content.body, publishedAt: content.publishedAt, cover: content.cover ?? null });
     setSlugTouched(content.slug !== slugify(content.title));
     setRestoreSettled(true);
@@ -281,7 +289,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
             />
           }
         />
-        {restoreDecision === "promptRestore" && !restoreSettled && stash && (
+        {bannerPending && stash && (
           <div className="px-5 pt-3 max-md:px-4">
             <RestoreBanner savedAt={new Date(stash.savedAt)} onRestore={restoreLocal} onDiscard={discardLocal} />
           </div>

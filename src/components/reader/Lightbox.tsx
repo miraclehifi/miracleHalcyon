@@ -67,7 +67,8 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
   const [failed, setFailed] = useState<ReadonlySet<number>>(new Set());
   useScrollLock();
 
-  useEffect(() => {
+  // 绘制前移入焦点：懒加载后首次打开时 useEffect 晚于绘制，可见但焦点仍在外面的空窗里 Esc 无效（WebKit 约 100ms）
+  useLayoutEffect(() => {
     closeRef.current?.focus();
   }, []);
 
@@ -106,6 +107,7 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
       event.preventDefault();
       onClose();
     } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      if (event.defaultPrevented) return; // 焦点在轮播区时它已切换过，冒泡上来不再切
       event.preventDefault();
       apiRef.current?.navigateBy(event.key === "ArrowLeft" ? -1 : 1);
     }
@@ -154,7 +156,8 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
       aria-modal="true"
       aria-label="图片查看"
       data-lightbox-backdrop=""
-      className="fixed inset-0 z-50 flex flex-col bg-scrim text-overlay-ink"
+      tabIndex={-1} // 点图注、计数等不可聚焦区域时焦点落在这里而不是 body，Esc 与焦点陷阱仍生效
+      className="fixed inset-0 z-50 flex flex-col bg-scrim text-overlay-ink outline-none"
       onKeyDown={onKeyDown}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();

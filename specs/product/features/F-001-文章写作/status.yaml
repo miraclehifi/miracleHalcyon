@@ -15,9 +15,9 @@ phases:
   domain_design: done   # domain_model / api_contract / data_model: self-checked
   task_planning: done   # self-checked；Sprint 1 共 72 个任务（已关闭）；Sprint 2 共 18 个任务（2026-10-14，按功能点粒度，.claude/rules/tasks.md）；Sprint 3 共 12 个任务（2026-10-14）
   implementation: done   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18）；Sprint 3 完成（14 / 14，含插入任务 13 raise-image-size-limit、14 fix-jpeg-sniff-large-metadata；2026-10-15 统一回归通过）
-  code_review: pending   # Sprint 1–3 待审查（2026-10-15 作者决定：先开发 F-002，全部开发完成后再统一测试）
+  code_review: done   # 2026-10-15 与 F-002 一起审查：6 项 MUST-FIX 已修复，报告 test/features/F-001-文章写作/reviews/code-review.md
   validation: pending
-current_phase: code_review
+current_phase: validation
 blockers: []
 notes: "范围决策：含文章管理列表与删除；仅支持 GFM Markdown（不支持 MDX）；不做版本历史、定时发布、图片库；2026-10-12 新增 US-10 format-toolbar（工具栏格式快捷键 + WarmTooltip 悬停提示，backlog/editor-warm-tooltip.md）"
 approvals:
@@ -30,7 +30,7 @@ has_ui_changes: true
 checkpoint:
   sprint: sprint-3
   current_task: null   # 2026-10-15 Sprint 3 收尾完成（TC-US09-02 用例竞态已修，见 sprint-3-task-results）；code-review / verify 延后到 F-002 开发完成后统一进行
-  current_phase: code_review
+  current_phase: validation
   completed_tasks: [spike-browser-media-processing, implement-markdown-image-plugins, implement-live-photo-upload-api, add-article-image-display, raise-image-size-limit, fix-jpeg-sniff-large-metadata, add-image-gallery-display, add-live-photo-playback, add-single-image-menu, add-gallery-menu, add-image-syntax-help, add-heic-upload, add-live-photo-pair-upload, add-motion-photo-detection]   # Sprint 3
   sprint2_completed_tasks: [build-format-toolbar, implement-image-upload-api, add-image-read-route, add-image-paste-upload, add-image-drop-and-pick-upload, handle-image-upload-errors, add-icon-button-tooltips, implement-delete-post-api, add-post-list-animated-entry, add-swipe-row-delete, add-list-delete-undo, add-editor-delete-action, add-editor-view-modes, add-preview-scroll-sync, add-local-draft-restore, handle-session-expired-save, implement-logout-endpoint, add-logout-entry]   # 18 / 18（Sprint 1 的 72 个见 sprint-1/_index.md）
   blocked_tasks: []

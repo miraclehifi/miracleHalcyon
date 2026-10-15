@@ -48,9 +48,14 @@ export function TagInput({ tags, onChange }: TagInputProps) {
     return () => window.clearTimeout(timer);
   }, [text]);
 
+  // 粘贴的文本可能含逗号 / 换行（绕过了逗号键）：按它们拆成多个标签
   const add = (raw: string) => {
-    const tag = raw.trim().slice(0, TAG_MAX_LENGTH);
-    if (tag && !full && !tags.some((existing) => sameTag(existing, tag))) onChange([...tags, tag]);
+    const next = [...tags];
+    for (const part of raw.split(/[,\r\n]/)) {
+      const tag = part.trim().slice(0, TAG_MAX_LENGTH);
+      if (tag && next.length < TAGS_MAX && !next.some((existing) => sameTag(existing, tag))) next.push(tag);
+    }
+    if (next.length > tags.length) onChange(next);
     setText("");
     setOpen(false);
   };

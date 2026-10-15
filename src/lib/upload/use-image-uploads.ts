@@ -1,8 +1,9 @@
 // 编辑器中的图片上传（editor module-spec §1、media-upload module-spec §1）：一批文件在光标处一次插入"处理中…"占位，
 // 解码算出主色与宽高后改为"上传中…"并随请求上报；进行中的任务按占位出现顺序排成有序列表；完成时替换对应占位
 // （保留作者选区、可撤销），失败时移除占位。每项经 uploadItem 处理（实况项另处理视频、同一请求上传），警示与错误带文件名。
-// 作者删掉了占位（占位数少于任务数）时，该任务完成后不再插入引用。上传前校验类型与大小，被拒的不插占位、不上传
-import { useCallback, useRef, useState, type RefObject } from "react";
+// 作者删掉了占位时，按删除位置找出是哪个任务的占位并把它移出列表（完成后不再插入），其余任务仍与占位一一对应；
+// 判断不了时（占位数与任务数对不上）不改写。上传前校验类型与大小，被拒的不插占位、不上传
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import {
   applyEdit,
   countPlaceholders,
@@ -10,6 +11,7 @@ import {
   insertPlaceholders,
   markUploading,
   PLACEHOLDER_PROCESSING,
+  placeholderRanges,
   placeholdersBefore,
   removePlaceholder,
   replacePlaceholder,
@@ -44,6 +46,26 @@ export async function fileToItem(file: File): Promise<UploadItem> {
   return motion ? { kind: "live", name: file.name, ...motion } : { kind: "image", file };
 }
 
+// 作者的一次编辑删掉了哪些占位（按出现顺序的序号）；判断不了返回 null。
+// 纯删除按光标定位改动区间（相同的占位相邻时，只比公共前后缀分不清删的是哪一个），否则取公共前后缀之间
+export function removedPlaceholders(prev: string, next: string, caret: number): number[] | null {
+  const ranges = placeholderRanges(prev);
+  const remaining = countPlaceholders(next);
+  if (remaining >= ranges.length) return [];
+  const removed = prev.length - next.length;
+  let from = caret;
+  let to = caret + removed;
+  if (!(removed > 0 && prev.slice(0, caret) === next.slice(0, caret) && prev.slice(to) === next.slice(caret))) {
+    from = 0;
+    while (from < prev.length && from < next.length && prev[from] === next[from]) from++;
+    let suffix = 0;
+    while (suffix < prev.length - from && suffix < next.length - from && prev[prev.length - 1 - suffix] === next[next.length - 1 - suffix]) suffix++;
+    to = prev.length - suffix;
+  }
+  const hit = ranges.flatMap(([start, end], i) => (end <= from || start >= to ? [] : [i]));
+  return ranges.length - hit.length === remaining ? hit : null;
+}
+
 export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | null>, {
     onTasksChange,
     upload = uploadImage,
@@ -57,14 +79,54 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
   const tasks = useRef<UploadTask[]>([]);
   const [limit] = useState(() => createLimiter(UPLOAD_CONCURRENCY));
   const notify = () => onTasksChange?.(tasks.current.map((task) => task.file.name));
+  const onTasksChangeRef = useRef(onTasksChange);
+  const selfEditing = useRef(false); // 本 hook 自己插入 / 改写占位时的 input 事件不算作者删除
 
-  // 改写第 task 个占位；作者删掉了占位（占位数少于任务数）时不改写
+  const edit = (element: HTMLTextAreaElement, change: Edit, preserveSelection = false) => {
+    selfEditing.current = true;
+    try {
+      applyEdit(element, change, { preserveSelection });
+    } finally {
+      selfEditing.current = false;
+    }
+  };
+
+  useEffect(() => {
+    onTasksChangeRef.current = onTasksChange;
+  });
+
+  // 作者删除占位：把对应任务移出列表
+  useEffect(() => {
+    const element = textareaRef.current;
+    if (!element) return;
+    let last = element.value;
+    const onBeforeInput = () => {
+      last = element.value;
+    };
+    const onInput = () => {
+      const prev = last;
+      last = element.value;
+      if (selfEditing.current || tasks.current.length === 0 || countPlaceholders(prev) !== tasks.current.length) return;
+      const removed = removedPlaceholders(prev, element.value, element.selectionStart);
+      if (!removed?.length) return;
+      tasks.current = tasks.current.filter((_, i) => !removed.includes(i));
+      onTasksChangeRef.current?.(tasks.current.map((task) => task.file.name));
+    };
+    element.addEventListener("beforeinput", onBeforeInput);
+    element.addEventListener("input", onInput);
+    return () => {
+      element.removeEventListener("beforeinput", onBeforeInput);
+      element.removeEventListener("input", onInput);
+    };
+  }, [textareaRef]);
+
+  // 改写第 task 个占位；任务已被移出（作者删了它的占位）或占位数与任务数对不上时不改写
   const rewrite = (task: UploadTask, compute: (text: string, index: number) => Edit | null) => {
     const element = textareaRef.current;
     const index = tasks.current.indexOf(task);
     if (element && index >= 0 && countPlaceholders(element.value) === tasks.current.length) {
-      const edit = compute(element.value, index);
-      if (edit) applyEdit(element, edit, { preserveSelection: true });
+      const change = compute(element.value, index);
+      if (change) edit(element, change, true);
     }
   };
 
@@ -89,7 +151,7 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
       const from = at ?? element.selectionStart;
       const to = at ?? element.selectionEnd;
       const position = placeholdersBefore(element.value, from);
-      applyEdit(element, { ...insertPlaceholders(from, batch.length, PLACEHOLDER_PROCESSING), to });
+      edit(element, { ...insertPlaceholders(from, batch.length, PLACEHOLDER_PROCESSING), to });
       tasks.current = [...tasks.current.slice(0, position), ...batch, ...tasks.current.slice(position)];
       notify();
       for (const task of batch) {

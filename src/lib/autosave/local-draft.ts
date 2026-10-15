@@ -70,7 +70,8 @@ export interface DraftStash {
   dispose(): void; // 同 flush（卸载时）
 }
 
-export function createLocalDraftStash(): DraftStash {
+// held()：恢复横幅还没处理时为 true——旧暂存是唯一副本，期间不写、不清、不迁移（作者选恢复或丢弃后再照常）
+export function createLocalDraftStash(held: () => boolean = () => false): DraftStash {
   let lastWrite = -Infinity;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let pending: { postId: string | null; getContent: () => DraftInput } | null = null;
@@ -90,14 +91,16 @@ export function createLocalDraftStash(): DraftStash {
 
   return {
     save(postId, getContent) {
+      if (held()) return;
       pending = { postId, getContent };
       if (timer === undefined) timer = setTimeout(write, Math.max(0, lastWrite + THROTTLE_MS - Date.now()));
     },
     clear(postId) {
       cancel();
-      clearLocalDraft(postId);
+      if (!held()) clearLocalDraft(postId);
     },
     move(from, to) {
+      if (held()) return;
       if (pending?.postId === from) pending.postId = to;
       const draft = readLocalDraft(from);
       clearLocalDraft(from);

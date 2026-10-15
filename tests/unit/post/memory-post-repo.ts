@@ -7,7 +7,8 @@ export class MemoryPostRepo implements PostRepo {
   rows = new Map<PostId, Post>();
   private nextId = 1;
 
-  async insert({ draft, draftHash, createdAt }: NewPostRow): Promise<PostId> {
+  async insert({ draft, draftHash, createdAt }: NewPostRow): Promise<PostId | null> {
+    if (await this.slugTaken(draft.slug)) return null;
     const id = this.nextId++;
     this.rows.set(id, { id, draft, draftHash, published: null, pubHash: null, lastPublishedAt: null, createdAt, updatedAt: createdAt });
     return id;
@@ -19,14 +20,14 @@ export class MemoryPostRepo implements PostRepo {
 
   async updateDraft(id: PostId, draft: PostContent, draftHash: string, now: Date): Promise<boolean> {
     const post = this.rows.get(id);
-    if (!post) return false;
+    if (!post || (await this.slugTaken(draft.slug, id))) return false;
     this.rows.set(id, { ...post, draft, draftHash, updatedAt: now });
     return true;
   }
 
   async setPublished(id: PostId, published: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean> {
     const post = this.rows.get(id);
-    if (!post) return false;
+    if (!post || (published && (await this.slugTaken(published.slug, id)))) return false;
     this.rows.set(id, { ...post, published, pubHash, lastPublishedAt: at });
     return true;
   }

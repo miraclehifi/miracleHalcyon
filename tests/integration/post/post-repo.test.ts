@@ -25,8 +25,8 @@ async function pubColumns(id: number) {
 describe("D1PostRepo", () => {
   it("insert / get 往返；updateDraft 不动快照；setPublished 写入与清空快照；slugTaken 只看他人", async () => {
     const repo = new D1PostRepo(env.DB);
-    const a = await repo.insert({ draft: content("post-a"), draftHash: "ha", createdAt: CREATED });
-    const b = await repo.insert({ draft: content("draft-b", { tags: [] }), draftHash: "hb", createdAt: CREATED });
+    const a = (await repo.insert({ draft: content("post-a"), draftHash: "ha", createdAt: CREATED }))!;
+    const b = (await repo.insert({ draft: content("draft-b", { tags: [] }), draftHash: "hb", createdAt: CREATED }))!;
 
     const inserted = await repo.get(a);
     await repo.setPublished(a, content("live-a"), "pa", PUBLISHED_AT);

@@ -87,6 +87,44 @@ describe("useImageUploads", () => {
     });
   });
 
+  // [SC-IMAGE-09] 上传期间作者删掉了 b 的占位：b 完成后不插入，a、c 仍各回各位（占位文本相同，靠删除位置判断删的是哪一个）
+  it("删掉中间的占位后，其余图片仍填回各自的位置", async () => {
+    const pending = new Map<string, ReturnType<typeof deferred<UploadedImage>>>();
+    const upload = (file: File) => {
+      const d = deferred<UploadedImage>();
+      pending.set(file.name, d);
+      return d.promise;
+    };
+    let uploadFiles!: (files: File[]) => void;
+    function Harness() {
+      const ref = useRef<HTMLTextAreaElement>(null);
+      uploadFiles = useImageUploads(ref, { upload }).uploadFiles;
+      return <textarea ref={ref} defaultValue="" />;
+    }
+    const { container } = render(<Harness />);
+    const textarea = container.querySelector("textarea")!;
+    act(() => uploadFiles(["a.png", "b.png", "c.png"].map((name) => new File(["x"], name, { type: "image/png" }))));
+
+    // 作者按退格删掉第二行（"\n" + b 的占位），光标停在第一个占位之后
+    const P = "![处理中…]()";
+    act(() => {
+      textarea.dispatchEvent(new Event("beforeinput", { bubbles: true }));
+      textarea.setRangeText("", P.length, 2 * P.length + 1, "start");
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    for (const name of ["a.png", "b.png", "c.png"]) {
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+        pending.get(name)?.resolve(image(name[0]));
+      });
+    }
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(textarea.value).toBe(`![a](${image("a").url})\n![c](${image("c").url})`);
+  });
+
   // UT-146（SC-LIVE-05）：占位阶段 处理中 → 上传中 → 替换 / 移除；算出的主色与宽高交给上传
   it("占位按阶段改写，主色与宽高随上传传入", async () => {
     const measured = new Map<string, ReturnType<typeof deferred<ImageMeta | null>>>();

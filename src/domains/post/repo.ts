@@ -39,10 +39,10 @@ export interface TagSuggestion {
 }
 
 export interface PostRepo {
-  insert(row: NewPostRow): Promise<PostId>;
+  insert(row: NewPostRow): Promise<PostId | null>; // null = slug 已被占用（检查与写入同一条语句）
   get(id: PostId): Promise<Post | null>;
-  updateDraft(id: PostId, content: PostContent, draftHash: string, now: Date): Promise<boolean>; // false = 不存在
-  setPublished(id: PostId, content: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean>;
+  updateDraft(id: PostId, content: PostContent, draftHash: string, now: Date): Promise<boolean>; // false = 不存在或 slug 已被占用
+  setPublished(id: PostId, content: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean>; // 同上
   delete(id: PostId): Promise<Post | null>; // 返回被删行（用于钩子）；null = 不存在
   slugTaken(slug: string, exceptId?: PostId): Promise<boolean>;
   list(query: ListQuery): Promise<{ rows: PostSummary[]; total: number; counts: StatusCounts }>;
@@ -133,18 +133,23 @@ function toPost(row: PostRow): Post {
   };
 }
 
+// slug 未被其他文章的工作稿或快照占用（不变量 3）；拼进写入语句，检查与写入原子完成，并发写同一 slug 只有一个成功
+const slugFree = (slug: string, exceptId: string) =>
+  `(${slug} = '' OR NOT EXISTS (SELECT 1 FROM posts other WHERE other.id <> ${exceptId} AND (other.slug = ${slug} OR other.pub_slug = ${slug})))`;
+
 export class D1PostRepo implements PostRepo {
   constructor(private readonly db: D1Database) {}
 
-  async insert({ draft, draftHash, createdAt }: NewPostRow): Promise<PostId> {
+  async insert({ draft, draftHash, createdAt }: NewPostRow): Promise<PostId | null> {
     const at = createdAt.toISOString();
     const { meta } = await this.db
       .prepare(
-        "INSERT INTO posts (title, slug, tags, summary, body, published_at, cover, draft_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO posts (title, slug, tags, summary, body, published_at, cover, draft_hash, created_at, updated_at) " +
+          `SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?9 WHERE ${slugFree("?2", "0")}`,
       )
-      .bind(draft.title, draft.slug, JSON.stringify(draft.tags), draft.summary, draft.body, draft.publishedAt, draft.cover ?? null, draftHash, at, at)
+      .bind(draft.title, draft.slug, JSON.stringify(draft.tags), draft.summary, draft.body, draft.publishedAt, draft.cover ?? null, draftHash, at)
       .run();
-    return meta.last_row_id;
+    return meta.changes > 0 ? meta.last_row_id : null;
   }
 
   async get(id: PostId): Promise<Post | null> {
@@ -162,7 +167,8 @@ export class D1PostRepo implements PostRepo {
   async updateDraft(id: PostId, content: PostContent, draftHash: string, now: Date): Promise<boolean> {
     const { meta } = await this.db
       .prepare(
-        "UPDATE posts SET title = ?, slug = ?, tags = ?, summary = ?, body = ?, published_at = ?, cover = ?, draft_hash = ?, updated_at = ? WHERE id = ?",
+        "UPDATE posts SET title = ?1, slug = ?2, tags = ?3, summary = ?4, body = ?5, published_at = ?6, cover = ?7, draft_hash = ?8, updated_at = ?9 " +
+          `WHERE id = ?10 AND ${slugFree("?2", "?10")}`,
       )
       .bind(content.title, content.slug, JSON.stringify(content.tags), content.summary, content.body, content.publishedAt, content.cover ?? null, draftHash, now.toISOString(), id)
       .run();
@@ -173,7 +179,8 @@ export class D1PostRepo implements PostRepo {
   async setPublished(id: PostId, content: PostContent | null, pubHash: string | null, at: Date | null): Promise<boolean> {
     const { meta } = await this.db
       .prepare(
-        "UPDATE posts SET pub_title = ?, pub_slug = ?, pub_tags = ?, pub_summary = ?, pub_body = ?, pub_published_at = ?, pub_cover = ?, pub_hash = ?, last_published_at = ? WHERE id = ?",
+        "UPDATE posts SET pub_title = ?1, pub_slug = ?2, pub_tags = ?3, pub_summary = ?4, pub_body = ?5, pub_published_at = ?6, pub_cover = ?7, pub_hash = ?8, " +
+          `last_published_at = ?9 WHERE id = ?10 AND (?2 IS NULL OR ${slugFree("?2", "?10")})`,
       )
       .bind(
         content?.title ?? null,

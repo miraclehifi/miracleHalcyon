@@ -60,7 +60,7 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | `readingStats(text)`（已实现） | `reading-stats.ts` | 计数 = 汉字（`\p{Script=Han}`）个数 + 其余按 `[\p{L}\p{N}]+` 匹配的词数；`displayWords` = 向上取整到百（< 100 时为实际数）；`minutes = max(1, ceil(count/300))` | TC-US07-05 |
 | `updatedDate(post)`（已实现） | `reading-stats.ts` | `lastPublishedAt` 取 UTC 日期；晚于 `publishedAt` 时返回该日期，否则 `null` | TC-US07-05 |
 | `formatLongDate(date)`（已实现） | `reading-stats.ts` | `yyyy-MM-dd` → "2026年10月10日 星期六"（按日历计算星期，不依赖时区） | TC-US07-04 |
-| `prepareArticleHtml(html)`（已实现：h1 降级、标题 id、目录、hasImages；`data-dropcap` 已实现） | `article-html.ts` | 在 `renderMarkdown` 结果上（rehype 解析 → 变换 → 序列化）：① 正文 `h1` 改为 `h2`；② 第一个顶层元素是 `p` 时加 `data-dropcap`；③ 给 h2 / h3 补 `id`（无 id 时按 `github-slugger` 规则生成，同名追加 `-1`、`-2`）；返回 `{ html, toc: TocItem[], hasImages }` | TC-US07-02、06、07、TC-US08-09 |
+| `prepareArticleHtml(html)`（已实现：h1 降级、标题 id、目录、hasImages；`data-dropcap` 已实现） | `article-html.ts` | 在 `renderMarkdown` 结果上（rehype 解析 → 变换 → 序列化）：① 正文 `h1` 改为 `h2`；② 第一个顶层元素是 `p` 时加 `data-dropcap`；③ 只有正文顶层的 h2 / h3 进目录并补 `id`（按 `github-slugger` 规则生成，同名追加 `-1`、`-2`）；引用、列表、脚注区里的标题不收，已有 id 的不覆盖（脚注区标题被 `aria-describedby` 引用），空标题不进目录；返回 `{ html, toc: TocItem[], hasImages }` | TC-US07-02、06、07、TC-US08-09 |
 | `normalizeSiteConfig(raw)`（已实现） | `site-config.ts` | `name`、`avatar`、`bio`（≥ 1 段）必填；`github` / `photo` 为空串或 `undefined` → 省略，否则必须 `http:` / `https:` URL；`email` 空 → 省略，否则 `^[^\s@]+@[^\s@]+\.[^\s@]+$`；不合法抛 `Error('site.{字段} …')`，构建失败 | TC-US02-03、04 |
 
 ## 3. 运行时脚本（原生，ADR-008；进度、目录、抽屉已实现：`src/components/reader/reading.ts`）
@@ -68,7 +68,7 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | 脚本 | 文件 | 规则 |
 |------|------|------|
 | 首屏主题 | `src/layouts/BaseLayout.astro` 内联 `<script is:inline>` | 读 `localStorage.theme`（try/catch）；`light` / `dark` → `document.documentElement.dataset.theme = 值`；其他不设置 |
-| 主题切换 | `ThemeToggle.astro` 的 `<script>` → `src/lib/reader/theme-toggle.ts` | `next(mode)`：light → dark → system → light；写存储（失败忽略）、设置 / 删除 `data-theme`；更新按钮 `aria-label`、图标（`data-mode`） |
+| 主题切换 | `ThemeToggle.astro` 的 `<script>` → `src/lib/reader/theme-toggle.ts` | `currentScheme()`：`data-theme` 优先，否则 `prefers-color-scheme`；点击翻转为相反配色，写存储（失败忽略）、设置 `data-theme`；支持 View Transitions 且未减少动效时在 `startViewTransition` 内同步切换，并对 `::view-transition-new(root)` 做以按钮中心为圆心的 clip-path 扩散（`circleClipPath` 纯函数，百分比坐标）；更新按钮 `aria-label`；未选择时监听系统配色变化同步名称 |
 | 进度 | `reading.ts` 的 `progressOf(scrollY, top, height, viewport)` + 绑定 | 纯函数：`clamp(round((scrollY + viewport - top) / height * 100), 0, 100)`，其中正文顶部进入视口顶部之前为 0；`scroll` 事件 rAF 节流；写 `aria-valuenow`、文本、条宽 | UT-213、TC-US08-04 |
 | 当前章节 | `reading.ts` 的 `currentHeading(tops, line)` | 返回最后一个 `top <= line` 的下标，都未越过时返回 0；阅读线 = 视口高 × 0.3；切换 `aria-current` | UT-214、TC-US08-05 |
 | 目录跳转 | 同上 | 点击 → `preventDefault` → `scrollIntoView({ behavior: 减弱动效 ? 'auto' : 'smooth' })` + `history.replaceState(null, '', '#' + id)` | UT-215 |

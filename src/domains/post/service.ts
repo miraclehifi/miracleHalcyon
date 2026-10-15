@@ -90,11 +90,18 @@ export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) 
     if (await repo.slugTaken(slug, exceptId)) throw new SlugTakenError(slug);
   }
 
+  // 带条件的写入没有生效：slug 在检查之后被并发请求占用，或文章已被删除
+  async function writeFailed(id: PostId, slug: string): Promise<never> {
+    if (await repo.slugTaken(slug, id)) throw new SlugTakenError(slug);
+    throw new NotFoundError(id);
+  }
+
   return {
     async create(input: DraftInput, now: Date): Promise<PostView> {
       const draft = normalizeContent(input);
       await assertSlugFree(draft.slug);
       const id = await repo.insert({ draft, draftHash: await contentHash(draft), createdAt: now });
+      if (id === null) throw new SlugTakenError(draft.slug); // 检查之后被并发请求占用
       return toPostView(await load(id));
     },
 
@@ -103,7 +110,7 @@ export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) 
       const draft = normalizeContent(input);
       await load(id); // 先确认存在：不存在的文章应得到 POST_NOT_FOUND 而不是 SLUG_TAKEN
       await assertSlugFree(draft.slug, id);
-      if (!(await repo.updateDraft(id, draft, await contentHash(draft), now))) throw new NotFoundError(id);
+      if (!(await repo.updateDraft(id, draft, await contentHash(draft), now))) await writeFailed(id, draft.slug);
       return toPostView(await load(id));
     },
 
@@ -122,9 +129,9 @@ export function createPostService({ repo, hooks = noopHooks }: PostServiceDeps) 
       if (draft.publishedAt === null) {
         draft = { ...draft, publishedAt: utcDate(now) };
         draftHash = await contentHash(draft);
-        await repo.updateDraft(id, draft, draftHash, now); // 补的日期同时写回工作稿
+        if (!(await repo.updateDraft(id, draft, draftHash, now))) await writeFailed(id, draft.slug); // 补的日期同时写回工作稿
       }
-      await repo.setPublished(id, draft, draftHash, now);
+      if (!(await repo.setPublished(id, draft, draftHash, now))) await writeFailed(id, draft.slug);
 
       const prevSlug = post.published?.slug;
       await notify(

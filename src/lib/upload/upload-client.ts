@@ -22,7 +22,10 @@ export class UploadError extends Error {
   }
 }
 
-export const UPLOAD_TIMEOUT_MS = 60_000; // 无响应超过 60 秒按失败处理
+// 超时从发请求起算、含上传请求体的时间：60 秒等待响应 + 按最低 256 KiB/s（约 2 Mbps）计的传输时间（50 MiB ≈ 4 分 20 秒）
+const RESPONSE_WAIT_MS = 60_000;
+const MIN_UPLOAD_BYTES_PER_SECOND = 256 * 1024;
+export const uploadTimeoutMs = (bytes: number) => RESPONSE_WAIT_MS + Math.ceil(bytes / MIN_UPLOAD_BYTES_PER_SECOND) * 1000;
 
 export interface UploadExtras {
   meta?: ImageMeta | null; // 浏览器算出的主色与宽高
@@ -38,7 +41,7 @@ export async function uploadImage(file: File, { meta, video }: UploadExtras = {}
     body.append("width", String(meta.width));
     body.append("height", String(meta.height));
   }
-  const response = await fetchImpl("/api/admin/images", { method: "POST", body, signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS) });
+  const response = await fetchImpl("/api/admin/images", { method: "POST", body, signal: AbortSignal.timeout(uploadTimeoutMs(file.size + (video?.size ?? 0))) });
   if (response.ok) return (await response.json()) as UploadedImage;
   const error = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
   throw new UploadError(error?.error?.code ?? "UPLOAD_FAILED", error?.error?.message ?? "上传失败，请重试", response.status);

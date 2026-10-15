@@ -30,8 +30,9 @@ describe("POST /api/admin/posts/:id/publish", () => {
     await service.saveDraft(Number(ok), draft("first", { body: "改过" }), NOW);
     const updated = await publish(ok);
     const missing = await publish(incomplete);
-    // 另一篇的快照占用了 clash（绕过服务直接写，模拟并发或历史数据）
-    await repo.setPublished(Number(incomplete), draft("clash"), "x", NOW);
+    // 另一篇的快照占用了 clash（直接写库模拟历史数据；仓储的写入自带 slug 条件，绕不过去）
+    expect(await repo.setPublished(Number(incomplete), draft("clash"), "x", NOW)).toBe(false);
+    await env.DB.prepare("UPDATE posts SET pub_title = 'x', pub_body = 'x', pub_slug = 'clash', pub_hash = 'x' WHERE id = ?").bind(Number(incomplete)).run();
     const taken = await publish(clash);
 
     expect({

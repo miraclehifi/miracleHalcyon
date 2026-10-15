@@ -73,10 +73,10 @@ function nextThrottleState(state: ThrottleState | null, event: 'fail' | 'success
 ```
 
 **login 流程**（已实现：`createAuthService().login`，`src/domains/auth/service.ts`；账号比较两边 SHA-256 摘要，耗时与长度无关；`Credentials` 超长按失败计数、不做哈希）：
-1. 读 throttle → 锁定中返回 `RATE_LIMITED`
+1. `ThrottleRepo.reserve` 先原子地记一次失败，并返回计数前的状态 → 锁定中返回 `RATE_LIMITED`（比对前先计数：同一 IP 的并发请求不会都读到"未锁定"而绕过限流）
 2. username 常量时间比较 `ADMIN_USERNAME`；无论 username 是否正确，都执行一次 `verifyPassword`，避免时序差异泄露账号是否存在
-3. 失败 → `nextThrottleState(fail)` 写回 → `INVALID_CREDENTIALS`（第 5 次失败本身返回 `INVALID_CREDENTIALS`，第 6 次起才返回 `RATE_LIMITED`）
-4. 成功 → 删除 throttle → 生成 token → 插入会话 → 返回 token
+3. 失败 → 计数已在第 1 步完成，直接返回 `INVALID_CREDENTIALS`（第 5 次失败本身返回 `INVALID_CREDENTIALS`，第 6 次起才返回 `RATE_LIMITED`）
+4. 成功 → 删除 throttle（撤销第 1 步的计数）→ 生成 token → 插入会话 → 返回 token
 
 ## 5. 仓储接口
 
@@ -90,6 +90,7 @@ interface ThrottleRepo { // 已实现：D1ThrottleRepo（src/domains/auth/thrott
   get(ip: string): Promise<ThrottleState | null>;
   put(ip: string, s: ThrottleState): Promise<void>;
   delete(ip: string): Promise<void>;
+  reserve(ip: string, now: Date): Promise<ThrottleState | null>; // 原子地按 nextThrottleState(·, 'fail') 计一次失败，返回计数前的状态；D1 用 batch（SELECT + UPSERT）在同一事务完成
 }
 ```
 

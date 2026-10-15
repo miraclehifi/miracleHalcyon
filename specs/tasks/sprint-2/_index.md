@@ -1,6 +1,6 @@
 # Sprint 2：写作体验
 
-**状态**: completed（待 code-review）
+**状态**: completed（code-review 完成，待 verify）
 **创建**: 2026-10-14
 **Feature**: F-001 文章写作（[Backlog: article-writing](../../backlog/article-writing.md)）
 **规划方式**: 迭代递进（Sprint 3 见 [tasks/_index.md](../_index.md)）

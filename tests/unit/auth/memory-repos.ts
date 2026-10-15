@@ -1,6 +1,6 @@
 // 单元测试用内存仓储，行为与 D1 实现一致（过期会话惰性删除）
 import type { AdminSession, SessionRepo } from "../../../src/domains/auth/session-repo";
-import type { ThrottleState } from "../../../src/domains/auth/throttle";
+import { nextThrottleState, type ThrottleState } from "../../../src/domains/auth/throttle";
 import type { ThrottleRepo } from "../../../src/domains/auth/throttle-repo";
 
 export class MemorySessionRepo implements SessionRepo {
@@ -38,5 +38,12 @@ export class MemoryThrottleRepo implements ThrottleRepo {
 
   async delete(ip: string) {
     this.rows.delete(ip);
+  }
+
+  async reserve(ip: string, now: Date) {
+    const before = this.rows.get(ip) ?? null;
+    const next = nextThrottleState(before, "fail", now);
+    if (next) this.rows.set(ip, next);
+    return before;
   }
 }

@@ -28,7 +28,7 @@ function applyEdit(textarea: HTMLTextAreaElement, e: Edit): void;
 
 > 已实现（Sprint 2，build-format-toolbar）：`applyEdit`、`applyFormat`（`src/lib/editor/format-commands.ts`）、`matchShortcut`（`src/lib/editor/shortcuts.ts`）、`EditorToolbar.tsx`。上传占位函数与 `src/lib/upload/use-image-uploads.ts`（Sprint 2，add-image-paste-upload；函数名为 `insertPlaceholders(cursor, count)`，一批一次插入）。
 
-占位文本就是 `![处理中…]()` / `![上传中…]()`（与验收用例一致，不夹带 token）。编辑器在内存中维护"进行中的上传任务"有序列表；第 i 个任务对应源码中第 i 个占位（按出现顺序扫描），因此作者在占位前后输入文字不影响定位。作者手动删掉某个占位时，扫描到的占位数少于任务数，该任务完成后不再插入引用。markdown 模块把空 URL 且 alt 为"处理中…"/"上传中…"的图片渲染为占位块（文件名由编辑器按顺序补上）。
+占位文本就是 `![处理中…]()` / `![上传中…]()`（与验收用例一致，不夹带 token）。编辑器在内存中维护"进行中的上传任务"有序列表；第 i 个任务对应源码中第 i 个占位（按出现顺序扫描），因此作者在占位前后输入文字不影响定位。作者手动删掉某个占位时，按这次编辑的删除区间（纯删除按光标定位，否则取新旧文本的公共前后缀之间）找出是哪个任务的占位并把它移出列表，该任务完成后不再插入引用，其余任务仍与占位一一对应；判断不了（占位数与任务数对不上）时不改写任何占位。markdown 模块把空 URL 且 alt 为"处理中…"/"上传中…"的图片渲染为占位块（文件名由编辑器按顺序补上）。
 
 ## 2. 自动保存（`useAutosave`）
 
@@ -48,7 +48,7 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 显示 | `idle`（新建未保存）不显示；`dirty` → "未保存"；`saving` → "保存中…"；`saved` → "已保存 · HH:mm"（取响应 `updatedAt`）；`failed` → "保存失败，将自动重试"（409 时不显示该文案，显示字段错误） |
 | 请求 | 首次 `POST /api/admin/posts` → `history.replaceState` 到 `/admin/posts/{id}`；之后 `PUT`；同一时间最多一个在途请求 |
 | 本地暂存 | 每次编辑（节流 500ms）写 `localStorage['mh:draft:{id\|new}'] = { savedAt, content }`；服务端保存成功且内容与暂存一致时删除 |
-| 恢复判断 | 加载时暂存存在且 `savedAt > post.updatedAt` 且内容不同 → 显示 `RestoreBanner`；新建页的 `mh:draft:new` 同理 |
+| 恢复判断 | 加载时暂存存在且 `savedAt > post.updatedAt` 且内容不同 → 显示 `RestoreBanner`；新建页的 `mh:draft:new` 同理。横幅未处理期间旧暂存是唯一副本：自动保存照常，但本地暂存不写、不清、不迁移（`createLocalDraftStash(held)`）；新建页在此期间已创建文章时，选"恢复"把暂存从 `new` 迁到新 id |
 | 离开拦截 | `dirty`/`saving`/`failed` 时注册 `beforeunload` |
 | 发布前 | 点击发布 / 发布更新时先 flush（立即保存并等待），再调用 `/publish` |
 

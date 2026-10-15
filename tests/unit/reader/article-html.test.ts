@@ -23,6 +23,15 @@ describe("prepareArticleHtml", () => {
     expect(html).toContain('<h2 id="安装-1">');
   });
 
+  // 只有正文顶层的标题进目录（当前章节高亮与跳转留白都只认顶层）；已有 id 不覆盖；空标题不进目录
+  it("脚注区标题保留原 id 且不进目录；引用 / 列表里的标题与空标题不进目录", async () => {
+    const { html, toc } = await prepare("## 正文\n\n第一段[^1]\n\n> ## 引用里的标题\n\n- ## 列表里的标题\n\n## \n\n[^1]: 注释");
+    expect(toc).toEqual([{ id: "正文", text: "正文", depth: 2 }]);
+    expect(html).toContain('id="user-content-footnote-label"');
+    expect(html).toContain('aria-describedby="user-content-footnote-label"');
+    expect(html).not.toMatch(/id=""/);
+  });
+
   it("没有 h2 / h3 时目录为空；有图片时 hasImages 为真", async () => {
     expect((await prepare("只有正文\n\n#### 四级")).toc).toEqual([]);
     expect((await prepare("正文")).hasImages).toBe(false);

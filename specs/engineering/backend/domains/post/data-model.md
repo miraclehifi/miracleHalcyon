@@ -52,7 +52,7 @@ END;
 ```
 
 **说明**
-- 两个部分唯一索引兜底"同一列内唯一"；"A 的工作稿 slug = B 的快照 slug"这种跨列冲突由服务层 `slugTaken` 检查（不变量 3），写入与检查在同一个 `batch` 中
+- 两个部分唯一索引兜底"同一列内唯一"；"A 的工作稿 slug = B 的快照 slug"这种跨列冲突由写入语句自带的 `NOT EXISTS` 条件拦截（不变量 3），检查与写入在同一条语句中
 - 派生字段：`status = CASE WHEN pub_hash IS NULL THEN 'draft' ELSE 'published' END`；`has_unpublished_changes = pub_hash IS NOT NULL AND pub_hash <> draft_hash`
 - 标签以 JSON 数组存储；标签查询用 `json_each`（千篇以内，见 US-07 假设），不建标签表
 

@@ -13,6 +13,7 @@ export interface UseAutosaveOptions {
   onCreated?(id: string): void;
   onSaved?(post: PostView): void;
   onError?(error: SaveError): void;
+  holdStash?: boolean; // 恢复横幅未处理：本地暂存暂不写、不清（见 createLocalDraftStash）
 }
 
 export interface UseAutosaveResult extends AutosaveState {
@@ -44,7 +45,7 @@ export function useAutosave(options: UseAutosaveOptions): UseAutosaveResult {
       onSaved: (post) => optionsRef.current.onSaved?.(post),
       onError: (error) => optionsRef.current.onError?.(error),
       onChange: setState,
-      stash: createLocalDraftStash(),
+      stash: createLocalDraftStash(() => optionsRef.current.holdStash ?? false),
     });
     return controllerRef.current;
   }, []);

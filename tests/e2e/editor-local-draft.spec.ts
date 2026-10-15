@@ -100,6 +100,22 @@ test("[TC-US06-14] 本地暂存更新：丢弃", async ({ page, baseURL }) => {
   expect(saves).toEqual([]);
 });
 
+// [TC-US06-13][SC-AUTOSAVE-07] 横幅未处理时继续输入：自动保存照常，但旧暂存不被覆盖或清除，之后仍可恢复
+test("[TC-US06-13] 有恢复横幅时继续输入不丢旧暂存", async ({ page, baseURL }) => {
+  const { id, updatedAt, content } = await serverPost(page, baseURL!, "横幅中输入");
+  await openWithStash(page, id, { [`mh:draft:${id}`]: { savedAt: shifted(updatedAt, 60_000), content: { ...content, body: "本地版本" } } });
+  await expect(banner(page)).toBeVisible();
+
+  await body(page).fill("服务端版本+新输入");
+  await expect(page.getByRole("banner").getByText("已保存")).toBeVisible({ timeout: 10_000 });
+  expect((await readStash(page, id))?.content.body).toBe("本地版本");
+
+  await banner(page).getByRole("button", { name: "恢复本地内容" }).click();
+  await expect(body(page)).toHaveValue("本地版本");
+  await expect(page.getByRole("banner").getByText("已保存")).toBeVisible({ timeout: 10_000 });
+  expect(await readStash(page, id)).toBeNull();
+});
+
 // [TC-US06-15][SC-AUTOSAVE-07] 只有严格更新才提示：更旧 / 相等 / 其他文章的暂存不提示（过期暂存清除），新 1ms 提示
 test("[TC-US06-15] 本地暂存更旧 / 时间相等不提示", async ({ page, baseURL }) => {
   const { id, updatedAt, content } = await serverPost(page, baseURL!, "边界");

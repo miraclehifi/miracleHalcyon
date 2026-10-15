@@ -69,4 +69,14 @@ describe("TagInput", () => {
       final: ["react"],
     });
   });
+
+  // [SC-POSTINFO-10] 粘贴带逗号的文本（绕过逗号键）：按逗号拆成多个标签，不产生服务端会拒绝的"含逗号标签"
+  it("粘贴 'react, astro,  vite' 回车：拆成多个标签并去重", () => {
+    vi.stubGlobal("fetch", vi.fn<typeof fetch>(async () => Response.json({ tags: [] })));
+    render(<Harness />);
+    const input = screen.getByRole("combobox", { name: "标签" });
+    fireEvent.change(input, { target: { value: "react, ASTRO,  vite,," } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect([chips(), (input as HTMLInputElement).value]).toEqual([["astro", "react", "vite"].map((tag) => expect.stringContaining(tag)), ""]);
+  });
 });

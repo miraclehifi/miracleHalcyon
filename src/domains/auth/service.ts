@@ -2,7 +2,7 @@
 import { sha256, sha256Hex } from "../../lib/crypto";
 import { verifyPassword, type PasswordHash } from "./password";
 import type { AdminSession, SessionRepo } from "./session-repo";
-import { isLocked, nextThrottleState } from "./throttle";
+import { isLocked } from "./throttle";
 import type { ThrottleRepo } from "./throttle-repo";
 
 export const SESSION_TTL_MS = 7 * 24 * 60 * 60_000; // 不滑动续期
@@ -56,24 +56,21 @@ function credentialsInRange(username: string, password: string): boolean {
 export function createAuthService(deps: AuthDeps) {
   const verify = deps.verify ?? verifyPassword;
 
-  async function recordFailure(ip: string, now: Date): Promise<LoginResult> {
-    const state = nextThrottleState(await deps.throttles.get(ip), "fail", now);
-    if (state) await deps.throttles.put(ip, state);
-    return { ok: false, code: "INVALID_CREDENTIALS" };
-  }
+  const invalid: LoginResult = { ok: false, code: "INVALID_CREDENTIALS" };
 
   return {
     async login({ ip, username, password, now }: LoginInput): Promise<LoginResult> {
-      const throttle = await deps.throttles.get(ip);
+      // 比对前先原子地记一次失败（成功再清除）：同一 IP 的并发请求不会都读到"未锁定"而绕过限流
+      const throttle = await deps.throttles.reserve(ip, now);
       if (throttle?.lockedUntil && isLocked(throttle, now)) return { ok: false, code: "RATE_LIMITED", lockedUntil: throttle.lockedUntil };
-      if (!credentialsInRange(username, password)) return recordFailure(ip, now); // 超长不做哈希
+      if (!credentialsInRange(username, password)) return invalid; // 超长不做哈希
 
       // 无论账号是否正确都比对一次密码，避免时序差异泄露账号是否存在
       const [userOk, passwordOk] = await Promise.all([
         usernameMatches(username, deps.adminUsername),
         verify(password, deps.adminPasswordHash),
       ]);
-      if (!userOk || !passwordOk) return recordFailure(ip, now);
+      if (!userOk || !passwordOk) return invalid;
 
       await deps.throttles.delete(ip);
       const token = generateToken();

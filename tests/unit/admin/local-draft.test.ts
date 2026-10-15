@@ -110,6 +110,27 @@ describe("自动保存写本地暂存", () => {
   });
 });
 
+// [SC-AUTOSAVE-07] 恢复横幅未处理时（held）：编辑不覆盖旧暂存，保存成功也不清除；处理后恢复正常
+describe("恢复横幅未处理时暂缓暂存", () => {
+  it("held 期间不写、不清、不迁移；释放后照常", async () => {
+    writeLocalDraft("7", { ...CONTENT, body: "旧暂存" }, "2026-10-10T06:30:00.000Z");
+    writeLocalDraft(null, { ...CONTENT, body: "旧新建暂存" }, "2026-10-10T06:30:00.000Z");
+    let held = true;
+    const stash = createLocalDraftStash(() => held);
+    stash.save("7", () => ({ ...CONTENT, body: "新输入" }));
+    await vi.advanceTimersByTimeAsync(600);
+    const afterEdit = readLocalDraft("7")?.content.body;
+    stash.clear("7");
+    stash.move(null, "8");
+    const whileHeld = [readLocalDraft("7")?.content.body, readLocalDraft(null)?.content.body, readLocalDraft("8")];
+    held = false;
+    stash.save("7", () => ({ ...CONTENT, body: "新输入" }));
+    await vi.advanceTimersByTimeAsync(600);
+    const released = readLocalDraft("7")?.content.body;
+    expect({ afterEdit, whileHeld, released }).toEqual({ afterEdit: "旧暂存", whileHeld: ["旧暂存", "旧新建暂存", null], released: "新输入" });
+  });
+});
+
 describe("会话过期", () => {
   // [UT-77][ED-UT-02][SC-AUTOSAVE-10] 401：在 onError（页面随即跳转）之前同步写入暂存（不等节流），状态 failed / unauthenticated，
   // 不重试；之后编辑可再次保存

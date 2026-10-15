@@ -33,6 +33,21 @@ export function cleanOriginalName(name: string): string {
   return [...(name.split(/[\\/]/).pop() ?? "")].slice(0, NAME_MAX).join("");
 }
 
+const prefix = async (blob: Blob, bytes: number) => new Uint8Array(await blob.slice(0, bytes).arrayBuffer());
+
+// 只读前缀嗅探；JPEG 的 SOF 可能在数百 KB 的 EXIF / 厂商私有段之后，前缀里找不到时逐步扩大到整个文件
+const JPEG_PREFIXES = [SNIFF_BYTES, 1024 * 1024, 8 * 1024 * 1024];
+async function sniffImageBlob(file: Blob) {
+  const head = await prefix(file, SNIFF_BYTES);
+  const found = sniffImage(head);
+  if (found || head[0] !== 0xff || head[1] !== 0xd8 || file.size <= SNIFF_BYTES) return found;
+  for (const size of [...JPEG_PREFIXES.slice(1), file.size]) {
+    const image = sniffImage(await prefix(file, size));
+    if (image || size >= file.size) return image;
+  }
+  return null;
+}
+
 export function createMediaService({ store, repo, generateId = generateImageId }: MediaServiceDeps) {
   async function freshKey(parts: Omit<Parameters<typeof buildImageKey>[0], "id">): Promise<string> {
     for (let attempt = 0; attempt < KEY_ATTEMPTS; attempt++) {
@@ -48,7 +63,7 @@ export function createMediaService({ store, repo, generateId = generateImageId }
     throw new UploadFailedError(error);
   }
 
-  async function putOrRollback(written: string[], key: string, body: Uint8Array, contentType: string) {
+  async function putOrRollback(written: string[], key: string, body: Blob, contentType: string) {
     try {
       await store.put(key, body, contentType);
       written.push(key);
@@ -62,17 +77,16 @@ export function createMediaService({ store, repo, generateId = generateImageId }
       const { rgb } = validateUploadFields(fields);
       checkImageSize(file.size);
       if (video) checkVideoSize(video.size);
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const image = sniffImage(bytes); // 整个文件：JPEG 的 SOF 可能在数百 KB 的 EXIF / 厂商私有段之后
+      const image = await sniffImageBlob(file);
       if (!image) throw new UnsupportedTypeError();
-      const videoBytes = video ? new Uint8Array(await video.arrayBuffer()) : null;
-      if (videoBytes && !sniffVideo(videoBytes.subarray(0, SNIFF_BYTES))) throw new UnsupportedTypeError();
+      if (video && !sniffVideo(await prefix(video, SNIFF_BYTES))) throw new UnsupportedTypeError();
 
+      // 写 R2 直接传表单里的 Blob：表单解析已在内存中占一份，不再复制（Workers 每个 isolate 128MB）
       const key = await freshKey({ width: image.width, height: image.height, rgb, ext: image.ext, now });
-      const videoKey = videoBytes ? videoKeyFor(key) : null;
+      const videoKey = video ? videoKeyFor(key) : null;
       const written: string[] = [];
-      await putOrRollback(written, key, bytes, image.mime);
-      if (videoBytes && videoKey) await putOrRollback(written, videoKey, videoBytes, VIDEO_MIME);
+      await putOrRollback(written, key, file, image.mime);
+      if (video && videoKey) await putOrRollback(written, videoKey, video, VIDEO_MIME);
       try {
         await repo.insert({
           key,
@@ -83,7 +97,7 @@ export function createMediaService({ store, repo, generateId = generateImageId }
           rgb,
           originalName: cleanOriginalName(file.name),
           createdAt: now,
-          ...(videoBytes && videoKey && { video: { key: videoKey, size: videoBytes.length } }),
+          ...(video && videoKey && { video: { key: videoKey, size: video.size } }),
         });
       } catch (error) {
         await rollback(written, error);
