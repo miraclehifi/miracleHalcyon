@@ -9,6 +9,8 @@
  * 4. 外层 aria-label 改为 ariaLabel prop（由 ImageGallery 传入，如"组图：京都三日"），上游写死为英文
  * 5. 去掉 'use client' 与演示用 DEFAULT_ITEMS（items 默认为空）；count 为 0 时 active 取 0
  * 6. 无 label 的面板不渲染标签行（上游展开时仍显示一根孤立的竖条）
+ * 7. "已展开"按按下时的状态判断：触屏轻点会先触发兼容的 mouseenter / focus 把面板展开，再触发 click；
+ *    按下前未展开的面板这次点击只展开，不调用 onActiveClick（F-002 读者端灯箱，TC-US10-04）
  * 其余逻辑（gsap 展开 / 倾斜 / 视差 / 标签错开、≤ 520px 竖向条带、键盘方向键切换）与上游一致，仅供 ImageGallery 使用。
  */
 
@@ -184,8 +186,13 @@ const AccordionGallery = ({
     if (trigger === "hover") setActive(i);
   };
 
+  const pressRef = useRef<{ i: number; wasActive: boolean } | null>(null); // 改动 7
+
   const handleClick = (i: number, e: MouseEvent) => {
-    if (i !== active) {
+    const press = pressRef.current;
+    pressRef.current = null;
+    const wasActive = press && press.i === i ? press.wasActive : i === active;
+    if (!wasActive) {
       e.preventDefault();
       setActive(i);
     } else {
@@ -230,6 +237,9 @@ const AccordionGallery = ({
             }
             href={item.link || undefined}
             onClick={(e) => handleClick(i, e)}
+            onPointerDown={() => {
+              pressRef.current = { i, wasActive: i === active };
+            }}
             onMouseEnter={() => handleEnter(i)}
             onFocus={() => setActive(i)}
             onKeyDown={(e) => handleKeyDown(i, e)}

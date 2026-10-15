@@ -293,6 +293,7 @@
 | 新增 `renderOverlay(item, index, active)`：在面板内渲染额外内容 | 展开项显示 `LiveBadge`，并挂动态照片播放（悬停 / 长按） |
 | `prefersReduced` 改为订阅 `matchMedia` 变化 | 原实现只在渲染时读一次 |
 | 外层 `aria-label` 改为由 `ImageGallery` 传入（如"组图：京都三日"） | 原文案写死为英文 |
+| "已展开"按按下时的状态判断（F-002） | 触屏轻点会先触发兼容的 mouseenter / focus 把面板展开再 click，导致第一次轻点就打开灯箱 |
 
 ### 灯箱层叠参数
 
@@ -313,7 +314,7 @@
 | `showControls` / `showIndicators` | `true` / `false` | `false` / `false` | 顶栏已有计数，不用圆点 |
 | `onChange` | 更新 `Lightbox` 的计数和图注 | 同左 | — |
 
-**需要在源码上补的改动**（implement 阶段）：
+**需要在源码上补的改动**（implement 阶段；已实现：`src/components/vendor/react-bits/DepthCarousel.tsx`，上游路径 `src/ts-tailwind/Components/DepthCarousel`，另补：不循环时首尾按钮 disabled、`apiRef` 供灯箱处理 ← / →、白色类名改为令牌，改动清单见文件头；`Lightbox` 已实现：`src/components/reader/Lightbox.tsx`，Sprint 4）：
 
 | 改动 | 原因 |
 |------|------|

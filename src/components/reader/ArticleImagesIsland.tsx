@@ -1,7 +1,7 @@
 // ArticleImagesIsland（reader module-spec §4.2，ADR-008）：读者页正文图片岛（client:idle，仅正文含图片时渲染）。
 // 把构建时输出的静态 figure / 组图换成宿主元素，portal 渲染 ArticleImage / ImageGallery（与后台预览同一套组件）；
-// 点击图片记录灯箱下标（灯箱见 add-lightbox）
-import { useLayoutEffect, useState } from "react";
+// 点击图片打开 Lightbox（首次打开时动态加载，含 gsap 与 DepthCarousel），关闭后焦点回到触发的图片
+import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { collectArticleImages, type ArticleImageData, type ArticleIsland } from "../../lib/reader/article-images";
 import { ArticleImage } from "../article/ArticleImage";
@@ -17,15 +17,28 @@ interface Mounted {
 }
 
 const toGalleryImage = ({ wide: _wide, ...image }: ArticleImageData) => image;
+const Lightbox = lazy(() => import("./Lightbox"));
 
 export function ArticleImagesIsland({ rootSelector }: ArticleImagesIslandProps) {
   const [mounted, setMounted] = useState<Mounted[]>([]);
-  const [, setOpenIndex] = useState<number | null>(null);
+  const [images, setImages] = useState<ArticleImageData[]>([]);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const trigger = useRef<HTMLElement | null>(null);
+
+  const open = (index: number) => {
+    trigger.current = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
+    setOpenIndex(index);
+  };
+  const close = () => {
+    setOpenIndex(null);
+    requestAnimationFrame(() => trigger.current?.focus());
+  };
 
   useLayoutEffect(() => {
     const root = document.querySelector<HTMLElement>(rootSelector);
     if (!root) return;
-    const { islands } = collectArticleImages(root);
+    const { islands, images: all } = collectArticleImages(root);
+    setImages(all);
     setMounted(
       islands.map((island) => {
         const host = document.createElement("div");
@@ -48,14 +61,19 @@ export function ArticleImagesIsland({ rootSelector }: ArticleImagesIslandProps) 
               height={island.image.height}
               wide={island.image.wide}
               live={island.image.live}
-              onClick={() => setOpenIndex(island.start)}
+              onClick={() => open(island.start)}
             />
           ) : (
-            <ImageGallery variant={island.variant} images={island.images.map(toGalleryImage)} onImageClick={(index) => setOpenIndex(island.start + index)} />
+            <ImageGallery variant={island.variant} images={island.images.map(toGalleryImage)} onImageClick={(index) => open(island.start + index)} />
           ),
           host,
           String(key),
         ),
+      )}
+      {openIndex !== null && (
+        <Suspense fallback={null}>
+          <Lightbox images={images} index={openIndex} onClose={close} />
+        </Suspense>
       )}
     </>
   );

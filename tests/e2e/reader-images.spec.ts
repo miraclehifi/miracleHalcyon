@@ -55,8 +55,8 @@ test("[TC-US10-02] 图片加载不引起布局偏移", async ({ page }) => {
   expect(cls).toBeLessThan(0.1);
 });
 
-// [TC-US10-12][SC-LIGHTBOX-02] 无图文章不加载图片岛（不含 React 运行时由 check-reader-build-output 检查）
-test("[TC-US10-12] 无图文章不渲染图片岛", async ({ page }) => {
+// [SC-LIGHTBOX-01] 无图文章不加载图片岛（不含 React 运行时由 check-reader-build-output 检查）
+test("无图文章不渲染图片岛", async ({ page }) => {
   await page.goto("/posts/latest-post");
   await expect(page.locator("astro-island")).toHaveCount(0);
 });
