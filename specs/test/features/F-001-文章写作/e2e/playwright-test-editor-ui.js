@@ -25,7 +25,7 @@ async function login(page) {
 
 function api(page) {
   const headers = { Origin: new URL(TARGET_URL).origin };
-  const draft = (fields) => ({ title: "", slug: "", tags: [], summary: "", body: "", publishedAt: null, ...fields });
+  const draft = (fields) => ({ title: "", slug: "", tags: [], summary: "", body: "", publishedAt: null, cover: null, ...fields }); // DraftInput 七字段必填（F-002 起含 cover）
   return {
     create: async (fields) => (await (await page.request.post(`${TARGET_URL}/api/admin/posts`, { headers, data: draft(fields) })).json()).id,
     save: (id, fields) => page.request.put(`${TARGET_URL}/api/admin/posts/${id}`, { headers, data: draft(fields) }),

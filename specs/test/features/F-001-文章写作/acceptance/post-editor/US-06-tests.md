@@ -3,8 +3,8 @@
 **US ID**: US-06
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-06-autosave-draft/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-06-autosave-draft/behaviors.md)
-**最后更新**: 2026-10-10
-**Version Tag**: v1.0
+**最后更新**: 2026-10-15
+**Version Tag**: v1.3
 
 > 验收用例从 behaviors.md 的 Given-When-Then 生成，叠加等价类、边界值（去抖 1.9s/2.0s、本地暂存时间戳新/旧/相等）、错误猜测（乱序响应、双标签页、重复创建）与状态转换。
 > 接口路径为占位，**接口路径以 design-domain API 契约为准**：新建 `POST /api/admin/posts`；自动保存 `PUT /api/admin/posts/{id}`；读取 `GET /api/admin/posts/{id}`；读者页 `GET /posts/{slug}`。本地暂存 key 为 `mh:draft:{postId|new}`（已实现）。
@@ -60,7 +60,7 @@
 | TC-US06-21 | SC-AUTOSAVE-01 | 保存接口响应时间 | performance | P2 |
 | TC-US06-22 | SC-AUTOSAVE-02 | 状态转换：未保存 → 保存中… → 已保存 · 14:32 | ui-interaction | P0 |
 | TC-US06-23 | SC-AUTOSAVE-02, SC-AUTOSAVE-06 | 状态转换：保存失败 → 重试 → 已保存 | ui-interaction | P0 |
-| TC-US06-24 | SC-AUTOSAVE-02 | 保存中继续输入，完成后显示"未保存" | ui-interaction | P1 |
+| TC-US06-24 | SC-AUTOSAVE-02 | 保存中继续输入，完成后立即再保存、不误显示"已保存" | ui-interaction | P1 |
 | TC-US06-25 | SC-AUTOSAVE-10 | 发布时会话过期跳登录页 | ui-interaction | P0 |
 | TC-US06-26 | SC-AUTOSAVE-09 | "未保存"/"保存中…"时离开弹确认 | ui-interaction | P0 |
 | TC-US06-27 | SC-AUTOSAVE-09 | "已保存"时离开不弹确认 | ui-interaction | P1 |
@@ -611,16 +611,16 @@
 | covers | SC-AUTOSAVE-08 |
 | Scenario | 约束"自动保存不得改变文章的发布状态"，草稿/已发布两类状态 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（保存请求体为七字段整份工作稿；附加 status 被忽略并返回 200） |
 
 **前置条件：**
 - 【数据前置】草稿文章 P1；已发布文章 P2（`publishedAt` = T0，正文 `V1`）
 - 【环境前置】已登录
 
-**测试数据：** 保存请求体 `{ "body": "V2" }`；另附加越权字段 `{ "body": "V3", "status": "published" }`
+**测试数据：** 保存请求体为整份工作稿（`DraftInput` 七个字段，以各自当前工作稿为底），`body` 改为 `V2`；越权请求体为同样的整份工作稿，`body` 改为 `V3`，另附加 `"status": "published"`
 
 **步骤：**
 1. 对 P1、P2 调用自动保存接口
@@ -628,7 +628,7 @@
 3. 读取 P1、P2
 
 **预期结果：**
-- P1 `status` 仍为草稿（附加 `status` 被忽略或返回 400，以契约为准，但不得发布）
+- 步骤 2 返回 200，附加的 `status` 被忽略：P1 `status` 仍为草稿，`body` = `V3`
 - P2 `status` 仍为已发布，`publishedAt` = T0，读者可见正文仍为 `V1`，存在未发布修改标记
 
 **清理：** 删除 P1、P2
@@ -848,12 +848,12 @@ await expect(status).toHaveText(/^已保存 · \d{2}:\d{2}$/, { timeout: 30000 }
 |------|------|
 | TC-ID | TC-US06-24 |
 | covers | SC-AUTOSAVE-02 |
-| Scenario | 错误猜测：保存响应返回时若已有新修改，不得误显示"已保存" |
+| Scenario | 错误猜测：保存中有新修改时，第一次保存完成后立即再保存（不再等 2 秒），且不误显示"已保存" |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | ui-interaction |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（保存中有新编辑：完成后立即再保存，不再等 2 秒） |
 
 **前置条件：**
 - 【环境前置】保存请求延迟 2000ms；`page.clock` 已安装
@@ -866,14 +866,16 @@ await expect(status).toHaveText(/^已保存 · \d{2}:\d{2}$/, { timeout: 30000 }
 3. 第一次保存响应返回
 
 **预期结果：**
-- 步骤 3 后状态栏为"未保存"（而非"已保存"）
-- 再过 2s 发起第二次保存，最终"已保存 · HH:mm"，DB `body` = `AB`
+- 步骤 2 期间不发出第二个保存请求（同一时间最多一个在途请求），状态栏保持"保存中…"
+- 步骤 3 后不等去抖（时钟不再前进）立即发出第二次 `PUT`，请求体 `body` = `AB`；两次保存之间状态栏不出现"已保存"
+- 第二次保存完成后显示"已保存 · HH:mm"，DB `body` = `AB`
 
 **playwright_hint：**
 ```ts
 await editor.type('B');
-await page.waitForResponse(r => r.url().includes('/api/admin/posts') && r.request().method() === 'PUT');
-await expect(status).toHaveText('未保存');
+const second = page.waitForRequest(r => r.method() === 'PUT' && r.postDataJSON()?.body === 'AB');
+await second; // 第一次响应返回后立即发出，无需再推进 2 秒去抖
+await expect(status).toHaveText(/已保存 · \d{2}:\d{2}/);
 ```
 
 **清理：** 删除文章
@@ -1102,5 +1104,6 @@ expect(saveCount).toBe(1);
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
+| 2026-10-15 | v1.3 | 期望值同步现行契约（sync-f001-acceptance-expectations）：TC-17 请求体为七字段整份工作稿、附加 `status` 被忽略；TC-24 保存中有新编辑时完成后立即再保存（editor module-spec §2） | miraclehifi |
 | 2026-10-14 | v1.2 | TC-18 / 25 按 UI 决定 #3 改为暂存后跳登录页（原为新窗口登录，作者确认） | miraclehifi |
 | 2026-10-14 | v1.1 | 暂存 key 改为 `mh:draft:`；TC-13 / 14 / 15 横幅文案与按钮名按设计稿 | miraclehifi |

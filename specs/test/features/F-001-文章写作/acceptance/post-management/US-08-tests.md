@@ -3,8 +3,8 @@
 **US ID**: US-08
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/post-management/US-08-publish-post/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/post-management/US-08-publish-post/behaviors.md)
-**最后更新**: 2026-10-13
-**Version Tag**: v1.0
+**最后更新**: 2026-10-15
+**Version Tag**: v1.3
 
 > 验收规格（非可执行代码）。占位接口，**接口路径以 design-domain API 契约为准**：
 > - 发布 / 更新：`POST /api/admin/posts/:id/publish`（草稿发布与已发布更新是否共用，以契约为准；下文"发布更新"记为 `POST /api/admin/posts/:id/update`）
@@ -148,12 +148,12 @@
 | covers | SC-PUBLISH-03 |
 | Scenario | BH-03 必填项缺失时不能发布 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（缺必填返回 422 MISSING_FIELDS，fields 按 title/slug/body 顺序；非法 slug 视同缺失） |
 
-**前置条件：** 【数据前置】每行独立创建一篇草稿；【环境前置】已登录
+**前置条件：** 【数据前置】每行独立创建一篇草稿（经接口保存时空 / 纯空白标题会存为"无标题"）；【环境前置】已登录
 
 **决策表：**
 
@@ -167,12 +167,12 @@
 | R6 | `无标题` | 空 | 空 | 拒绝，缺失：标题、slug、正文 |
 | R7 | `   `（空格） | `hello` | `正文` | 拒绝，缺失：标题（错误猜测：纯空白视为空） |
 | R8 | `Hello` | `hello` | `\n\n  `（纯空白） | 拒绝，缺失：正文 |
-| R9 | `Hello` | `Hello World!`（非法） | `正文` | 拒绝（slug 格式错误，见 SC-POSTINFO-07） |
+| R9 | `Hello` | `Hello World!`（非法，经 Factory 直写 D1；经接口保存会先被 400 拒绝，见 TC-US03-06） | `正文` | 拒绝，缺失：slug（slug 不合法视同未填） |
 
 **步骤：** 调用 `POST /api/admin/posts/:id/publish`
 
 **预期结果：**
-- 拒绝时 HTTP 4xx（400/422，以契约为准），响应列出缺失字段；UI 显示"发布前请填写：标题、slug、正文"中缺失的项
+- 拒绝时 HTTP 422 `MISSING_FIELDS`，`error.fields` 为 `["title","slug","body"]` 中缺失的项（按此顺序，如 R6 为全部三项、R4 为 `["slug"]`），信息"发布前请填写：{缺失项}"（如 R6"发布前请填写：标题、slug、正文"、R2"发布前请填写：标题"）；UI 显示同样的文案
 - 文章保持草稿状态；读者端按 slug 读取返回不存在
 
 **清理：** `resetPosts()`
@@ -789,3 +789,4 @@ await expect(page.getByTestId('post-status-badge')).toHaveText('已发布');
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-10 | v1.1 | 按钮名"更新"改为"发布更新"；撤回入口为设置抽屉（design-ui 界面审阅） | miraclehifi |
 | 2026-10-13 | v1.2 | TC-US08-09 改为验证重建触发与 5 分钟内可见（读者页构建时预渲染） | miraclehifi |
+| 2026-10-15 | v1.3 | 期望值同步现行契约（sync-f001-acceptance-expectations）：TC-04 发布缺必填 422 `MISSING_FIELDS`（带 `fields`） | miraclehifi |

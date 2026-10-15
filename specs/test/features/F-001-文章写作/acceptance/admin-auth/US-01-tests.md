@@ -4,8 +4,8 @@
 **所属分组**: admin-auth
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/admin-auth/US-01-admin-login/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/admin-auth/US-01-admin-login/behaviors.md)
-**最后更新**: 2026-10-10
-**Version Tag**: v1.0
+**最后更新**: 2026-10-15
+**Version Tag**: v1.1
 **状态**: draft
 
 > 验收测试用例由 behaviors.md 的 Given-When-Then 生成，并按等价类、边界值、错误猜测、状态转换补充。
@@ -248,10 +248,10 @@
 | covers | SC-LOGIN-04 |
 | Scenario | 密码错误时登录失败且不发会话 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（401 INVALID_CREDENTIALS，文案"账号或密码错误，请检查后重试"） |
 
 **前置条件**
 - 【数据前置】测试 IP 计数为 0
@@ -270,7 +270,7 @@
 1. 每组数据分别 `POST /api/admin/login`（`username=test-admin`），每组前重置该 IP 计数
 
 **预期结果**
-- 返回 401（以 API 契约为准），错误信息为"账号或密码错误"
+- 返回 401 `INVALID_CREDENTIALS`，错误信息为"账号或密码错误，请检查后重试"
 - 响应中**无**会话 `Set-Cookie`
 
 **清理**：重置该 IP 失败计数
@@ -285,10 +285,10 @@
 | covers | SC-LOGIN-04 |
 | Scenario | 不区分账号错与密码错，防账号枚举 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | security |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（提示文案改为"账号或密码错误，请检查后重试"） |
 
 **前置条件**
 - 【环境前置】`CF-Connecting-IP: 198.51.100.7`，计数为 0
@@ -303,7 +303,7 @@
 2. 各重复 20 次，记录响应时间
 
 **预期结果**
-- A、B、C 的状态码、响应体、响应头（除 Date 等易变头外）完全一致，提示均为"账号或密码错误"
+- A、B、C 的状态码、响应体、响应头（除 Date 等易变头外）完全一致，提示均为"账号或密码错误，请检查后重试"
 - A 与 B 的响应时间中位数差 < 50ms（账号不存在时也执行哈希比对，避免时序侧信道）
 - 均无会话 Cookie
 
@@ -319,10 +319,10 @@
 | covers | SC-LOGIN-04 |
 | Scenario | 恶意输入按普通错误凭据处理 |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | security |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（401 文案"账号或密码错误，请检查后重试"，类型非法 400 文案"请输入账号和密码"） |
 
 **前置条件**
 - 【环境前置】每组使用独立 IP `198.51.100.8x`
@@ -339,7 +339,7 @@
 1. 逐组 `POST /api/admin/login`
 
 **预期结果**
-- 均返回 401"账号或密码错误"或 400（类型非法时），**无** 5xx、无数据库错误信息、无堆栈
+- 均返回 401"账号或密码错误，请检查后重试"或 400 `VALIDATION_FAILED`"请输入账号和密码"（类型非法时，如对象形式的 username），**无** 5xx、无数据库错误信息、无堆栈
 - 均无会话 Cookie
 - 若错误信息回显输入，必须已转义（不执行脚本）
 
@@ -1131,11 +1131,11 @@
 | covers | SC-LOGIN-04 |
 | Scenario | 账号或密码错误时登录失败（UI 表现） |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | ui-interaction |
-| playwright_hint | `await expect(page.getByRole('alert')).toHaveText('账号或密码错误'); await expect(page.getByLabel('密码')).toHaveValue(''); await expect(page.getByLabel('账号')).toHaveValue('test-admin')` |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| playwright_hint | `await expect(page.getByRole('alert')).toHaveText('账号或密码错误，请检查后重试'); await expect(page.getByLabel('密码')).toHaveValue(''); await expect(page.getByLabel('账号')).toHaveValue('test-admin')` |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（提示文案与 playwright_hint 改为"账号或密码错误，请检查后重试"） |
 
 **前置条件**
 - 【环境前置】登录页；独立 IP（或计数已重置）
@@ -1146,7 +1146,7 @@
 1. 填写并点击"登录"
 
 **预期结果**
-- 表单上方显示"账号或密码错误"
+- 表单上方显示"账号或密码错误，请检查后重试"
 - 密码框为空，账号框保留 `test-admin`
 - 停留在 `/admin/login`，无会话 Cookie
 - 因密码已清空，"登录"按钮回到禁用状态
@@ -1163,11 +1163,11 @@
 | covers | SC-LOGIN-06 |
 | Scenario | 锁定时页面提示 |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | ui-interaction |
 | playwright_hint | `await expect(page.getByRole('alert')).toHaveText('尝试次数过多，请 15 分钟后再试')` |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（凭据错误文案改为"账号或密码错误，请检查后重试"） |
 
 **前置条件**
 - 【数据前置】当前浏览器出口 IP 已连续失败 5 次（通过 API 预置）
@@ -1178,7 +1178,7 @@
 1. 在登录页填写正确凭据并点击"登录"
 
 **预期结果**
-- 显示"尝试次数过多，请 15 分钟后再试"，不显示"账号或密码错误"
+- 显示"尝试次数过多，请 15 分钟后再试"，不显示凭据错误提示"账号或密码错误，请检查后重试"
 - 停留在登录页，无会话 Cookie
 
 **清理**：重置计数
@@ -1397,3 +1397,4 @@
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始版本 | miraclehifi |
+| 2026-10-15 | v1.1 | 登录失败文案按 auth api-contract 与 admin-login.md 改为"账号或密码错误，请检查后重试"（TC-06 / 07 / 08 / 33 / 34）；TC-08 类型非法 400 文案 | miraclehifi |

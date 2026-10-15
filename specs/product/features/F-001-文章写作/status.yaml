@@ -16,12 +16,9 @@ phases:
   task_planning: done   # self-checked；Sprint 1 共 72 个任务（已关闭）；Sprint 2 共 18 个任务（2026-10-14，按功能点粒度，.claude/rules/tasks.md）；Sprint 3 共 12 个任务（2026-10-14）
   implementation: done   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18）；Sprint 3 完成（14 / 14，含插入任务 13 raise-image-size-limit、14 fix-jpeg-sniff-large-metadata；2026-10-15 统一回归通过）
   code_review: done   # 2026-10-15 与 F-002 一起审查：6 项 MUST-FIX 已修复，报告 test/features/F-001-文章写作/reviews/code-review.md
-  validation: in_progress   # 2026-10-15 verify：现有测试全过；验收用例 256 个中 18 个无测试（4 个 P0）、54 个部分覆盖，见 test/features/F-001-文章写作/validation/validation-report.md
+  validation: done   # 2026-10-16 Sprint 5 后重新验证：P0 全部有测试并通过；已覆盖 189 / 部分 49 / 无测试 10（P1、P2）/ 线上 8，剩余缺口按作者决定记为已知风险，见 test/features/F-001-文章写作/validation/validation-report.md
 current_phase: validation
-blockers:
-  - description: "verify 发现验收测试缺口（18 个无测试、54 个部分覆盖）且 US-03 / US-06 / US-07 验收文档与设计脱节：补测（建议 Sprint 5）还是记为已知风险后发布"
-    category: needs-decision
-    since: 2026-10-15
+blockers: []   # 2026-10-16 作者决定：只补 P0（Sprint 5）后发布，其余缺口记为已知风险
 notes: "范围决策：含文章管理列表与删除；仅支持 GFM Markdown（不支持 MDX）；不做版本历史、定时发布、图片库；2026-10-12 新增 US-10 format-toolbar（工具栏格式快捷键 + WarmTooltip 悬停提示，backlog/editor-warm-tooltip.md）"
 approvals:
   requirements: true

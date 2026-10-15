@@ -3,8 +3,8 @@
 **US ID**: US-03
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-03-edit-post-info/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-03-edit-post-info/behaviors.md)
-**最后更新**: 2026-10-10
-**Version Tag**: v1.0
+**最后更新**: 2026-10-15
+**Version Tag**: v1.2
 
 > 本文件为验收**规格**，非可执行代码；implement 阶段转化为测试代码。
 > 接口路径均为占位（`POST /api/admin/posts`、`PUT /api/admin/posts/:id`、`GET /api/admin/posts/:id`、`GET /api/admin/tags`、`POST /api/admin/posts/:id/publish`），**接口路径以 design-domain API 契约为准**。响应字段断言在 endpoint-details 产出后补齐 `schema_validation`。
@@ -15,12 +15,13 @@
 
 | 项 | 取值 | 来源 |
 |----|------|------|
-| slug 格式 | `^[a-z0-9]+(-[a-z0-9]+)*$`（小写字母/数字，单连字符分隔，不以连字符开头或结尾） | story 约束；"无连续/首尾连字符"为建议值，待 design-domain 确认 |
-| slug 最大长度 | 100 字符 | 建议值，待 design-domain 确认 |
-| 标题最大长度 | 120 字符（按 Unicode 字素计，emoji 计 1） | 建议值，待 design-domain 确认 |
-| 摘要最大长度 | 200 字（按 Unicode 字素计，中英文、emoji 各计 1） | story 约束；计数口径为建议值 |
-| slug 生成规则 | 标题转小写 → 非 `[a-z0-9]` 字符序列替换为单个 `-` → 去首尾 `-`；结果为空则 slug 留空 | 由 BH-04/BH-06 推导，待 design-domain 确认 |
-| 错误码 | 校验失败 400、slug 冲突 409、不存在 404、未登录 401、Origin 不符 403 | 建议值，待 design-domain 确认 |
+| slug 格式 | `^[a-z0-9]+(-[a-z0-9]+)*$`（小写字母/数字，单连字符分隔，不以连字符开头或结尾）；服务端先去首尾空白再校验，草稿允许为空 | post domain-model §2.2、§3 `Slug` |
+| slug 最大长度 | 80 字符 | post domain-model §3 `Slug` |
+| 标题最大长度 | 200 字符（按 Unicode 码点计）；去首尾空白后为空则存为"无标题"（不报错，发布时再拦截，见 TC-US08-04） | post domain-model §2.2 |
+| 摘要最大长度 | 200 字（按 Unicode 码点计） | post domain-model §2.2 |
+| slug 生成规则 | NFKD 规范化 → 去组合附加符号 → 小写 → 非 `[a-z0-9]` 字符序列替换为单个 `-` → 去首尾 `-` → 截断到 80 字符（不以 `-` 结尾）；结果为空则 slug 留空 | post domain-model §3 `slugify` |
+| 保存请求体 | `PUT` 必须带齐 `DraftInput` 七个字段（title、slug、tags、summary、body、publishedAt、cover），缺字段 400"请求缺少字段：{字段名}"；`POST` 新建字段均可选（缺省按空值）。下文"`PUT` 提交 `{x}`"均指以当前工作稿为底、只替换 x 后提交整份 | post api-contract §3 `PUT /api/admin/posts/:id` |
+| 错误码 | 校验失败 400 `VALIDATION_FAILED`（`error.fields` 列出字段）、slug 冲突 409 `SLUG_TAKEN`、发布缺必填 422 `MISSING_FIELDS`、不存在 404、未登录 401、Origin 不符 403 | post api-contract §5 |
 
 ---
 
@@ -43,11 +44,11 @@
 |-------|--------|------|------|----------|
 | TC-US03-01 | SC-POSTINFO-02 | API 创建草稿成功 | api | P0 |
 | TC-US03-02 | SC-POSTINFO-02, SC-POSTINFO-03 | API 更新后读取为最新内容 | api | P0 |
-| TC-US03-03 | SC-POSTINFO-02 | 标题等价类与边界（空/1/120/121/emoji） | api | P1 |
+| TC-US03-03 | SC-POSTINFO-02 | 标题等价类与边界（空存为"无标题"/1/200/201/emoji） | api | P1 |
 | TC-US03-04 | SC-POSTINFO-04, SC-POSTINFO-06 | slug 生成规则决策表（英文/中文/混合） | unit | P0 |
 | TC-US03-05 | SC-POSTINFO-06 | 中文标题空 slug 草稿可保存、发布被拒 | api | P0 |
 | TC-US03-06 | SC-POSTINFO-07 | slug 格式等价类与错误猜测 | api | P0 |
-| TC-US03-07 | SC-POSTINFO-07 | slug 长度边界 1/100/101 | api | P1 |
+| TC-US03-07 | SC-POSTINFO-07 | slug 长度边界 1/80/81 | api | P1 |
 | TC-US03-08 | SC-POSTINFO-08 | slug 与其他文章重复返回 409 | api | P0 |
 | TC-US03-09 | SC-POSTINFO-08 | 并发写入相同 slug 竞态 | api | P1 |
 | TC-US03-10 | SC-POSTINFO-09 | 摘要边界 199/200/201 | api | P0 |
@@ -78,10 +79,10 @@
 | covers | SC-POSTINFO-02 |
 | Scenario | 填写信息与正文后保存成功（API 层） |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（请求体含 cover: null 共七字段，读回含 cover；201 带 Location，PostView 字段） |
 
 **前置条件：**
 - 【环境前置】`adminSession` Fixture 可用；D1 已迁移
@@ -90,16 +91,18 @@
 **测试数据：**
 ```json
 { "title": "Hello Astro", "slug": "hello-astro-{runId}", "tags": ["astro"],
-  "summary": "Astro 5 入门笔记", "body": "# Hello\n\n正文第一段。", "publishedAt": "2026-10-10" }
+  "summary": "Astro 5 入门笔记", "body": "# Hello\n\n正文第一段。", "publishedAt": "2026-10-10", "cover": null }
 ```
+
+> 与编辑器一致发送 `DraftInput` 全部七个字段（`POST` 新建时字段均可选，缺省按空值）。
 
 **步骤：**
 1. 携带 `adminSession` 调用 `POST /api/admin/posts`，请求体为上述数据
 2. 以返回的 `id` 调用 `GET /api/admin/posts/:id`
 
 **预期结果：**
-- 步骤 1 返回 201，响应含非空 `id`，`status` = `draft`
-- 步骤 2 返回 200，`title`/`slug`/`tags`/`summary`/`body`/`publishedAt` 与提交值逐字段相等，`status` = `draft`，`updatedAt` 为 ISO-8601 时间且 ≥ 请求发起时间
+- 步骤 1 返回 201，`Location` = `/api/admin/posts/{id}`；响应为 `PostView`：非空 `id`，`status` = `draft`，`hasUnpublishedChanges` = `false`，`lastPublishedAt` = `null`
+- 步骤 2 返回 200，`title`/`slug`/`tags`/`summary`/`body`/`publishedAt`/`cover` 与提交值逐字段相等（`cover` = `null`），`status` = `draft`，`updatedAt` 为 ISO-8601 时间且 ≥ 请求发起时间
 
 **清理：** 删除创建的文章
 
@@ -113,24 +116,30 @@
 | covers | SC-POSTINFO-02, SC-POSTINFO-03 |
 | Scenario | 已有文章更新后，再次读取返回最新保存内容 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（PUT 提交整份工作稿；缺字段返回 400"请求缺少字段"，替代"未提交字段保持原值"） |
 
 **前置条件：**
 - 【数据前置】`postFactory({title:"旧标题", body:"旧正文"})` 创建文章 A
 - 【环境前置】`adminSession` 可用
 
-**测试数据：** 更新体 `{ "title": "新标题", "body": "新正文" }`
+**测试数据：**
+- 完整更新体：以 A 的当前工作稿（`GET` 所得七个字段）为底，`title` 改为 `新标题`、`body` 改为 `新正文`，其余字段（slug、tags、summary、publishedAt、cover）原样带上
+- 缺字段更新体：`{ "title": "再改", "body": "再改正文" }`
 
 **步骤：**
-1. `PUT /api/admin/posts/:idA` 提交更新体
+1. `PUT /api/admin/posts/:idA` 提交完整更新体
 2. `GET /api/admin/posts/:idA`
+3. `PUT /api/admin/posts/:idA` 提交缺字段更新体
+4. `GET /api/admin/posts/:idA`
 
 **预期结果：**
 - 步骤 1 返回 200
-- 步骤 2 返回 `title` = `新标题`，`body` = `新正文`；未提交字段（slug、tags、summary）保持原值；`updatedAt` 晚于更新前值；`status` 仍为 `draft`
+- 步骤 2 返回 `title` = `新标题`，`body` = `新正文`；其余字段等于提交值（即原值）；`updatedAt` 晚于更新前值；`status` 仍为 `draft`
+- 步骤 3 返回 400 `VALIDATION_FAILED`，`error.fields` = `["slug","tags","summary","publishedAt","cover"]`，信息"请求缺少字段：slug、tags、summary、publishedAt、cover"（整份不保存，防止部分覆盖丢数据）
+- 步骤 4 与步骤 2 的内容和 `updatedAt` 相同
 
 **清理：** 删除文章 A
 
@@ -142,12 +151,12 @@
 |------|------|
 | TC-ID | TC-US03-03 |
 | covers | SC-POSTINFO-02 |
-| Scenario | 标题长度与内容的有效/无效等价类（含 story 验收标准 5"标题不能为空"） |
+| Scenario | 标题长度与内容的有效/无效等价类（story 验收标准 5"标题不能为空"：保存时空标题存为"无标题"，发布时拦截，见 TC-US08-04） |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（空 / 空白标题存为"无标题"；上限 200、按码点计；PUT 提交整份） |
 
 **前置条件：**
 - 【数据前置】每行数据用 `postFactory()` 新建一篇文章 P（slug 唯一）
@@ -157,15 +166,16 @@
 
 | # | title | 预期 |
 |---|-------|------|
-| 1 | `""`（空） | 400，错误信息"标题不能为空" |
-| 2 | `"   "`（仅空白） | 400，"标题不能为空"（建议：trim 后判空，待 design-domain 确认） |
+| 1 | `""`（空） | 200，读回 `title` = `无标题` |
+| 2 | `"   "`（仅空白） | 200，读回 `title` = `无标题`（去首尾空白后判空） |
 | 3 | `"A"`（1 字符） | 200 |
-| 4 | 120 个 `"字"` | 200，读回长度 120 |
-| 5 | 121 个 `"字"` | 400（上限 120 为建议值，待 design-domain 确认） |
+| 4 | 200 个 `"字"` | 200，读回长度 200 |
+| 5 | 201 个 `"字"` | 400 `VALIDATION_FAILED`，`fields` = `["title"]`，"标题不能超过 200 字" |
 | 6 | `"🚀 发布日 Launch"` | 200，读回逐字节相等（emoji 不被截断/替换） |
-| 7 | 119 个 `"a"` + `"👨‍👩‍👧"`（ZWJ 复合 emoji，计 1） | 200 |
+| 7 | 199 个 `"a"` + `"😀"`（1 个码点） | 200（共 200 码点） |
+| 8 | 196 个 `"a"` + `"👨‍👩‍👧"`（ZWJ 复合 emoji，3 个 emoji + 2 个 ZWJ = 5 个码点） | 400（共 201 码点：按码点计，不按字素） |
 
-**步骤：** 对每行 `PUT /api/admin/posts/:idP` 仅提交 `{title}`，随后 `GET` 读回
+**步骤：** 对每行以 P 的当前工作稿为底、只替换 `title`，整份 `PUT /api/admin/posts/:idP`，随后 `GET` 读回
 
 **预期结果：** 按表；400 情况下读回的 `title` 保持更新前原值
 
@@ -181,12 +191,12 @@
 | covers | SC-POSTINFO-04, SC-POSTINFO-06 |
 | Scenario | 由标题生成 slug 的纯函数（英文/中文/混合/特殊字符） |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | unit |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（先 NFKD 去重音 Café → cafe，补全角行；上限 80 截断且不以 - 结尾） |
 
-**前置条件：** 【环境前置】slug 生成函数（如 `slugify(title)`）可单独调用，无 IO
+**前置条件：** 【环境前置】`slugify(title)`（`src/domains/post/slug.ts`，前后端共用纯函数）可单独调用，无 IO
 
 **测试数据（决策表，标题类型 × 预期）：**
 
@@ -202,12 +212,14 @@
 | 8 | 中文 + 数字 | `2026 年度总结` | `2026` |
 | 9 | emoji + 英文 | `🚀 Launch Day` | `launch-day` |
 | 10 | 纯符号 | `---!!!` | `""` |
-| 11 | 带重音字母 | `Café Déjà Vu` | `caf-d-j-vu`（建议：不做音译；若 design-domain 决定 NFKD 去重音则为 `cafe-deja-vu`） |
-| 12 | 超长 | 150 个 `a` | 截断至 100 个 `a`，且结果不以 `-` 结尾 |
+| 11 | 带重音字母 | `Café Déjà Vu` | `cafe-deja-vu`（NFKD 后去掉组合附加符号） |
+| 12 | 全角字符 | `ＡＢＣ　１２３`（全角字母、数字与空格） | `abc-123`（NFKD 兼容分解为半角） |
+| 13 | 超长 | 150 个 `a` | 截断至 80 个 `a` |
+| 14 | 超长且截断点落在 `-` 上 | 79 个 `a` + ` Bcd` | 79 个 `a`（截到 80 位时末位是 `-`，去掉） |
 
 **步骤：** 对每行调用 `slugify(title)`
 
-**预期结果：** 输出等于预期 slug；所有非空输出均匹配 `^[a-z0-9]+(-[a-z0-9]+)*$`
+**预期结果：** 输出等于预期 slug；所有非空输出均匹配 `^[a-z0-9]+(-[a-z0-9]+)*$` 且长度 ≤ 80
 
 **清理：** 无
 
@@ -221,10 +233,10 @@
 | covers | SC-POSTINFO-06 |
 | Scenario | 草稿 slug 可为空；发布时 slug 必填 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（空 slug 为 ""；发布缺 slug 返回 422 MISSING_FIELDS，fields ["slug"]） |
 
 **前置条件：** 【环境前置】`adminSession` 可用
 
@@ -236,9 +248,9 @@
 3. `GET /api/admin/posts/:id`
 
 **预期结果：**
-- 步骤 1 返回 201，`slug` 为空（`""` 或 `null`，以 API 契约为准），`status` = `draft`
-- 步骤 2 返回 400，错误指向字段 `slug`
-- 步骤 3 `status` 仍为 `draft`
+- 步骤 1 返回 201，`slug` = `""`，`status` = `draft`
+- 步骤 2 返回 422 `MISSING_FIELDS`，信息"发布前请填写：slug"，`error.fields` = `["slug"]`
+- 步骤 3 `status` 仍为 `draft`，内容不变
 
 **清理：** 删除该文章
 
@@ -252,10 +264,10 @@
 | covers | SC-POSTINFO-07 |
 | Scenario | slug 含非法字符时拒绝保存 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（首尾空白 slug 去空白后保存（200）；接口错误文案"slug 只能包含小写字母、数字和连字符"） |
 
 **前置条件：** 【数据前置】`postFactory()` 创建文章 P，记录原 slug `S0`；【环境前置】`adminSession` 可用
 
@@ -277,15 +289,15 @@
 | 12 | 无效：路径穿越 | `../admin` | 400 |
 | 13 | 无效：斜杠 | `2026/10/post` | 400 |
 | 14 | 无效：URL 编码 | `hello%20world` | 400 |
-| 15 | 无效：首尾空白 | ` hello ` | 400（建议：服务端不静默 trim，待 design-domain 确认） |
+| 15 | 有效：首尾空白 | ` hello ` | 200，读回 `hello`（服务端去首尾空白后校验） |
 
 > 有效行使用值前追加唯一后缀以免冲突（如 `hello-astro-5-{runId}`），#3 使用 `a{runId}` 之外的独立文章并在清理时删除。
 
 **步骤：** 对每行 `PUT /api/admin/posts/:idP` 提交 `{slug}`，随后 `GET` 读回
 
 **预期结果：**
-- 无效行：400，错误字段为 `slug`，错误信息"仅允许小写字母、数字和连字符"；读回 `slug` = 上一次成功保存的值（未被保存）
-- 有效行：200，读回 `slug` 等于提交值
+- 无效行：400 `VALIDATION_FAILED`，`error.fields` = `["slug"]`，错误信息"slug 只能包含小写字母、数字和连字符"（编辑页行内提示"仅允许小写字母、数字和连字符"见 TC-US03-22）；读回 `slug` = 上一次成功保存的值（未被保存）
+- 有效行：200，读回 `slug` 等于提交值去首尾空白后的值
 
 **清理：** 删除文章 P
 
@@ -297,12 +309,12 @@
 |------|------|
 | TC-ID | TC-US03-07 |
 | covers | SC-POSTINFO-07 |
-| Scenario | slug 长度上下边界（上限 100 为建议值，待 design-domain 确认） |
+| Scenario | slug 长度上下边界（上限 80；去首尾空白后计长度） |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（上限 80；输入去首尾空白后再计长度） |
 
 **前置条件：** 【数据前置】`postFactory()` 创建文章 P
 
@@ -311,9 +323,10 @@
 | # | slug | 长度 | 预期 |
 |---|------|------|------|
 | 1 | `x` + runId 截成 1 位（如 `k`） | 1 | 200 |
-| 2 | `{runId}-` + 补 `a` 至 99 | 99 | 200 |
-| 3 | `{runId}-` + 补 `a` 至 100 | 100 | 200 |
-| 4 | `{runId}-` + 补 `a` 至 101 | 101 | 400 |
+| 2 | `{runId}-` + 补 `a` 至 79 | 79 | 200 |
+| 3 | `{runId}-` + 补 `a` 至 80 | 80 | 200 |
+| 4 | `{runId}-` + 补 `a` 至 81 | 81 | 400 `VALIDATION_FAILED`，`fields` = `["slug"]` |
+| 5 | 前后各加 1 个空格的 80 位 slug（另取 runId 前缀） | 82（去空白后 80） | 200，读回不含空格的 80 位 |
 
 **步骤：** 逐行 `PUT /api/admin/posts/:idP` 提交 `{slug}` 并读回
 
@@ -331,10 +344,10 @@
 | covers | SC-POSTINFO-08 |
 | Scenario | slug 全站唯一；与自身原 slug 相同不算冲突 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（409 SLUG_TAKEN，文案"slug 已存在，请换一个"，错误体不带 fields） |
 
 **前置条件：**
 - 【数据前置】`postFactory({slug:"hello-astro-{runId}"})` 创建文章 B
@@ -347,10 +360,10 @@
 4. `POST /api/admin/posts` 提交 `{title:"X", slug:"hello-astro-{runId}"}`（新建时冲突）
 
 **预期结果：**
-- 步骤 1 返回 409，错误字段 `slug`，信息"slug 已存在"
+- 步骤 1 返回 409 `SLUG_TAKEN`，信息"slug 已存在，请换一个"（错误体不带 `fields`），整份不保存
 - 步骤 2 `slug` = `orig-{runId}`（保持原值），文章 B 未被修改
 - 步骤 3 返回 200
-- 步骤 4 返回 409，"slug 已存在"，未产生新文章
+- 步骤 4 返回 409 `SLUG_TAKEN`，未产生新文章
 
 **清理：** 删除文章 A、B
 
@@ -364,10 +377,10 @@
 | covers | SC-POSTINFO-08 |
 | Scenario | 错误猜测：两请求同时把不同文章 slug 改为同一值 |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（409 SLUG_TAKEN；唯一性由写入语句的 NOT EXISTS 条件保证） |
 
 **前置条件：** 【数据前置】`postFactory()` 创建文章 A、C；目标 slug `race-{runId}` 不存在
 
@@ -377,8 +390,8 @@
 3. 重复步骤 1–2 共 10 轮（每轮使用新目标 slug `race-{runId}-{i}`）
 
 **预期结果：**
-- 每轮恰好一个请求 200、另一个 409"slug 已存在"
-- 每轮数据库中该 slug 恰好 1 条（依赖 D1 唯一约束，而非仅应用层先查后写）
+- 每轮恰好一个请求 200、另一个 409 `SLUG_TAKEN`
+- 每轮数据库中该 slug 恰好 1 条（写入语句自带"slug 未被其他文章占用"条件，检查与写入原子完成，而非仅应用层先查后写）
 
 **清理：** 删除文章 A、C
 
@@ -425,12 +438,12 @@
 |------|------|
 | TC-ID | TC-US03-11 |
 | covers | SC-POSTINFO-10 |
-| Scenario | 标签数组持久化；补全接口按前缀返回已有标签 |
+| Scenario | 标签数组持久化；补全接口按不区分大小写的包含匹配返回已有标签 |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（补全为不区分大小写的包含匹配（补 q=STR），响应 { tags: [{ name, count }] }；标签归一规则定稿） |
 
 **前置条件：**
 - 【数据前置】Seed 文章 `seed-tags-astro-react`（tags `astro`、`react`）存在
@@ -442,13 +455,15 @@
 1. `PUT /api/admin/posts/:idP` 提交 `{tags:[上述数据]}`，随后读回
 2. `PUT /api/admin/posts/:idP` 提交 `{tags:["cloudflare"]}`，随后读回
 3. `GET /api/admin/tags?q=as`
-4. `GET /api/admin/tags?q=zzz-{runId}`
+4. `GET /api/admin/tags?q=STR`
+5. `GET /api/admin/tags?q=zzz-{runId}`
 
 **预期结果：**
-- 步骤 1 读回 `tags` = `["astro","cloudflare"]`（去重；大小写与首尾空白归一为建议规则，待 design-domain 确认）
+- 步骤 1 读回 `tags` = `["astro","cloudflare"]`（去首尾空白；不区分大小写去重，保留首次出现的写法）
 - 步骤 2 读回 `tags` = `["cloudflare"]`
-- 步骤 3 返回 200，结果包含 `astro`，不包含 `react`
-- 步骤 4 返回 200，空数组
+- 步骤 3 返回 200 `{ "tags": [{ "name", "count" }] }`，`name` 中包含 `astro`，不包含 `react`
+- 步骤 4 返回 200，`name` 中包含 `astro`（包含匹配且不区分大小写，不要求前缀）
+- 步骤 5 返回 200，`{ "tags": [] }`
 
 **清理：** 删除文章 P
 
@@ -700,10 +715,10 @@ await expect(page.getByTestId('md-editor')).toContainText('旧正文-v2');
 | covers | SC-POSTINFO-04, SC-POSTINFO-05 |
 | Scenario | slug 是否跟随标题变化 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | ui-interaction |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（#4 清空后不恢复跟随；#5 按 slug ≠ slugify(标题) 判定改过） |
 
 **前置条件：** 【环境前置】每行从全新的新建文章页开始（#5 除外）
 
@@ -714,8 +729,8 @@ await expect(page.getByTestId('md-editor')).toContainText('旧正文-v2');
 | 1 | 否 | 否 | 输入标题 `Hello Astro 5!` | `hello-astro-5`（BH-04） |
 | 2 | 否 | 否 | 标题 `Hello` → 改为 `Hello World` | `hello-world`（持续跟随） |
 | 3 | 是（改为 `my-post`） | 否 | 标题改为 `New Title` | `my-post`（BH-05） |
-| 4 | 是，随后清空 slug 输入框 | 否 | 标题改为 `Back Again` | `back-again`（建议：清空即恢复跟随，待 design-ui 确认） |
-| 5 | 否 | 是（Factory slug `keep-{runId}`） | 打开编辑页，标题改为 `Changed` | `keep-{runId}`（建议：已保存文章视为已手动设置，避免改标题导致链接变化，待 design-ui 确认） |
+| 4 | 是，随后清空 slug 输入框 | 否 | 标题改为 `Back Again` | `""`（改过后不再跟随，清空也不恢复） |
+| 5 | 否 | 是（Factory slug `keep-{runId}`） | 打开编辑页，标题改为 `Changed` | `keep-{runId}`（打开已有文章时 slug ≠ slugify(标题) 即视为改过） |
 
 **步骤：** 按表操作
 
@@ -843,31 +858,31 @@ await expect(page.getByText('slug 已存在')).toBeVisible();
 |------|------|
 | TC-ID | TC-US03-24 |
 | covers | SC-POSTINFO-09 |
-| Scenario | 摘要字数计数与超限提示 |
+| Scenario | 摘要字数计数与超限截断 |
 | Priority | P1 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ |
 | type | ui-interaction |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（按 admin-post-editor.md 摘要"超过 200 不可再输入"：201 字被截为 200，计数格式"N / 200"） |
 
 **前置条件：** 【数据前置】`postFactory({summary:"原摘要"})` 创建文章 P，打开编辑页
 
 **测试数据：** 199 / 200 / 201 个 `文`
 
-**步骤：** 依次将摘要填为 199、200、201 字；201 字时按 `ControlOrMeta+S`
+**步骤：** 依次将摘要填为 199、200、201 字（201 字以一次粘贴 / `fill` 输入）；之后按 `ControlOrMeta+S`
 
 **预期结果：**
-- 199：计数 `199/200`，非红色，无提示
-- 200：计数 `200/200`，非红色，无提示
-- 201：计数显示红色 `201/200`，提示"摘要不能超过 200 字"；保存后 `GET` 读回 `summary` = `原摘要`
+- 199：计数 `199 / 200`，非红色，显示说明"留空时读者端自动截取正文开头"
+- 200：计数 `200 / 200`，非红色
+- 201：超出部分被截掉，输入框内容为 200 个 `文`，计数 `200 / 200`，非红色，不出现"摘要不能超过 200 字"；保存后 `GET` 读回 `summary` = 200 个 `文`
+- 计数变红并提示"摘要不能超过 200 字"只在已有内容超过 200 字时出现（经接口无法保存这样的内容，本用例不覆盖）
 
 **playwright_hint：**
 ```ts
 await page.getByLabel('摘要').fill('文'.repeat(201));
-const counter = page.getByTestId('summary-counter');
-await expect(counter).toHaveText('201/200');
-await expect(counter).toHaveCSS('color', /* 错误色 token 的 rgb 值，以 design-ui 为准 */ expectedErrorColor);
-await expect(page.getByText('摘要不能超过 200 字')).toBeVisible();
+await expect(page.getByLabel('摘要')).toHaveValue('文'.repeat(200));
+await expect(page.getByText('200 / 200')).toBeVisible();
+await expect(page.getByText('摘要不能超过 200 字')).toHaveCount(0);
 ```
 
 **清理：** 删除文章 P
@@ -971,7 +986,7 @@ await expect(page).toHaveURL(/\/admin$/);
 | SC-POSTINFO-10 | BH-10 | TC-US03-11, TC-US03-15, TC-US03-25 |
 | SC-POSTINFO-11 | BH-11 | TC-US03-12, TC-US03-13, TC-US03-26 |
 
-**Story 验收标准追溯**：AC1→TC-17；AC2→TC-04/20/21；AC3→TC-20；AC4→TC-08/09/23；AC5（标题不能为空）→TC-03（behaviors.md 未为 AC5 单列 BH/SC，暂挂 SC-POSTINFO-02，建议 write-behavior 补充）；AC6→TC-11/25；AC7→TC-02/19。
+**Story 验收标准追溯**：AC1→TC-17；AC2→TC-04/20/21；AC3→TC-20；AC4→TC-08/09/23；AC5（标题不能为空）→TC-03（保存时存为"无标题"）、TC-US08-04（发布拦截）（behaviors.md 未为 AC5 单列 BH/SC，暂挂 SC-POSTINFO-02）；AC6→TC-11/25；AC7→TC-02/19。
 
 **NFR 追溯**：授权/401→TC-13；CSRF Origin→TC-14；XSS→TC-15；写接口 P95→TC-16。
 
@@ -993,3 +1008,4 @@ await expect(page).toHaveURL(/\/admin$/);
 |------|------|----------|------|
 | 2026-10-10 | v1.0 | 初始创建 | AI（design-acceptance） |
 | 2026-10-13 | v1.1 | 与 design-ui 对齐（build-editor-page-shell）：编辑页路由 `/admin/posts/:id`（去掉 `/edit`）；不存在时文案"文章不存在或已被删除"、链接"返回文章列表"回到 `/admin` | miraclehifi |
+| 2026-10-15 | v1.2 | 期望值同步现行契约（sync-f001-acceptance-expectations）：约定表定稿（slug ≤ 80、标题 ≤ 200 按码点计、空标题存为"无标题"、slugify 先 NFKD、PUT 带齐七字段、422 `MISSING_FIELDS`）；TC-01 / 02 / 03 / 04 / 05 / 06 / 07 / 08 / 09 / 11 / 20 / 24 | miraclehifi |

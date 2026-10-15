@@ -3,8 +3,8 @@
 **US ID**: US-07
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/post-management/US-07-post-list/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/post-management/US-07-post-list/behaviors.md)
-**最后更新**: 2026-10-10
-**Version Tag**: v1.0
+**最后更新**: 2026-10-15
+**Version Tag**: v1.3
 
 > 验收规格（非可执行代码），由 behaviors.md 的 Given-When-Then 生成。
 > 接口路径为占位，**接口路径以 design-domain API 契约为准**：
@@ -90,10 +90,10 @@
 | covers | SC-POSTLIST-01 |
 | Scenario | BH-01 接口层：草稿/已发布/已发布有修改三类等价类均被返回 |
 | Priority | P0 |
-| Version Tag | v1.0 |
+| Version Tag | v1.1 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | api |
-| Change History | 2026-10-10 v1.0 初始创建 |
+| Change History | 2026-10-10 v1.0 初始创建；2026-10-15 v1.1 期望值同步现行契约（列表条目为 PostListItem，不含 slug / body / cover；次级排序 id 倒序；补响应外层与 counts） |
 
 **前置条件：**
 - 【数据前置】同 TC-US07-01 的 A/B/C；另加 D（draft，updated_at 与 A 相同 10:00，id 更大）用于同时间排序稳定性
@@ -106,10 +106,10 @@
 2. 再调用一次，比较两次顺序
 
 **预期结果：**
-- HTTP 200；返回 4 条，包含 draft 与 published（含 dirty）全部状态
-- 按 updated_at 倒序；同 updated_at 时顺序稳定（两次调用一致，次级排序键以契约为准）
-- 每条至少包含：id、title、slug、status、是否有未发布修改标识、tags、updated_at（字段名以 endpoint-details 为准，届时补 `schema_validation`）
-- 不返回正文全文（列表无需正文，防止响应膨胀；以契约为准）
+- HTTP 200；响应 `{ items, page: 1, pageSize: 20, total: 4, counts: { all: 4, draft: 2, published: 2 } }`；`items` 含 draft 与 published（含 dirty）全部状态
+- 按 `updatedAt` 倒序，同 `updatedAt` 按 `id` 倒序：D 排在 A 之前；两次调用顺序一致
+- 每条恰为 `PostListItem`：`id`、`title`、`status`、`hasUnpublishedChanges`、`tags`、`updatedAt`（C 的 `hasUnpublishedChanges` = `true`，其余 `false`）
+- 不含 `slug`、`body`（正文）、`cover`
 
 **清理：** 清空 post 表
 
@@ -767,3 +767,4 @@ await expect(page.getByRole('listitem')).not.toHaveCount(0);
 | 2026-10-10 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-13 | v1.1 | 与 design-ui 对齐（build-post-list-page）：状态文案"已发布 · 有未发布修改"；行为卡片列表（`listitem`），不显示标签；编辑页路由 `/admin/posts/:id`；"新建文章"为按钮；TC-20 改为拦截首屏之后的列表请求（首屏 SSR） | miraclehifi |
 | 2026-10-13 | v1.2 | TC-17 / TC-18 文案按 admin-post-list.md"页面状态"（筛选无结果写明条件）；TC-17 自动化改由组件测试覆盖 | miraclehifi |
+| 2026-10-15 | v1.3 | 期望值同步现行契约（sync-f001-acceptance-expectations）：TC-02 条目字段按 `PostListItem`（不含 slug），排序次级键 `id DESC` | miraclehifi |

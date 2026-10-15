@@ -19,7 +19,7 @@
 
 | Feature | 名称 | 状态 | 当前阶段 |
 |---------|------|------|----------|
-| F-001 | 文章写作 | in_progress | validation（verify 发现验收测试缺口，待决策：补测或记为已知风险） |
+| F-001 | 文章写作 | in_progress | validation done（Sprint 5 补齐 P0；待发布确认，与 F-002 一起） |
 | F-002 | 博客首页与阅读 | in_progress | validation done（待发布确认，发布跟随 F-001） |
 
 ## 队列

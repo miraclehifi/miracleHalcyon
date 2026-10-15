@@ -1,17 +1,17 @@
 # 追溯报告：F-001 文章写作
 
-**生成日期**: 2026-10-15
+**生成日期**: 2026-10-16（Sprint 5 后重新追溯）
 
-> 来源：各 US 的验收用例索引表（TC → SC）。追溯方式：① 测试名或注释中带 TC 编号且与该 US 的 SC 前缀一致；② Sprint 任务文件中列出的 TC 与测试文件；③ 以上都没有的，逐条阅读测试断言判断（Sprint 1 的测试按领域单元规格与接口契约组织，不带 TC 编号）。"部分覆盖"指测了主要结果、缺少用例里列出的部分边界或变体。
+> 来源：各 US 的验收用例索引表（TC → SC）。追溯方式：① 测试名或注释中带 TC 编号且与该 US 的 SC 前缀一致（含 tests/ 与 specs/test/features/*/e2e/ 下 verify 阶段运行的 playwright-skill 脚本）；② Sprint 任务文件中列出的 TC 与测试文件；③ 以上都没有的，逐条阅读测试断言判断（Sprint 1 的测试按领域单元规格与接口契约组织，不带 TC 编号）。"部分覆盖"指测了主要结果、缺少用例里列出的部分边界或变体。
 
 ## 覆盖率
 
 | 指标 | 数值 |
 |------|------|
 | 验收用例（不含已删除） | 256 |
-| 已覆盖 | 176（68%） |
-| 部分覆盖 | 54（21%） |
-| 无测试 | 18（7%） |
+| 已覆盖 | 189（73%） |
+| 部分覆盖 | 49（19%） |
+| 无测试 | 10（3%） |
 | 线上 / 人工 | 8（3%） |
 | 已删除 | 5 |
 
@@ -19,13 +19,13 @@
 
 | US | 已覆盖 | 部分覆盖 | 无测试 | 线上 / 人工 | 已删除 |
 |----|----|----|----|----|----|
-| US-01 | 15 | 15 | 6 | 3 | — |
+| US-01 | 20 | 15 | 1 | 3 | — |
 | US-02 | 17 | — | — | — | — |
-| US-03 | 13 | 11 | 1 | 1 | — |
+| US-03 | 18 | 7 | — | 1 | — |
 | US-04 | 10 | 3 | 2 | — | — |
 | US-05 | 24 | — | — | 1 | — |
-| US-06 | 14 | 9 | 5 | 1 | — |
-| US-07 | 10 | 8 | 1 | 1 | — |
+| US-06 | 15 | 9 | 4 | 1 | — |
+| US-07 | 12 | 7 | — | 1 | — |
 | US-08 | 9 | 8 | 3 | 1 | — |
 | US-09 | 16 | — | — | — | — |
 | US-10 | 10 | — | — | — | — |
@@ -37,20 +37,12 @@
 | TC | US | 优先级 | 类型 | 场景 | 状态 | 已有测试 | 说明 |
 |----|----|------|------|------|------|---------|------|
 | TC-US01-09 | US-01 | P1 | security | 超长密码 / 超长账号不导致 5xx 或超时 | 无测试 | — | 实现有 USERNAME_MAX 64 / PASSWORD_MAX 256 超长直接 401 不做哈希，但无测试断言超长输入（1000 / 100000 / 1MB 密码、10000 账号） |
-| TC-US01-30 | US-01 | P1 | ui-interaction | UI：填写后启用、清空任一字段后再次禁用 | 无测试 | — | 无 LoginForm 组件测试或 E2E 断言按钮随输入启用 / 清空后禁用 |
-| TC-US01-31 | US-01 | P0 | ui-interaction | UI：提交中按钮禁用 + 加载指示，连击仅发一次请求 | 无测试 | — | 无测试断言提交中按钮禁用、aria-busy / “登录中…”、连击仅发 1 次请求 |
-| TC-US01-32 | US-01 | P2 | ui-interaction | UI：请求失败后加载态结束、按钮恢复 | 无测试 | — | 无测试模拟 abort / 500 后加载态结束、按钮恢复、显示错误 |
-| TC-US01-33 | US-01 | P0 | ui-interaction | UI：错误提示文案，密码清空、账号保留 | 无测试 | — | 只有接口层 401 文案与 Alert 组件渲染文案；无表单失败后显示提示、清空密码、保留账号、按钮回到禁用的 UI 测试 |
-| TC-US01-34 | US-01 | P1 | ui-interaction | UI：锁定提示文案 | 无测试 | — | 接口层 429 文案已测，但无页面上显示锁定提示（且不显示账号或密码错误）的 UI 测试 |
-| TC-US03-22 | US-03 | P0 | ui-interaction | 非法 slug 行内提示且不被保存 | 无测试 | — | 无界面测试验证非法 slug 行内提示“仅允许小写字母、数字和连字符”、不被保存及改回后提示消失（仅服务端拒绝有 API 测试） |
 | TC-US04-08 | US-04 | P1 | performance | 长文连续输入不卡顿 | 无测试 | — | 无 longtask / 连续输入不丢字的长文性能测试 |
 | TC-US04-11 | US-04 | P1 | ui-interaction | 空正文显示占位 | 无测试 | — | 无测试断言空正文占位“在左侧开始写作，这里会显示预览”及输入后删空/仅空白的切换 |
 | TC-US06-03 | US-06 | P1 | e2e | 持续输入去抖，仅停止后保存 1 次 | 无测试 | — | 无测试验证持续输入重置防抖计时（间隔 <2s 多次编辑期间 0 请求、停止后仅 1 次） |
 | TC-US06-06 | US-06 | P2 | e2e | 双标签页编辑同一篇，后写覆盖且不报错 | 无测试 | — | 无双标签页后写覆盖测试 |
 | TC-US06-10 | US-06 | P1 | e2e | 空白新建页离开不产生草稿 | 无测试 | — | 无测试验证空白新建页离开不发 POST、不弹确认 |
-| TC-US06-26 | US-06 | P0 | ui-interaction | "未保存"/"保存中…"时离开弹确认 | 无测试 | — | 无测试断言未保存/保存中离开触发 beforeunload（仅测了会话过期、登出时不拦截） |
 | TC-US06-29 | US-06 | P1 | ui-interaction | 去抖等待中按 Ctrl+S 只保存 1 次 | 无测试 | — | 无测试验证防抖中连按 Ctrl+S 只发 1 次请求 |
-| TC-US07-20 | US-07 | P1 | ui-interaction | 加载失败显示错误并重试恢复 | 无测试 | — | 无测试模拟列表请求 500/中断后显示“加载失败/重试”并重试恢复 |
 | TC-US08-11 | US-08 | P1 | e2e | 发布失败状态不变并提示 | 无测试 | — | 无测试拦截发布 500/中断验证“发布失败，请重试”、状态不变、重试成功 |
 | TC-US08-12 | US-08 | P2 | api | 更新/撤回失败状态不变（错误猜测） | 无测试 | — | 无更新/撤回失败的故障注入测试，也未验证原子性 |
 | TC-US08-18 | US-08 | P1 | ui-interaction | 请求进行中按钮加载并禁用，防重复提交 | 无测试 | — | 无测试验证发布/发布更新进行中按钮 loading 禁用及只发 1 次请求（仅删除确认框有同类测试） |
@@ -69,17 +61,13 @@
 | TC-US01-35 | US-01 | P0 | security | NFR：密码与会话 Token 不出现在日志 / 响应 | 部分覆盖 | `tests/integration/auth/logout-endpoint.test.ts:43`<br>`tests/integration/auth/login-endpoint.test.ts:79` | 只断言登出时 token 不进 console；登录成功 / 失败 / 超长密码时密码与 token 不进日志未测；登录错误体只核对 code / message，未检查无其他字段。完整日志采集需 wrangler tail |
 | TC-US01-36 | US-01 | P0 | security | NFR：会话 Cookie 属性与 Token 强度 | 部分覆盖 | `tests/integration/auth/login-endpoint.test.ts:79`<br>`tests/unit/auth/login-service.test.ts:30`<br>`tests/e2e/login.spec.ts:7` | Cookie 属性精确断言（无 Domain）、token 43 字符 base64url（256 bit）、浏览器端 httpOnly=true 已测；20 个 token 互不相同未测，HTTP→HTTPS 跳转属部署配置 |
 | TC-US01-38 | US-01 | P1 | security | NFR：防会话固定（登录后签发新 Token） | 部分覆盖 | `tests/unit/auth/login-service.test.ts:30`<br>`tests/unit/auth/session-check.test.ts:13` | 登录总是生成随机新 token、未知 token 判为无会话，结构上成立；无预置 attacker-fixed Cookie 后登录再用它调写接口 401 的用例 |
-| TC-US03-03 | US-03 | P1 | api | 标题等价类与边界（空/1/120/121/emoji） | 部分覆盖 | `tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` | 仅验证空/空白标题→“无标题”（设计改为不报 400）；上限（设计为 200 字）边界 200/201、emoji/ZWJ 原样读回、400 后原值不变均无测试 |
+| TC-US03-03 | US-03 | P1 | api | 标题等价类与边界（空存为"无标题"/1/200/201/emoji） | 部分覆盖 | `tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` | 仅验证空/空白标题→“无标题”（设计改为不报 400）；上限（设计为 200 字）边界 200/201、emoji/ZWJ 原样读回、400 后原值不变均无测试 |
 | TC-US03-04 | US-03 | P0 | unit | slug 生成规则决策表（英文/中文/混合） | 部分覆盖 | `tests/unit/post/slug.test.ts:8`<br>`tests/unit/admin/post-settings-drawer.test.tsx:46` | 覆盖英文、纯中文→空、中英混合、重音（NFKD）、超长截断（上限 80）、Hello Astro 5!；多空白、C++/C#、下划线、emoji、纯符号、“2026 年度总结”行未测 |
 | TC-US03-06 | US-03 | P0 | api | slug 格式等价类与错误猜测 | 部分覆盖 | `tests/unit/post/slug.test.ts:8`<br>`tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` | 只测 Hello_World、-a、a--b 被拒及 API 400 fields=slug；大写、尾随连字符、Unicode、中文、../、斜杠、%20、首尾空白（实现会 trim）及有效值 2026/a 未测；400 后读回原值未断言 |
-| TC-US03-07 | US-03 | P1 | api | slug 长度边界 1/100/101 | 部分覆盖 | `tests/unit/post/slug.test.ts:8` | 仅断言 81 字符被拒（上限改为 80）；1 字符、恰好 80 字符通过的边界及 API 层 400/读回均未测 |
+| TC-US03-07 | US-03 | P1 | api | slug 长度边界 1/80/81 | 部分覆盖 | `tests/unit/post/slug.test.ts:8` | 仅断言 81 字符被拒（上限改为 80）；1 字符、恰好 80 字符通过的边界及 API 层 400/读回均未测 |
 | TC-US03-10 | US-03 | P0 | api | 摘要边界 199/200/201 | 部分覆盖 | `tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` | 200 通过、201 报 summary 字段 400 及文案已测；emoji 计数口径、400 后读回原摘要（不截断入库）未测 |
 | TC-US03-13 | US-03 | P0 | security | 未登录访问写接口与编辑页被拒 | 部分覆盖 | `tests/integration/auth/middleware.test.ts:68`<br>`tests/integration/auth/logout-endpoint.test.ts:115`<br>`tests/unit/auth/session-check.test.ts:13` | 无会话/已登出旧会话的 POST/PUT 401、页面跳登录已测；GET /api/admin/posts/:id 与 GET /api/admin/tags 未登录 401、/admin/posts/new 与 /admin/posts/nope 跳转、文章未被修改未测 |
 | TC-US03-15 | US-03 | P1 | security | 标题/标签/摘要中的 HTML 作为纯文本存储与回显 | 部分覆盖 | `tests/e2e/editor-delete.spec.ts:57`<br>`tests/unit/admin/delete-dialog.test.tsx` | 仅标题含 <img onerror> 在编辑页不触发 dialog；标签、摘要 HTML 载荷的存储与回显、标题输入框 value 原样未测 |
-| TC-US03-17 | US-03 | P0 | ui-interaction | 新建文章显示空白表单 | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46`<br>`tests/e2e/post-list.spec.ts:7` | 新建页 slug/摘要为空、发布日期为今天、列表点“新建文章”进入新建页已测；标题/正文为空、无标签、状态“草稿”未断言 |
-| TC-US03-20 | US-03 | P0 | ui-interaction | slug 自动跟随 vs 手动修改决策表 | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46` | 决策表 #1（跟随）、#3（手改后不跟随）、#5（已保存 slug 不跟随）已测；#2 持续跟随、#4 清空后恢复跟随未测 |
-| TC-US03-21 | US-03 | P1 | ui-interaction | 中文标题提示"请填写英文 slug" | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46`<br>`tests/integration/post/create-endpoint.test.ts:21` | 中文标题 slug 为空+提示“请填写英文 slug”已测；界面中按 Ctrl+S 保存成功、URL 变化未测（API 层空 slug 可保存已测） |
-| TC-US03-24 | US-03 | P1 | ui-interaction | 摘要超 200 字计数变红并提示 | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46` | 201/200 计数变红、提示文案与 aria 关联、输入截断到 200 已测；199/200 非红无提示、超限保存后读回原摘要未测 |
 | TC-US04-01 | US-04 | P0 | unit | GFM 渲染矩阵 | 部分覆盖 | `tests/unit/markdown/gfm.test.ts:33`<br>`tests/e2e/editor-preview.spec.ts:23`<br>`tests/unit/markdown/isomorphic.test.ts:7` | 快照含 h1/h2、列表、表格对齐、任务列表、删除线、https 自动链接、脚注，E2E 补引用与链接；h3–h6、www 自动链接、嵌套列表、行内代码转义、hr、MDX 组件、空输入未测 |
 | TC-US04-07 | US-04 | P0 | performance | 万字 + 20 代码块预览更新 < 300ms | 部分覆盖 | `tests/spike/markdown-browser.spec.ts:13` | spike 只测 Worker 内渲染万字（10 个代码块）P95<200ms，不含按键到预览 DOM 更新的端到端耗时，且属 test:spike 非常规回归 |
 | TC-US04-10 | US-04 | P1 | ui-interaction | 高亮主题随亮/暗模式切换 | 部分覆盖 | `tests/unit/markdown/code.test.ts:21` | 单元验证 token 带亮/暗两套颜色变量及主题选择器；未在浏览器中断言预览区切换亮/暗后计算颜色变化、与读者端一致 |
@@ -89,7 +77,7 @@
 | TC-US06-09 | US-06 | P0 | e2e | 新建后连续保存不重复创建文章 | 部分覆盖 | `tests/unit/admin/autosave.test.ts:22`<br>`tests/unit/admin/local-draft.test.ts:94` | 单元验证首次 POST 后改 PUT；创建挂起期间再编辑/Ctrl+S 只断言暂存迁移，未断言仅 1 次 POST、后续为 PUT、最终 body |
 | TC-US06-22 | US-06 | P0 | ui-interaction | 状态转换：未保存 → 保存中… → 已保存 · 14:32 | 部分覆盖 | `tests/unit/admin/autosave.test.ts:22`<br>`tests/unit/ui/save-indicator.test.tsx:22`<br>`tests/e2e/editor-autosave.spec.ts:6` | 状态机顺序 dirty→saving→saved（单元）与文案（组件）已测，E2E 见“未保存”→“已保存 · HH:mm”；页面层未断言“保存中…”，未用固定时钟验证 14:32 |
 | TC-US06-23 | US-06 | P0 | ui-interaction | 状态转换：保存失败 → 重试 → 已保存 | 部分覆盖 | `tests/e2e/editor-local-draft.spec.ts:47`<br>`tests/unit/admin/autosave.test.ts:22` | 断网→保存失败→恢复后已保存已验证；未验证失败期间继续输入不丢字及其状态 |
-| TC-US06-24 | US-06 | P1 | ui-interaction | 保存中继续输入，完成后显示"未保存" | 部分覆盖 | `tests/unit/admin/autosave.test.ts:22` | 单元验证保存中编辑后完成即再保存（实现为立即再存而非 TC 写的再等 2s）；未断言首个响应后显示“未保存”及最终 DB=AB |
+| TC-US06-24 | US-06 | P1 | ui-interaction | 保存中继续输入，完成后立即再保存、不误显示"已保存" | 部分覆盖 | `tests/unit/admin/autosave.test.ts:22` | 单元验证保存中编辑后完成即再保存（实现为立即再存而非 TC 写的再等 2s）；未断言首个响应后显示“未保存”及最终 DB=AB |
 | TC-US06-27 | US-06 | P1 | ui-interaction | "已保存"时离开不弹确认 | 部分覆盖 | `tests/e2e/logout.spec.ts:50` | 已保存状态下经登出跳转离开无 dialog；未测 page.close(runBeforeUnload) 与站内链接离开 |
 | TC-US06-28 | US-06 | P0 | ui-interaction | Ctrl/Cmd+S 立即保存且不弹"保存网页" | 部分覆盖 | `tests/e2e/editor-autosave.spec.ts:25` | 暂停时钟下 Ctrl/Cmd+S 立即发出保存已测；未断言 keydown defaultPrevented，未验证之后 2s 不再额外保存 |
 | TC-US07-02 | US-07 | P0 | api | 列表接口返回全部状态文章与排序（等价类） | 部分覆盖 | `tests/integration/post/post-list.test.ts:30`<br>`tests/integration/post/list-endpoint.test.ts:21` | 三类状态都返回、按更新时间倒序、条目字段不含正文已测；同 updatedAt 顺序稳定未测（契约条目不含 slug） |
@@ -99,7 +87,6 @@
 | TC-US07-08 | US-07 | P1 | api | 非法页码：超过末页 / 0 / -1 / abc | 部分覆盖 | `tests/integration/post/post-list.test.ts:30`<br>`tests/integration/post/list-endpoint.test.ts:21` | 超末页返回空+total、0/abc/1.5 → 400 已测；-1、999999、页面 /admin?page=4 显示未测 |
 | TC-US07-09 | US-07 | P2 | api | 筛选 + 搜索 + 分页组合（决策表） | 部分覆盖 | `tests/integration/post/list-endpoint.test.ts:21`<br>`tests/integration/post/post-list.test.ts:30` | 仅 status+q 组合单条命中；筛选+搜索+分页决策表 R1–R5（条数与页数）未测 |
 | TC-US07-10 | US-07 | P0 | security | 未登录访问列表页 / 列表接口被拒 | 部分覆盖 | `tests/integration/auth/middleware.test.ts:68`<br>`tests/integration/auth/logout-endpoint.test.ts:115` | 未登录/旧会话访问 /admin 跳登录已测；GET /api/admin/posts 未登录 401 且不含标题未测（中间件测试只用 POST） |
-| TC-US07-14 | US-07 | P0 | ui-interaction | 点击"新建文章"进入空白写文章页 | 部分覆盖 | `tests/e2e/post-list.spec.ts:7`<br>`tests/e2e/mainline-journey.spec.ts:41` | 点击“新建文章”进入 /admin/posts/new 已测；仅进入页面不新增文章未断言 |
 | TC-US08-03 | US-08 | P1 | api | 发布日期等价类：空 → 今天；已填 → 保留 | 部分覆盖 | `tests/unit/post/publish-service.test.ts:15`<br>`tests/integration/post/public-list-endpoint.test.ts:21` | 空→发布当天、过去日期保留已验证；未来日期未测，23:59:59 上海时区边界未测 |
 | TC-US08-04 | US-08 | P0 | api | 必填项缺失决策表 | 部分覆盖 | `tests/unit/post/publish-validation.test.ts:9`<br>`tests/unit/post/content.test.ts:18`<br>`tests/integration/post/publish-endpoint.test.ts:22` | 8 组合决策表、空白标题归一为无标题、422 MISSING_FIELDS 带 fields 已测；拒绝后仍为草稿、读者 404 未断言，R9 非法 slug 在保存时已拒（发布接口未测） |
 | TC-US08-08 | US-08 | P1 | security | 读者端绕过尝试（错误猜测） | 部分覆盖 | `tests/integration/post/public-list-endpoint.test.ts:21`<br>`tests/integration/post/public-detail-endpoint.test.ts:21`<br>`tests/integration/post/published-query.test.ts:34` | ?status=draft 被忽略、大小写不符 404、工作稿 slug 查不到已测；?preview/?draft、?version=latest、id 代 slug、尾空格/斜杠、无会话 GET 管理端 401 未测 |
@@ -151,12 +138,12 @@
 | TC-US01-26 | SC-LOGIN-09, SC-LOGIN-01 | 会话状态转换：无 → 有效 → 过期 → 重新登录 | 部分覆盖 | `tests/integration/auth/middleware.test.ts:68`<br>`tests/e2e/login.spec.ts:7`<br>`tests/unit/auth/session-check.test.ts:13` |
 | TC-US01-27 | SC-LOGIN-11 | next 参数开放重定向变体全部回落到 /admin | 部分覆盖 | `tests/unit/auth/next.test.ts:17` |
 | TC-US01-28 | SC-LOGIN-11, SC-LOGIN-03 | 已登录访问带恶意 next 的登录页仍到 /admin | 部分覆盖 | `tests/integration/auth/middleware.test.ts:68`<br>`tests/unit/auth/next.test.ts:17` |
-| TC-US01-29 | SC-LOGIN-05 | UI：账号或密码为空时"登录"按钮禁用 | 已覆盖 | `tests/e2e/login.spec.ts` |
-| TC-US01-30 | SC-LOGIN-05 | UI：填写后启用、清空任一字段后再次禁用 | 无测试 | — |
-| TC-US01-31 | SC-LOGIN-10 | UI：提交中按钮禁用 + 加载指示，连击仅发一次请求 | 无测试 | — |
-| TC-US01-32 | SC-LOGIN-10 | UI：请求失败后加载态结束、按钮恢复 | 无测试 | — |
-| TC-US01-33 | SC-LOGIN-04 | UI：错误提示文案，密码清空、账号保留 | 无测试 | — |
-| TC-US01-34 | SC-LOGIN-06 | UI：锁定提示文案 | 无测试 | — |
+| TC-US01-29 | SC-LOGIN-05 | UI：账号或密码为空时"登录"按钮禁用 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-login-ui.js` |
+| TC-US01-30 | SC-LOGIN-05 | UI：填写后启用、清空任一字段后再次禁用 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-login-ui.js` |
+| TC-US01-31 | SC-LOGIN-10 | UI：提交中按钮禁用 + 加载指示，连击仅发一次请求 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-login-ui.js`<br>`tests/e2e/login.spec.ts` |
+| TC-US01-32 | SC-LOGIN-10 | UI：请求失败后加载态结束、按钮恢复 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-login-ui.js` |
+| TC-US01-33 | SC-LOGIN-04 | UI：错误提示文案，密码清空、账号保留 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-login-ui.js`<br>`tests/e2e/login.spec.ts` |
+| TC-US01-34 | SC-LOGIN-06 | UI：锁定提示文案 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-login-ui.js` |
 | TC-US01-35 | SC-LOGIN-01, SC-LOGIN-04 | NFR：密码与会话 Token 不出现在日志 / 响应 | 部分覆盖 | `tests/integration/auth/logout-endpoint.test.ts:43`<br>`tests/integration/auth/login-endpoint.test.ts:79` |
 | TC-US01-36 | SC-LOGIN-01 | NFR：会话 Cookie 属性与 Token 强度 | 部分覆盖 | `tests/integration/auth/login-endpoint.test.ts:79`<br>`tests/unit/auth/login-service.test.ts:30`<br>`tests/e2e/login.spec.ts:7` |
 | TC-US01-37 | SC-LOGIN-01 | NFR：密码以不可逆哈希存储 | 线上 / 人工 | `tests/unit/auth/password.test.ts:14` |
@@ -181,11 +168,11 @@
 | TC-US02-17 | SC-LOGOUT-01 | NFR：登出过程不泄露 Token，清除 Cookie 属性正确 | 已覆盖 | `tests/integration/auth/logout-endpoint.test.ts` |
 | TC-US03-01 | SC-POSTINFO-02 | API 创建草稿成功 | 已覆盖 | `tests/integration/post/create-endpoint.test.ts:21`<br>`tests/integration/post/get-endpoint.test.ts:19` |
 | TC-US03-02 | SC-POSTINFO-02, SC-POSTINFO-03 | API 更新后读取为最新内容 | 已覆盖 | `tests/integration/post/save-endpoint.test.ts:25`<br>`tests/unit/post/save-service.test.ts:15`<br>`tests/integration/post/get-endpoint.test.ts:19` |
-| TC-US03-03 | SC-POSTINFO-02 | 标题等价类与边界（空/1/120/121/emoji） | 部分覆盖 | `tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` |
+| TC-US03-03 | SC-POSTINFO-02 | 标题等价类与边界（空存为"无标题"/1/200/201/emoji） | 部分覆盖 | `tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` |
 | TC-US03-04 | SC-POSTINFO-04, SC-POSTINFO-06 | slug 生成规则决策表（英文/中文/混合） | 部分覆盖 | `tests/unit/post/slug.test.ts:8`<br>`tests/unit/admin/post-settings-drawer.test.tsx:46` |
 | TC-US03-05 | SC-POSTINFO-06 | 中文标题空 slug 草稿可保存、发布被拒 | 已覆盖 | `tests/integration/post/create-endpoint.test.ts:21`<br>`tests/integration/post/publish-endpoint.test.ts:22`<br>`tests/unit/post/publish-validation.test.ts:9` |
 | TC-US03-06 | SC-POSTINFO-07 | slug 格式等价类与错误猜测 | 部分覆盖 | `tests/unit/post/slug.test.ts:8`<br>`tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` |
-| TC-US03-07 | SC-POSTINFO-07 | slug 长度边界 1/100/101 | 部分覆盖 | `tests/unit/post/slug.test.ts:8` |
+| TC-US03-07 | SC-POSTINFO-07 | slug 长度边界 1/80/81 | 部分覆盖 | `tests/unit/post/slug.test.ts:8` |
 | TC-US03-08 | SC-POSTINFO-08 | slug 与其他文章重复返回 409 | 已覆盖 | `tests/integration/post/save-endpoint.test.ts:25`<br>`tests/integration/post/create-endpoint.test.ts:21`<br>`tests/unit/post/slug-uniqueness.test.ts:21` |
 | TC-US03-09 | SC-POSTINFO-08 | 并发写入相同 slug 竞态 | 已覆盖 | `tests/integration/post/slug-race.test.ts:26`<br>`tests/integration/post/slug-race.test.ts:33` |
 | TC-US03-10 | SC-POSTINFO-09 | 摘要边界 199/200/201 | 部分覆盖 | `tests/unit/post/content.test.ts:18`<br>`tests/integration/post/create-endpoint.test.ts:21` |
@@ -195,16 +182,16 @@
 | TC-US03-14 | SC-POSTINFO-02 | 写接口 Origin 校验（CSRF） | 已覆盖 | `tests/integration/auth/middleware.test.ts:68` |
 | TC-US03-15 | SC-POSTINFO-02, SC-POSTINFO-10 | 标题/标签/摘要中的 HTML 作为纯文本存储与回显 | 部分覆盖 | `tests/e2e/editor-delete.spec.ts:57`<br>`tests/unit/admin/delete-dialog.test.tsx` |
 | TC-US03-16 | SC-POSTINFO-02 | 保存接口响应 P95 < 500ms | 线上 / 人工 | — |
-| TC-US03-17 | SC-POSTINFO-01 | 新建文章显示空白表单 | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46`<br>`tests/e2e/post-list.spec.ts:7` |
+| TC-US03-17 | SC-POSTINFO-01 | 新建文章显示空白表单 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-editor-ui.js` |
 | TC-US03-18 | SC-POSTINFO-02 | Ctrl/Cmd+S 保存后地址栏变为编辑地址 | 已覆盖 | `tests/e2e/editor-autosave.spec.ts` |
-| TC-US03-19 | SC-POSTINFO-03 | 打开已有文章显示最新保存内容 | 已覆盖 | `tests/e2e/editor-load.spec.ts` |
-| TC-US03-20 | SC-POSTINFO-04, SC-POSTINFO-05 | slug 自动跟随 vs 手动修改决策表 | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46` |
-| TC-US03-21 | SC-POSTINFO-06 | 中文标题提示"请填写英文 slug" | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46`<br>`tests/integration/post/create-endpoint.test.ts:21` |
-| TC-US03-22 | SC-POSTINFO-07 | 非法 slug 行内提示且不被保存 | 无测试 | — |
+| TC-US03-19 | SC-POSTINFO-03 | 打开已有文章显示最新保存内容 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-editor-ui.js`<br>`tests/e2e/editor-load.spec.ts` |
+| TC-US03-20 | SC-POSTINFO-04, SC-POSTINFO-05 | slug 自动跟随 vs 手动修改决策表 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-editor-ui.js` |
+| TC-US03-21 | SC-POSTINFO-06 | 中文标题提示"请填写英文 slug" | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-editor-ui.js` |
+| TC-US03-22 | SC-POSTINFO-07 | 非法 slug 行内提示且不被保存 | 已覆盖 | `tests/e2e/editor-slug-conflict.spec.ts` |
 | TC-US03-23 | SC-POSTINFO-08 | 重复 slug 提示"slug 已存在"且保持原值 | 已覆盖 | `tests/e2e/editor-slug-conflict.spec.ts` |
-| TC-US03-24 | SC-POSTINFO-09 | 摘要超 200 字计数变红并提示 | 部分覆盖 | `tests/unit/admin/post-settings-drawer.test.tsx:46` |
-| TC-US03-25 | SC-POSTINFO-10 | 标签添加、自动补全、删除 | 已覆盖 | `tests/unit/admin/tag-input.test.tsx` |
-| TC-US03-26 | SC-POSTINFO-11 | 编辑页访问不存在文章显示 404 | 已覆盖 | `tests/e2e/editor-load.spec.ts` |
+| TC-US03-24 | SC-POSTINFO-09 | 摘要超 200 字计数变红并提示 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-editor-ui.js` |
+| TC-US03-25 | SC-POSTINFO-10 | 标签添加、自动补全、删除 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-editor-ui.js`<br>`tests/unit/admin/tag-input.test.tsx` |
+| TC-US03-26 | SC-POSTINFO-11 | 编辑页访问不存在文章显示 404 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-editor-ui.js`<br>`tests/e2e/editor-load.spec.ts` |
 | TC-US04-01 | SC-PREVIEW-01 | GFM 渲染矩阵 | 部分覆盖 | `tests/unit/markdown/gfm.test.ts:33`<br>`tests/e2e/editor-preview.spec.ts:23`<br>`tests/unit/markdown/isomorphic.test.ts:7` |
 | TC-US04-02 | SC-PREVIEW-02 | 代码块语法高亮等价类 | 已覆盖 | `tests/unit/markdown/code.test.ts` |
 | TC-US04-03 | SC-PREVIEW-03 | 渲染器 XSS 载荷清单 | 已覆盖 | `tests/unit/markdown/xss.test.ts` |
@@ -268,9 +255,9 @@
 | TC-US06-21 | SC-AUTOSAVE-01 | 保存接口响应时间 | 线上 / 人工 | — |
 | TC-US06-22 | SC-AUTOSAVE-02 | 状态转换：未保存 → 保存中… → 已保存 · 14:32 | 部分覆盖 | `tests/unit/admin/autosave.test.ts:22`<br>`tests/unit/ui/save-indicator.test.tsx:22`<br>`tests/e2e/editor-autosave.spec.ts:6` |
 | TC-US06-23 | SC-AUTOSAVE-02, SC-AUTOSAVE-06 | 状态转换：保存失败 → 重试 → 已保存 | 部分覆盖 | `tests/e2e/editor-local-draft.spec.ts:47`<br>`tests/unit/admin/autosave.test.ts:22` |
-| TC-US06-24 | SC-AUTOSAVE-02 | 保存中继续输入，完成后显示"未保存" | 部分覆盖 | `tests/unit/admin/autosave.test.ts:22` |
+| TC-US06-24 | SC-AUTOSAVE-02 | 保存中继续输入，完成后立即再保存、不误显示"已保存" | 部分覆盖 | `tests/unit/admin/autosave.test.ts:22` |
 | TC-US06-25 | SC-AUTOSAVE-10 | 发布时会话过期跳登录页 | 已覆盖 | `tests/e2e/editor-session-expired.spec.ts`<br>`tests/unit/admin/session-expired.test.tsx` |
-| TC-US06-26 | SC-AUTOSAVE-09 | "未保存"/"保存中…"时离开弹确认 | 无测试 | — |
+| TC-US06-26 | SC-AUTOSAVE-09 | "未保存"/"保存中…"时离开弹确认 | 已覆盖 | `tests/e2e/editor-autosave.spec.ts` |
 | TC-US06-27 | SC-AUTOSAVE-09 | "已保存"时离开不弹确认 | 部分覆盖 | `tests/e2e/logout.spec.ts:50` |
 | TC-US06-28 | SC-AUTOSAVE-11 | Ctrl/Cmd+S 立即保存且不弹"保存网页" | 部分覆盖 | `tests/e2e/editor-autosave.spec.ts:25` |
 | TC-US06-29 | SC-AUTOSAVE-11 | 去抖等待中按 Ctrl+S 只保存 1 次 | 无测试 | — |
@@ -338,15 +325,15 @@
 | TC-US07-09 | SC-POSTLIST-04, SC-POSTLIST-05, SC-POSTLIST-08 | 筛选 + 搜索 + 分页组合（决策表） | 部分覆盖 | `tests/integration/post/list-endpoint.test.ts:21`<br>`tests/integration/post/post-list.test.ts:30` |
 | TC-US07-10 | SC-POSTLIST-01 | 未登录访问列表页 / 列表接口被拒 | 部分覆盖 | `tests/integration/auth/middleware.test.ts:68`<br>`tests/integration/auth/logout-endpoint.test.ts:115` |
 | TC-US07-11 | SC-POSTLIST-01 | 列表接口性能（1000 篇） | 线上 / 人工 | — |
-| TC-US07-12 | SC-POSTLIST-01 | 状态标记渲染（含 dirty 判定） | 已覆盖 | `tests/e2e/post-list-motion.spec.ts`<br>`tests/e2e/post-list.spec.ts`<br>`tests/e2e/support/admin.ts` |
-| TC-US07-13 | SC-POSTLIST-02 | 点击标题进入写文章页 | 已覆盖 | `tests/e2e/post-list-motion.spec.ts`<br>`tests/unit/admin/post-list.test.tsx` |
-| TC-US07-14 | SC-POSTLIST-03 | 点击"新建文章"进入空白写文章页 | 部分覆盖 | `tests/e2e/post-list.spec.ts:7`<br>`tests/e2e/mainline-journey.spec.ts:41` |
-| TC-US07-15 | SC-POSTLIST-04 | 选择"草稿"筛选，URL 同步并刷新保持 | 已覆盖 | `tests/e2e/post-list-filter.spec.ts` |
-| TC-US07-16 | SC-POSTLIST-05 | 搜索框输入后列表过滤 | 已覆盖 | `tests/e2e/post-list-search.spec.ts` |
+| TC-US07-12 | SC-POSTLIST-01 | 状态标记渲染（含 dirty 判定） | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js` |
+| TC-US07-13 | SC-POSTLIST-02 | 点击标题进入写文章页 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js` |
+| TC-US07-14 | SC-POSTLIST-03 | 点击"新建文章"进入空白写文章页 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js` |
+| TC-US07-15 | SC-POSTLIST-04 | 选择"草稿"筛选，URL 同步并刷新保持 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js`<br>`tests/e2e/post-list-filter.spec.ts` |
+| TC-US07-16 | SC-POSTLIST-05 | 搜索框输入后列表过滤 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js`<br>`tests/e2e/post-list-search.spec.ts` |
 | TC-US07-17 | SC-POSTLIST-06 | 空状态 | 已覆盖 | `tests/unit/admin/post-list-empty.test.tsx` |
-| TC-US07-18 | SC-POSTLIST-07 | 筛选无结果提示与"清除筛选" | 已覆盖 | `tests/unit/admin/post-list-empty.test.tsx` |
-| TC-US07-19 | SC-POSTLIST-08 | 分页控件交互 | 已覆盖 | `tests/e2e/post-list-pagination.spec.ts` |
-| TC-US07-20 | SC-POSTLIST-09 | 加载失败显示错误并重试恢复 | 无测试 | — |
+| TC-US07-18 | SC-POSTLIST-07 | 筛选无结果提示与"清除筛选" | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js`<br>`tests/unit/admin/post-list-empty.test.tsx` |
+| TC-US07-19 | SC-POSTLIST-08 | 分页控件交互 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js`<br>`tests/e2e/post-list-pagination.spec.ts` |
+| TC-US07-20 | SC-POSTLIST-09 | 加载失败显示错误并重试恢复 | 已覆盖 | `specs/test/features/F-001-文章写作/e2e/playwright-test-post-list-ui.js` |
 | TC-US08-01 | SC-PUBLISH-01 | 发布草稿，读者可按 slug 读取 | 已覆盖 | `tests/e2e/editor-publish.spec.ts` |
 | TC-US08-02 | SC-PUBLISH-01 | 发布接口与读者端读取（接口层） | 已覆盖 | `tests/integration/post/publish-endpoint.test.ts:22`<br>`tests/integration/post/public-detail-endpoint.test.ts:21`<br>`tests/integration/post/public-list-endpoint.test.ts:21` |
 | TC-US08-03 | SC-PUBLISH-02 | 发布日期等价类：空 → 今天；已填 → 保留 | 部分覆盖 | `tests/unit/post/publish-service.test.ts:15`<br>`tests/integration/post/public-list-endpoint.test.ts:21` |

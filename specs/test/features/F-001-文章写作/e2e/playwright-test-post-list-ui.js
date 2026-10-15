@@ -26,7 +26,7 @@ async function login(page) {
 
 function api(page) {
   const headers = { Origin: new URL(TARGET_URL).origin };
-  const draft = (title, slug = "", body = "") => ({ title, slug, tags: [], summary: "", body, publishedAt: null });
+  const draft = (title, slug = "", body = "") => ({ title, slug, tags: [], summary: "", body, publishedAt: null, cover: null }); // DraftInput 七字段必填（F-002 起含 cover）
   return {
     create: async (title, slug, body) => (await (await page.request.post(`${TARGET_URL}/api/admin/posts`, { headers, data: draft(title, slug, body) })).json()).id,
     save: (id, title, slug, body) => page.request.put(`${TARGET_URL}/api/admin/posts/${id}`, { headers, data: draft(title, slug, body) }),
@@ -106,7 +106,7 @@ const rowsOf = (page, prefix) => page.getByRole("listitem").filter({ hasText: pr
     check((await page.getByRole("listitem").filter({ hasText: "已发布" }).count()) === 0, "草稿筛选下出现了已发布文章");
     await page.getByRole("radio", { name: /^全部/ }).click();
     await page.waitForURL(/\/admin$/);
-    await page.waitForFunction((prefix) => [...document.querySelectorAll("li")].filter((li) => li.textContent.includes(prefix)).length === 5, p);
+    await page.waitForFunction((prefix) => [...document.querySelectorAll('[role="listitem"]')].filter((li) => li.textContent.includes(prefix)).length === 5, p);
   });
 
   await run("[SC-POSTLIST-05] TC-US07-16 搜索框输入后只显示标题包含关键字的文章（不区分大小写）", async ({ page, api }) => {
@@ -116,7 +116,7 @@ const rowsOf = (page, prefix) => page.getByRole("listitem").filter({ hasText: pr
     await page.waitForSelector("astro-island:not([ssr])");
     await page.getByRole("searchbox", { name: "搜索标题" }).pressSequentially(`${token}Astro`, { delay: 40 });
     await page.waitForURL((url) => url.searchParams.get("q") === `${token}Astro`);
-    await page.waitForFunction(() => document.querySelectorAll("li").length === 2);
+    await page.waitForFunction(() => document.querySelectorAll('[role="listitem"]').length === 2);
   });
 
   await run("[SC-POSTLIST-08] TC-US07-19 分页：23 篇分 2 页，当前页 aria-current，首末页禁用上 / 下一页", async ({ page, api }) => {
@@ -129,7 +129,7 @@ const rowsOf = (page, prefix) => page.getByRole("listitem").filter({ hasText: pr
     check((await pager.getByText("上一页").getAttribute("aria-disabled")) === "true", "第 1 页\"上一页\"应禁用");
     await pager.getByRole("link", { name: "2", exact: true }).click();
     await page.waitForURL((url) => url.searchParams.get("page") === "2");
-    await page.waitForFunction(() => document.querySelectorAll("li").length === 3);
+    await page.waitForFunction(() => document.querySelectorAll('[role="listitem"]').length === 3);
     check((await pager.getByRole("link", { name: "2", exact: true }).getAttribute("aria-current")) === "page", "当前页应为 aria-current=page");
     check((await pager.getByText("下一页").getAttribute("aria-disabled")) === "true", "末页\"下一页\"应禁用");
   });
