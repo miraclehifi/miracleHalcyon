@@ -1,7 +1,7 @@
-# 用户流程（作者后台）
+# 用户流程（作者后台 · 读者端）
 
 **最后更新**: 2026-10-10
-**关联 Feature**: F-001-文章写作
+**关联 Feature**: F-001-文章写作、F-002-博客首页与阅读
 
 ## 1. 页面跳转
 
@@ -68,8 +68,56 @@ stateDiagram-v2
 
 多张图片：每张各自插入占位、按顺序替换。
 
+## 5. 读者端页面跳转（F-002）
+
+```mermaid
+graph LR
+    Home[首页 /] -->|顶栏 文章| Posts[文章 /posts]
+    Posts -->|分页| PostsN["/posts/page/n"]
+    Posts -->|卡片| Detail[文章详情 /posts/:slug]
+    Posts -->|标签 / 标签索引| Tag[标签页 /tags/:tag]
+    Tag -->|卡片| Detail
+    Detail -->|标签| Tag
+    Detail -->|同标签文章 / 上一篇 / 下一篇| Detail
+    Detail -->|cd ..| Posts
+    Posts -->|cd ..| Home
+    Tag -->|cd ..| Home
+    Any["未匹配路径（含 /media、/rss.xml）"] --> NF[404]
+    NF -->|回首页| Home
+    NF -->|看看全部文章| Posts
+```
+
+## 6. 发布到读者可见（F-002）
+
+```mermaid
+sequenceDiagram
+    participant A as 作者（写文章页）
+    participant W as Worker（/api/admin）
+    participant H as Deploy Hook
+    participant B as Workers Builds
+    participant R as 读者
+    A->>W: 发布 / 发布更新 / 撤回 / 删除
+    W-->>A: 成功（"已发布，几分钟后读者可见"）
+    W--)H: POST（waitUntil，失败只记日志）
+    H->>B: 触发构建
+    B->>W: 构建时读取 GET /api/posts[/:slug]
+    B-->>R: 新的静态读者页上线（P95 ≤ 5 分钟）
+```
+
+## 7. 灯箱（文章详情）
+
+```mermaid
+stateDiagram-v2
+    [*] --> 关闭
+    关闭 --> 打开: 点击图片 / 手风琴已展开项 / Enter
+    打开 --> 打开: ← → / 拖动切换（首尾不循环）
+    打开 --> 关闭: Esc / 关闭按钮 / 点遮罩 / 下滑超过阈值
+    关闭 --> [*]
+```
+
 ## 变更历史
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
 | 2026-10-10 | 初始版本 | miraclehifi |
+| 2026-10-15 | 新增读者端页面跳转、发布到读者可见、灯箱（F-002） | miraclehifi |

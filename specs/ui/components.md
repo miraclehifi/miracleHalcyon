@@ -1,6 +1,6 @@
 # 组件清单（设计稿 ↔ 前端）
 
-**最后更新**: 2026-10-12
+**最后更新**: 2026-10-15
 **状态**: draft
 
 > 设计稿组件与前端 React 组件**同名**。来源：[admin.pen](admin.pen) 顶部的"组件区 Components"；颜色、字号、圆角等令牌见 [design-tokens.md](design-tokens.md)。
@@ -117,15 +117,17 @@
 
 | 设计稿组件 | React 组件 | Props | 使用位置 |
 |-----------|-----------|-------|---------|
-| `SiteNav` · `SiteNav/Mobile` | `SiteNav` | `current?`（`posts` / `media`，首页不传）；桌面：文字项 文章 / 书影音（当前项 `accent` + 600）+ 图标 摄影（外链）/ GitHub / RSS / 主题切换（`IconButton/Ghost`，图标 18px）；手机：全部为 44px 图标按钮 文章 / 书影音 / 摄影 / 主题切换，GitHub / RSS 不显示，当前项图标 `accent`；文章详情、标签页传 `posts`（见 [site-map.md](site-map.md)"全局导航"） | `SiteHeader` 内 |
+| `SiteNav` · `SiteNav/Mobile` | `SiteNav` | `current?`（`posts` / `media`，首页、404 不传）；摄影 / GitHub 地址来自 `site.ts`，为空的项不渲染；桌面：文字项 文章 / 书影音（当前项 `accent` + 600）+ 图标 摄影（外链）/ GitHub / RSS / 主题切换（`IconButton/Ghost`，图标 18px）；手机：全部为 44px 图标按钮 文章 / 书影音 / 摄影 / 主题切换，GitHub / RSS 不显示，当前项图标 `accent`；文章详情、标签页传 `posts`（见 [site-map.md](site-map.md)"全局导航"） | `SiteHeader` 内 |
 | `SiteHeader` · `SiteHeader/Mobile` | `SiteHeader` | `current?`（透传给 `SiteNav`）；左侧站点名（回首页），右侧 `SiteNav` / `SiteNav/Mobile` | 读者端全部页面 |
-| `PostPager` | `PostPager` | `prev?`、`next?`（`title`、`slug`）；缺一侧时该侧留空 | 文章详情页文末 |
-| `PostCard` · `PostCard/Hover` · `PostCard/Mobile` | `PostCard` | `post`（`title`、`excerpt`、`publishedAt`、`tags`、`cover?`）；整卡可点进入详情；`excerpt` 由正文渲染后取纯文本前约 120 字，最多 3 行；没有 `cover` 时不显示右侧图片；`/Hover` 是悬停与键盘聚焦态（上层左上移 4px、下层右下移 4px，边框不换色，保持 `line-strong`），在列表中由 `active` 控制（见"列表动效参数"）；手机端标题与 72px 封面同行，摘要在下 | 文章列表页 `/posts` |
+| `PostPager` | `PostPager` | `prev?`、`next?`（`title`、`slug`）；缺一侧时该侧留空，两侧都没有时不渲染；手机两项上下排列 | 文章详情页文末 |
+| `PostCard` · `PostCard/Hover` · `PostCard/Mobile` | `PostCard` | `post`（`title`、`excerpt`、`publishedAt`、`tags`、`cover?`）；整卡可点进入详情；`excerpt`：有 `summary` 用 `summary`，否则由正文渲染后取纯文本前约 120 字，最多 3 行，为空时不渲染；没有 `cover` 时不显示右侧图片；`/Hover` 是悬停与键盘聚焦态（上层左上移 4px、下层右下移 4px，边框不换色，保持 `line-strong`），在列表中由 `active` 控制（见"列表动效参数"）；手机端标题与 72px 封面同行，摘要在下 | 文章列表页 `/posts` |
 | `SiteFooter` | `SiteFooter` | —（站点名、签名一句话、版权、RSS / GitHub 链接） | 读者端全部页面 |
+| （SiteNav 内的主题切换按钮） | `ThemeToggle` | —；`IconButton/Ghost`，亮 / 暗 / 跟随系统三态轮换，图标 `sun` / `moon` / `sun-moon`，`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
+| `BackLink` | `BackLink` | `href`；文字 `> cd ..`，`font-mono` 14px `ink-muted`，上下内边距 12（可点高度 ≥ 44） | 读者端子页主体末尾（05、05m、07、07m；首页不用） |
 
 ### 列表动效参数
 
-`PostList`（后台）、`HomePosts`（读者端 `/posts`）内部渲染 React Bits AnimatedList（TypeScript + Tailwind 版，文件 `AnimatedList.tsx`，只供这两个区块使用，页面不直接引用）。**只借动效和交互**：每行用 `renderItem` 渲染 `PostListItem` / `PostCard`，卡片外观不变；AnimatedList 自带的磨砂底板、行块、选中框都不用（[Backlog](../backlog/animated-list.md)）。
+`PostList`（后台）、`PostCardList`（读者端 `/posts`、`/tags/:tag`）内部渲染 React Bits AnimatedList（TypeScript + Tailwind 版，文件 `AnimatedList.tsx`，只供这两个区块使用，页面不直接引用）。**只借动效和交互**：每行用 `renderItem` 渲染 `PostListItem` / `PostCard`，卡片外观不变；AnimatedList 自带的磨砂底板、行块、选中框都不用（[Backlog](../backlog/animated-list.md)）。
 
 已实现（后台 `PostList`，Sprint 2）：`src/components/admin/PostList.tsx`、`src/components/vendor/react-bits/AnimatedList.tsx`（另去掉 Enter / 空格选择与内部滚动跟随，见文件头）。
 
@@ -326,13 +328,18 @@
 
 | 图层名 | React 组件 | 所在画板 |
 |-------|-----------|---------|
-| `TagPostsNav` | `TagPostsNav` | 05 文章详情（左栏：同标签文章，当前篇高亮） |
-| `ArticleHeader` | `ArticleHeader` | 05 / 05m（标题、日期、字数与阅读时长、标签） |
+| `TagPostsNav` · `TagPostsNav/Mobile` | `TagPostsNav` | 05 文章详情左栏 / 05m 文末（同标签文章，最多 8 篇，不含本文，每项标题 + 共享标签；`/Mobile` 为文末形态，每项高 44） |
+| `ArticleHeader` | `ArticleHeader` | 05 / 05m（标题、日期、字数与阅读时长、更新于（有更新时）、标签） |
 | `ArticleContent` | `ArticleContent` | 05 / 05m（Markdown 渲染：段首缩进、首字下沉、引用署名） |
-| `HomeIntro` | `HomeIntro` | 06 / 06m（头像、问候语、一句话简介、GitHub / RSS / 关于我） |
-| `HomeTags` | `HomeTags` | 06 / 06m（标签入口，`TagChip` 带文章数） |
-| `HomePosts` | `HomePosts` | 06 / 06m（标题 + 篇数、`PostCard` 列表、`Pagination`；列表底层 AnimatedList，见"列表动效参数"） |
+| `HomeIntro` | `HomeIntro` | 06 / 06m（头像、问候语、多段简介、GitHub / 摄影 / 邮箱；内容来自 `site.ts`） |
+| `PostsHeader` | `PostsHeader` | 07 / 07m（"文章"或"#标签" + 篇数） |
+| `TagIndex` | `TagIndex` | 07 / 07m（"按标签浏览" + `TagChip` 带文章数，只在 `/posts` 第 1 页） |
+| `PostCardList` | `PostCardList` | 07 / 07m（`PostCard` 列表 + `Pagination`；列表底层 AnimatedList，见"列表动效参数"） |
 | `TableOfContents` | `TableOfContents` | 05（右栏：阅读进度 + 目录，当前章节高亮） |
+| `ReadingProgress/Bar` | `ReadingProgress` | 05m / 05m-b（顶栏下 2px 进度细条，< 1280px） |
+| `TocButton` · `TocDrawer` | `TocDrawer` | 05m 右下角浮动按钮 / 05m-b 底部目录抽屉（< 1280px） |
+| `NotFound` | `NotFound` | 08（404：代码、标题、说明、回首页 / 看看全部文章） |
+| `CoverField` | `CoverField` | 03 设置抽屉（封面：缩略图 + 更换 / 移除，空时为拖放区） |
 | `LoginForm` | `LoginForm` | 01 / 01m |
 | `PageHeader` | `PageHeader` | 02 / 02m |
 | `PostList` | `PostList` | 02 / 02m（底层 AnimatedList，见"列表动效参数"） |
@@ -351,7 +358,6 @@
 | `IconButton` 圆角 | 编辑器工具栏、轻提示关闭按钮的实例覆盖为 4px，其余为 `radius`（8px） | 实现时统一为 `radius` |
 | `ConfirmDialog` 遮罩 | 设计稿为 `#2A251F` 35%（未用令牌） | 实现用 `scrim` 令牌 37%（`bg-scrim/37`），亮暗主题通用 |
 | 轻提示关闭按钮尺寸 | 设计稿为 24×24、图标 14px | 实现用 `IconButton` `sm`（28×28、图标 16px），满足桌面可点区域 ≥ 28px（design-tokens"焦点与交互"） |
-| 06 首页稿 | 网站地图已改为参考 pseudoyu（首页自我介绍、文章列表在 `/posts`），06 稿仍是"简介 + 标签 + 文章列表"；顶栏已换成新 `SiteNav` | F-002 design-ui 时拆为首页（自我介绍）与 `/posts`（`HomeTags` / `HomePosts` 随之改名） |
 | `PostCard` 边框 | 参考站是 1px 虚线，Pencil 不支持虚线描边，设计稿画成实线 | 实现时用 `border-dashed`，颜色 `line-strong` |
 | 视图切换选中项字重 | 套用 `SegmentedItem/Selected` 后从 400 变为 500，与文章列表筛选一致 | 保持统一 |
 
@@ -359,6 +365,7 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-15 | F-002 design-ui：06 拆为首页（06 / 06m）与 `/posts`（07 / 07m），`HomeTags` / `HomePosts` 改名 `TagIndex` / `PostCardList`，新增 `PostsHeader`；05 补左栏 `TagPostsNav`、文末 `PostPager`、`BackLink`，05m 目录改为 `TocButton` + `TocDrawer`（05m-b）、新增 `ReadingProgress/Bar`、`TagPostsNav/Mobile`；新增 08 `NotFound`、`ThemeToggle`、03 `CoverField`；`PostCard` 摘要优先用 `summary` | miraclehifi |
 | 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../backlog/drop-apple-live-photo.md)）：`ImageSyntaxHelp` 删去 iPhone 实况照片导出方法（admin.pen 03b 已同步） | miraclehifi |
 | 2026-10-14 | `ArticleImage`、RefineFrame 标注已实现；宽图扩出量由 `--article-bleed` 决定 | miraclehifi |
 | 2026-10-14 | 写文章页顶栏新增"更多"菜单（`IconButton/Ghost` + `Menu`，项：登出），03 / 03m 顶栏最右、04 新增展开示例；不新增组件 | miraclehifi |

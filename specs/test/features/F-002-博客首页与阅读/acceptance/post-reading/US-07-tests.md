@@ -17,8 +17,8 @@
 | TC-US07-01 | SC-ARTICLE-01 | 读者页正文与预览同一渲染 | P0 | integration |
 | TC-US07-02 | SC-ARTICLE-01 | 详情页正文结构 | P0 | e2e |
 | TC-US07-03 | SC-ARTICLE-02 | 代码高亮随主题切换 | P1 | ui-interaction |
-| TC-US07-04 | SC-ARTICLE-03 | 标题区日期、更新于与标签 | P0 | e2e |
-| TC-US07-05 | SC-ARTICLE-03 | 更新于判断纯函数 | P2 | unit |
+| TC-US07-04 | SC-ARTICLE-03 | 标题区日期、字数与阅读时长、更新于、标签 | P0 | e2e |
+| TC-US07-05 | SC-ARTICLE-03 | 更新于与字数纯函数 | P2 | unit |
 | TC-US07-06 | SC-ARTICLE-04 | 段首缩进与首字下沉 | P0 | ui-interaction |
 | TC-US07-07 | SC-ARTICLE-05 | 首段不是文字时不下沉 | P1 | ui-interaction |
 | TC-US07-08 | SC-ARTICLE-06 | 引用署名 | P1 | ui-interaction |
@@ -85,13 +85,13 @@
 
 ---
 
-### TC-US07-04: 标题区日期、更新于与标签
+### TC-US07-04: 标题区日期、字数与阅读时长、更新于、标签
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US07-04 |
 | covers | SC-ARTICLE-03 |
-| Scenario | 标题区日期、更新于与标签 |
+| Scenario | 标题区日期、字数与阅读时长、更新于、标签 |
 | Priority | P0 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ 适合自动化 |
@@ -105,20 +105,20 @@
 1. 访问 `/posts/hello` 与 `/posts/prev-post`
 
 **预期结果：**
-- hello：`time[datetime="2026-10-10"]` 文本"2026-10-10"；"更新于 2026-10-12"；标签链接 `#Astro`、`#Cloudflare`
+- hello：`time[datetime="2026-10-10"]` 文本"2026年10月10日 星期六"；"约 N 字 · 阅读 M 分钟"（N 为正文纯文本字数向上取整到百位，M = 字数 / 300 向上取整且 ≥ 1）；"更新于 2026年10月12日"；标签链接 `#Astro`、`#Cloudflare`
 - prev-post：无"更新于"
 
 **清理：** 无（只读夹具）
 
 ---
 
-### TC-US07-05: 更新于判断纯函数
+### TC-US07-05: 更新于与字数纯函数
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US07-05 |
 | covers | SC-ARTICLE-03 |
-| Scenario | 更新于判断纯函数 |
+| Scenario | 更新于与字数纯函数 |
 | Priority | P2 |
 | Version Tag | v1.0 |
 | Automation Feasibility | ✅ 适合自动化 |
@@ -139,6 +139,7 @@
 
 **预期结果：**
 - 同一天 → null；晚于发布日期 → `2026-10-12`；null → null（按 UTC 日期比较，以 design-domain 为准）
+- `readingStats(text)`：中文按字、英文按词计数；300 字 → 1 分钟，301 字 → 2 分钟，0 字 → 1 分钟
 
 **清理：** 无（只读夹具）
 

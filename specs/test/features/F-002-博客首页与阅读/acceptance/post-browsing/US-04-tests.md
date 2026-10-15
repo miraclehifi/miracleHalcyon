@@ -23,6 +23,7 @@
 | TC-US04-07 | SC-BROWSE-06, SC-BROWSE-07 | 非法页码 404 | P1 | e2e |
 | TC-US04-08 | SC-BROWSE-08 | 空列表 | P1 | build |
 | TC-US04-09 | SC-BROWSE-09 | 悬停错位、触屏与减弱动效 | P2 | ui-interaction |
+| TC-US04-10 | SC-BROWSE-10 | 标签索引 | P1 | e2e |
 
 ---
 
@@ -181,6 +182,34 @@
 
 ---
 
+### TC-US04-10: 标签索引
+
+| 字段 | 值 |
+|------|------|
+| TC-ID | TC-US04-10 |
+| covers | SC-BROWSE-10 |
+| Scenario | 标签索引 |
+| Priority | P1 |
+| Version Tag | v1.0 |
+| Automation Feasibility | ✅ 适合自动化 |
+| type | e2e |
+| Change History | 2026-10-15 v1.0 初始创建 |
+
+**前置条件：**
+- 无
+
+**步骤：**
+1. 访问 `/posts`，读取"按标签浏览"；点击 `#Cloudflare · 2`；访问 `/posts/page/2`
+
+**预期结果：**
+- 标签依次为 `#Astro · 25`、`#Cloudflare · 2`、`#C# 与 .NET/Core · 1`（篇数降序，同数按名称升序），不含 Secret
+- 点击进入 `/tags/cloudflare`
+- `/posts/page/2` 不显示标签索引
+
+**清理：** 无（只读夹具）
+
+---
+
 ## UI 交互测试
 
 ### TC-US04-04: 摘要最多 3 行
@@ -333,6 +362,7 @@ await expect(card('Hello Halcyon').locator('[data-layer="top"]')).toHaveCSS('tra
 | SC-BROWSE-07 | TC-US04-07 |
 | SC-BROWSE-08 | TC-US04-08 |
 | SC-BROWSE-09 | TC-US04-09 |
+| SC-BROWSE-10 | TC-US04-10 |
 
 ---
 

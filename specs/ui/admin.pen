@@ -9916,7 +9916,7 @@
       "type": "frame",
       "id": "TmZwv",
       "x": 0,
-      "y": 16500,
+      "y": 16232,
       "name": "页面区 · 读者端",
       "layout": "vertical",
       "gap": 6,
@@ -15486,37 +15486,6 @@
                                   "fill": "$ink-faint"
                                 }
                               ]
-                            },
-                            {
-                              "type": "rectangle",
-                              "id": "qNBbi",
-                              "name": "Divider",
-                              "fill": "$line",
-                              "width": "fill_container",
-                              "height": 1
-                            },
-                            {
-                              "type": "text",
-                              "id": "h4Fj8i",
-                              "name": "iPhone Title",
-                              "fill": "$ink",
-                              "content": "从 iPhone 上传实况照片",
-                              "fontFamily": "$font-body",
-                              "fontSize": 13,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "l4MZb3",
-                              "name": "iPhone Body",
-                              "fill": "$ink-muted",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "iPhone 网页里从相册选择只能拿到静态图。\n① 电脑上：照片 → 文件 → 导出 → 导出未修改的原件，把同名的 HEIC 和 MOV 一起拖进来\n② iPhone 上：先「存储到文件」，再用「插入图片」从「文件」里同时选中两个文件",
-                              "lineHeight": 1.6,
-                              "fontFamily": "$font-body",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
                             }
                           ]
                         }

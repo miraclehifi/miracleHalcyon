@@ -13,6 +13,7 @@
 | BH-07 | SC-BROWSE-07 | 超出范围的页码 | 错误 |
 | BH-08 | SC-BROWSE-08 | 空列表 | 边界 |
 | BH-09 | SC-BROWSE-09 | 悬停错位效果 | UI |
+| BH-10 | SC-BROWSE-10 | 标签索引 | 正常 |
 
 ---
 
@@ -115,6 +116,20 @@ When 移入或点按卡片
 Then 虚线框不移动
 ```
 
+## BH-10: 标签索引
+
+**SC-ID**: SC-BROWSE-10
+
+```gherkin
+Given 已发布文章标签为 Astro 25 篇、Cloudflare 2 篇、C# 与 .NET/Core 1 篇，Secret 只在草稿中
+When 我访问 /posts
+Then 页头下方"按标签浏览"依次为 #Astro · 25、#Cloudflare · 2、#C# 与 .NET/Core · 1，不含 Secret
+When 我点击 #Cloudflare · 2
+Then 进入 /tags/cloudflare
+When 我访问 /posts/page/2
+Then 不显示标签索引
+```
+
 ---
 
 ## 变更历史
@@ -122,3 +137,4 @@ Then 虚线框不移动
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-15 | 1.0 | 初始版本 | miraclehifi |
+| 2026-10-15 | 1.1 | 新增 BH-10 标签索引 | miraclehifi |
