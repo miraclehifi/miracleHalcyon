@@ -8,8 +8,9 @@
     {
       "binding": "DB",
       "database_name": "miracle-halcyon",
-      // 本地模拟用占位 ID；接入生产库时替换为 `wrangler d1 create` 返回的 ID
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "8784e373-405f-471f-b126-b5eb2381498c",
+      // 本地 D1 按此 ID 存储，沿用接入生产库前的占位 ID，保留已有本地数据
+      "preview_database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "src/db/migrations"
     }
   ],
