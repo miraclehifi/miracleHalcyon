@@ -1,7 +1,7 @@
 # 文章写作 User Stories 索引
 
 **Feature ID**: F-001
-**最后更新**: 2026-10-12
+**最后更新**: 2026-10-16
 
 ---
 
@@ -34,11 +34,11 @@
 |-------|------|------|------|
 | US-03 | edit-post-info | implemented | 新建/编辑文章：标题、slug、标签、摘要、发布日期、正文 |
 | US-04 | markdown-preview | implemented | 正文 Markdown 实时预览（GFM、代码高亮） |
-| US-05 | image-upload | implemented | 粘贴/拖入图片上传 R2 并插入引用 |
+| US-05 | image-upload | implemented | 粘贴/拖入图片上传 R2 并插入引用；浏览器端压缩、进度卡片（2026-10-16 增量） |
 | US-06 | autosave-draft | implemented | 停止输入后自动保存，显示保存状态，重开恢复 |
 | US-10 | format-toolbar | implemented | 工具栏格式命令、格式快捷键、按钮悬停提示 |
-| US-11 | live-photo-upload | implemented | 安卓动态照片（JPEG 内嵌视频）识别为实况照片上传 |
-| US-12 | image-layout-marks | implemented | 宽图、组图网格 / 手风琴写法，预览图片菜单（Sprint 3） |
+| US-11 | live-photo-upload | implemented | 安卓动态照片（JPEG 内嵌视频）识别为实况照片上传；实况开关默认关闭（2026-10-16 增量） |
+| US-12 | image-layout-marks | implemented | 宽图、组图网格 / 手风琴写法，预览图片菜单（Sprint 3）；菜单实况勾选项（2026-10-16 增量） |
 
 ### post-management
 

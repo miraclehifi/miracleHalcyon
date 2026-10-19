@@ -40,6 +40,14 @@ describe("reader-fixture 构建产物", () => {
     for (const marker of ["draft-post", "withdrawn-post", ">Draft<", ">Withdrawn<", "#Secret"]) expect(all, marker).not.toContain(marker);
   });
 
+  // [TC-US05-38][SC-IMAGE-20] 正文残留的上传占位（失败 / 上传中 / 处理中，独占段落或行内）不出现在读者页
+  it("[TC-US05-38] 读者页不渲染上传占位", () => {
+    const page = html("posts/filler-20.html");
+    const article = page.slice(page.indexOf("段落A"), page.indexOf("段落B") + 3);
+    expect(article).toContain("前文");
+    expect(article).not.toMatch(/data-upload-placeholder|upload-placeholder|图片上传中|上传中…|处理中…|上传失败|上传已中断|src=""|<p>\s*<\/p>/);
+  });
+
   // ADR-007 验证结果②：构建数据与 Markdown 渲染（Shiki）不进运行时 Worker 包
   it("Worker 包不含读者数据与 Shiki", () => {
     const worker = files(SERVER, (path) => relative(SERVER, path).startsWith(".prerender"))

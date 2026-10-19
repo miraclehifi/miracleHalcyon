@@ -3,8 +3,8 @@
 **US ID**: US-12
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-12-image-layout-marks/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-12-image-layout-marks/behaviors.md)
-**最后更新**: 2026-10-13
-**Version Tag**: v1.0
+**最后更新**: 2026-10-16
+**Version Tag**: v1.4
 
 > 用例以 behaviors.md 为基础，补充等价类、边界值和错误猜测。写法规则以 [ADR-005](../../../../../engineering/features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) 为准。
 > 渲染规则是纯函数 `renderMarkdown`，大部分用例在单元层用"输入 Markdown → 输出 HTML 结构"矩阵覆盖（见 [frontend-unit-tests.md](../../unit/frontend-unit-tests.md) §12）。本文件只放需要浏览器参与的端到端行为，以及代表性的渲染断言。
@@ -47,6 +47,9 @@
 | TC-US12-16 | SC-LAYOUT-12 | 底栏"图片写法"说明的打开、内容、Esc 关闭、焦点回归 | ui-interaction | P2 |
 | TC-US12-17 | SC-LAYOUT-13 | 继续输入时，已加载的图片不重新加载、不重新播放动画 | ui-interaction | P1 |
 | TC-US12-18 | SC-LAYOUT-07, SC-LAYOUT-08 | 菜单可用键盘操作（Tab 到图片、Enter 打开、方向键、Esc） | ui-interaction | P1 |
+| TC-US12-19 | SC-LAYOUT-14 | 单图菜单取消 / 恢复实况，保留 `wide`，可撤销 | ui-interaction | P0 |
+| TC-US12-20 | SC-LAYOUT-15 | 无实况视频（含已清理）不显示"实况"项；检查结果会话内缓存 | ui-interaction | P1 |
+| TC-US12-21 | SC-LAYOUT-14 | 片段改写纯函数：`live` 的增删与其他标记保留（规格见 frontend-unit-tests.md） | unit | P1 |
 
 ---
 
@@ -567,6 +570,70 @@ await page.keyboard.press('Escape');
 
 **清理：** 删除草稿
 
+### TC-US12-19: 单图菜单取消 / 恢复实况，保留 `wide`，可撤销
+
+| 字段 | 值 |
+|------|------|
+| TC-ID | TC-US12-19 |
+| covers | SC-LAYOUT-14 |
+| Scenario | 菜单"实况"勾选项改写 URL 片段 |
+| Priority | P0 |
+| Version Tag | v1.4 |
+| Automation Feasibility | ✅ 适合自动化 |
+| type | ui-interaction |
+| Change History | 2026-10-16 v1.4 上传体验升级（media-upload-experience）：新增 |
+
+**前置条件：** 【数据前置】R2 只读夹具 `img/2026/10/llllllllll_1600x1200_334455.jpg` 及同名 `.live.mp4`；草稿正文第 1 行为 `![海](/img/2026/10/llllllllll_1600x1200_334455.jpg#wide,live)`
+
+**步骤：**
+1. 悬停预览中的图片，打开菜单
+2. 取消勾选"实况"
+3. 再次勾选"实况"
+4. 源码区按 Ctrl/Cmd+Z
+
+**预期结果：**
+- 步骤 1：菜单有"宽图"（`aria-pressed="true"`）和"实况"（`role="menuitemcheckbox"`，`aria-checked="true"`）
+- 步骤 2：第 1 行为 `…334455.jpg#wide`；预览无 `LIVE` 标记，仍为宽图；"实况"仍显示，`aria-checked="false"`
+- 步骤 3：第 1 行为 `…334455.jpg#wide,live`
+- 步骤 4：第 1 行回到 `…334455.jpg#wide`
+
+**playwright_hint：**
+```ts
+const live = page.getByRole('menuitemcheckbox', { name: '实况' });
+await expect(live).toHaveAttribute('aria-checked', 'true');
+await live.click();
+await expect(editor).toHaveValue(/334455\.jpg#wide\)$/m);
+```
+
+**清理：** 删除草稿
+
+---
+
+### TC-US12-20: 无实况视频不显示"实况"项；检查结果会话内缓存
+
+| 字段 | 值 |
+|------|------|
+| TC-ID | TC-US12-20 |
+| covers | SC-LAYOUT-15 |
+| Scenario | 只有存在 `.live.mp4` 的图片才显示勾选项 |
+| Priority | P1 |
+| Version Tag | v1.4 |
+| Automation Feasibility | ✅ 适合自动化（统计对 `.live.mp4` 的 HEAD 请求次数） |
+| type | ui-interaction |
+| Change History | 2026-10-16 v1.4 上传体验升级（media-upload-experience）：新增 |
+
+**前置条件：** 【数据前置】只读夹具 `aaaaaaaaaa_1600x900_556677.jpg`（无视频）、`mmmmmmmmmm_1600x900_112233.jpg`（无视频，正文写成 `#live`，模拟视频已被清理）
+
+**步骤：**
+1. 分别打开两张图的菜单
+2. 关闭后再次打开第一张的菜单
+
+**预期结果：**
+- 两个菜单都没有"实况"项，"宽图"正常
+- 每张图只发起 1 次视频存在性检查请求；第二次打开不再请求
+
+**清理：** 删除草稿
+
 ---
 
 ## 覆盖矩阵
@@ -586,18 +653,20 @@ await page.keyboard.press('Escape');
 | SC-LAYOUT-11 | BH-11 定位保护 | TC-US12-14, 15 |
 | SC-LAYOUT-12 | BH-12 写法帮助 | TC-US12-16 |
 | SC-LAYOUT-13 | BH-13 不重复加载 | TC-US12-17 |
+| SC-LAYOUT-14 | BH-14 菜单实况勾选 | TC-US12-19, 21 |
+| SC-LAYOUT-15 | BH-15 无视频不显示实况项 | TC-US12-20 |
 
 | 验收标准（story.md §2） | TC-IDs |
 |------------------------|--------|
 | AC1 宽图 | TC-US12-01 |
 | AC2 组图 / 手风琴 | TC-US12-02, 03, 04, 05 |
 | AC3 图注 | TC-US12-06 |
-| AC4 单图菜单 | TC-US12-09, 10, 13 |
+| AC4 单图菜单（含实况勾选项） | TC-US12-09, 10, 13, 19, 20, 21 |
 | AC5 组图菜单 | TC-US12-11, 12 |
 | AC6 写错不报错 | TC-US12-07, 08 |
 | AC7 写法帮助 | TC-US12-16 |
 
-**Gap 检查**：behaviors.md 共有 SC-LAYOUT-01 ~ SC-LAYOUT-13 13 个 SC-ID，每个都至少有 1 个 TC 覆盖。
+**Gap 检查**：behaviors.md 共有 SC-LAYOUT-01 ~ SC-LAYOUT-15 15 个 SC-ID，每个都至少有 1 个 TC 覆盖。
 
 **Gap: 无**
 
@@ -611,3 +680,4 @@ await page.keyboard.press('Escape');
 | 2026-10-13 | v1.1 | TC-US12-16 增加 iPhone 导出方法断言 | miraclehifi |
 | 2026-10-13 | v1.2 | 菜单改为"悬停出按钮 → 点击展开"（design-ui），同步 TC-US12-09/11/15/18 步骤 | miraclehifi |
 | 2026-10-15 | v1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../../backlog/drop-apple-live-photo.md)）：TC-US12-16 删去 iPhone 一节断言 | miraclehifi |
+| 2026-10-16 | v1.4 | 单图菜单增加"实况"勾选项（[media-upload-experience](../../../../../backlog/media-upload-experience.md)）：新增 TC-US12-19 ~ 21 | miraclehifi |

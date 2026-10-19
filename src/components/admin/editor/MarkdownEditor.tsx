@@ -1,10 +1,11 @@
 // MarkdownEditor（components.md，admin-post-editor.md"编辑区"，ADR-004 textarea 编辑器）：标题 + 源码区 + 底栏
 // 标题是无边框大号输入（自动增高、不含换行），回车把光标移到正文；工具栏按钮与快捷键改写源码（US-10，可撤销）
-import { useCallback, useLayoutEffect, useRef, useState, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent } from "react";
+import { useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent } from "react";
 import { applyEdit, applyFormat, type FormatCommand } from "../../../lib/editor/format-commands";
 import { isMacPlatform, matchShortcut } from "../../../lib/editor/shortcuts";
 import { offsetFromPoint } from "../../../lib/editor/textarea-mirror";
-import { useImageUploads } from "../../../lib/upload/use-image-uploads";
+import { readLivePref, writeLivePref } from "../../../lib/upload/live-pref";
+import { useImageUploads, type UploadView } from "../../../lib/upload/use-image-uploads";
 import { Popover } from "../../ui/Popover";
 import { useToast } from "../../ui/Toast";
 import { EditorToolbar } from "./EditorToolbar";
@@ -17,10 +18,12 @@ export interface MarkdownEditorProps {
   bodyInvalid?: boolean;
   onTitleChange(title: string): void;
   onBodyChange(body: string): void;
-  onUploadsChange?: (names: string[]) => void; // 进行中上传的文件名（预览占位块用）
+  onUploadsChange?: (uploads: UploadView[]) => void; // 进行中的上传（预览进度卡片用）
+  onSessionExpired?: () => void; // 上传返回 401（与保存 401 同一处理：暂存、跳登录）
 }
 
 const countFormat = new Intl.NumberFormat("en-US");
+const noopSubscribe = () => () => {};
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif"; // heic / 实况视频在 Sprint 3（US-11）放开
 
 // 底栏"图片写法"：文字按钮打开 Popover（底栏上方、与底栏文字左对齐，admin.pen 03b）；关闭后焦点回到按钮
@@ -58,14 +61,22 @@ export function countChars(text: string): number {
   return count;
 }
 
-export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitleChange, onBodyChange, onUploadsChange }: MarkdownEditorProps) {
+export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitleChange, onBodyChange, onUploadsChange, onSessionExpired }: MarkdownEditorProps) {
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const showUploadError = useCallback((message: string) => toast.show({ tone: "error", message }), [toast]);
   const showUploadWarning = useCallback((message: string) => toast.show({ tone: "warning", message }), [toast]);
-  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange, onError: showUploadError, onWarning: showUploadWarning });
+  // 实况照片开关：存储里的值（服务端渲染按关闭）+ 本次切换的结果（存储不可用时也生效），同 view-mode 的做法
+  const stored = useSyncExternalStore(noopSubscribe, readLivePref, () => false);
+  const [chosen, setChosen] = useState<boolean | null>(null);
+  const live = chosen ?? stored;
+  const changeLive = useCallback((next: boolean) => {
+    setChosen(next);
+    writeLivePref(next);
+  }, []);
+  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange, onError: showUploadError, onWarning: showUploadWarning, liveEnabled: live, onUnauthenticated: onSessionExpired });
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0); // dragenter / dragleave 在子元素间成对出现，计数归零才算离开
 
@@ -163,7 +174,7 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
         onKeyDown={onTitleKeyDown}
         className="w-full resize-none overflow-hidden bg-transparent text-display font-semibold text-ink outline-none placeholder:text-ink-faint max-md:text-[26px]"
       />
-      <EditorToolbar onCommand={runCommand} onInsertImage={() => fileInputRef.current?.click()} />
+      <EditorToolbar onCommand={runCommand} onInsertImage={() => fileInputRef.current?.click()} live={live} onLiveChange={changeLive} />
       <input ref={fileInputRef} type="file" accept={IMAGE_ACCEPT} multiple hidden onChange={onPickFiles} />
       <textarea
         ref={bodyRef}

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { adminApi, login, PASSWORD, USERNAME } from "./support/admin";
 import { waitForHydration } from "./support/hydration";
+import { pasteFiles } from "./support/images";
 
 // 会话过期（editor module-spec §2 状态机 401、UI 决定 #3）：保存或发布返回 401 → 内容暂存本地 → 跳 /admin/login?next=当前地址，
 // 不弹离开确认；登录后回到写文章页，恢复横幅找回内容。会话失效用清 Cookie 模拟
@@ -59,4 +60,25 @@ test("[TC-US06-25] 发布时会话过期跳登录页", async ({ page, context, b
   await expect(page).toHaveURL(new RegExp(`/admin/posts/${id}$`));
   await waitForHydration(page);
   await expect(page.getByRole("button", { name: "恢复本地内容" })).toHaveCount(0);
+});
+
+// [TC-US05-40][SC-AUTOSAVE-10] 上传图片返回 401：同样暂存当前内容（占位为"上传失败"）并跳登录页，不弹离开确认
+test("[TC-US05-40] 上传时会话过期：暂存并跳登录页", async ({ page, context, baseURL }) => {
+  const id = await openPost(page, baseURL!, "上传过期");
+  const dialogs: string[] = [];
+  page.on("dialog", (dialog) => {
+    dialogs.push(dialog.type());
+    void dialog.dismiss();
+  });
+  await page.route("**/api/admin/images", (route) =>
+    route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ error: { code: "UNAUTHENTICATED", message: "未登录" } }) }),
+  );
+  await context.clearCookies(); // 会话真正失效，登录页不会再把人送回来；上传先于自动保存（2 秒防抖）返回 401
+  const editor = body(page);
+  await editor.focus();
+  await editor.press("ControlOrMeta+End");
+  await pasteFiles(page, editor, [{ name: "shot.png", type: "image/png", content: { png: [20, 20] } }]);
+  await expect(page).toHaveURL(loginUrl(id));
+  const stash = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null") as { content: { body: string } } | null, `mh:draft:${id}`);
+  expect({ dialogs, body: stash?.content.body }).toEqual({ dialogs: [], body: "基线![上传失败]()" });
 });

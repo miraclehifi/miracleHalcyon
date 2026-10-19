@@ -30,7 +30,7 @@
 
 4. Given 我把鼠标移到预览里的单张图片上（手机上是点按）
    When 图片菜单出现
-   Then 我可以切换"宽图"，源码中这张图的 URL 随之加上或去掉 `#wide`，可以用 ⌘Z / Ctrl+Z 撤销
+   Then 我可以切换"宽图"，源码中这张图的 URL 随之加上或去掉 `#wide`，可以用 ⌘Z / Ctrl+Z 撤销；该图存有实况视频时，菜单还有"实况"勾选项，取消 / 勾选会去掉 / 加回 URL 片段中的 `live`，保留 `wide` 等其他标记（如 `#wide,live` → `#wide`），同样可撤销；没有实况视频（含已被清理）的图片不显示该项
 
 5. Given 我把鼠标移到预览里的组图上（手机上是点按）
    When 在菜单中选"网格 / 手风琴 / 拆成单图"
@@ -52,6 +52,7 @@
 - 所有写法都是合法 GFM，在其他 Markdown 阅读器中退化为普通图片（[ADR-005](../../../../../../engineering/features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md)）
 - 预览中的图片展示与读者端一致（`ArticleImage`、`ImageGallery`，见 [components.md](../../../../../../ui/components.md)"文章图片"）
 - 菜单只改源码，改写与格式工具栏一样进入原生撤销栈（同 US-10）
+- "实况"勾选项是否显示：打开菜单时检查该图是否存在 `.live.mp4`，本次会话内缓存结果
 
 **假设**:
 - "合并为组图"不提供菜单项，靠手写（删掉图片之间的空行）
@@ -74,3 +75,4 @@
 | 2026-10-12 | 1.0 | 初始版本（design-arch 范围变更：宽图 / 组图 F-001 全做） | miraclehifi |
 | 2026-10-13 | 1.1 | 写法帮助增加 iPhone 实况照片导出方法 | miraclehifi |
 | 2026-10-15 | 1.2 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../../../backlog/drop-apple-live-photo.md)）：AC7 删去 iPhone 导出方法 | miraclehifi |
+| 2026-10-16 | 1.3 | AC4 单图菜单增加"实况"勾选项（[media-upload-experience](../../../../../../backlog/media-upload-experience.md)） | miraclehifi |

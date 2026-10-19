@@ -3,9 +3,14 @@ import {
   applyEdit,
   countPlaceholders,
   insertPlaceholders,
+  markFailed,
+  markProcessing,
+  PLACEHOLDER_FAILED,
   PLACEHOLDER_UPLOADING,
+  placeholderEdit,
   placeholdersBefore,
   removePlaceholder,
+  removePlaceholderLine,
   replacePlaceholder,
   type Edit,
 } from "../../../src/lib/editor/format-commands";
@@ -53,6 +58,31 @@ describe("removePlaceholder", () => {
   });
 });
 
+// [SC-IMAGE-07][SC-IMAGE-11] UT-89（2026-10-16）："上传失败"占位参与按顺序定位；失败改写与整行移除
+describe("失败占位", () => {
+  it("上传失败也算占位；markFailed 改写；removePlaceholderLine 独占一行时连同换行一起删", () => {
+    const F = PLACEHOLDER_FAILED;
+    const text = `段落A\n${P}\n${F}\n段落B`;
+    expect({
+      count: countPlaceholders(text),
+      failed: apply(text, markFailed(text, 0)),
+      retry: apply(text, markProcessing(text, 1)),
+      middle: apply(text, removePlaceholderLine(text, 1)),
+      last: apply(`段落A\n${F}`, removePlaceholderLine(`段落A\n${F}`, 0)),
+      only: apply(F, removePlaceholderLine(F, 0)),
+      inline: apply(`前文 ${F} 后文`, removePlaceholderLine(`前文 ${F} 后文`, 0)),
+    }).toEqual({
+      count: 2,
+      failed: `段落A\n${F}\n${F}\n段落B`,
+      retry: `段落A\n${P}\n![处理中…]()\n段落B`,
+      middle: `段落A\n${P}\n段落B`,
+      last: "段落A",
+      only: "",
+      inline: "前文  后文",
+    });
+  });
+});
+
 // [SC-IMAGE-01][SC-IMAGE-02] UT-91：文件名 → alt
 describe("altFromFileName / imageMarkdown", () => {
   it("去扩展名；剪贴板无名图片为 image；[ ] 转义", () => {
@@ -90,5 +120,39 @@ describe("applyEdit 保留作者选区", () => {
     });
     body.remove();
     other.remove();
+  });
+});
+
+// [SC-IMAGE-09][SC-IMAGE-19] ED-UT-03（扩展，2026-10-16）：占位槽位——一次编辑删掉了哪些占位（旧序号）、新出现了哪些（新序号）
+describe("placeholderEdit", () => {
+  const F = PLACEHOLDER_FAILED;
+  it("占位数不变 → 无变化；纯删除按光标定位（相邻相同占位也分得清）", () => {
+    const prev = `${P}\n${P}\n${P}`;
+    expect([
+      placeholderEdit("a", "ab", 2),
+      placeholderEdit(prev, `${P}\n${P}`, P.length), // 删掉第 2 个占位连同它前面的换行：光标停在第 1 个之后
+      placeholderEdit(prev, `${P}\n${P}\n`, 2 * P.length + 2),
+    ]).toEqual([
+      { removed: [], inserted: [] },
+      { removed: [1], inserted: [] },
+      { removed: [2], inserted: [] },
+    ]);
+  });
+
+  it("撤销 / 粘贴带回占位：按插入区间识别为新占位", () => {
+    const prev = `开头\n${P}\n结尾`;
+    const pasted = `开头\n${F}\n${P}\n结尾`;
+    expect([placeholderEdit(prev, pasted, 3 + F.length + 1), placeholderEdit(prev, pasted, 0)]).toEqual([
+      { removed: [], inserted: [0] }, // 纯插入：按光标定位
+      { removed: [], inserted: [0] }, // 光标不对时退回公共前后缀
+    ]);
+  });
+
+  it("替换：删一个、出现一个；改坏占位文本算删除", () => {
+    const prev = `${P}\nx\n${P}`;
+    expect([placeholderEdit(prev, `${P}\n${F}\n${P}`, 0), placeholderEdit(prev, `![上传中…](\nx\n${P}`, 0)]).toEqual([
+      { removed: [], inserted: [1] },
+      { removed: [0], inserted: [] },
+    ]);
   });
 });

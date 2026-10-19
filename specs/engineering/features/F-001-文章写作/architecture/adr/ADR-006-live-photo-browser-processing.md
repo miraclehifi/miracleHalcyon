@@ -6,6 +6,13 @@ Accepted（2026-10-12）；2026-10-15 范围调整，见下
 ## 范围调整（2026-10-15）
 作者决定不考虑 iPhone / 苹果系统（[drop-apple-live-photo](../../../../../backlog/drop-apple-live-photo.md)）：实况照片只来自安卓动态照片（一个 JPEG 内嵌 mp4）。决策第 1 点的同名"图片 + 视频"配对、第 2 点的 HEIC / HEIF 转换取消，HEIC、单独的 mov / mp4 按 US-05 的类型错误处理；视频处理、元数据、服务端校验、读者端降级不变。下文"背景"保留当时的调研记录。
 
+## 调整（2026-10-16）
+[media-upload-experience](../../../../../backlog/media-upload-experience.md)：
+
+- **实况默认关闭**：编辑器工具栏新增"实况照片"开关（默认关，选择存本浏览器）。关闭时识别出的动态照片只上传静态图（仍切掉内嵌视频字节），不加载 `mediabunny`、不存视频；开启时按下文决策处理。上传中的单张可"仅转为静态图"。理由：多数照片不需要动，视频占存储、拖慢上传
+- **静态图压缩**：静态图在上传前于浏览器压缩（长边 2560、WebP 0.82，不支持时 JPEG 0.85；PNG 只缩尺寸；GIF 不压缩），主色与宽高改为基于压缩结果计算（决策第 4 点）。服务端不变
+- 已上传的实况照片可在图片菜单取消 / 恢复 `#live`（视频文件保留，清理见 [media-orphan-cleanup](../../../../../backlog/media-orphan-cleanup.md)）
+
 ## 背景
 iPhone 导出的实况照片是 HEIC + MOV（通常为 HEVC 编码），安卓的 Motion Photo 是把 mp4 嵌在 JPEG 里。Chrome、Firefox 不能显示 HEIC，很多环境也播放不了 HEVC。Workers 里不能运行 sharp、ffmpeg、exiftool 这类原生程序。
 

@@ -5,8 +5,9 @@ export const IMAGE_URL = /^\/img\/\d{4}\/\d{2}\/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}
 export interface FakeFile {
   name: string;
   type: string;
-  // png / jpeg：页面内用 canvas 生成可解码的图片（宽×高）；bytes：该字节数的填充内容
-  content: { png: [number, number] } | { jpeg: [number, number] } | { bytes: number };
+  // png / jpeg：页面内用 canvas 生成可解码的图片（宽×高）；bytes：该字节数的填充内容；
+  // photo：类照片的 JPEG（渐变 + 细噪点，左上角 200×200 红块用来判断方向，见 drawPhoto）
+  content: { png: [number, number] } | { jpeg: [number, number] } | { photo: [number, number] } | { bytes: number };
   padTo?: number; // 在图片末尾补零到恰好该字节数（文件头不变，仍能通过服务端嗅探）
 }
 
@@ -18,6 +19,33 @@ export async function makeFiles(page: Page, files: FakeFile[]) {
       let blob: Blob;
       if ("bytes" in spec.content) {
         blob = new Blob([new Uint8Array(spec.content.bytes)]);
+      } else if ("photo" in spec.content) {
+        const [w, h] = spec.content.photo;
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        const gradient = ctx.createLinearGradient(0, 0, w, h);
+        gradient.addColorStop(0, "#d9a066");
+        gradient.addColorStop(0.5, "#5b7f95");
+        gradient.addColorStop(1, "#2d3a2e");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, w, h);
+        const tile = ctx.createImageData(256, 256);
+        let seed = 7;
+        for (let i = 0; i < tile.data.length; i += 4) {
+          seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+          const v = seed % 48;
+          tile.data.set([v, v, v, 40], i);
+        }
+        const noise = document.createElement("canvas");
+        noise.width = noise.height = 256;
+        noise.getContext("2d")!.putImageData(tile, 0, 0);
+        ctx.fillStyle = ctx.createPattern(noise, "repeat")!;
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(0, 0, 200, 200);
+        blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.95));
       } else {
         const [type, [w, h]] = "png" in spec.content ? ["image/png", spec.content.png] : ["image/jpeg", spec.content.jpeg];
         const canvas = document.createElement("canvas");
@@ -122,4 +150,40 @@ export function multipartFields(body: Buffer, contentType: string): Record<strin
     pos = next;
   }
   return fields;
+}
+
+// 读取页面里生成的文件字节（用于在 Node 侧加工后再经 dropBytes 拖入）
+export async function fileBytes(page: Page, file: FakeFile): Promise<Uint8Array> {
+  const handle = await makeFiles(page, [file]);
+  const values = await handle.evaluate(async ([f]) => [...new Uint8Array(await f.arrayBuffer())]);
+  return new Uint8Array(values);
+}
+
+// 在 JPEG 的 SOI 之后插入 APP1 Exif：IFD0 含 Orientation 与 GPSInfo 指针，GPS IFD 含 GPSVersionID（小端序 TIFF）
+export function withExif(jpeg: Uint8Array, orientation: number): Uint8Array {
+  const tiff = Buffer.alloc(8 + 2 + 2 * 12 + 4 + 2 + 12 + 4);
+  tiff.write("II", 0, "latin1");
+  tiff.writeUInt16LE(42, 2);
+  tiff.writeUInt32LE(8, 4);
+  tiff.writeUInt16LE(2, 8);
+  const gpsOffset = 8 + 2 + 2 * 12 + 4;
+  const entry = (at: number, tag: number, type: number, count: number, value: number, short = false) => {
+    tiff.writeUInt16LE(tag, at);
+    tiff.writeUInt16LE(type, at + 2);
+    tiff.writeUInt32LE(count, at + 4);
+    if (short) tiff.writeUInt16LE(value, at + 8);
+    else tiff.writeUInt32LE(value, at + 8);
+  };
+  entry(10, 0x0112, 3, 1, orientation, true);
+  entry(22, 0x8825, 4, 1, gpsOffset);
+  tiff.writeUInt32LE(0, 34);
+  tiff.writeUInt16LE(1, gpsOffset);
+  tiff.writeUInt16LE(0x0000, gpsOffset + 2);
+  tiff.writeUInt16LE(1, gpsOffset + 4);
+  tiff.writeUInt32LE(4, gpsOffset + 6);
+  tiff.set([2, 2, 0, 0], gpsOffset + 10);
+  tiff.writeUInt32LE(0, gpsOffset + 14);
+  const payload = Buffer.concat([Buffer.from("Exif\0\0", "latin1"), tiff]);
+  const header = Buffer.from([0xff, 0xe1, (payload.length + 2) >> 8, (payload.length + 2) & 0xff]);
+  return new Uint8Array(Buffer.concat([Buffer.from(jpeg.subarray(0, 2)), header, payload, Buffer.from(jpeg.subarray(2))]));
 }

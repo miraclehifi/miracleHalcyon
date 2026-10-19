@@ -61,7 +61,7 @@ describe("useImageUploads", () => {
     let uploadFiles!: (files: File[]) => void;
     function Harness() {
       const ref = useRef<HTMLTextAreaElement>(null);
-      uploadFiles = useImageUploads(ref, { upload }).uploadFiles;
+      uploadFiles = useImageUploads(ref, { fadeOutMs: 0, upload }).uploadFiles;
       return <textarea ref={ref} defaultValue="" />;
     }
     const { container } = render(<Harness />);
@@ -98,7 +98,7 @@ describe("useImageUploads", () => {
     let uploadFiles!: (files: File[]) => void;
     function Harness() {
       const ref = useRef<HTMLTextAreaElement>(null);
-      uploadFiles = useImageUploads(ref, { upload }).uploadFiles;
+      uploadFiles = useImageUploads(ref, { fadeOutMs: 0, upload }).uploadFiles;
       return <textarea ref={ref} defaultValue="" />;
     }
     const { container } = render(<Harness />);
@@ -144,7 +144,7 @@ describe("useImageUploads", () => {
     let uploadFiles!: (files: File[]) => void;
     function Harness() {
       const ref = useRef<HTMLTextAreaElement>(null);
-      uploadFiles = useImageUploads(ref, { upload, measure }).uploadFiles;
+      uploadFiles = useImageUploads(ref, { fadeOutMs: 0, upload, measure }).uploadFiles;
       return <textarea ref={ref} defaultValue="" />;
     }
     const { container } = render(<Harness />);
@@ -167,7 +167,7 @@ describe("useImageUploads", () => {
     steps.push(textarea.value);
 
     expect({ steps, metas }).toEqual({
-      steps: ["![处理中…]()\n![处理中…]()", "![上传中…]()\n![处理中…]()", "![上传中…]()\n![上传中…]()", `![a](${image("a").url})\n`],
+      steps: ["![处理中…]()\n![处理中…]()", "![上传中…]()\n![处理中…]()", "![上传中…]()\n![上传中…]()", `![a](${image("a").url})\n![上传失败]()`],
       metas: [
         ["a.png", { width: 640, height: 480, rgb: "8a7b6c" }],
         ["b.png", null],

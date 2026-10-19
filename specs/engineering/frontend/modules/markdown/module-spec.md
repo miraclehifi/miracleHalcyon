@@ -1,6 +1,6 @@
 # markdown 模块（同构渲染）
 
-**最后更新**: 2026-10-14
+**最后更新**: 2026-10-16
 **状态**: self-checked
 **来源**: [ADR-001](../../../features/F-001-文章写作/architecture/adr/ADR-001-isomorphic-markdown.md) · [ADR-005](../../../features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) · feature-architecture §6.3
 **位置**: `src/lib/markdown/`
@@ -11,7 +11,10 @@
 ## 1. 接口
 
 ```ts
-export interface RenderOptions { sourceMap?: boolean }   // 预览传 true：输出源码位置属性
+export interface RenderOptions {
+  sourceMap?: boolean;               // 预览传 true：输出源码位置属性
+  uploadPlaceholders?: boolean;      // 预览传 true：上传占位输出为挂载点；默认（读者页）删除占位
+}
 export interface RenderResult { html: string; images: ImageRef[] }
 export async function renderMarkdown(source: string, opts?: RenderOptions): Promise<RenderResult>;
 
@@ -50,6 +53,17 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 
 > 已实现（implement-markdown-gfm-render）：GFM 处理链与 `RenderOptions` 签名；脚注区无障碍文案为中文（标题「脚注」、回链「返回引用 N」）。
 > 已实现（implement-markdown-sanitize）：`src/lib/markdown/sanitize-schema.ts`。注意：Expressive Code 在每个代码块内输出自带的 `<style>` 与复制按钮 `<script type="module">`，预览区（TC-US04-05 断言无 script）需处理。
+
+### 2.1 上传占位（`rehypeUploadPlaceholders`）
+
+占位 = Markdown 图片语法、URL 为空、alt 为"处理中…"/"上传中…"/"上传失败"之一。在 sanitize 之后、`rehypeImageFigures` 之前处理：
+
+| 模式 | 输出 |
+|------|------|
+| `uploadPlaceholders: true`（预览） | `[data-upload-placeholder="processing\|uploading\|failed"][data-placeholder-index="{按出现顺序的序号}"]`，由 `MarkdownPreview` 挂载 `UploadCard`。所在段落只有占位时整段替换为 `div`（多个占位各一个，第一个继承段落的源码位置），否则为行内 `span`（不留空 `p`） |
+| 默认（读者页、RSS 等） | 删除占位节点；删除后段落为空（只剩空白）则删除段落。不输出任何文字、`img` 或 `data-upload-placeholder`（US-05 AC10） |
+
+> 已实现（Sprint 6，strip-reader-upload-placeholders）：`src/lib/markdown/plugins/upload-placeholder.ts`，开关经 `file.data.uploadPlaceholders`；预览 Worker 传 true。2026-10-16 前预览与读者页都把占位渲染为"图片上传中…"块。
 
 ## 3. 图片输出结构
 
@@ -119,3 +133,4 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | 2026-10-14 | 1.5 | 图片插件已实现：组图判定改在 sanitize 之后进行；混有文字段落的拆分规则 | miraclehifi |
 | 2026-10-14 | 1.6 | §4：Worker 回传 `images`；预览单图挂载与 `reconcileIslands`（add-article-image-display） | miraclehifi |
 | 2026-10-15 | 1.7 | F-002：新增 `rehypeQuoteAttribution`（引用署名）与 MD-UT-07 | miraclehifi |
+| 2026-10-16 | 1.8 | 新增 §2.1 上传占位：`RenderOptions.uploadPlaceholders`，预览输出挂载点、读者端删除占位（[media-upload-experience](../../../../backlog/media-upload-experience.md)） | miraclehifi |

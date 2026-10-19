@@ -1,5 +1,5 @@
 // ImageMenu（components.md `ImageMenu` · `/Gallery` · `/Mobile`，admin-post-editor"图片菜单"）：预览图片右上角的选项按钮
-// （OverlayButton 32，手机 44）+ Menu。单图："宽图"（checkbox）；组图："网格 / 手风琴"（radio）→ 分隔线 →"拆成单图"，
+// （OverlayButton 32，手机 44）+ Menu。单图："宽图"（checkbox），有实况视频时再加"实况"（checkbox，打开菜单时检查）；组图："网格 / 手风琴"（radio）→ 分隔线 →"拆成单图"，
 // 张数不在 3–7 时"手风琴" aria-disabled 并提示原因。开合由使用方控制（MarkdownPreview 按图片的源码位置记住哪个菜单开着，
 // 改写源码、预览重新挂载后菜单仍打开并停在 initialFocus 项）。菜单在按钮下方右对齐，下方空间不够时翻到上方；
 // 滚动（滚轮 / 触摸滑动）时关闭；关闭后焦点回到按钮
@@ -13,7 +13,14 @@ export const ACCORDION_RANGE = { min: 3, max: 7 };
 const ACCORDION_HINT = "手风琴需要 3–7 张图片";
 
 type ImageMenuKind =
-  | { kind: "image"; wide: boolean; onToggleWide(): void }
+  | {
+      kind: "image";
+      wide: boolean;
+      onToggleWide(): void;
+      live?: boolean; // URL 片段里的 live
+      hasLiveVideo?: () => Promise<boolean>; // 打开时检查一次；不传则不显示"实况"
+      onToggleLive?(): void;
+    }
   | { kind: "gallery"; mode: "grid" | "accordion"; count: number; onModeChange(mode: "grid" | "accordion"): void; onSplit(): void };
 
 export type ImageMenuProps = {
@@ -56,6 +63,18 @@ export function ImageMenu(props: ImageMenuProps) {
   };
   const label = props.kind === "image" ? "图片" : "组图";
 
+  // "实况"项：菜单打开时检查是否有实况视频，检查中不显示（hasLiveVideo 自带会话缓存）
+  const check = props.kind === "image" ? props.hasLiveVideo : undefined;
+  const [liveVideo, setLiveVideo] = useState(false);
+  useEffect(() => {
+    if (!open || !check) return;
+    let current = true;
+    void check().then((exists) => current && setLiveVideo(exists));
+    return () => {
+      current = false;
+    };
+  }, [open, check]);
+
   return (
     <div className="relative">
       <OverlayButton
@@ -82,9 +101,16 @@ export function ImageMenu(props: ImageMenuProps) {
         className={`right-0 w-45 ${above ? "bottom-full mb-1.5" : "top-full mt-1.5"}`}
       >
         {props.kind === "image" ? (
-          <Menu.Item type="checkbox" checked={props.wide} onSelect={props.onToggleWide}>
-            宽图
-          </Menu.Item>
+          <>
+            <Menu.Item type="checkbox" checked={props.wide} onSelect={props.onToggleWide}>
+              宽图
+            </Menu.Item>
+            {liveVideo && props.onToggleLive && (
+              <Menu.Item type="checkbox" checked={props.live ?? false} onSelect={props.onToggleLive}>
+                实况
+              </Menu.Item>
+            )}
+          </>
         ) : (
           <GalleryItems {...props} />
         )}

@@ -1,5 +1,5 @@
 // 图标注册表：组件的 icon 属性用 lucide 图标名（与设计稿一致），只打包这里登记的图标
-import { ArrowLeft, Bold, Check, CircleAlert, CircleCheck, CircleDot, CloudCheck, CloudOff, Code, Columns2, Copy, Ellipsis, ExternalLink, Eye, Feather, Heading2, History, ImagePlus, Italic, Link, List, ListTodo, Loader, LogOut, PenLine, Search, Settings2, SquarePen, TextQuote, Trash2, TriangleAlert, Undo2, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bold, Check, CircleAlert, CircleCheck, CircleDot, CircleDotDashed, CloudCheck, CloudOff, CloudUpload, Code, Columns2, Copy, Ellipsis, ExternalLink, Eye, Feather, FileText, HardDrive, Heading2, History, Image, ImageOff, ImagePlus, Italic, Link, List, ListTodo, Loader, LoaderCircle, LogOut, PenLine, RefreshCw, RotateCcw, Search, Settings2, SquarePen, TextQuote, Trash2, TriangleAlert, Undo2, X, type LucideIcon } from "lucide-react";
 
 export const ICONS = {
   "arrow-left": ArrowLeft,
@@ -7,6 +7,8 @@ export const ICONS = {
   check: Check,
   code: Code,
   "heading-2": Heading2,
+  image: Image,
+  "image-off": ImageOff,
   "image-plus": ImagePlus,
   italic: Italic,
   link: Link,
@@ -16,15 +18,22 @@ export const ICONS = {
   "circle-alert": CircleAlert,
   "circle-check": CircleCheck,
   "circle-dot": CircleDot,
+  "circle-dot-dashed": CircleDotDashed,
   "cloud-check": CloudCheck,
   "cloud-off": CloudOff,
+  "cloud-upload": CloudUpload,
   ellipsis: Ellipsis,
   "external-link": ExternalLink,
   feather: Feather,
+  "file-text": FileText,
+  "hard-drive": HardDrive,
   history: History,
   loader: Loader,
+  "loader-circle": LoaderCircle,
   "log-out": LogOut,
   "pen-line": PenLine,
+  "refresh-cw": RefreshCw,
+  "rotate-ccw": RotateCcw,
   "columns-2": Columns2,
   copy: Copy,
   eye: Eye,

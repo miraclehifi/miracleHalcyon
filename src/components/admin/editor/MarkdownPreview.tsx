@@ -4,6 +4,8 @@
 // 单图 figure[data-article-image] 挂载为 ArticleImage（portal 到替换 figure 的宿主元素）；重新渲染时按 reconcileIslands
 // 复用 src 与标记未变的实例——把原宿主移回新位置，已加载的图片不重新请求、不重播马赛克。组图 div[data-gallery] 同样
 // 挂载为 ImageGallery，按"模式 + 组内各图 key"复用。
+// 上传占位（markdown module-spec §2.1）挂载点换成宿主元素，按占位序号复用（卡片实例与进度过渡不因重新渲染而重置），
+// 内容为对应上传任务的 UploadCard（admin-post-editor"上传进度卡片"）。
 // 图片菜单（admin-post-editor"图片菜单"）：单图右上角"图片选项"，经 onSourceEdit 改写源码；哪张图的菜单开着按"源码起点 +
 // 地址"记录，改写后图片重新挂载菜单仍打开；该图片在新的渲染结果里找不到时关闭（焦点无处可去时回到预览区）
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
@@ -12,19 +14,21 @@ import type { Edit } from "../../../lib/editor/format-commands";
 import { setGalleryMode, toggleMark, type ImageLocation } from "../../../lib/editor/image-marks";
 import { liveVideoSrc } from "../../../lib/markdown/plugins/image-key";
 import { islandKey, reconcileIslands } from "../../../lib/markdown/reconcile-islands";
-import { PLACEHOLDER_LABELS } from "../../../lib/markdown/plugins/upload-placeholder";
 import type { ImageRef } from "../../../lib/markdown/render";
 import type { RenderRequest, RenderResponse } from "../../../lib/markdown/worker";
+import { hasLiveVideo } from "../../../lib/upload/live-video-check";
+import type { UploadView } from "../../../lib/upload/use-image-uploads";
 import MarkdownWorker from "../../../lib/markdown/worker.ts?worker";
 import { ArticleImage } from "../../article/ArticleImage";
 import { ImageGallery, type GalleryImage } from "../../article/ImageGallery";
 import { Alert } from "../../ui/Alert";
 import { ImageMenu } from "./ImageMenu";
+import { UploadCard } from "./UploadCard";
 
 export interface MarkdownPreviewProps {
   title: string;
   body: string;
-  uploadNames?: string[]; // 进行中上传的文件名，按占位出现顺序补到占位块上
+  uploads?: UploadView[]; // 进行中的上传，按占位出现顺序对应预览中的进度卡片
   // 图片菜单改写源码：compute 拿到当前源码算出 Edit（定位不上返回 null）；返回是否已写入。不传时不显示图片菜单
   onSourceEdit?: (compute: (source: string) => Edit | null) => boolean;
 }
@@ -199,13 +203,22 @@ function mountIslands(content: HTMLElement, { html, images }: Rendered, prev: Is
   });
 }
 
+// 把上传占位的挂载点换成宿主元素（第 i 个占位沿用上次第 i 个宿主）；返回本次的宿主列表
+function mountUploadHosts(content: HTMLElement, prev: HTMLElement[]): HTMLElement[] {
+  return [...content.querySelectorAll<HTMLElement>("[data-upload-placeholder]")].map((element, i) => {
+    const host = prev[i] ?? Object.assign(document.createElement("div"), { className: "upload-host" });
+    element.replaceWith(host);
+    return host;
+  });
+}
+
 const leadImage = (content: IslandContent) => (content.kind === "image" ? content.image : content.images[0]);
 const anchorOf = (content: IslandContent): MenuAnchor => ({ kind: content.kind, start: leadImage(content).sourceStart, src: leadImage(content).src });
 const anchors = (anchor: MenuAnchor | null, content: IslandContent) =>
   anchor !== null && anchor.kind === content.kind && anchor.start === leadImage(content).sourceStart && anchor.src === leadImage(content).src;
 const locationOf = (image: ImageRef): ImageLocation => ({ start: image.sourceStart, end: image.sourceEnd, src: image.src });
 
-export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }: MarkdownPreviewProps) {
+export function MarkdownPreview({ title, body, uploads = [], onSourceEdit }: MarkdownPreviewProps) {
   const { rendered, failed } = usePreviewHtml(body);
   const empty = body.trim() === "";
   const contentRef = useRef<HTMLDivElement>(null);
@@ -215,6 +228,8 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
   const [menu, setMenu] = useState<MenuAnchor | null>(null);
   const menuRef = useRef<MenuAnchor | null>(null);
   const press = useRef({ touch: false, at: 0 });
+  const [uploadHosts, setUploadHosts] = useState<HTMLElement[]>([]);
+  const uploadHostsRef = useRef<HTMLElement[]>([]);
 
   // 在下方补占位文件名之前执行：先写入新 HTML
   useLayoutEffect(() => {
@@ -222,6 +237,9 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
     const next = content ? mountIslands(content, rendered ?? { html: "", images: [] }, islandsRef.current, () => ++lastId.current) : [];
     islandsRef.current = next;
     setIslands(next);
+    const hosts = content ? mountUploadHosts(content, uploadHostsRef.current) : [];
+    uploadHostsRef.current = hosts;
+    setUploadHosts(hosts);
     // 菜单所在的图片 / 组图已不在（源码被删改、拆成单图）：关闭菜单；焦点随按钮一起被移除时回到预览区
     const anchor = menuRef.current;
     if (anchor && !next.some(({ content }) => anchors(anchor, content))) {
@@ -258,6 +276,9 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
           onOpenChange={onOpenChange}
           wide={image.marks.wide}
           onToggleWide={() => rewrite((source) => toggleMark(source, locationOf(image), "wide"), document.activeElement as HTMLElement | null)}
+          live={image.marks.live}
+          hasLiveVideo={() => hasLiveVideo(image.src)}
+          onToggleLive={() => rewrite((source) => toggleMark(source, locationOf(image), "live"), document.activeElement as HTMLElement | null)}
         />
       );
     }
@@ -289,14 +310,6 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
     const island = islands.find((item) => String(item.id) === id);
     if (island) setMenuAnchor(anchorOf(island.content));
   };
-
-  // 占位块"图片上传中… 文件名"：渲染结果不含文件名（源码里没有），按出现顺序补上
-  useLayoutEffect(() => {
-    contentRef.current?.querySelectorAll<HTMLElement>("[data-upload-placeholder]").forEach((element, i) => {
-      const label = PLACEHOLDER_LABELS[element.dataset.uploadPlaceholder ?? ""] ?? "";
-      element.textContent = uploadNames[i] ? `${label} ${uploadNames[i]}` : label;
-    });
-  }, [rendered, uploadNames]);
 
   return (
     <div data-testid="md-preview">
@@ -337,6 +350,32 @@ export function MarkdownPreview({ title, body, uploadNames = [], onSourceEdit }:
             String(id),
           ),
         )}
+        {uploadHosts.map((host, i) => {
+          // 预览还停在旧源码时占位数等于"含幽灵"的列表长度，否则按去掉幽灵的列表对应
+          const list = uploadHosts.length === uploads.length ? uploads : uploads.filter((item) => !item.ghost);
+          const upload = list[i];
+          if (upload?.ghost) return null;
+          return createPortal(
+            upload ? (
+              <UploadCard
+                state={upload.state}
+                fileName={upload.name}
+                thumbUrl={upload.thumbUrl}
+                progress={upload.progress}
+                error={upload.error}
+                leaving={upload.leaving}
+                onRetry={upload.retry}
+                onRemove={upload.remove}
+                onStillOnly={upload.stillOnly}
+              />
+            ) : (
+              // 预览先于槽位核对渲染出占位（如页面刚加载）：先按已中断显示，核对后换成带"移除"的槽位卡片
+              <UploadCard state="interrupted" fileName="" progress={0} onRemove={() => undefined} />
+            ),
+            host,
+            `upload-${i}`,
+          );
+        })}
       </article>
     </div>
   );

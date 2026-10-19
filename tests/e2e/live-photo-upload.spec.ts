@@ -6,13 +6,21 @@ import { dropBytes, dropFiles, holdUploads, type ByteFile } from "./support/imag
 
 // US-11 上传前处理与安卓动态照片（media-upload module-spec §1）：占位"处理中…"→"上传中…"，主色与宽高随请求上报；
 // 动态照片切出视频、转码 / 转封装 / 丢弃，与静态图同一请求上传。真实样本为 OPPO，其余由 motion-photos.ts 在内存中派生
-async function openPost(page: Page, baseURL: string, body = "") {
+// live：打开后先在工具栏开启"实况照片"开关（缺省关闭，US-11 AC9）
+async function openPost(page: Page, baseURL: string, body = "", { live = false } = {}) {
   await page.setViewportSize({ width: 1440, height: 900 });
   await login(page);
   const id = await adminApi(page, baseURL).create({ title: `[E2E-US11] 上传 ${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, body });
   await page.goto(`/admin/posts/${id}`);
   await waitForHydration(page);
+  if (live) await setLive(page, true);
   return page.getByRole("textbox", { name: "正文" });
+}
+
+const liveSwitch = (page: Page) => page.getByRole("switch", { name: "实况照片" });
+async function setLive(page: Page, on: boolean) {
+  if ((await liveSwitch(page).getAttribute("aria-checked")) !== String(on)) await liveSwitch(page).click();
+  await expect(liveSwitch(page)).toHaveAttribute("aria-checked", String(on));
 }
 
 // 扣住页面里的图片解码（createImageBitmap），直到调用返回的 release()
@@ -44,11 +52,11 @@ test("[TC-US11-22] 占位依次显示处理中、上传中，请求带主色与�
 
   await dropFiles(page, editor, [{ name: "b.jpg", type: "image/jpeg", content: { jpeg: [64, 48] } }]);
   await expect(editor).toHaveValue("![处理中…]()");
-  await expect(preview.getByText("图片处理中… b.jpg")).toBeVisible();
+  await expect(preview.getByTestId("upload-card")).toContainText("正在压缩…");
 
   await releaseDecode();
   await expect(editor).toHaveValue("![上传中…]()");
-  await expect(preview.getByText("图片上传中… b.jpg")).toBeVisible();
+  await expect(preview.getByTestId("upload-card")).toContainText("正在上传…");
   const form = (await request).postDataBuffer()!.toString("latin1");
   const field = (name: string) => new RegExp(`name="${name}"\\r\\n\\r\\n([^\\r]*)`).exec(form)?.[1];
   const rgb = field("rgb")!;
@@ -62,7 +70,7 @@ test("[TC-US11-22] 占位依次显示处理中、上传中，请求带主色与�
 
 // ---- 安卓动态照片（add-motion-photo-detection）----
 const OPPO_NAME = "IMG20260516172228.jpg";
-const REF = /^!\[([^\]]+)\]\(\/img\/\d{4}\/\d{2}\/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}\.(?:jpg|png)(#live)?\)$/;
+const REF = /^!\[([^\]]+)\]\(\/img\/\d{4}\/\d{2}\/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}\.(?:jpg|png|webp)(#live)?\)$/;
 const jpeg = (name: string, bytes: Uint8Array): ByteFile => ({ name, type: "image/jpeg", bytes });
 
 // 源码各行：引用行解析为 "alt" / "alt#live"，其余原样；占位未替换完时返回 null
@@ -89,30 +97,40 @@ interface FilePart {
 }
 type UploadRecord = Record<string, FilePart | string>;
 
-// 在页面里包一层 fetch，记录上传表单各字段（大请求体 Playwright 拿不到 postData，且两种浏览器都要可用）
+// 在页面里包一层 XMLHttpRequest（上传用 XHR 以拿到进度），记录上传表单各字段（大请求体 Playwright 拿不到 postData，且两种浏览器都要可用）
 async function captureUploads(page: Page): Promise<() => Promise<UploadRecord[]>> {
   await page.evaluate(() => {
-    const records: UploadRecord[] = [];
-    Object.assign(window, { __uploads: records });
-    const original = window.fetch.bind(window);
-    window.fetch = async (input, init) => {
-      if (String(input).endsWith("/api/admin/images") && init?.body instanceof FormData) {
-        const record: UploadRecord = {};
-        for (const [name, value] of init.body.entries()) {
-          if (typeof value === "string") {
-            record[name] = value;
-            continue;
-          }
-          const bytes = new Uint8Array(await value.arrayBuffer());
-          const text = new TextDecoder("latin1").decode(bytes);
-          record[name] = { size: bytes.length, head: text.slice(4, 8), hevc: /hvc1|hev1/.test(text) };
-        }
-        records.push(record);
+    const pending: Promise<UploadRecord>[] = [];
+    Object.assign(window, { __uploads: pending });
+    const urls = new WeakMap<XMLHttpRequest, string>();
+    const open = XMLHttpRequest.prototype.open;
+    const send = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function (this: XMLHttpRequest, method: string, url: string | URL, ...rest: unknown[]) {
+      urls.set(this, String(url));
+      return (open as (...args: unknown[]) => void).call(this, method, url, ...rest);
+    } as typeof XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body?: Document | XMLHttpRequestBodyInit | null) {
+      if (urls.get(this)?.endsWith("/api/admin/images") && body instanceof FormData) {
+        pending.push(
+          (async () => {
+            const record: UploadRecord = {};
+            for (const [name, value] of body.entries()) {
+              if (typeof value === "string") {
+                record[name] = value;
+                continue;
+              }
+              const bytes = new Uint8Array(await value.arrayBuffer());
+              const text = new TextDecoder("latin1").decode(bytes);
+              record[name] = { size: bytes.length, head: text.slice(4, 8), hevc: /hvc1|hev1/.test(text) };
+            }
+            return record;
+          })(),
+        );
       }
-      return original(input, init);
+      return send.call(this, body as XMLHttpRequestBodyInit | null | undefined);
     };
   });
-  return () => page.evaluate(() => (window as unknown as { __uploads: UploadRecord[] }).__uploads);
+  return () => page.evaluate(() => Promise.all((window as unknown as { __uploads: Promise<UploadRecord>[] }).__uploads));
 }
 const part = (record: UploadRecord, name: string) => record[name] as FilePart | undefined;
 
@@ -126,22 +144,22 @@ test.describe("安卓动态照片", () => {
   const needsTranscode = (browserName: string) => test.skip(browserName === "webkit", "WebKit（Windows）不能转码 HEVC，按设计降级，见 TC-US11-09");
 
   // [TC-US11-01][SC-LIVE-01] 拖入 OPPO 动态照片：一个请求同时含图片和视频，只新增一行 #live 引用，预览显示 LIVE
-  // [TC-US11-05][SC-LIVE-03] 视频字段以 ftyp 开头；file 只含静态图（长度 = 主视频起点）
+  // [TC-US11-05][SC-LIVE-03] 视频字段以 ftyp 开头；file 只含静态图（经浏览器压缩，比主视频起点之前的原静态图还小，不含视频字节）
   test("[TC-US11-01][TC-US11-05] 拖入安卓动态照片，插入一条 #live 引用", async ({ page, baseURL, browserName }) => {
     needsTranscode(browserName);
-    const editor = await openPost(page, baseURL!, "行1\n行2\n行3\n");
+    const editor = await openPost(page, baseURL!, "行1\n行2\n行3\n", { live: true });
     const uploads = await captureUploads(page);
     await dropBytes(page, editor, [jpeg(OPPO_NAME, oppo())], 4);
 
     await settled(editor, ["行1", "行2", "行3", "IMG20260516172228#live"]);
     const [record, ...rest] = await uploads();
-    expect({ ftyp: part(record, "video")?.head, still: part(record, "file")?.size, more: rest.length }).toEqual({ ftyp: "ftyp", still: oppoLayout().start, more: 0 });
+    expect({ ftyp: part(record, "video")?.head, stillOnly: part(record, "file")!.size < oppoLayout().start, more: rest.length }).toEqual({ ftyp: "ftyp", stillOnly: true, more: 0 });
     await expect(page.getByTestId("md-preview").locator("[data-live-badge]")).toBeVisible({ timeout: 15_000 });
   });
 
   // [TC-US11-06][SC-LIVE-03] 旧版 MicroVideoOffset 识别；普通 JPEG 不误识别
   test("[TC-US11-06] 旧版 MicroVideoOffset 识别，普通 JPEG 不误识别", async ({ page, baseURL }) => {
-    const editor = await openPost(page, baseURL!);
+    const editor = await openPost(page, baseURL!, "", { live: true });
     const uploads = await captureUploads(page);
     await dropBytes(page, editor, [jpeg("MVIMG_0002.jpg", derived["MVIMG_0002.jpg"])]);
     await settled(editor, ["MVIMG_0002#live"]);
@@ -158,7 +176,7 @@ test.describe("安卓动态照片", () => {
       if (route.request().postDataBuffer()?.includes('filename="a.png"')) await new Promise((resolve) => setTimeout(resolve, 2_000));
       await route.continue();
     });
-    const editor = await openPost(page, baseURL!);
+    const editor = await openPost(page, baseURL!, "", { live: true });
     const uploads = await captureUploads(page);
     const png = await page.evaluate(async () => {
       const canvas = Object.assign(document.createElement("canvas"), { width: 30, height: 20 });
@@ -176,7 +194,7 @@ test.describe("安卓动态照片", () => {
   // [TC-US11-09][SC-LIVE-06] 不能编码 H.264：只转封装后 16.4MB → 不带视频、不带 #live，警示
   test("[TC-US11-09] 视频只转封装后超过 10MB，退回普通图片并提示", async ({ page, baseURL }) => {
     await noH264Encoder(page);
-    const editor = await openPost(page, baseURL!);
+    const editor = await openPost(page, baseURL!, "", { live: true });
     const uploads = await captureUploads(page);
     await dropBytes(page, editor, [jpeg(OPPO_NAME, oppo())]);
     await settled(editor, ["IMG20260516172228"]);
@@ -186,7 +204,7 @@ test.describe("安卓动态照片", () => {
 
   // [TC-US11-10][SC-LIVE-06] 内嵌 H.264（原样使用）恰好 10MB 接受、多 1 字节退回
   test("[TC-US11-10] 视频恰好 10MB 接受，10MB+1 退回", async ({ page, baseURL }) => {
-    const editor = await openPost(page, baseURL!);
+    const editor = await openPost(page, baseURL!, "", { live: true });
     const uploads = await captureUploads(page);
     await dropBytes(page, editor, [jpeg("IMG_2100.jpg", derived["IMG_2100.jpg"])]);
     await settled(editor, ["IMG_2100#live"]);
@@ -196,19 +214,67 @@ test.describe("安卓动态照片", () => {
     expect((await uploads()).map((record) => part(record, "video")?.size ?? null)).toEqual([10 * 1024 * 1024, null]);
   });
 
-  // [TC-US11-14][SC-LIVE-08] 上传失败：图片和视频都不保留，常驻错误
-  test("[TC-US11-14] 上传请求失败，图片和视频都不保留", async ({ page, baseURL }) => {
+  // [TC-US11-14][SC-LIVE-08] 上传失败：图片和视频都不保留，占位改为"上传失败"，失败卡片（不弹提示）；
+  // 恢复网络后点"重试"，重新处理并在同一请求里带上视频，引用带 #live
+  // （WebKit 不能转码 OPPO 的 HEVC，重试后按设计丢弃视频，见 TC-US11-09）
+  test("[TC-US11-14] 上传请求失败，图片和视频都不保留；重试带视频", async ({ page, baseURL, browserName }) => {
+    const transcodes = browserName !== "webkit";
     await page.route("**/api/admin/images", (route) => route.abort());
-    const editor = await openPost(page, baseURL!, "前文");
+    const editor = await openPost(page, baseURL!, "前文", { live: true });
+    const uploads = await captureUploads(page);
     await dropBytes(page, editor, [jpeg("IMG_3000.jpg", derived["IMG_3000.jpg"])]);
-    await expect(page.getByRole("alert").filter({ hasText: "上传失败，请重试" })).toBeVisible({ timeout: 60_000 });
-    await expect(editor).toHaveValue("前文");
+    const card = page.getByTestId("md-preview").getByTestId("upload-card");
+    await expect(card).toHaveAttribute("data-state", "error", { timeout: 60_000 });
+    await expect(card).toContainText("网络中断");
+    await expect(editor).toHaveValue("前文![上传失败]()");
+    await expect(page.getByRole("alert")).toHaveCount(0);
+
+    await page.unroute("**/api/admin/images");
+    await card.getByRole("button", { name: "重试" }).click();
+    await expect(editor).toHaveValue(transcodes ? /^前文!\[IMG_3000\]\(\/img\/[^)#]+#live\)$/ : /^前文!\[IMG_3000\]\(\/img\/[^)#]+\)$/, { timeout: 60_000 });
+    const records = await uploads();
+    expect({ attempts: records.length, video: part(records.at(-1)!, "video")?.head }).toEqual({ attempts: 2, video: transcodes ? "ftyp" : undefined });
+  });
+
+  // [TC-US11-22][SC-LIVE-05][SC-LIVE-16] 开关开启时动态照片的卡片三阶段：正在压缩…（≤ 15%）→ 正在处理实况视频…（15–40%）
+  // → 正在上传…（≥ 40%）；进度只增不减
+  test("[TC-US11-22] 实况照片卡片：压缩、处理实况视频、上传三阶段", async ({ page, baseURL, browserName }) => {
+    needsTranscode(browserName);
+    const editor = await openPost(page, baseURL!, "", { live: true });
+    const release = await holdUploads(page);
+    await page.evaluate(() => {
+      const samples: [string, number][] = [];
+      Object.assign(window, { __samples: samples });
+      setInterval(() => {
+        const card = document.querySelector<HTMLElement>('[data-testid="md-preview"] [data-testid="upload-card"]');
+        const value = card?.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow");
+        if (card && value) samples.push([card.dataset.state ?? "", Number(value)]);
+      }, 50);
+    });
+    await dropBytes(page, editor, [jpeg(OPPO_NAME, oppo())]);
+    const card = page.getByTestId("md-preview").getByTestId("upload-card");
+    await expect(card).toContainText("正在处理实况视频…", { timeout: 30_000 });
+    await expect(card).toContainText("正在上传…", { timeout: 60_000 });
+    release();
+    await settled(editor, ["IMG20260516172228#live"]);
+
+    const samples = await page.evaluate(() => (window as unknown as { __samples: [string, number][] }).__samples);
+    const range = (state: string) => samples.filter(([s]) => s === state).map(([, v]) => v);
+    const live = range("processing-live");
+    const uploading = range("uploading");
+    expect({
+      order: [...new Set(samples.map(([s]) => s))].filter((s) => s !== "compressing"),
+      compress: range("compressing").every((v) => v <= 15),
+      live: live.length > 0 && live.every((v) => v >= 15 && v <= 40),
+      upload: uploading.every((v) => v >= 40),
+      monotonic: samples.every(([, v], i) => i === 0 || v >= samples[i - 1][1]),
+    }).toEqual({ order: ["processing-live", "uploading"], compress: true, live: true, upload: true, monotonic: true });
   });
 
   // [TC-US11-16][SC-LIVE-09] 不能编码 H.264：内嵌 HEVC（≤ 10MB）只转封装、保留 HEVC，带 #live 并警示
   test("[TC-US11-16] 不支持 H.264 编码，保留 HEVC 并提示", async ({ page, baseURL }) => {
     await noH264Encoder(page);
-    const editor = await openPost(page, baseURL!);
+    const editor = await openPost(page, baseURL!, "", { live: true });
     const uploads = await captureUploads(page);
     await dropBytes(page, editor, [jpeg("IMG_4000.jpg", derived["IMG_4000.jpg"])]);
     await settled(editor, ["IMG_4000#live"]);
@@ -217,13 +283,77 @@ test.describe("安卓动态照片", () => {
     await expect(page.getByRole("status").filter({ hasText: "该实况视频在部分浏览器中只显示静态图" })).toBeVisible();
   });
 
+  // [TC-US11-28][SC-LIVE-16] 两张动态照片：第一张处理视频时点"仅转为静态图"——它的请求不带 video、引用不带 #live，
+  // 按钮随即消失；第二张照常带 #live；工具栏开关保持开启
+  test("[TC-US11-28] 仅转为静态图只放弃本张视频", async ({ page, baseURL, browserName }) => {
+    needsTranscode(browserName);
+    const editor = await openPost(page, baseURL!, "", { live: true });
+    const uploads = await captureUploads(page);
+    await dropBytes(page, editor, [jpeg("first.jpg", oppo()), jpeg("second.jpg", oppo())]);
+    const first = page.getByTestId("md-preview").getByTestId("upload-card").first();
+    await expect(first).toHaveAttribute("data-state", "processing-live", { timeout: 30_000 });
+    await first.getByRole("button", { name: "仅转为静态图" }).click();
+    await expect(first.getByRole("button", { name: "仅转为静态图" })).toHaveCount(0);
+    await settled(editor, ["first", "second#live"]);
+
+    const records = await uploads(); // 引用里 first 不带 #live、second 带；请求里恰好一个带视频
+    expect({ count: records.length, videos: records.map((record) => (part(record, "video") ? "video" : "none")).sort() }).toEqual({ count: 2, videos: ["none", "video"] });
+    await expect(liveSwitch(page)).toHaveAttribute("aria-checked", "true");
+  });
+
   // [TC-US11-17][SC-LIVE-01] "插入图片"选择动态照片同样识别
   test("[TC-US11-17] 插入图片选择动态照片，同样识别", async ({ page, baseURL, browserName }) => {
     needsTranscode(browserName);
-    const editor = await openPost(page, baseURL!);
+    const editor = await openPost(page, baseURL!, "", { live: true });
     const chooser = page.waitForEvent("filechooser");
     await page.getByRole("button", { name: "插入图片" }).click();
     await (await chooser).setFiles(OPPO_PATH);
     await settled(editor, ["IMG20260516172228#live"]);
   });
+});
+
+// ---- 实况照片开关（add-live-photo-toggle）----
+
+// [TC-US11-26][SC-LIVE-14] 默认关闭：动态照片只传静态图——请求不含 video、不加载视频处理模块（拖入后没有新的脚本请求）、
+// 引用不带 #live，服务端没有 .live.mp4
+test("[TC-US11-26] 开关默认关闭，动态照片只传静态图", async ({ page, baseURL }) => {
+  test.setTimeout(60_000);
+  const editor = await openPost(page, baseURL!);
+  await expect(liveSwitch(page)).toHaveAttribute("aria-checked", "false");
+  const uploads = await captureUploads(page);
+  const scripts: string[] = [];
+  page.on("request", (request) => {
+    if (request.resourceType() === "script" || /\.m?js(\?|$)/.test(request.url())) scripts.push(request.url());
+  });
+  await dropBytes(page, editor, [jpeg(OPPO_NAME, oppo())]);
+  await settled(editor, ["IMG20260516172228"]);
+  const [record] = await uploads();
+  const src = /\]\((\/img\/[^)]+)\)/.exec(await editor.inputValue())![1];
+  const video = await page.request.get(`${baseURL}${src.replace(/\.(jpg|webp|png)$/, ".live.mp4")}`);
+  expect({ video: part(record, "video") ?? null, scripts, liveFile: video.status() }).toEqual({ video: null, scripts: [], liveFile: 404 });
+});
+
+// [TC-US11-27][SC-LIVE-15] 开关记在本浏览器：开启后刷新仍开启；存储读写抛错时按关闭，页面照常可用、本次切换生效
+test("[TC-US11-27] 开关持久化；存储不可用时按关闭", async ({ page, baseURL }) => {
+  await openPost(page, baseURL!);
+  await setLive(page, true);
+  expect(await page.evaluate(() => localStorage.getItem("mh:live-photo"))).toBe("1");
+  await page.reload();
+  await waitForHydration(page);
+  await expect(liveSwitch(page)).toHaveAttribute("aria-checked", "true");
+
+  await page.addInitScript(() => {
+    if (typeof window === "undefined") return;
+    Storage.prototype.getItem = () => {
+      throw new DOMException("denied", "SecurityError");
+    };
+    Storage.prototype.setItem = () => {
+      throw new DOMException("denied", "SecurityError");
+    };
+  });
+  await page.reload();
+  await waitForHydration(page);
+  await expect(liveSwitch(page)).toHaveAttribute("aria-checked", "false");
+  await setLive(page, true);
+  await expect(page.getByRole("textbox", { name: "正文" })).toBeEditable();
 });

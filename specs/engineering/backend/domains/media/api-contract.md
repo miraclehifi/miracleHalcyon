@@ -1,6 +1,6 @@
 # media API 契约
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-16
 **状态**: self-checked
 
 > 通用约定见 [domains/_index.md](../_index.md)；401 / 403 见 [auth/api-contract.md](../auth/api-contract.md)。
@@ -65,7 +65,76 @@
 | 带 `Range`（视频） | 206 + `Content-Range`、`Accept-Ranges: bytes` |
 | 不存在 / key 不匹配 `^img/\d{4}/\d{2}/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}\.(png\|jpg\|webp\|gif\|live\.mp4)$` | 404（不访问 R2） |
 
+前端用 `Range: bytes=0-0` 请求 `.live.mp4` 判断某张图是否存有实况视频（图片菜单"实况"项，见 media-upload module-spec"实况视频检查"），不新增接口。
+
+自 2026-10-16 起，编辑器上传的 `file` 一般为浏览器压缩后的 WebP / JPEG / PNG（[media-upload-experience](../../../../backlog/media-upload-experience.md)）；接口规则不变。
+
 图片同时带 `X-Content-Type-Options: nosniff` 与 `Content-Security-Policy: default-src 'none'`（即使被直接打开也不能执行脚本）。
+
+## GET /api/admin/storage/orphans
+
+> F-006 US-01。已实现（Sprint 7 任务 1）：`src/pages/api/admin/storage/orphans.ts`。需要会话（401 见 auth 契约）。
+
+统计未引用资源（规则见 [domain-model](domain-model.md) §9）。只返回数字，不返回 key 列表。
+
+**200**
+
+```json
+{
+  "summary": {
+    "orphanImageCount": 12,
+    "orphanImageBytes": 18450120,
+    "orphanVideoCount": 3,
+    "orphanVideoBytes": 8102340,
+    "totalOrphanBytes": 26552460,
+    "protectedCount": 2
+  },
+  "checkedAt": "2026-10-16T06:32:00.000Z"
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `summary.orphanImageCount` | integer | 未引用图片张数 |
+| `summary.orphanImageBytes` | integer | 未引用图片的图片体积之和（字节，不含其视频） |
+| `summary.orphanVideoCount` | integer | 未引用实况视频个数（图片仍被引用） |
+| `summary.orphanVideoBytes` | integer | 未引用实况视频体积之和 |
+| `summary.totalOrphanBytes` | integer | 预计可释放：以上两项 + 未引用图片自带的视频体积 |
+| `summary.protectedCount` | integer | 24 小时内上传、暂不参与的项数 |
+| `checkedAt` | 时间戳 | 服务端检测时间（ISO 8601 UTC，前端按本地时区显示） |
+
+**错误**
+
+| 状态 | code | message |
+|------|------|---------|
+| 500 | `INTERNAL_ERROR` | 检测失败，请重试 |
+
+## POST /api/admin/storage/cleanup
+
+> F-006 US-02。已实现（Sprint 7 任务 2）：`src/pages/api/admin/storage/cleanup.ts`。需要会话 + Origin 校验（401 / 403 见 auth 契约）。
+
+**请求**：无请求体（有也忽略）。服务端重新判定后清理全部未引用资源。
+
+**200**
+
+```json
+{ "removedImages": 12, "removedVideos": 3, "freedBytes": 26552460 }
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `removedImages` | integer | 删除的图片数（其自带视频一并删除，不单独计数） |
+| `removedVideos` | integer | 只删除视频、图片保留的个数 |
+| `freedBytes` | integer | 本次释放的字节数（= 清理时的 `totalOrphanBytes`） |
+
+无未引用资源时返回 `0 / 0 / 0`。
+
+**错误**
+
+| 状态 | code | message |
+|------|------|---------|
+| 405 | — | 非 POST（Astro 路由只导出 `POST`） |
+| 500 | `CLEANUP_FAILED` | 清理未完成，请重试（已删除的不恢复，重试可继续） |
 
 ---
 
@@ -75,3 +144,4 @@
 |------|------|----------|------|
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-14 | 1.1 | `file` 上限 5 MiB → 50 MiB（[raise-image-size-limit](../../../../backlog/raise-image-size-limit.md)） | miraclehifi |
+| 2026-10-16 | 1.2 | F-006：新增 `GET /api/admin/storage/orphans`、`POST /api/admin/storage/cleanup` | miraclehifi |

@@ -12,8 +12,8 @@ interface Source {
 }
 
 // mediabunny 的最小替身：只实现 processVideo 用到的部分，记录转换参数
-function fakeMediabunny({ isMp4 = true, codec = "hevc", audio = true, canDecode = true, canEncode = true, outSize = 2_000_000 }: Source) {
-  const calls: { encode?: unknown; conversion?: { video: unknown; audio: unknown } } = {};
+function fakeMediabunny({ isMp4 = true, codec = "hevc", audio = true, canDecode = true, canEncode = true, outSize = 2_000_000, hang = false }: Source & { hang?: boolean }) {
+  const calls: { encode?: unknown; conversion?: { video: unknown; audio: unknown }; canceled?: boolean } = {};
   const MP4 = { name: "MP4" };
   class Output {
     constructor(readonly options: { target: { buffer: ArrayBuffer | null } }) {}
@@ -44,7 +44,23 @@ function fakeMediabunny({ isMp4 = true, codec = "hevc", audio = true, canDecode 
     Conversion: {
       init: async ({ output, video, audio: audioOptions }: { output: Output; video: unknown; audio: unknown }) => {
         calls.conversion = { video, audio: audioOptions };
-        return { isValid: true, execute: async () => void (output.options.target.buffer = new ArrayBuffer(outSize)) };
+        let cancel!: () => void;
+        const canceled = new Promise<void>((resolve) => (cancel = resolve));
+        return {
+          isValid: true,
+          // hang：转换一直进行，直到 cancel()（mediabunny 取消时 execute 以错误结束）
+          execute: async () => {
+            if (hang) {
+              await canceled;
+              throw new Error("Conversion was canceled.");
+            }
+            output.options.target.buffer = new ArrayBuffer(outSize);
+          },
+          cancel: async () => {
+            calls.canceled = true;
+            cancel();
+          },
+        };
       },
     },
   };
@@ -58,7 +74,7 @@ const describeResult = (result: Awaited<ReturnType<typeof processVideo>>) => ("d
 describe("processVideo", () => {
   it("能解码且能编码 H.264 → 转码（长边 1920、6 Mbps、去音轨）", async () => {
     const { load, calls } = fakeMediabunny({});
-    const result = await processVideo(blob(16_000_000), load);
+    const result = await processVideo(blob(16_000_000), { load });
     expect({ result: describeResult(result), calls }).toEqual({
       result: { size: 2_000_000, warning: null },
       calls: {
@@ -72,7 +88,7 @@ describe("processVideo", () => {
     const noEncoder = fakeMediabunny({ canEncode: false, outSize: 3_000_000 });
     const noDecoder = fakeMediabunny({ canDecode: false, outSize: 3_000_000 });
     const avcWithAudio = fakeMediabunny({ codec: "avc", canEncode: false, outSize: 3_000_000 });
-    const results = await Promise.all([noEncoder, noDecoder, avcWithAudio].map(({ load }) => processVideo(blob(5_000_000), load).then(describeResult)));
+    const results = await Promise.all([noEncoder, noDecoder, avcWithAudio].map(({ load }) => processVideo(blob(5_000_000), { load }).then(describeResult)));
     expect({ results, remux: noEncoder.calls.conversion }).toEqual({
       results: [
         { size: 3_000_000, warning: "HEVC_KEPT" },
@@ -86,14 +102,33 @@ describe("processVideo", () => {
   it("源已是无音轨的 H.264 mp4 → 原样使用，不转换", async () => {
     const { load, calls } = fakeMediabunny({ codec: "avc", audio: false });
     const input = blob(4_000_000);
-    const result = await processVideo(input, load);
+    const result = await processVideo(input, { load });
     expect({ same: "blob" in result && result.blob === input, converted: calls.conversion ?? null }).toEqual({ same: true, converted: null });
   });
 
   it("结果 10,485,760 B 保留，多 1 B → dropVideo", async () => {
     const results = await Promise.all(
-      [VIDEO_MAX_BYTES, VIDEO_MAX_BYTES + 1].map((size) => processVideo(blob(size), fakeMediabunny({ codec: "avc", audio: false }).load).then(describeResult)),
+      [VIDEO_MAX_BYTES, VIDEO_MAX_BYTES + 1].map((size) => processVideo(blob(size), { load: fakeMediabunny({ codec: "avc", audio: false }).load }).then(describeResult)),
     );
     expect(results).toEqual([{ size: VIDEO_MAX_BYTES, warning: null }, "drop"]);
+  });
+
+  // UT-161 stillOnly（SC-LIVE-16）：中止后取消转换，以 AbortError 结束，不再产出结果；开始前已中止则不加载 mediabunny
+  it("signal 中止：取消进行中的转换并以 AbortError 结束；已中止时直接结束", async () => {
+    const { load, calls } = fakeMediabunny({ hang: true });
+    const controller = new AbortController();
+    const running = processVideo(blob(16_000_000), { load, signal: controller.signal });
+    await new Promise((r) => setTimeout(r, 0));
+    controller.abort();
+    const error = await running.catch((e: unknown) => e);
+    let loaded = false;
+    const early = await processVideo(blob(1), {
+      load: async () => {
+        loaded = true;
+        return fakeMediabunny({}).load();
+      },
+      signal: AbortSignal.abort(),
+    }).catch((e: unknown) => e);
+    expect({ name: (error as Error).name, canceled: calls.canceled, earlyName: (early as Error).name, loaded }).toEqual({ name: "AbortError", canceled: true, earlyName: "AbortError", loaded: false });
   });
 });

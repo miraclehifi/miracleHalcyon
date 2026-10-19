@@ -51,14 +51,14 @@ describe("uploadErrorMessage", () => {
   });
 });
 
-// [SC-IMAGE-05][SC-IMAGE-06] UT-92：校验失败不发起上传、不插入；一批多张时提示带文件名；上传失败移除占位并提示
+// [SC-IMAGE-05][SC-IMAGE-06] UT-92：校验失败不发起上传、不插入；一批多张时提示带文件名；上传失败改为失败卡片（不弹提示）
 describe("useImageUploads 错误处理", () => {
   function setup(upload: (file: File) => Promise<never>) {
     const onError = vi.fn();
     let uploadFiles!: (files: File[]) => void;
     function Harness() {
       const ref = useRef<HTMLTextAreaElement>(null);
-      uploadFiles = useImageUploads(ref, { upload, onError }).uploadFiles;
+      uploadFiles = useImageUploads(ref, { fadeOutMs: 0, upload, onError }).uploadFiles;
       return <textarea ref={ref} defaultValue="原文" />;
     }
     const { container } = render(<Harness />);
@@ -91,12 +91,13 @@ describe("useImageUploads 错误处理", () => {
     });
   });
 
-  it("上传失败：移除占位并提示上传失败", async () => {
+  // [SC-IMAGE-07] UT-146（2026-10-16）：失败时占位改为"上传失败"留在原位，不调用 onError（由失败卡片展示原因）
+  it("上传失败：占位改为上传失败，不弹提示", async () => {
     const { onError, textarea, uploadFiles } = setup(() => Promise.reject(new TypeError("Failed to fetch")));
     uploadFiles([file("shot.png", "image/png")]);
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
-    expect({ value: textarea.value, errors: onError.mock.calls.map((c) => c[0]) }).toEqual({ value: "原文", errors: ["上传失败，请重试"] });
+    expect({ value: textarea.value, errors: onError.mock.calls.length }).toEqual({ value: "原文![上传失败]()", errors: 0 });
   });
 });

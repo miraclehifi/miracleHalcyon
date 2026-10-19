@@ -23,7 +23,7 @@
 | 设计稿组件 | React 组件 | Props / variant | 使用位置 |
 |-----------|-----------|----------------|---------|
 | `Button/Primary` · `Secondary` · `Outline` · `Ghost` · `Danger` · `GhostDanger` | `Button` | `variant`；`icon?`（图标名，lucide）；`children`；底层为 `SpecularButton`，参数见"按钮质感参数" | 全部页面。Outline = 弹窗"取消"；GhostDanger = 设置抽屉"删除文章" |
-| `IconButton/Ghost` · `Outline` | `IconButton` | `variant`；`icon`；`aria-label`（必填）；`size`：`sm` 28px（桌面）/ `touch` 44px（手机） | 工具栏按钮、关闭、列表行"更多操作"（`⋯`）、顶栏图标、轻提示关闭。已实现：`src/components/ui/IconButton.tsx`（图标 `ink-muted`，悬停 `surface-sunken` 底 + `ink`；Outline 1px `line-strong`；父元素可设 `--icon-button-ink` 改图标色，Toast 设为 `currentColor`） |
+| `IconButton/Ghost` · `Outline` · `/Ghost/Checked` | `IconButton` | `variant`；`icon`；`aria-label`（必填）；`size`：`sm` 28px（桌面）/ `touch` 44px（手机）；`checked?`（传了即开关：`role="switch"` + `aria-checked`，为真时 `accent-soft` 底 + `accent` 图标，对应设计稿 `/Ghost/Checked`，**不是 variant**） | 工具栏按钮（含"实况照片"开关）、关闭、列表行"更多操作"（`⋯`）、顶栏图标、轻提示关闭。已实现：`src/components/ui/IconButton.tsx`（图标 `ink-muted`，悬停 `surface-sunken` 底 + `ink`；Outline 1px `line-strong`；父元素可设 `--icon-button-ink` 改图标色，Toast 设为 `currentColor`；`checked` 开关态 Sprint 6 已实现） |
 | `StatusBadge/Draft` · `Published` · `Modified` | `StatusBadge` | `status`：`draft` / `published` / `modified`（已发布 · 有未发布修改）；配色见 design-tokens"文章状态配色" | 文章列表、写文章页顶栏、04 主按钮变体。已实现：`src/components/ui/StatusBadge.tsx`（含 `badgeStatus(status, hasUnpublishedChanges)`） |
 | `TagChip` | `TagChip` | `label`（`onRemove` 时带 × "删除标签 X"；`href` 时为链接，读者端标签入口，F-002）。已实现：`src/components/ui/TagChip.tsx`；设置抽屉的 `TagInput` 在 `src/components/admin/editor/TagInput.tsx` | 首页标签入口、设置抽屉标签输入 |
 | `Field` | `Field` | `label`；`hint?`；`error?`；`children`（输入控件） | 登录表单、设置抽屉（slug、日期）、04 校验。已实现：`src/components/ui/Field.tsx`（给唯一子控件补 id / `aria-invalid` / `aria-describedby` 与输入框样式 `FIELD_CONTROL_CLASS`；手机 16px 断点用 `md`（768px），与全站移动端定义一致） |
@@ -108,10 +108,13 @@
 
 | 设计稿组件 | React 组件 | Props | 使用位置 |
 |-----------|-----------|-------|---------|
-| `AdminHeader` · `AdminHeader/Mobile` | `AdminHeader` | —（站点名、"查看博客"、"登出"）；手机端两个操作只留图标。已实现：`src/components/admin/AdminHeader.tsx`（"登出"已接线，Sprint 2）；同目录 `PageHeader.tsx` | 文章列表 |
+| `AdminHeader` · `AdminHeader/Mobile` | `AdminHeader` | `current?`：`posts` / `storage`（当前项 `accent` + 600，`aria-current="page"`）；左侧站点名（回 `/admin`）+ 导航"文章"（`/admin`）"存储"（`/admin/storage`，F-006）；右侧"查看博客""登出"；手机端导航与两个操作都只留图标（`file-text`、`hard-drive`、外链、登出，44×44，带 `aria-label`）。已实现：`src/components/admin/AdminHeader.tsx`（"登出"已接线，Sprint 2；导航与 `current`，F-006 Sprint 7）；同目录 `PageHeader.tsx` | 文章列表、存储页 |
+| `StatCard` · `StatCard/Highlight` | `StatCard` | `label`；`value`（主数字文本，如"12 张""25.3 MB"）；`detail?`（副行，如体积）；`highlight?`（对应 `/Highlight`：实线 `accent` 边 + `accent-soft` 底 + 主数字 `accent`，**不是 variant**）；`loading?`（主数字处骨架条）。外框同 `PostListItem`（虚线 `line-strong`、圆角 12），不可点无悬停；渲染为 `<dl>`；规则见 [admin-storage.md](pages/admin-storage.md)"StatCard"。已实现：`src/components/ui/StatCard.tsx`（主数字 `text-title` 24px） | 存储页统计区（F-006） |
 | `PostListItem` · `PostListItem/Mobile` · `/Open` · `/Mobile/Open` · `/Mobile/Commit` | `PostListItem` | `post`（`title`、`status`、`updatedAt`）；`onDelete`；`active`（由 `PostList` 传入，为真时显示悬停态，见"列表动效参数"）；`open` / `onOpenChange`（抽屉开合，由 `PostList` 控制，同一时间只开一行）；外框与 `PostCard` 一致（悬停同 `PostCard/Hover`），内容只有标题、状态徽标 + 更新时间和右侧 `IconButton/Ghost`（`⋯` 更多操作）。卡片本身是 SwipeRow 的拖动面，左滑露出抽屉"编辑 / 删除"，参数见"行滑动参数"。`/Open`（抽屉展开）、`/Mobile/Commit`（全滑、删除块铺满）是运行时状态，**不是 prop**；规则见 [admin-post-list.md](pages/admin-post-list.md)"行操作"。已实现：`src/components/admin/PostListItem.tsx`——外框、`active` 双层错位、标题链接、徽标 + 相对时间（Sprint 1）；SwipeRow 抽屉、`⋯`、全滑删除、删除后撤销（Sprint 2；`onDelete(post, index)` 带删除前位置，撤销时插回） | 文章列表 |
-| `ImageMenu` · `ImageMenu/Gallery` · `ImageMenu/Mobile` | `ImageMenu` | `kind`：`image` / `gallery`；`wide?`（单图）；`mode?`：`grid` / `accordion`，`count`（组图）；`onToggleWide` / `onModeChange` / `onSplit`。由触发按钮 `OverlayButton`（`size` 32）+ `Menu` 组成；`/Gallery` 对应 `kind="gallery"`，`/Mobile` 为触屏形态（菜单项 44px），**都不是 variant**；规则见 [admin-post-editor.md](pages/admin-post-editor.md)"图片菜单"。已实现：`src/components/admin/editor/ImageMenu.tsx`（开合由 `MarkdownPreview` 按图片 / 组图首张的源码起点 + 地址记录，改写后重新挂载仍打开并停在原项；改写经 `src/lib/editor/image-marks.ts` 双重定位；挂在 `ArticleImage` / `ImageGallery` 的 `actions` 插槽，即右上角内侧 8px；`/Mobile`：< 768px 时按钮 44、菜单项 44，点按图片 / 组图直接展开，按压超过 300ms 不算点按） | 写文章页 `MarkdownPreview` |
-| `EditorToolbar` · `EditorToolbar/Mobile` | `EditorToolbar` | `onCommand`；桌面 8 个格式按钮 + 插入图片（9 个都是 `IconButton/Ghost`，插入图片前加竖分隔线）；手机 7 个、固定在键盘上方；全部按钮包在一个 `TooltipGroup` 里，每个按钮一个 `Tooltip`（桌面 `side="bottom"`，手机 `side="top"`），名称与快捷键见 [admin-post-editor.md](pages/admin-post-editor.md)"工具栏与悬停提示" | 写文章页 |
+| `ImageMenu` · `ImageMenu/Gallery` · `ImageMenu/Mobile` | `ImageMenu` | `kind`：`image` / `gallery`；`wide?`（单图）；`live?`（单图 URL 片段含 `live`）、`hasLiveVideo?`（`true` 时显示"实况"勾选项）、`onToggleLive`（单图）；`mode?`：`grid` / `accordion`，`count`（组图）；`onToggleWide` / `onModeChange` / `onSplit`。由触发按钮 `OverlayButton`（`size` 32）+ `Menu` 组成；`/Gallery` 对应 `kind="gallery"`，`/Mobile` 为触屏形态（菜单项 44px），**都不是 variant**；规则见 [admin-post-editor.md](pages/admin-post-editor.md)"图片菜单"。已实现：`src/components/admin/editor/ImageMenu.tsx`（开合由 `MarkdownPreview` 按图片 / 组图首张的源码起点 + 地址记录，改写后重新挂载仍打开并停在原项；改写经 `src/lib/editor/image-marks.ts` 双重定位；挂在 `ArticleImage` / `ImageGallery` 的 `actions` 插槽，即右上角内侧 8px；`/Mobile`：< 768px 时按钮 44、菜单项 44，点按图片 / 组图直接展开，按压超过 300ms 不算点按）；"实况"项（Sprint 6）：`hasLiveVideo` 为检查函数，菜单打开时调用，检查中与结果为 false 时不显示 | 写文章页 `MarkdownPreview` |
+| `EditorToolbar` · `EditorToolbar/Mobile` | `EditorToolbar` | `onCommand`；桌面 8 个格式按钮 + 插入图片（9 个都是 `IconButton/Ghost`，插入图片前加竖分隔线）；手机 7 个、固定在键盘上方；全部按钮包在一个 `TooltipGroup` 里，每个按钮一个 `Tooltip`（桌面 `side="bottom"`，手机 `side="top"`），名称与快捷键见 [admin-post-editor.md](pages/admin-post-editor.md)"工具栏与悬停提示"；末尾"实况照片"开关（`IconButton` `checked`，`live` / `onLiveChange`，Sprint 6 已实现） | 写文章页 |
+
+| `UploadCard` · `/ProcessingLive` · `/Error` · `/Interrupted` | `UploadCard` | `state`：`waiting` / `compressing` / `processing-live` / `uploading` / `error` / `interrupted`；`fileName`；`thumbUrl?`（`blob:` URL）；`progress`（0–100）；`error?`（失败原因文案）；`onRetry?`；`onRemove`；`onStillOnly?`（有值且 `state="processing-live"` 时显示"仅转为静态图"）。设计稿 `UploadCard` 为上传中，`/ProcessingLive`、`/Error`、`/Interrupted` 对应同名 `state`，`waiting` / `compressing` 与上传中同形态只换文案；**都不是 variant**。规则见 [admin-post-editor.md](pages/admin-post-editor.md)"上传进度卡片"。已实现（Sprint 6）：`src/components/admin/editor/UploadCard.tsx`（`interrupted` 为单独的 120px 卡片，只有"移除"；`MarkdownPreview` 按占位序号挂载，同槽位跨渲染复用宿主） | 写文章页 `MarkdownPreview`（源码上传占位的位置） |
 
 ## 读者端区块
 
@@ -123,7 +126,10 @@
 | `PostCard` · `PostCard/Hover` · `PostCard/Mobile` | `PostCard`（已实现：`src/components/reader/PostCard.tsx`、列表 `PostCardList.tsx`，Sprint 4） | `post`（`title`、`excerpt`、`publishedAt`、`tags`、`cover?`）；整卡可点进入详情；`excerpt`：有 `summary` 用 `summary`，否则由正文渲染后取纯文本前约 120 字，最多 3 行，为空时不渲染；没有 `cover` 时不显示右侧图片；`/Hover` 是悬停与键盘聚焦态（上层左上移 4px、下层右下移 4px，边框不换色，保持 `line-strong`），在列表中由 `active` 控制（见"列表动效参数"）；手机端标题与 72px 封面同行，摘要在下 | 文章列表页 `/posts` |
 | `SiteFooter` | `SiteFooter` | —（站点名、签名一句话、版权、RSS / GitHub 链接）。已实现：`src/components/reader/SiteFooter.astro`（与 `SiteHeader`、`SiteNav`、`BackLink`、`NotFound` 同为 Astro 组件，不水合） | 读者端全部页面 |
 | （SiteNav 内的主题切换按钮） | `ThemeToggle`（已实现：`src/components/reader/ThemeToggle.astro`，原生脚本，不加载 React） | —；`IconButton/Ghost`，亮 / 暗两态翻转 + 圆形扩散动画（View Transitions），图标固定为半填充圆（自绘 SVG），`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
-| `BackLink` | `BackLink` | `href`；文字 `> cd ..`，`font-mono` 14px `ink-muted`，上下内边距 12（可点高度 ≥ 44） | 读者端子页主体末尾（05、05m、07、07m；首页不用） |
+| `BackLink` | `BackLink` | `href`；文字 `> cd ..`，`font-mono` 14px `ink-muted`，上下内边距 12（可点高度 ≥ 44） | 读者端子页主体末尾（05、05m、07、07m、09、09m；首页不用） |
+| `MediaTypeTab/Selected` · `Default` | `MediaTypeTabs` + `MediaTypeTabs.Item`（F-005 先行稿） | 容器：`value`（`book` / `comic` / `movie` / `series` / `anime` / `game` / `boardgame`）。Item：`value`；`href`；文字 书 / 漫画 / 电影 / 剧 / 动画 / 游戏 / 桌游，`font-body` 14px，内边距 4 10，圆角 4；`/Selected` 为反色（底 `ink`、字 `bg`、600，参考 pseudoyu），`/Default` 为 `ink-muted`、无底 | 书影音 `/media` |
+| `MediaRow` · `MediaRow/Mobile` | `MediaRow`（F-005 先行稿） | `item`（`title`、`creator`、`rating?` 1–5、`markedAt`、`status`、`cover`、`doubanUrl`）；整行链接到豆瓣（新标签页）。桌面一行：封面 40×60（圆角 4，`object-fit: cover`，`referrerpolicy="no-referrer"`，加载失败时显示 `surface-sunken` 底 + 图标）· 标题（16px `ink`，正在进行的条目后接 `accent-soft` 底 `accent` 字的"在读 / 在看 / 在玩"徽标）· 作者 / 导演 / 开发商（14px `ink-muted`，宽 200）· 评分（★ 用 `accent`，☆ 用 `line-strong`，无评分不渲染）· 标记年月（`font-mono` 12px `ink-faint`）；行间 1px `line` 分隔。手机：封面 44×66，右侧标题一行、下方"作者 · 评分 · 年月"一行 | 书影音 `/media`（书、漫画以外的分类） |
+| `MediaCard` · `MediaCard/Mobile` | `MediaCard`（F-005 先行稿，参考 [book-store-ui](../../references/code/book-store-ui/src) 的 `.book-card`） | `item`（同 `MediaRow`，另加 `comment?` 我的短评）。卡片 `bg` 底、1px `line` 描边、圆角 4，不加卡片投影；封面 128×192（手机 96×144），圆角 2，向上探出卡片顶边 32px，投影 `0 2px 8px` 黑 18%，悬停放大 1.04 倍（0.3s ease，减弱动效时不放大）；封面右侧：标题（16px 600 `ink`，单行省略）· 作者（13px `ink-faint`）· 评分星级（★ `accent`、☆ `line-strong`，无评分不渲染）· 短评（13px `ink-muted`，行高 1.6，最多 4 行，没有短评时不渲染）；底部分隔线下一行：左侧状态与日期（"读过 · 2026-08-14"，进行中的条目用"在读"徽标代替"读过"），右侧"豆瓣 ↗"（12px `ink-faint`，新标签页）；整卡可点，去豆瓣页。桌面两列、列距 32、行距 48；手机单列 | 书影音 `/media`（书、漫画） |
 
 ### 列表动效参数
 
@@ -340,12 +346,15 @@
 | `ReadingProgress/Bar` | `ReadingProgress` | 05m / 05m-b（顶栏下 2px 进度细条，< 1280px） |
 | `TocButton` · `TocDrawer` | `TocDrawer` | 05m 右下角浮动按钮 / 05m-b 底部目录抽屉（< 1280px） |
 | `NotFound` | `NotFound` | 08（404：代码、标题、说明、回首页 / 看看全部文章） |
+| `MediaHeader` | `MediaHeader` | 09 / 09m（"书影音" + 当前分类数量与进行中数量） |
+| `MediaList` | `MediaList` | 09 / 09m（书、漫画用 `MediaCard` 网格，其余分类用 `MediaRow` 列表；进行中的条目置顶，其余按标记时间倒序；列表下方一行来源说明） |
 | `CoverField` | `CoverField` | 03 设置抽屉（封面：缩略图 + 更换 / 移除，空时为拖放区）。已实现：`src/components/admin/editor/CoverField.tsx` |
 | `LoginForm` | `LoginForm` | 01 / 01m |
 | `PageHeader` | `PageHeader` | 02 / 02m |
 | `PostList` | `PostList` | 02 / 02m（底层 AnimatedList，见"列表动效参数"） |
 | `EditorTopBar` | `EditorTopBar` | 03 / 03m |
 | `MarkdownEditor` | `MarkdownEditor` | 03 / 03m |
+| `StoragePage` | `StoragePage` | 09 / 09m（存储页主体：`PageHeader` + 三张 `StatCard` + 保护期提示 + 清理按钮与确认框，F-006） |
 | `MarkdownPreview` | `MarkdownPreview` | 03 |
 | `ImageSyntaxHelp` | `ImageSyntaxHelp` | 03b（`Popover` 的内容：写法示例）。已实现：`src/components/admin/editor/ImageSyntaxHelp.tsx`（组图两行显示说明、复制可直接粘贴的示例；桌面在底栏 Popover，与底栏文字左对齐；手机在设置面板最下方展开） |
 | `PostSettingsDrawer` | `PostSettingsDrawer` | 03 |
@@ -366,6 +375,7 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-16 | F-005 书影音先行稿（09 / 09m，参考 pseudoyu）：新增 `MediaTypeTab/Selected` · `Default`、`MediaRow` · `MediaRow/Mobile`、`MediaCard` · `MediaCard/Mobile`（书、漫画的卡片，参考 book-store-ui），页面区块 `MediaHeader`、`MediaList`（[media-douban-sync](../backlog/media-douban-sync.md)） | miraclehifi |
 | 2026-10-15 | `ThemeToggle` 改两态 + 圆形扩散动画，图标换成半填充圆；admin.pen `SiteNav` / `SiteNav/Mobile` 同步（[animated-theme-toggle](../backlog/animated-theme-toggle.md)） | miraclehifi |
 | 2026-10-15 | F-002 design-ui：06 拆为首页（06 / 06m）与 `/posts`（07 / 07m），`HomeTags` / `HomePosts` 改名 `TagIndex` / `PostCardList`，新增 `PostsHeader`；05 补左栏 `TagPostsNav`、文末 `PostPager`、`BackLink`，05m 目录改为 `TocButton` + `TocDrawer`（05m-b）、新增 `ReadingProgress/Bar`、`TagPostsNav/Mobile`；新增 08 `NotFound`、`ThemeToggle`、03 `CoverField`；`PostCard` 摘要优先用 `summary` | miraclehifi |
 | 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../backlog/drop-apple-live-photo.md)）：`ImageSyntaxHelp` 删去 iPhone 实况照片导出方法（admin.pen 03b 已同步） | miraclehifi |
@@ -395,3 +405,5 @@
 | 2026-10-12 | 新增 `Tooltip`（含 `/Shortcut`）与 `TooltipGroup`，底层为 React Bits WarmTooltip，新增"悬停提示参数"；`EditorToolbar` 按钮改用提示组，"插入图片"由文字按钮改为图标按钮（[Backlog](../backlog/editor-warm-tooltip.md)） | miraclehifi |
 | 2026-10-12 | `PostListItem` 底层改用 React Bits SwipeRow（左滑抽屉：编辑 / 删除，全滑删除），新增"行滑动参数"；删除 `MenuItem` / `DropdownMenu`；`Toast` 新增 `/Undo`（`action`）（[Backlog](../backlog/swipe-row-actions.md)） | miraclehifi |
 | 2026-10-13 | 新增 `Menu`、`Popover`、`ImageMenu`、`ImageSyntaxHelp`；`Toast` 加 `warning`；`OverlayButton` 加 32 尺寸（F-001 US-11、US-12） | miraclehifi |
+| 2026-10-16 | 新增 `UploadCard`（上传进度卡片，四种设计稿状态）、`IconButton` 加 `checked`（`/Ghost/Checked`，工具栏"实况照片"开关）、`ImageMenu` 加实况勾选项；admin.pen `EditorToolbar` / `EditorToolbar/Mobile` 末尾加实况按钮（[media-upload-experience](../backlog/media-upload-experience.md)） | miraclehifi |
+| 2026-10-16 | F-006 design-ui：新增 `StatCard`（含 `/Highlight`）、页面区块 `StoragePage`；`AdminHeader` 加导航"文章 / 存储"与 `current`；admin.pen 新增 09 / 09m 存储页（[media-orphan-cleanup](../backlog/media-orphan-cleanup.md)） | miraclehifi |

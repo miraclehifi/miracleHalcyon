@@ -71,6 +71,63 @@ describe("ImageMenu 单图", () => {
   });
 });
 
+// UT-165（SC-LAYOUT-14、SC-LAYOUT-15）：单图"实况"项——打开菜单时检查是否有实况视频，检查中与没有视频时不显示；
+// 有视频时为 menuitemcheckbox，勾选状态随 live，执行后菜单保持打开
+describe("ImageMenu 实况项", () => {
+  function LiveHarness({ hasVideo, onToggleLive }: { hasVideo: () => Promise<boolean>; onToggleLive: () => void }) {
+    const [open, setOpen] = useState(false);
+    const [live, setLive] = useState(true);
+    return (
+      <ImageMenu
+        kind="image"
+        open={open}
+        onOpenChange={setOpen}
+        wide={false}
+        onToggleWide={() => undefined}
+        live={live}
+        hasLiveVideo={hasVideo}
+        onToggleLive={() => {
+          onToggleLive();
+          setLive((value) => !value);
+        }}
+      />
+    );
+  }
+  const liveItem = () => screen.queryByRole("menuitemcheckbox", { name: "实况" });
+
+  it("有视频：检查完成后显示并可切换；没有视频：不显示", async () => {
+    let resolve!: (value: boolean) => void;
+    const hasVideo = vi.fn(() => new Promise<boolean>((r) => (resolve = r)));
+    const onToggleLive = vi.fn();
+    render(<LiveHarness hasVideo={hasVideo} onToggleLive={onToggleLive} />);
+    const closed = hasVideo.mock.calls.length; // 菜单没打开时不检查
+    fireEvent.click(trigger());
+    const checking = liveItem();
+    resolve(true);
+    const item = await screen.findByRole("menuitemcheckbox", { name: "实况" });
+    const before = item.getAttribute("aria-checked");
+    fireEvent.click(item);
+    const after = liveItem()?.getAttribute("aria-checked");
+    const open = screen.queryByRole("menu") !== null;
+    cleanup();
+
+    render(<LiveHarness hasVideo={async () => false} onToggleLive={() => undefined} />);
+    fireEvent.click(trigger());
+    await Promise.resolve();
+    await Promise.resolve();
+    expect({ closed, checking, before, after, calls: onToggleLive.mock.calls.length, open, none: liveItem(), wide: screen.getByRole("menuitemcheckbox", { name: "宽图" }) !== null }).toEqual({
+      closed: 0,
+      checking: null,
+      before: "true",
+      after: "false",
+      calls: 1,
+      open: true,
+      none: null,
+      wide: true,
+    });
+  });
+});
+
 // UT-137（组图）
 describe("ImageMenu 组图", () => {
   const renderGallery = (count: number, mode: "grid" | "accordion" = "grid") => {

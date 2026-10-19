@@ -153,6 +153,34 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 | `counts` | `{ all, draft, published }`：只应用 `q`，不应用 `status`（分段控件的数量） |
 | `total` | 应用 `q` + `status` 后的总数（分页用） |
 
+## 6.1 图片引用查询（F-006）
+
+> 来源：F-006 [ADR-009](../../../features/F-006-媒体存储清理/architecture/adr/ADR-009-orphan-detection-in-d1.md)。只读，不改写路径。已实现（Sprint 7 任务 1）：`src/domains/post/image-reference-query.ts`（`D1ImageReferenceQuery`、`keyStem`、`collectReferences`）
+
+```ts
+interface ImageReferenceQuery {   // media.StorageService 的依赖
+  classify(images: { key: string; videoKey: string | null }[]): Promise<Map<string, ImageReference>>;
+}
+type ImageReference = { referenced: boolean; liveReferenced: boolean };
+function keyStem(key: string): string;   // 去掉最后一个扩展名、保留点："img/…_112233.jpg" → "img/…_112233."
+function collectReferences(rows: { kind: 'b' | 'c'; snippet: string }[]): { stems: Set<string>; liveStems: Set<string> };
+```
+
+**D1 部分**：一条递归 CTE，把每列正文扫一遍。
+1. `src`：挑出含 `img/` 的列，`body`、`pub_body` 记为 `b`，`cover`、`pub_cover` 记为 `c`。
+2. `hit`：每一步用 `instr` 找下一处 `img/`，取 `substr(rest, pos, 120)` 作为片段，剩余部分继续递归。
+3. 输出 `SELECT DISTINCT kind, snippet`。
+
+不用 `LIKE`：§6 记录了 D1 限制 LIKE 模式不超过 50 字节。
+
+**Worker 部分**：`collectReferences` 用 `^(img/\d{4}/\d{2}/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}\.)(live\.mp4|[a-z0-9]+)(#[^\s"'()<>[\]]*)?` 解析片段。
+- 主干放入 `stems`。
+- `b` 类片段若片段地址是视频地址，或 URL 片段转小写后含 `live`，主干再放入 `liveStems`（比 `parseMarks` 宽，宁可少删）。
+- `classify` 按 `keyStem(key)` 查这两个集合；没有视频的图片，`liveReferenced` 恒为 false。
+- 空列表直接返回空 Map，不查询。
+
+实测：300 篇 / 3,000 张 711 ms（ADR-009）。
+
 ## 7. 服务的需求
 
 | US | 使用的能力 |
@@ -164,6 +192,7 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 | US-08 publish-post | `publish`、`unpublish`、`PublishedPostQuery`（读者可见性）、`onPublicationChanged` |
 | US-09 delete-post | `delete`、`onPublicationChanged` |
 | F-002 US-03、US-04、US-05、US-07–US-10 | `PublishedPostQuery`（经公开接口，构建时读取）、`onPublicationChanged`（Deploy Hook 实现） |
+| F-006 US-01、US-02 | `ImageReferenceQuery.classify`（只读四列，§6.1） |
 | F-002 US-06 post-cover | `PostContent.cover`、`saveDraft`、`publish`（快照含封面）、`contentHash` 兼容 |
 
 ## 8. 单元测试规格
@@ -184,6 +213,8 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 | POST-UT-12 | `normalizeContent` 封面 | `null`；合法站内地址；外链、`/img/../x`、key 格式不符、带 `?x=1`、数字、`javascript:` | 前两项通过；其余抛 `VALIDATION_FAILED`（`fields` 含 `cover`）（TC-US06-08） |
 | POST-UT-13 | `contentHash` 兼容 | 同一内容 `cover: null` 与 0003 前的 6 字段结果；`cover` 非空 | 前者相等（与旧算法同值）；后者不同（TC-US06-09） |
 | POST-UT-14 | 封面随快照（Workers 集成 + D1） | 已发布 clean 文章改封面后保存；再发布 | 保存后 `hasUnpublishedChanges` 为 true、公开接口 cover 不变；发布后为新封面（TC-US06-05、06） |
+| POST-UT-15 | `keyStem` | `img/2026/10/a_1x1_000000.jpg`；`.webp`；无扩展名 | `img/2026/10/a_1x1_000000.`；同理；原样 |
+| POST-UT-16 | `ImageReferenceQuery.classify`（Workers 集成 + D1） | F-006 TC-US01-02、03、05、07 的数据 | 四列、各种写法、key 中 `_` 不作通配、视频地址、保守 live 判定如 ADR-009 |
 
 ---
 
@@ -194,3 +225,4 @@ interface PostRepo { // 已实现 insert / get / updateDraft / setPublished / sl
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-13 | 1.1 | `onPublicationChanged` 用途改为触发读者页重建（ADR-001 修订） | miraclehifi |
 | 2026-10-15 | 1.2 | F-002：`PostContent` 新增 `cover`（`CoverUrl`），`contentHash` 兼容规则；POST-UT-12–14 | miraclehifi |
+| 2026-10-16 | 1.3 | F-006：新增 §6.1 `ImageReferenceQuery`（只读，图片引用判定，[ADR-009](../../../features/F-006-媒体存储清理/architecture/adr/ADR-009-orphan-detection-in-d1.md)） | miraclehifi |

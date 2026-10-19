@@ -1,0 +1,13 @@
+---
+// 存储页（admin-storage.md，F-006）：会话已由 middleware 校验；统计在浏览器端经接口读取（页面不加载任何图片）
+import { AdminHeader } from "../../components/admin/AdminHeader";
+import { StoragePage } from "../../components/admin/storage/StoragePage";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export const prerender = false;
+---
+
+<BaseLayout title="存储 · miracleHalcyon 后台">
+  <AdminHeader client:load current="storage" />
+  <StoragePage client:load />
+</BaseLayout>

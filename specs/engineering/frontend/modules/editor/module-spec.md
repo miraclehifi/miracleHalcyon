@@ -1,6 +1,6 @@
 # editor 模块（写文章页客户端逻辑）
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-16
 **状态**: self-checked
 **来源**: [ADR-004](../../../features/F-001-文章写作/architecture/adr/ADR-004-textarea-editor.md) · feature-architecture §3.2、§6 · [admin-post-editor.md](../../../../ui/pages/admin-post-editor.md)
 **位置**: `src/lib/editor/`、`src/lib/autosave/`、`src/components/admin/editor/`
@@ -22,13 +22,23 @@ function applyEdit(textarea: HTMLTextAreaElement, e: Edit): void;
 |--------|------|------|
 | `applyFormat(text, sel, cmd): Edit` | 行内包裹 / 行级前缀切换 | UT-117、UT-118 |
 | `matchShortcut(event, isMac): Cmd \| null` | 快捷键映射 | UT-119 |
-| `toggleMark(text, range, mark): Edit \| null` | 图片菜单：宽图 | UT-134 |
+| `toggleMark(text, range, mark): Edit \| null` | 图片菜单：宽图、实况（`live` 加在片段末尾，去掉时保留其他标记） | UT-134、UT-164 |
 | `setGalleryMode(text, range, mode): Edit \| null` | 图片菜单：网格 / 手风琴 / 拆分 | UT-135 |
-| `insertPlaceholder` / `replacePlaceholder` / `removePlaceholder` | 上传占位（按出现顺序定位，不依赖偏移） | UT-87 – UT-89 |
+| `insertPlaceholder` / `replacePlaceholder` / `removePlaceholder` / `setPlaceholderState` | 上传占位（按出现顺序定位，不依赖偏移；状态改写 `处理中…` / `上传中…` / `上传失败`） | UT-87 – UT-89 |
 
 > 已实现（Sprint 2，build-format-toolbar）：`applyEdit`、`applyFormat`（`src/lib/editor/format-commands.ts`）、`matchShortcut`（`src/lib/editor/shortcuts.ts`）、`EditorToolbar.tsx`。上传占位函数与 `src/lib/upload/use-image-uploads.ts`（Sprint 2，add-image-paste-upload；函数名为 `insertPlaceholders(cursor, count)`，一批一次插入）。
 
-占位文本就是 `![处理中…]()` / `![上传中…]()`（与验收用例一致，不夹带 token）。编辑器在内存中维护"进行中的上传任务"有序列表；第 i 个任务对应源码中第 i 个占位（按出现顺序扫描），因此作者在占位前后输入文字不影响定位。作者手动删掉某个占位时，按这次编辑的删除区间（纯删除按光标定位，否则取新旧文本的公共前后缀之间）找出是哪个任务的占位并把它移出列表，该任务完成后不再插入引用，其余任务仍与占位一一对应；判断不了（占位数与任务数对不上）时不改写任何占位。markdown 模块把空 URL 且 alt 为"处理中…"/"上传中…"的图片渲染为占位块（文件名由编辑器按顺序补上）。
+占位文本就是 `![处理中…]()` / `![上传中…]()` / `![上传失败]()`（与验收用例一致，不夹带 token）。编辑器在内存中维护**占位槽位**有序列表，与源码中的占位按出现顺序一一对应；每个槽位要么绑定一个上传任务，要么为空（孤立占位）。
+
+- 页面加载时，源码中已有的占位全部是空槽位（任务在内存中，刷新后已不存在）→ 预览显示"上传已中断"
+- 插入一批占位：按插入点前的占位个数算出位置，插入对应数量的绑定槽位
+- 作者编辑导致占位数变化：按这次编辑的区间（纯删除 / 纯插入按光标定位，否则取新旧文本的公共前后缀之间）判断哪些槽位被删除、哪些占位是新出现的（例如撤销"移除"、手动粘贴占位文本）→ 删除对应槽位（绑定的任务完成后不再插入引用）、为新占位插入空槽位
+- 判断不了（槽位数与占位数对不上）时：不改写任何占位，所有槽位转为空槽位（进行中的任务完成后不写回源码），避免把引用写错位置
+- 任务完成 → 槽位移除、占位替换为引用；"移除" → 槽位与占位一起删除
+
+> 已实现（Sprint 6）：识别函数 `placeholderEdit(prev, next, caret)`（`src/lib/editor/format-commands.ts`：纯删除 / 纯插入按光标，否则先取公共后缀再取前缀，区间边界落在占位中间时扩到整个占位）；槽位在 `src/lib/upload/use-image-uploads.ts`。槽位的 input 监听挂在 window 上分两步：捕获阶段（React 处理之前）只更新槽位 ref，冒泡阶段（React 处理完受控 textarea 的 onChange 之后）再通知卡片列表——先于 React 触发重渲染会把值写回旧值、吞掉撤销；只在冒泡阶段更新槽位又会被 React 同步渲染里的"渲染后核对"抢先重置（TC-US05-39）。源码被受控赋值改变时，每次渲染后按占位数核对一次（本 hook 自身写入期间跳过）。
+
+markdown 模块在预览模式下把空 URL 且 alt 为"处理中…"/"上传中…"/"上传失败"的图片输出为挂载点（见 markdown module-spec §2.1"上传占位"），`MarkdownPreview` 按槽位序号挂载 `UploadCard`：绑定槽位按任务状态显示，空槽位显示 `interrupted`。
 
 ## 2. 自动保存（`useAutosave`）
 
@@ -59,7 +69,8 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 项 | 规则 |
 |----|------|
 | 渲染触发 | 源码变化即发给 Web Worker（不 debounce）；渲染中又有输入时只保留最后一次，上一次完成后再发，只采用最新 seq 的结果（长文连续输入不排队）。已实现：`src/components/admin/editor/MarkdownPreview.tsx` |
-| 注入 | `innerHTML` 替换正文容器，然后按 `ImageRef` 挂载：`[data-article-image]` → `ArticleImage`、`[data-gallery]` → `ImageGallery`、占位 → 上传占位块 |
+| 注入 | `innerHTML` 替换正文容器，然后按 `ImageRef` 挂载：`[data-article-image]` → `ArticleImage`、`[data-gallery]` → `ImageGallery`、`[data-upload-placeholder]` → `UploadCard`（按 `data-placeholder-index` 取槽位；同一槽位跨渲染复用实例，进度动画不重置） |
+| 图片菜单实况项 | 打开单图菜单时，`marks.live` 或图片为站内 key 才调用 `hasLiveVideo(src)`；检查中不显示"实况"，结果为 true 时显示，勾选状态 = `marks.live` |
 | 复用 | `reconcileIslands`：以 `src + marks` 为键复用已挂载的 React root（保持加载状态），新增的挂载、消失的 `unmount`（UT-140） |
 | 同步滚动 | 源码 textarea 用隐藏镜像元素（`src/lib/editor/textarea-mirror.ts`，拖放落点换算已在用）算出每行的 `offsetTop`；预览按 `data-line` 建立映射；两侧滚动按行插值；防回声：记下写给另一侧的 scrollTop，那一侧下一次滚动事件落在该值上即忽略（不用定时锁，避免吞掉作者对另一侧的真实滚动）。已实现：`src/lib/editor/scroll-sync.ts`（`lineTops` 在 `textarea-mirror.ts`），仅并排视图启用 |
 | 图片菜单 | `ImageMenu` 收到 `ImageRef.sourceStart/End` 与 `src`；执行前核对 `text.slice(start, end)` 中包含该 `src`，否则放弃（UT-136） |
@@ -94,3 +105,4 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 2026-10-14 | 1.2 | §2 本地暂存、恢复判断已实现 | miraclehifi |
 | 2026-10-14 | 1.1 | §3 同步滚动已实现；防回声由 50ms 锁改为按写入值识别 | miraclehifi |
 | 2026-10-15 | — | F-002：设置抽屉封面 `CoverField`；`cover` 进入自动保存与本地暂存 | miraclehifi |
+| 2026-10-16 | 1.4 | 上传占位改为槽位模型（绑定 / 空槽位，支持"上传失败"占位与刷新后的孤立占位）；预览挂载 `UploadCard`；`toggleMark` 支持 `live`；菜单实况项检查（[media-upload-experience](../../../../backlog/media-upload-experience.md)） | miraclehifi |

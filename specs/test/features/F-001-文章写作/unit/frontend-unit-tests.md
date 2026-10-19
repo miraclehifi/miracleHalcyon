@@ -1,7 +1,7 @@
 # F-001 文章写作 前端组件单元测试规格
 
 **Feature**: F-001-文章写作
-**最后更新**: 2026-10-10
+**最后更新**: 2026-10-16
 **Version Tag**: v1.0
 **技术假设**: React 19 + Vitest + @testing-library/react + @testing-library/user-event + jsdom（可访问性断言可加 vitest-axe）
 
@@ -164,7 +164,7 @@
 | UT-86 | S | 大小边界 | 50MB−1B、50MB（50×1024×1024）→ ok；50MB+1B、60MB → "图片不能超过 50MB"；0 字节 → 拒绝（以 design-domain 为准） | SC-IMAGE-05 |
 | UT-87 | S | 纯函数 `insertPlaceholder(text, cursor)` | 在光标处插入占位 `![上传中…]()`，返回新文本与新光标；任务与占位按出现顺序对应（见 editor 模块规格） | SC-IMAGE-01 |
 | UT-88 | S | 纯函数 `replacePlaceholder(text, index, md)` | 替换为 `![image](/img/…/x.png)`；占位前插入了新文字时仍替换正确位置，新文字不变 | SC-IMAGE-01, SC-IMAGE-09 |
-| UT-89 | S | 纯函数 `removePlaceholder(text, index)` | 只移除该占位，其他内容（含其他图片占位）不变 | SC-IMAGE-07 |
+| UT-89 | S | 纯函数 `removePlaceholder(text, index)` / 占位改为"上传失败" | 只移除（或改写为 `![上传失败]()`）该占位，其他内容（含其他图片占位）不变；失败占位仍参与按顺序定位（2026-10-16） | SC-IMAGE-07, SC-IMAGE-11 |
 | UT-90 | S | 多图顺序 | a、b、c 三张以不同完成顺序 resolve，最终正文按 a、b、c 顺序各一行 | SC-IMAGE-04 |
 | UT-91 | S | 文件名→alt | `photo.jpg`→`photo`；剪贴板无名图片→`image`；alt 中 `]`、`[` 被转义 | SC-IMAGE-01, SC-IMAGE-02, SC-IMAGE-03 |
 | UT-92 | S | 校验失败不发起上传 | 60MB / svg 文件时 upload mock 调用 0 次，正文不插入内容 | SC-IMAGE-05, SC-IMAGE-06 |
@@ -253,9 +253,9 @@
 | UT-143 | — | ~~`decodeHeic` 分支~~ | 已删除（2026-10-15） | — |
 | UT-144 | S | `processVideo` 分支 | avc 编码可用 → 转码；不可用（或源编码无法解码）→ 只转封装，并返回 `warning: 'HEVC_KEPT'`；源已是无音轨的 H.264 mp4 → 原样返回；结果 10,485,760 B 保留、+1 → 返回 `{ dropVideo: true }` | SC-LIVE-06, SC-LIVE-09 |
 | UT-145 | S | `dominantColor(bitmap)` | 纯色图返回该颜色；黑白各半的图片避开极暗和极亮像素后返回中性色；输出为 6 位小写 hex | SC-LIVE-01, SC-LIVE-05 |
-| UT-146 | S | 占位阶段 | 占位文本的状态机：`processing` → `uploading` → 替换为引用 / 移除；实况照片任一步失败时一次性移除 | SC-LIVE-05, SC-LIVE-08 |
+| UT-146 | S | 占位阶段 | 占位文本的状态机：`processing` → `uploading` → 替换为引用；失败 → `failed`（`![上传失败]()`），重试回到 `processing`，移除则删掉占位；实况照片任一步失败时整项失败（2026-10-16） | SC-LIVE-05, SC-LIVE-08 |
 | UT-147 | R | `LiveBadge` 与播放 | 悬停时 `play()`，离开时 `pause()` 并把 `currentTime` 设为 0；`video` 触发 `error` 后隐藏 badge，悬停不再播放 | SC-LIVE-10, SC-LIVE-11 |
-| UT-152 | S | `uploadItem` 实况项（`processVideo`、上传 mock） | `{ kind: 'live' }` 的静态图与视频在同一请求中（`file` + `video`），引用追加 `#live`；`dropVideo` → 请求不含 `video`、引用不带 `#live`、`Toast/Warning`"实况视频超过 10MB…"；`HEVC_KEPT` → 带 `video` 与 `#live`、`Toast/Warning`；上传失败 → 移除占位、`Toast/Error`（带文件名） | SC-LIVE-06, SC-LIVE-08, SC-LIVE-09 |
+| UT-152 | S | `uploadItem` 实况项（`processVideo`、上传 mock） | `{ kind: 'live' }` 的静态图与视频在同一请求中（`file` + `video`），引用追加 `#live`；`dropVideo` → 请求不含 `video`、引用不带 `#live`、`Toast/Warning`"实况视频超过 10MB…"；`HEVC_KEPT` → 带 `video` 与 `#live`、`Toast/Warning`；上传失败 → 任务进入失败态（带失败原因），不弹 `Toast/Error`（2026-10-16）；`liveEnabled: false` → 不调用 `processVideo`、请求不含 `video`、引用不带 `#live` | SC-LIVE-06, SC-LIVE-08, SC-LIVE-09, SC-LIVE-14 |
 
 ## 15. 列表删除的延迟提交 `createPendingDelete`（fake timers）
 
@@ -265,6 +265,26 @@
 | UT-149 | S | 撤销与暂停 | 3 秒时 `undo()` 返回 B，之后推进任意时间不提交；再 `schedule(B)`、`hold(true)` 10 秒不提交，`hold(false)` 后剩余时间到期提交 1 次 | SC-DELETE-07 |
 | UT-150 | S | 连续删除 | `schedule(A)` 2 秒后 `schedule(B)`：立即 commit(A)，B 在其后 6 秒提交；每条只提交 1 次 | SC-DELETE-08 |
 | UT-151 | S | 页面卸载 | 撤销期内派发 `pagehide` → 立即 commit；`dispose()` 立即提交并移除监听，之后 `pagehide` 不再提交 | SC-DELETE-08 |
+
+## 16. 上传体验：压缩、进度卡片、实况开关（2026-10-16，[media-upload-experience](../../../../backlog/media-upload-experience.md)）
+
+> 函数 / 组件名为暂定，以 design-ui（组件）与 design-domain（media-upload module-spec）为准。
+
+| UT-ID | 类 | 用例 | 预期 | covers |
+|------|------|------|------|------|
+| UT-153 | S | 纯函数 `planCompression({ format, size, width, height })` | 决策表同 TC-US05-33（9 行） | SC-IMAGE-13, SC-IMAGE-15, SC-IMAGE-16 |
+| UT-154 | S | `fitLongEdge(w, h, 2560)` | 4000×3000 → 2560×1920；3000×4000 → 1920×2560；2561×1440 → 2560×1439；2560×1440 / 100×100 → 不变（不放大） | SC-IMAGE-13, SC-IMAGE-15 |
+| UT-155 | S | `compressImage(file)` 输出格式（canvas / `createImageBitmap` mock） | JPEG / WebP 源 → 先请求 `image/webp` 0.82；mock `toBlob` 返回 `image/png` 类型时改请求 `image/jpeg` 0.85；PNG 源 → 请求 `image/png`；结果 `size >= file.size` → 返回原文件；`createImageBitmap` 抛错或 `getContext` 返回 null → 返回原文件，不抛错；解码参数含 `imageOrientation: 'from-image'` | SC-IMAGE-13, SC-IMAGE-14, SC-IMAGE-17, SC-IMAGE-18 |
+| UT-156 | S | 文件名随格式变化 | `photo.jpg` 压缩为 WebP → 上传文件名 `photo.webp`、alt 仍为 `photo`；降级 JPEG → `photo.jpg` | SC-IMAGE-13, SC-IMAGE-14 |
+| UT-157 | S | 进度映射 `stageProgress(stage, ratio, { live })` | 压缩 0–15；实况视频 15–40；上传：live 时 40–100，否则 15–100；`ratio` 越界被夹紧；总进度单调不减（阶段切换不倒退） | SC-IMAGE-12, SC-LIVE-05 |
+| UT-158 | S | `uploadImage` 用 XHR（fake XHR） | `upload.onprogress` 的 `loaded / total` 逐次回调；`onerror` → `{ reason: 'network' }`（"网络中断"）；`ontimeout` → "上传超时，请重试"；5xx → "上传失败，请重试"；4xx 带 `{ error }` → 使用服务端文案；`abort()` 后不再回调 | SC-IMAGE-07, SC-IMAGE-12 |
+| UT-159 | R | `UploadCard` 各状态 | `waiting`："等待中…"；`compressing` / `processing-live` / `uploading`：缩略图 `img[src^="blob:"]`、`role="progressbar"` 的 `aria-valuenow`、阶段文案；`processing-live` 且有 `onStillOnly` 时显示"仅转为静态图"；`error`：红框、原因文案、"重试""移除"；`interrupted`（无任务的孤立占位）："上传已中断"、只有"移除"、无缩略图和进度条；带 `data-testid="upload-card"`、`data-state` | SC-IMAGE-01, SC-IMAGE-07, SC-IMAGE-10, SC-IMAGE-11, SC-IMAGE-19, SC-LIVE-16 |
+| UT-160 | S | 缩略图 URL 生命周期 | 任务创建时 `URL.createObjectURL` 1 次；成功、移除、组件卸载时 `revokeObjectURL` 同一个 URL 各 1 次；重试不重复创建 | SC-IMAGE-01 |
+| UT-161 | S | `useImageUploads` 重试 / 移除 / 仅静态图 | 失败任务 `retry(id)` 从压缩重新开始，占位位置不变；`remove(id)` 删占位并移出任务列表，其余任务仍按顺序对应；`stillOnly(id)` 中止本项视频处理（`AbortSignal`），本项按静态图继续，其他项不受影响 | SC-IMAGE-10, SC-IMAGE-11, SC-LIVE-16 |
+| UT-162 | S | 实况开关存储 `readLivePref()` / `writeLivePref(v)` | 无值 → `false`；写入 `true` 后读回 `true`；`getItem` / `setItem` 抛错 → 读 `false`、写静默失败 | SC-LIVE-14, SC-LIVE-15 |
+| UT-163 | R/A | `EditorToolbar` 实况开关 | `role="switch"`、可访问名称"实况照片"、`aria-checked` 随点击切换；键盘 Space / Enter 可切换；有悬停提示 | SC-LIVE-15 |
+| UT-164 | S | `toggleMark(source, range, 'live')` | `#wide,live` 去 live → `#wide`；`#live` 去 live → 无片段；`#wide` 加 live → `#wide,live`；`#accordion` 首张加 live → `#accordion,live`；只改 `range` 内的 URL（即 TC-US12-21） | SC-LAYOUT-14 |
+| UT-165 | R | `ImageMenu` 实况项 | `hasLiveVideo` 为 `true` 时显示 `menuitemcheckbox`"实况"，`aria-checked` 与 URL 中 `live` 一致；`false` / 检查中 → 不显示；同一 key 的检查函数在一次会话内只调用 1 次（缓存） | SC-LAYOUT-14, SC-LAYOUT-15 |
 
 ---
 
@@ -277,14 +297,14 @@
 | US-01 登录 | SC-LOGIN-01, 04, 05, 06, 10, 11 |
 | US-03 文章信息 | SC-POSTINFO-01, 03 ~ 10 |
 | US-04 预览 | SC-PREVIEW-01 ~ 08 |
-| US-05 图片 | SC-IMAGE-01 ~ 07, 09 |
+| US-05 图片 | SC-IMAGE-01 ~ 07, 09 ~ 18 |
 | US-06 自动保存 | SC-AUTOSAVE-01, 02, 04 ~ 11 |
 | US-07 列表 | SC-POSTLIST-01 ~ 02, 04 ~ 09 |
 | US-08 发布 | SC-PUBLISH-03 ~ 05, 08 ~ 10 |
 | US-09 删除 | SC-DELETE-01 ~ 03, 07, 08 |
 | US-10 工具栏 | SC-TOOLBAR-01 ~ 05, 07 ~ 10 |
-| US-11 实况照片 | SC-LIVE-01, 03 ~ 06, 08 ~ 11（02、07、13 已删除） |
-| US-12 图片排版 | SC-LAYOUT-01 ~ 08, 10 ~ 13 |
+| US-11 实况照片 | SC-LIVE-01, 03 ~ 06, 08 ~ 11, 14 ~ 16（02、07、13 已删除） |
+| US-12 图片排版 | SC-LAYOUT-01 ~ 08, 10 ~ 15 |
 
 未在单元层覆盖（纯服务端 / 跨系统，由 acceptance 覆盖）：SC-LOGIN-02/03/07/08/09、SC-LOGOUT-*、SC-POSTINFO-02/11、SC-IMAGE-08、SC-AUTOSAVE-03、SC-POSTLIST-03、SC-PUBLISH-01/02/06/07、SC-DELETE-04 ~ 06、SC-TOOLBAR-06（原生撤销栈）、SC-TOOLBAR-11（页面级接线）、SC-LIVE-12（文件选择器接线）、SC-LAYOUT-09（触屏手势）。
 
@@ -301,6 +321,7 @@
 | 2026-10-14 | v1.4 | 新增 §15 列表删除的延迟提交（UT-148 ~ UT-151，US-09 撤销） | miraclehifi |
 | 2026-10-14 | v1.9 | UT-63 改为跳登录页（作者确认）；UT-77 补充同步暂存 | miraclehifi |
 | 2026-10-15 | v1.10 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：UT-141 `pairFiles`、UT-143 `decodeHeic` 删除；UT-139、142、144、146 改写；新增 UT-152 `uploadItem` 实况项 | miraclehifi |
+| 2026-10-16 | v1.11 | 上传体验升级（[media-upload-experience](../../../../backlog/media-upload-experience.md)）：新增 §16（UT-153 ~ UT-165：压缩、进度、XHR、UploadCard、重试 / 移除 / 仅静态图、实况开关、菜单实况项）；UT-89、146、152 失败处理改为失败卡片 | miraclehifi |
 | 2026-10-14 | v1.8 | UT-76 暂存时机与 key；UT-79 横幅文案按设计稿 | miraclehifi |
 | 2026-10-14 | v1.7 | UT-53 由按标题映射改为按 `data-line` 行映射（editor module-spec §3，作者确认） | miraclehifi |
 | 2026-10-14 | v1.6 | UT-52 补充默认视图与存储；UT-55 宽屏视图切换按设计稿改为单选组 | miraclehifi |

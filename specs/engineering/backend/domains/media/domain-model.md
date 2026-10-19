@@ -1,16 +1,16 @@
 # media 领域模型
 
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-16
 **状态**: self-checked
-**来源**: [feature-architecture.md](../../../features/F-001-文章写作/architecture/feature-architecture.md) §2、§5.3 · [ADR-005](../../../features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) · [ADR-006](../../../features/F-001-文章写作/architecture/adr/ADR-006-live-photo-browser-processing.md)
+**来源**: [feature-architecture.md](../../../features/F-001-文章写作/architecture/feature-architecture.md) §2、§5.3 · [ADR-005](../../../features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) · [ADR-006](../../../features/F-001-文章写作/architecture/adr/ADR-006-live-photo-browser-processing.md) · F-006 [feature-architecture](../../../features/F-006-媒体存储清理/architecture/feature-architecture.md) · [ADR-009](../../../features/F-006-媒体存储清理/architecture/adr/ADR-009-orphan-detection-in-d1.md)
 
 ---
 
 ## 1. 职责与边界
 
-- 负责：上传校验（魔数、大小、配对）、生成自描述 key、写 R2、记录 `images`、公开读取 `/img/*`
+- 负责：上传校验（魔数、大小、配对）、生成自描述 key、写 R2、记录 `images`、公开读取 `/img/*`；未引用资源的检测与清理（F-006，§9）
 - 不负责：安卓动态照片识别与切视频、视频转封装 / 转码、主色计算——都在浏览器端完成（[media-upload 模块](../../../frontend/modules/media-upload/module-spec.md)）；Markdown 引用的生成与解析（编辑器 / `markdown` 模块）
-- 与 `post` 无关联：正文只存 URL 字符串；删除文章不删图片（US-09 约束）
+- 与 `post` 的唯一关联：清理时经 `post` 提供的只读 `ImageReferenceQuery` 判定引用（不读 `posts` 表）；正文只存 URL 字符串；删除文章不删图片（US-09 约束），其图片在 24 小时保护期后由 F-006 按未引用清理
 
 ## 2. 聚合：Image
 
@@ -26,7 +26,7 @@
 | createdAt | 时间戳 | — |
 
 **不变量**
-1. 图片与视频要么都存在于 R2 和 `images` 中，要么都不存在（不留半对，US-11 AC7）
+1. 上传时图片与视频要么都写入 R2 和 `images`，要么都不写（不留半对，US-11 AC7）；`images.video_key` 非空时 R2 中必有该视频。清理可以只移除视频（先删 R2 对象，再把 `video_key` / `video_size` 置空），这是图片失去视频的唯一途径
 2. key 一经写入不再修改、不覆盖（随机 id 冲突时重新生成）
 3. 不接受 SVG 及任何魔数不在白名单内的文件，不论扩展名和 `Content-Type`
 4. `width`、`height` 是文件真实尺寸
@@ -107,9 +107,19 @@ interface MediaStore {           // R2
   get(key: string, range?: R2Range): Promise<R2ObjectBody | null>;
   delete(key: string): Promise<void>;
 }
+interface MediaCleanupStore {    // R2，F-006 存储清理用（R2MediaStore 同时实现）
+  deleteMany(keys: string[]): Promise<void>;   // 按 1000 个一批调用 R2 delete(string[])；不存在的 key 不报错
+}
 interface ImageRepo {            // D1
   insert(img: ImageRow): Promise<void>;
 }
+interface ImageCleanupRepo {     // D1，F-006 存储清理用（D1ImageRepo 同时实现；与上传接口分开，上传侧不依赖清理能力）
+  listAll(): Promise<ImageRecord[]>;                 // 只取 key、size、video_key、video_size、created_at
+  removeOrphans(imageKeys: string[], videoOnlyKeys: string[]): Promise<void>;
+  // F-006：一个 batch 内 DELETE … WHERE key IN (SELECT value FROM json_each(?))
+  //        + UPDATE … SET video_key = NULL, video_size = NULL WHERE key IN (SELECT value FROM json_each(?))
+}
+type ImageRecord = { key: string; size: number; videoKey: string | null; videoSize: number | null; createdAt: string };
 ```
 
 ## 7. 服务的需求
@@ -120,6 +130,8 @@ interface ImageRepo {            // D1
 | US-11 live-photo-upload | `upload`（图 + 视频）、视频校验、不留半对、`.live.mp4` 读取（Range） |
 | US-12 image-layout-marks | key 中的宽高与主色（由 `markdown` 模块解析） |
 | F-002 | `/img/*` 读取 |
+| F-006 US-01 detect-orphans | `StorageService.detectOrphans`、`ImageCleanupRepo.listAll`、`ImageReferenceQuery`（post） |
+| F-006 US-02 cleanup-orphans | `StorageService.cleanupOrphans`、`MediaCleanupStore.deleteMany`、`ImageCleanupRepo.removeOrphans` |
 
 ## 8. 单元测试规格
 
@@ -133,6 +145,55 @@ interface ImageRepo {            // D1
 | MEDIA-UT-06 | `upload`（Workers 集成 + R2 桩） | 视频 `put` 抛错；D1 插入抛错 | 500 `UPLOAD_FAILED`；R2 与 D1 均无残留 |
 | MEDIA-UT-07 | `upload` 采用服务端尺寸 | 客户端报 4032×3024，实际 1×1 | key 中为 `1x1` |
 | MEDIA-UT-08 | `/img/*` 读取 | 存在；不存在；`..` 路径；视频 `Range: bytes=0-99` | 200 + 长缓存头；404；404；206 + `Content-Range` |
+| MEDIA-UT-09 | `classifyOrphans` / `summarize`（纯函数） | 决策表：referenced {是, 否} × 有视频 {是, 否} × liveReferenced {是, 否} × createdAt {now − 24h + 1ms, now − 24h − 1ms} | 未引用图片 / 未引用视频 / 保护期 / 无动作分类正确；三项体积与 `protectedCount` 正确（F-006 TC-US01-04、05、06） |
+| MEDIA-UT-10 | `StorageService.cleanupOrphans`（Workers 集成 + D1 + R2） | F-006 TC-US02-01、02、03、05、07、09 | R2 先删、D1 后改；失败重跑幂等；R2 每批 ≤ 1000；无候选不写 |
+
+## 9. 存储清理（F-006）
+
+> 来源：F-006 [US-01](../../../../product/features/F-006-媒体存储清理/stories/storage-cleanup/US-01-detect-orphans/story.md)、[US-02](../../../../product/features/F-006-媒体存储清理/stories/storage-cleanup/US-02-cleanup-orphans/story.md) · [ADR-009](../../../features/F-006-媒体存储清理/architecture/adr/ADR-009-orphan-detection-in-d1.md)。实现位置：`src/domains/media/storage.ts`。已实现：`detectOrphans`、`classifyOrphans`、`summarize`、`ImageCleanupRepo.listAll`（Sprint 7 任务 1）、`cleanupOrphans`、`removeOrphans`、`MediaCleanupStore.deleteMany`（任务 2）；`GET /api/admin/storage/orphans`、`POST /api/admin/storage/cleanup`
+
+### 9.1 概念
+
+| 概念 | 定义 |
+|------|------|
+| 被引用 | `post.ImageReferenceQuery` 判定该 key 的主干（去扩展名、保留点）出现在任一文章的 `body`、`cover`、`pub_body`、`pub_cover` 中 |
+| 带实况引用 | 有视频的图片在 `body` / `pub_body` 中有一处引用的 URL 片段含 `live`（不区分大小写），或直接出现视频地址（比 `parseMarks` 宽，ADR-009） |
+| 保护期 | `createdAt > now − 24h`（`PROTECTION_MS = 86_400_000`） |
+| 未引用图片 | 保护期外、未被引用；清理时连同其视频 |
+| 未引用视频 | 保护期外、被引用、有视频、未被带实况引用；清理时只移除视频 |
+
+### 9.2 服务
+
+```ts
+interface StorageService {
+  detectOrphans(now: Date): Promise<OrphanSummary>;
+  cleanupOrphans(now: Date): Promise<CleanupResult>;
+}
+type OrphanSummary = { orphanImageCount: number; orphanImageBytes: number; orphanVideoCount: number; orphanVideoBytes: number; totalOrphanBytes: number; protectedCount: number };
+type CleanupResult = { removedImages: number; removedVideos: number; freedBytes: number };
+
+// 纯函数，便于单测
+function classifyOrphans(rows: ImageRecord[], refs: Map<string, ImageReference>, now: Date):
+  { images: ImageRecord[]; videos: ImageRecord[]; protectedCount: number };
+function summarize(c: { images: ImageRecord[]; videos: ImageRecord[]; protectedCount: number }): OrphanSummary;
+```
+
+依赖：`ImageCleanupRepo`、`MediaCleanupStore`、`ImageReferenceQuery`，构造时注入（`createStorageService(deps)`）。
+
+**detectOrphans**：`listAll` → `ImageReferenceQuery.classify(rows)` → `classifyOrphans` → `summarize`。
+- `orphanImageBytes` = Σ 未引用图片的 `size`
+- `orphanVideoBytes` = Σ 未引用视频的 `videoSize`
+- `totalOrphanBytes` = `orphanImageBytes` + Σ 未引用图片自带视频的 `videoSize` + `orphanVideoBytes`
+- `protectedCount` = 保护期内、否则会计入两类之一的行数
+
+**cleanupOrphans**：
+1. 与 `detectOrphans` 相同的三步，重新得到 `images`、`videos`（不接受前端传入的 key）
+2. 两类都为空 → 直接返回 0，不调用 R2 / D1 写
+3. `MediaCleanupStore.deleteMany`：`images` 的图片 key 与非空视频 key，加上 `videos` 的视频 key
+4. `ImageCleanupRepo.removeOrphans(images 的 key, videos 的 key)`
+5. 返回 `removedImages = images.length`、`removedVideos = videos.length`（未引用图片自带的视频不单独计数）、`freedBytes = totalOrphanBytes`
+
+失败：任一步抛错 → `StorageCleanupError` → API 500 `CLEANUP_FAILED`。先删 R2 后改 D1：失败后 D1 行仍在，下次检测仍可见；重跑时 R2 删除已不存在的 key 不报错，因此可重入。
 
 ---
 
@@ -143,4 +204,5 @@ interface ImageRepo {            // D1
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-14 | 1.1 | 图片上限 5 MiB → 50 MiB，请求体上限 16 MiB → 64 MiB（[raise-image-size-limit](../../../../backlog/raise-image-size-limit.md)） | miraclehifi |
 | 2026-10-14 | 1.2 | `sniffImage` 改为扫描整个图片字节（[sniff-jpeg-large-metadata](../../../../backlog/sniff-jpeg-large-metadata.md)） | miraclehifi |
+| 2026-10-16 | 1.4 | F-006：新增 §9 存储清理（`StorageService`）、仓储方法 `listAll` / `removeOrphans` / `deleteMany`；不变量 1 允许清理只移除视频（[ADR-009](../../../features/F-006-媒体存储清理/architecture/adr/ADR-009-orphan-detection-in-d1.md)） | miraclehifi |
 | 2026-10-15 | 1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：只改职责描述，接口与数据结构不变 | miraclehifi |

@@ -10,14 +10,14 @@
 | US-02 admin-logout | ● | | | | | | `POST /api/admin/logout`、列表页 / 写文章页登出入口（已实现，Sprint 2） |
 | US-03 edit-post-info | ○ | ● | | | ● | | `POST/GET/PUT /api/admin/posts[/:id]`、`GET /api/admin/tags`、`slugify` |
 | US-04 markdown-preview | | | | ● | ● | | `renderMarkdown`（Web Worker）、`useEditorView`（视图切换、窄屏 Tab）、`useScrollSync`（同步滚动）——已实现，Sprint 2 |
-| US-05 image-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`、`GET /img/*`（已实现，Sprint 2） |
+| US-05 image-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`、`GET /img/*`（已实现，Sprint 2）；浏览器端压缩、`UploadCard` 进度 / 失败 / 已中断、读者端删除占位（media-upload、editor、markdown 模块，2026-10-16 增量，Sprint 6 已实现） |
 | US-06 autosave-draft | ○ | ● | | | ● | | `POST/PUT /api/admin/posts`、自动保存状态机、本地暂存与恢复横幅、401 暂存跳转（已实现，Sprint 2） |
 | US-07 post-list | ○ | ● | | | | | `GET /api/admin/posts`（已实现，Sprint 1；列表页 `/admin` 已实现） |
 | US-08 publish-post | ○ | ● | | | ● | | `POST /api/admin/posts/:id/publish`、`/unpublish`、`GET /api/posts[/:slug]` |
 | US-09 delete-post | ○ | ● | | | | | `DELETE /api/admin/posts/:id`（已实现，Sprint 2：列表左滑 + 撤销、写文章页删除） |
 | US-10 format-toolbar | | | | | ● | | `applyFormat`、`applyEdit` |
-| US-11 live-photo-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`（`video`，已实现，Sprint 3）、`GET /img/*.live.mp4`（已实现，Sprint 2） |
-| US-12 image-layout-marks | | | ○ | ● | ● | | 图片插件（已实现，Sprint 3）、预览单图挂载 `reconcileIslands` + `ArticleImage`（已实现，Sprint 3）、`ImageMenu`、`toggleMark`、`setGalleryMode` |
+| US-11 live-photo-upload | ○ | | ● | ○ | ● | ● | `POST /api/admin/images`（`video`，已实现，Sprint 3）、`GET /img/*.live.mp4`（已实现，Sprint 2）；实况开关、仅转为静态图（media-upload 模块，2026-10-16 增量，Sprint 6 已实现） |
+| US-12 image-layout-marks | | | ○ | ● | ● | | 图片插件（已实现，Sprint 3）、预览单图挂载 `reconcileIslands` + `ArticleImage`（已实现，Sprint 3）、`ImageMenu`、`toggleMark`、`setGalleryMode`；菜单实况项 `hasLiveVideo` + `toggleMark(live)`（2026-10-16 增量，Sprint 6 已实现） |
 
 ● 主要承载　○ 依赖（auth 的 ○ = 受 middleware 保护）
 

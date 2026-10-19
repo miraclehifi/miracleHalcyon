@@ -23,6 +23,7 @@ function countUploads(page: Page) {
 }
 
 const alerts = (page: Page, text: string) => page.getByRole("alert").filter({ hasText: text });
+const cards = (page: Page) => page.getByTestId("md-preview").getByTestId("upload-card");
 const png = (name: string, padTo?: number): FakeFile => ({ name, type: "image/png", content: { png: [20, 20] }, padTo });
 const SVG: FakeFile = { name: "logo.svg", type: "image/svg+xml", content: { bytes: 64 } };
 
@@ -71,38 +72,50 @@ test("[TC-US05-11] 混合拖入：仅合法图片被插入", async ({ page, base
   expect(uploads.value).toBe(2);
 });
 
-// [TC-US05-12][SC-IMAGE-07] 离线粘贴：占位移除、提示上传失败，正文与粘贴前逐字一致
-test("[TC-US05-12] 离线粘贴：移除占位并提示", async ({ page, context, baseURL }) => {
+// [TC-US05-12][SC-IMAGE-07] 离线粘贴：占位改为"上传失败"留在原位，卡片红框显示"网络中断"并有重试 / 移除；不弹提示
+test("[TC-US05-12] 离线粘贴：失败卡片", async ({ page, context, baseURL }) => {
   const editor = await openPost(page, baseURL!, "O", "段落A\n段落B");
   await editor.evaluate((el: HTMLTextAreaElement) => el.setSelectionRange(4, 4)); // "段落A\n" 之后
   await context.setOffline(true);
   await pasteFiles(page, editor, [png("image.png")]);
 
-  await expect(alerts(page, "上传失败，请重试")).toBeVisible();
-  await expect(editor).toHaveValue("段落A\n段落B");
+  const card = cards(page);
+  await expect(card).toHaveAttribute("data-state", "error");
+  await expect(card).toContainText("网络中断");
+  await expect(card.getByRole("button", { name: "重试" })).toBeVisible();
+  await expect(card.getByRole("button", { name: "移除" })).toBeVisible();
+  await expect(editor).toHaveValue("段落A\n![上传失败]()段落B");
+  await expect(page.getByRole("alert")).toHaveCount(0);
   await context.setOffline(false);
 });
 
-// [TC-US05-13][SC-IMAGE-07] 连接中断、服务端 500：各自移除占位并提示；取消拦截后再粘贴可成功
-test("[TC-US05-13] 服务端 500 / 请求中断：移除占位并提示", async ({ page, baseURL }) => {
+// [TC-US05-13][SC-IMAGE-07] 连接中断 → "网络中断"；服务端 500 → "上传失败，请重试"；服务端 4xx 带文案 → 服务端文案；
+// 都不弹提示；移除失败卡片、取消拦截后再粘贴可成功（失败不残留状态）
+test("[TC-US05-13] 服务端 500 / 请求中断：失败卡片按原因显示", async ({ page, baseURL }) => {
   const editor = await openPost(page, baseURL!, "E", "原文");
-  await page.route("**/api/admin/images", (route) => route.abort("connectionreset"));
-  await pasteFiles(page, editor, [png("1x1.png")]);
-  await expect(alerts(page, "上传失败，请重试")).toHaveCount(1);
-  await expect(editor).toHaveValue("原文");
+  const failWith = async (handler: Parameters<Page["route"]>[1], reason: string) => {
+    await page.unrouteAll();
+    await page.route("**/api/admin/images", handler);
+    await pasteFiles(page, editor, [png("1x1.png")]);
+    await expect(cards(page)).toHaveAttribute("data-state", "error");
+    await expect(cards(page)).toContainText(reason);
+    await expect(editor).toHaveValue("原文![上传失败]()");
+    await cards(page).getByRole("button", { name: "移除" }).click();
+    await expect(editor).toHaveValue("原文");
+  };
+  await failWith((route) => route.abort("connectionreset"), "网络中断");
+  await failWith((route) => route.fulfill({ status: 500, body: "{}" }), "上传失败，请重试");
+  await failWith((route) => route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: { code: "UNSUPPORTED_TYPE", message: "不支持的图片格式" } }) }), "不支持的图片格式");
+  await expect(page.getByRole("alert")).toHaveCount(0);
 
   await page.unrouteAll();
-  await page.route("**/api/admin/images", (route) => route.fulfill({ status: 500, body: "{}" }));
-  await pasteFiles(page, editor, [png("1x1.png")]);
-  await expect(alerts(page, "上传失败，请重试")).toHaveCount(2);
-  await expect(editor).toHaveValue("原文");
-
-  await page.unrouteAll();
+  await editor.focus();
+  await editor.press("ControlOrMeta+End");
   await pasteFiles(page, editor, [png("1x1.png")]);
   await expect(editor).toHaveValue(/^原文!\[1x1\]\(\/img\/[^)]+\)$/);
 });
 
-// [TC-US05-25][SC-IMAGE-07][SC-IMAGE-09] 上传中在开头输入，最终失败：只移除占位，新输入保留
+// [TC-US05-25][SC-IMAGE-07][SC-IMAGE-09] 上传中在开头输入，最终失败：占位改为"上传失败"，新输入保留
 test("[TC-US05-25] 上传失败时上传期间输入的文字保留", async ({ page, baseURL }) => {
   const editor = await openPost(page, baseURL!, "K", "开头");
   let release!: () => void;
@@ -117,7 +130,63 @@ test("[TC-US05-25] 上传失败时上传期间输入的文字保留", async ({ p
   await page.keyboard.type("补充");
   release();
 
-  await expect(alerts(page, "上传失败，请重试")).toBeVisible();
-  await expect(editor).toHaveValue("补充开头");
+  await expect(cards(page)).toHaveAttribute("data-state", "error");
+  await expect(editor).toHaveValue("补充开头![上传失败]()");
+});
+
+// [TC-US05-26][SC-IMAGE-10] 第一次上传中断，期间在前面输入文字；点"重试"后从头处理并上传成功，引用落在原占位位置
+test("[TC-US05-26] 失败卡片重试后上传成功", async ({ page, baseURL }) => {
+  const editor = await openPost(page, baseURL!, "R", "段落A\n\n段落B");
+  await editor.evaluate((el: HTMLTextAreaElement) => el.setSelectionRange(4, 4));
+  let attempts = 0;
+  await page.route("**/api/admin/images", (route) => (attempts++ === 0 ? route.abort() : route.continue()));
+  await pasteFiles(page, editor, [png("image.png")]);
+  await expect(cards(page)).toHaveAttribute("data-state", "error");
+  await editor.press("ControlOrMeta+Home");
+  await page.keyboard.type("前言");
+
+  await cards(page).getByRole("button", { name: "重试" }).click();
+  await expect(editor).toHaveValue(/^前言段落A\n!\[image\]\(\/img\/[^)]+\)\n段落B$/, { timeout: 15_000 });
+  await expect(cards(page)).toHaveCount(0);
+  expect(attempts).toBe(2);
+});
+
+// [TC-US05-27][SC-IMAGE-11][SC-IMAGE-19] "移除"删掉整行占位，只删这一处；在源码区撤销能恢复占位文本，
+// 恢复的占位已不对应任何任务，卡片显示"上传已中断"
+test("[TC-US05-27] 失败卡片移除占位，可撤销", async ({ page, baseURL }) => {
+  const editor = await openPost(page, baseURL!, "X", "段落A\n\n段落B");
+  await editor.evaluate((el: HTMLTextAreaElement) => el.setSelectionRange(4, 4));
+  await page.route("**/api/admin/images", (route) => route.abort());
+  await pasteFiles(page, editor, [png("image.png")]);
+  await expect(editor).toHaveValue("段落A\n![上传失败]()\n段落B");
+
+  await cards(page).getByRole("button", { name: "移除" }).click();
+  await expect(editor).toHaveValue("段落A\n段落B"); // 占位独占的那一行整行删掉
+  await expect(cards(page)).toHaveCount(0);
+  await editor.focus();
+  await editor.press("ControlOrMeta+z");
+  await expect(editor).toHaveValue("段落A\n![上传失败]()\n段落B");
+  await expect(cards(page)).toHaveCount(1);
+  await expect(cards(page)).toHaveAttribute("data-state", "interrupted");
+  await expect(cards(page)).toContainText("上传已中断");
+  await expect(cards(page).getByRole("button", { name: "重试" })).toHaveCount(0);
+});
+
+// [TC-US05-37][SC-IMAGE-19] 刷新后残留的占位（经 API 写入）：两张卡片都是"上传已中断"，无缩略图、进度条与重试；
+// 移除第一张只删它那一行，第二张仍在
+test("[TC-US05-37] 孤立占位显示上传已中断，只能移除", async ({ page, baseURL }) => {
+  const editor = await openPost(page, baseURL!, "中断", "段落A\n![上传失败]()\n![上传中…]()\n段落B");
+  await expect(cards(page)).toHaveCount(2);
+  for (const card of await cards(page).all()) {
+    await expect(card).toHaveAttribute("data-state", "interrupted");
+    await expect(card).toContainText("上传已中断");
+    await expect(card.getByRole("button")).toHaveText(["移除"]);
+    await expect(card.locator("img")).toHaveCount(0);
+    await expect(card.getByRole("progressbar")).toHaveCount(0);
+  }
+  await cards(page).first().getByRole("button", { name: "移除" }).click();
+  await expect(editor).toHaveValue("段落A\n![上传中…]()\n段落B");
+  await expect(cards(page)).toHaveCount(1);
+  await expect(cards(page)).toHaveAttribute("data-state", "interrupted");
 });
 

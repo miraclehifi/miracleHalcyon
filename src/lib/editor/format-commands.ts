@@ -83,11 +83,12 @@ export function applyEdit(textarea: HTMLTextAreaElement, edit: Edit, { preserveS
   textarea.setSelectionRange(selStart, selEnd);
 }
 
-// 上传占位（editor module-spec §1）：源码中就是 ![处理中…]() / ![上传中…]()，不夹带 token；
+// 上传占位（editor module-spec §1）：源码中就是 ![处理中…]() / ![上传中…]() / ![上传失败]()，不夹带 token；
 // 第 i 个上传任务对应源码中第 i 个占位（按出现顺序扫描），作者在占位前后输入不影响定位
 export const PLACEHOLDER_UPLOADING = "![上传中…]()";
 export const PLACEHOLDER_PROCESSING = "![处理中…]()";
-const PLACEHOLDER = /!\[(?:处理中…|上传中…)\]\(\)/g;
+export const PLACEHOLDER_FAILED = "![上传失败]()";
+const PLACEHOLDER = /!\[(?:处理中…|上传中…|上传失败)\]\(\)/g;
 
 function placeholderAt(text: string, index: number): RegExpExecArray | null {
   let match: RegExpExecArray | null;
@@ -99,9 +100,70 @@ function placeholderAt(text: string, index: number): RegExpExecArray | null {
 
 export const countPlaceholders = (text: string) => text.match(PLACEHOLDER)?.length ?? 0;
 
-// 各占位在源码中的 [起, 止)，按出现顺序
-export const placeholderRanges = (text: string): [number, number][] => [...text.matchAll(PLACEHOLDER)].map((m) => [m.index, m.index + m[0].length]);
+// 各占位在源码中的 [起, 止)，按出现顺序（matchAll 从正则当前的 lastIndex 开始，先归零）
+export function placeholderRanges(text: string): [number, number][] {
+  PLACEHOLDER.lastIndex = 0;
+  return [...text.matchAll(PLACEHOLDER)].map((m) => [m.index, m.index + m[0].length]);
+}
 export const placeholdersBefore = (text: string, pos: number) => countPlaceholders(text.slice(0, pos));
+
+// 一次编辑在旧文本的 [from, toPrev)、新文本的 [from, toNext) 之间（前后都相同）
+interface EditRegion {
+  from: number;
+  toPrev: number;
+  toNext: number;
+}
+
+// 纯删除 / 纯插入：按光标定位（相同的占位相邻时，只比公共前后缀分不清改的是哪一个）。插入时光标在插入内容之后，
+// 撤销等操作可能把插入内容选中、光标在其前面，两种都试
+function caretRegion(prev: string, next: string, caret: number): EditRegion | null {
+  const delta = next.length - prev.length;
+  const same = (from: number, toPrev: number, toNext: number) =>
+    from >= 0 && prev.slice(0, from) === next.slice(0, from) && prev.slice(toPrev) === next.slice(toNext) ? { from, toPrev, toNext } : null;
+  if (delta < 0) return same(caret, caret - delta, caret);
+  if (delta > 0) return same(caret - delta, caret - delta, caret) ?? same(caret, caret, caret + delta);
+  return null;
+}
+
+// 先取公共后缀、再取公共前缀（粘贴相似的占位文本时，改动区间不会把原有占位拆开）
+function diffRegion(prev: string, next: string): EditRegion {
+  let suffix = 0;
+  while (suffix < prev.length && suffix < next.length && prev[prev.length - 1 - suffix] === next[next.length - 1 - suffix]) suffix++;
+  let from = 0;
+  const max = Math.min(prev.length, next.length) - suffix;
+  while (from < max && prev[from] === next[from]) from++;
+  return { from, toPrev: prev.length - suffix, toNext: next.length - suffix };
+}
+
+// 区间边界落在某个占位中间时扩到整个占位（前缀、后缀两边相同，扩展后仍相同）
+function alignRegion(region: EditRegion, before: [number, number][], after: [number, number][]): EditRegion {
+  let { from, toPrev, toNext } = region;
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (const [start, end] of [...before, ...after]) {
+      if (start < from && end > from) [from, changed] = [start, true];
+    }
+    for (const [start, end] of before) {
+      if (start < toPrev && end > toPrev) [toNext, toPrev, changed] = [toNext + end - toPrev, end, true];
+    }
+    for (const [start, end] of after) {
+      if (start < toNext && end > toNext) [toPrev, toNext, changed] = [toPrev + end - toNext, end, true];
+    }
+  }
+  return { from, toPrev, toNext };
+}
+
+// 占位槽位（editor module-spec §1）：作者的一次编辑删掉了哪些占位（旧文本中的序号）、新出现了哪些（新文本中的序号，
+// 如撤销"移除"、粘贴占位文本）；判断不了返回 null
+export function placeholderEdit(prev: string, next: string, caret: number): { removed: number[]; inserted: number[] } | null {
+  const before = placeholderRanges(prev);
+  const after = placeholderRanges(next);
+  const { from, toPrev, toNext } = alignRegion(caretRegion(prev, next, caret) ?? diffRegion(prev, next), before, after);
+  const within = (ranges: [number, number][], to: number) => ranges.flatMap(([start, end], i) => (start < to && end > from ? [i] : []));
+  const removed = within(before, toPrev);
+  const inserted = within(after, toNext);
+  return before.length - removed.length + inserted.length === after.length ? { removed, inserted } : null;
+}
 
 // 一批 count 张：一次插在光标处，各占一行，光标落在最后一个占位之后
 export function insertPlaceholders(cursor: number, count: number, placeholder = PLACEHOLDER_UPLOADING): Edit {
@@ -117,5 +179,23 @@ export function replacePlaceholder(text: string, index: number, markdown: string
 
 export const removePlaceholder = (text: string, index: number) => replacePlaceholder(text, index, "");
 
-// 占位阶段（media-upload module-spec §1）：处理中 → 上传中 → 替换为引用 / 移除；只改第 index 个占位的文字，序号不变
+// 卡片"移除"：占位独占一行时连同一个换行一起删（前面有行时删前面的换行，否则删后面的），否则只删占位本身
+export function removePlaceholderLine(text: string, index: number): Edit | null {
+  const match = placeholderAt(text, index);
+  if (!match) return null;
+  let from = match.index;
+  let to = from + match[0].length;
+  const lineStart = from === 0 || text[from - 1] === "\n";
+  const lineEnd = to === text.length || text[to] === "\n";
+  if (lineStart && lineEnd) {
+    if (from > 0) from--;
+    else if (to < text.length) to++;
+  }
+  return { from, to, insert: "" };
+}
+
+// 占位阶段（media-upload module-spec §1）：处理中 → 上传中 → 替换为引用；失败 → 上传失败，重试回到处理中；
+// 只改第 index 个占位的文字，序号不变
 export const markUploading = (text: string, index: number) => replacePlaceholder(text, index, PLACEHOLDER_UPLOADING);
+export const markFailed = (text: string, index: number) => replacePlaceholder(text, index, PLACEHOLDER_FAILED);
+export const markProcessing = (text: string, index: number) => replacePlaceholder(text, index, PLACEHOLDER_PROCESSING);

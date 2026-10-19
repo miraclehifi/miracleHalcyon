@@ -1,4 +1,5 @@
-// 上传客户端（media-upload module-spec §2、§3）：POST /api/admin/images（multipart），错误按契约的 code / message 抛出
+// 上传客户端（media-upload module-spec §2、§3"上传"）：POST /api/admin/images（multipart），用 XHR 以便拿到上传字节进度
+// （fetch 没有上传进度）。错误按契约的 code / message 抛出；网络中断、超时分别为 NETWORK / TIMEOUT
 // 浏览器算出的主色与宽高随请求上报（dominant-color.ts）；算不出时不传，服务端按中性灰 808080 记录
 import type { ImageMeta } from "./dominant-color";
 
@@ -32,7 +33,23 @@ export interface UploadExtras {
   video?: Blob; // 实况视频（与静态图同一请求，api-contract `video` 字段）
 }
 
-export async function uploadImage(file: File, { meta, video }: UploadExtras = {}, fetchImpl: typeof fetch = fetch): Promise<UploadedImage> {
+export interface UploadOptions {
+  onProgress?: (loaded: number, total: number) => void; // 请求体已发送的字节
+  signal?: AbortSignal;
+  xhr?: () => XMLHttpRequest; // 测试注入
+}
+
+const failed = (status: number, body: string): UploadError => {
+  let error: { code?: string; message?: string } | undefined;
+  try {
+    error = (JSON.parse(body) as { error?: { code?: string; message?: string } }).error;
+  } catch {
+    error = undefined;
+  }
+  return new UploadError(error?.code ?? "UPLOAD_FAILED", error?.message ?? "上传失败，请重试", status);
+};
+
+export function uploadImage(file: File, { meta, video }: UploadExtras = {}, { onProgress, signal, xhr = () => new XMLHttpRequest() }: UploadOptions = {}): Promise<UploadedImage> {
   const body = new FormData();
   body.append("file", file);
   if (video) body.append("video", video, file.name.replace(/\.[^.]*$/, "") + ".mp4");
@@ -41,10 +58,40 @@ export async function uploadImage(file: File, { meta, video }: UploadExtras = {}
     body.append("width", String(meta.width));
     body.append("height", String(meta.height));
   }
-  const response = await fetchImpl("/api/admin/images", { method: "POST", body, signal: AbortSignal.timeout(uploadTimeoutMs(file.size + (video?.size ?? 0))) });
-  if (response.ok) return (await response.json()) as UploadedImage;
-  const error = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
-  throw new UploadError(error?.error?.code ?? "UPLOAD_FAILED", error?.error?.message ?? "上传失败，请重试", response.status);
+  return new Promise((resolve, reject) => {
+    const request = xhr();
+    let settled = false;
+    const settle = (action: () => void) => {
+      if (settled) return;
+      settled = true;
+      signal?.removeEventListener("abort", onAbort);
+      action();
+    };
+    const onAbort = () => {
+      settle(() => reject(new DOMException("上传已取消", "AbortError")));
+      request.abort();
+    };
+    if (signal?.aborted) return onAbort();
+    signal?.addEventListener("abort", onAbort);
+    request.open("POST", "/api/admin/images");
+    request.timeout = uploadTimeoutMs(file.size + (video?.size ?? 0));
+    request.upload.onprogress = (event) => {
+      if (!settled && event.lengthComputable) onProgress?.(event.loaded, event.total);
+    };
+    request.onload = () =>
+      settle(() => {
+        if (request.status >= 200 && request.status < 300) {
+          try {
+            resolve(JSON.parse(request.responseText) as UploadedImage);
+          } catch {
+            reject(failed(request.status, ""));
+          }
+        } else reject(failed(request.status, request.responseText));
+      });
+    request.onerror = () => settle(() => reject(new UploadError("NETWORK", "网络中断", 0)));
+    request.ontimeout = () => settle(() => reject(new UploadError("TIMEOUT", "上传超时，请重试", 0)));
+    request.send(body);
+  });
 }
 
 // alt = 文件名去扩展名；剪贴板无名图片为 image；[ ] 转义（UT-91）

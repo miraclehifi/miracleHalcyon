@@ -38,7 +38,7 @@ test("[TC-US05-01] 粘贴图片上传并插入引用", async ({ page, baseURL })
   expect(uploads).toBe(1);
 });
 
-// [TC-US05-23][SC-IMAGE-01] 上传中：源码是占位、预览显示"图片上传中… 文件名"而不是图片；完成后占位被替换，预览出现图片
+// [TC-US05-23][SC-IMAGE-01] 上传中：源码是占位、预览显示进度卡片（缩略图为 blob 地址）而不是正式图片；完成后占位被替换，卡片消失、预览出现图片
 test("[TC-US05-23] 占位文本出现与替换、预览区渲染图片", async ({ page, baseURL }) => {
   const editor = await openPost(page, baseURL!, "Q", "");
   const release = await holdUploads(page);
@@ -46,15 +46,18 @@ test("[TC-US05-23] 占位文本出现与替换、预览区渲染图片", async (
 
   await expect(editor).toHaveValue("![上传中…]()");
   const preview = page.getByTestId("md-preview");
-  await expect(preview.getByText("图片上传中… image.png")).toBeVisible();
-  await expect(preview.locator("img")).toHaveCount(0);
+  const card = preview.getByTestId("upload-card");
+  await expect(card).toContainText("正在上传…");
+  await expect(card).toContainText("image.png");
+  await expect(card.locator("img")).toHaveAttribute("src", /^blob:/);
+  await expect(preview.locator('img:not([src^="blob:"])')).toHaveCount(0);
   release();
 
   await expect(editor).not.toHaveValue(/上传中…/, { timeout: 10_000 });
   const url = (await value(editor)).match(/^!\[image\]\((.+)\)$/)?.[1];
   expect(url).toMatch(IMAGE_URL);
   await expect(preview.locator(`img[src="${url}"]`)).toBeVisible();
-  await expect(preview.getByText(/图片上传中/)).toHaveCount(0);
+  await expect(preview.getByTestId("upload-card")).toHaveCount(0);
 });
 
 // [TC-US05-24][SC-IMAGE-09] 上传期间在占位前、后继续输入：引用恰好替换占位，新输入的文字不变

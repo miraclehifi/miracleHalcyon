@@ -223,3 +223,48 @@ test.describe("手机", () => {
     await expect(editor(page)).toHaveValue(`开头段落\n\n![山](${IMG}#wide)\n\n${group(3)}`);
   });
 });
+
+// ---- 单图菜单"实况"项（add-image-menu-live-toggle）----
+
+const LIVE_IMG = "/img/2026/10/jjjjjjjjjj_960x1280_6b7f8e.jpg"; // 夹具带同名 .live.mp4
+const liveItem = (page: Page) => menu(page).getByRole("menuitemcheckbox", { name: "实况" });
+
+// [TC-US12-19][SC-LAYOUT-14] #wide,live 的图片：菜单有"实况"（已勾选）；取消 → #wide、预览无 LIVE、项仍在；再勾选 → #wide,live；撤销回到 #wide
+test("[TC-US12-19] 单图菜单取消 / 恢复实况，保留 wide，可撤销", async ({ page, baseURL }) => {
+  await openDraft(page, baseURL!, `![海](${LIVE_IMG}#wide,live)`, "实况");
+  await openMenu(page);
+  await expect(wideItem(page)).toHaveAttribute("aria-checked", "true");
+  await expect(liveItem(page)).toHaveAttribute("aria-checked", "true");
+
+  await liveItem(page).click();
+  await expect(editor(page)).toHaveValue(`![海](${LIVE_IMG}#wide)`);
+  await expect(preview(page).locator("[data-live-badge]")).toHaveCount(0);
+  await expect(preview(page).locator("figure[data-article-image][data-wide]")).toHaveCount(1);
+  await expect(liveItem(page)).toHaveAttribute("aria-checked", "false");
+
+  await liveItem(page).click();
+  await expect(editor(page)).toHaveValue(`![海](${LIVE_IMG}#wide,live)`);
+  await page.keyboard.press("Escape");
+  await editor(page).focus();
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(editor(page)).toHaveValue(`![海](${LIVE_IMG}#wide)`);
+});
+
+// [TC-US12-20][SC-LAYOUT-15] 没有实况视频的图片（含片段写了 #live 但视频已不在的）：菜单没有"实况"项，"宽图"正常；
+// 每张图只检查 1 次，再次打开不再请求
+test("[TC-US12-20] 无实况视频不显示实况项，检查结果会话内缓存", async ({ page, baseURL }) => {
+  await openDraft(page, baseURL!, `![甲](${IMG})\n\n![乙](${IMG2}#live)`, "无视频");
+  const checks: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().endsWith(".live.mp4") && request.headers()["range"] === "bytes=0-0") checks.push(new URL(request.url()).pathname);
+  });
+  for (const index of [0, 1, 0]) {
+    await openMenu(page, index);
+    await expect(wideItem(page)).toBeVisible();
+    await page.waitForTimeout(300); // 等检查结果返回
+    await expect(liveItem(page)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(menu(page)).toBeHidden();
+  }
+  expect(checks.sort()).toEqual([IMG.replace(".jpg", ".live.mp4"), IMG2.replace(".jpg", ".live.mp4")].sort());
+});

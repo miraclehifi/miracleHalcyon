@@ -15,6 +15,7 @@ import { rehypeAfterSanitize, sanitizeSchema } from "./sanitize-schema";
 
 export interface RenderOptions {
   sourceMap?: boolean; // 预览传 true：顶层块输出 data-line（同步滚动）
+  uploadPlaceholders?: boolean; // 预览传 true：上传占位输出为挂载点；默认（读者页）删除占位（module-spec §2.1）
 }
 
 export type { ImageRef } from "./plugins/image-figures";
@@ -51,6 +52,6 @@ const processor = unified()
   .use(rehypeStringify);
 
 export async function renderMarkdown(source: string, opts: RenderOptions = {}): Promise<RenderResult> {
-  const file = await processor.process({ value: source, data: { sourceMap: opts.sourceMap ?? false } });
+  const file = await processor.process({ value: source, data: { sourceMap: opts.sourceMap ?? false, uploadPlaceholders: opts.uploadPlaceholders ?? false } });
   return { html: String(file), images: file.data.images ?? [] };
 }

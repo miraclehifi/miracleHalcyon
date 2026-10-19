@@ -1,7 +1,7 @@
 // 实况视频处理（media-upload module-spec §2、§3，ADR-006 第 3、5 点）：mediabunny 只在处理视频时动态 import。
 // 源已是无音轨的 H.264 mp4 → 原样使用；能解码源视频且浏览器能编码 H.264 → 转码（长边 1920、6 Mbps、去音轨）；
 // 否则只转封装（保留原编码、去音轨），结果不是 H.264 时返回 HEVC_KEPT（部分浏览器只显示静态图）。
-// 结果超过 10MB → dropVideo（按普通图片上传）
+// 结果超过 10MB → dropVideo（按普通图片上传）。signal 中止（卡片"仅转为静态图"）：取消进行中的转换，以 AbortError 结束
 export const VIDEO_MAX_BYTES = 10 * 1024 * 1024;
 const MAX_EDGE = 1920; // 浏览器 H.264 编码器不支持 4K（OPPO 主视频 3840×2880）
 const VIDEO_BITRATE = 6_000_000; // 约 0.75MB/s，3 秒片段 ≈ 2.3MB
@@ -31,8 +31,20 @@ const evenSize = (width: number, height: number) => {
   return { width: Math.round((width * scale) / 2) * 2, height: Math.round((height * scale) / 2) * 2 };
 };
 
-export async function processVideo(video: Blob, load: () => Promise<Mediabunny> = loadMediabunny): Promise<ProcessedVideo> {
+export interface ProcessVideoOptions {
+  signal?: AbortSignal;
+  load?: () => Promise<Mediabunny>; // 测试替身
+}
+
+const abortError = () => new DOMException("已放弃实况视频", "AbortError");
+
+export async function processVideo(video: Blob, { signal, load = loadMediabunny }: ProcessVideoOptions = {}): Promise<ProcessedVideo> {
+  const check = () => {
+    if (signal?.aborted) throw abortError();
+  };
+  check();
   const lib = await load();
+  check();
   const input = new lib.Input({ source: new lib.BlobSource(video), formats: lib.ALL_FORMATS });
   const track = await input.getPrimaryVideoTrack();
   if (!track) throw new Error("视频中没有画面");
@@ -58,7 +70,18 @@ export async function processVideo(video: Blob, load: () => Promise<Mediabunny> 
       showWarnings: false,
     });
     if (!conversion.isValid) throw new Error("无法处理该视频");
-    await conversion.execute();
+    check();
+    const cancel = () => void conversion.cancel();
+    signal?.addEventListener("abort", cancel, { once: true });
+    try {
+      await conversion.execute();
+    } catch (error) {
+      check(); // 被取消的转换以 AbortError 结束
+      throw error;
+    } finally {
+      signal?.removeEventListener("abort", cancel);
+    }
+    check();
     blob = new Blob([target.buffer!], { type: "video/mp4" });
   }
   if (blob.size > VIDEO_MAX_BYTES) return { dropVideo: true };

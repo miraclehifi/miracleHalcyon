@@ -61,6 +61,7 @@ specs/
 ├── test/          # QA: 验证与追溯
 ├── devops/        # DevOps: Git/发布/构建配置
 └── tasks/         # Sprint: 任务执行计划
+references/        # 参考素材（设计截图、文章摘录、代码片段、链接），不参与 lint / 类型检查 / 构建
 ```
 
 ---

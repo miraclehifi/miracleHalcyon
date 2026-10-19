@@ -15,7 +15,7 @@ declare const self: DedicatedWorkerGlobalScope;
 self.addEventListener("message", async (event: MessageEvent<RenderRequest>) => {
   const { seq, source } = event.data;
   try {
-    const { html, images } = await renderMarkdown(source, { sourceMap: true }); // 预览：带 data-line 供同步滚动
+    const { html, images } = await renderMarkdown(source, { sourceMap: true, uploadPlaceholders: true }); // 预览：带 data-line 供同步滚动；上传占位输出挂载点
     self.postMessage({ seq, html, images } satisfies RenderResponse);
   } catch (error) {
     console.error("预览渲染失败", error);

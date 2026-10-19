@@ -17,6 +17,7 @@ import { useScrollSync } from "../../../lib/editor/scroll-sync";
 import { useEditorView, type NarrowTab, type ViewMode } from "../../../lib/editor/view-mode";
 import { useHydrated } from "../../../lib/dom/hydration";
 import { navigate } from "../../../lib/dom/navigate";
+import type { UploadView } from "../../../lib/upload/use-image-uploads";
 import { localDate } from "../../../lib/format/local-date";
 import { ConfirmDialog } from "../../ui/ConfirmDialog";
 import { RestoreBanner } from "../../ui/RestoreBanner";
@@ -82,7 +83,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
   const [slugTouched, setSlugTouched] = useState(() => initial !== null && initial.slug !== slugify(initial.title));
   // 抽屉默认：新建时打开（方便填信息），编辑已有文章时关闭；不跨文章记忆
   const [settingsOpen, setSettingsOpen] = useState(initial === null);
-  const [uploadNames, setUploadNames] = useState<string[]>([]);
+  const [uploads, setUploads] = useState<UploadView[]>([]);
   const [slugError, setSlugError] = useState<string | undefined>(); // 服务端 409 SLUG_TAKEN，改 slug 后清除
   const [missing, setMissing] = useState<RequiredField[]>([]); // 发布时缺少的必填项，改了对应字段后清除
   const [focusRequest, setFocusRequest] = useState<{ field: RequiredField } | null>(null);
@@ -318,7 +319,8 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
               bodyInvalid={missing.includes("body")}
               onTitleChange={onTitleChange}
               onBodyChange={(body) => update({ body })}
-              onUploadsChange={setUploadNames}
+              onUploadsChange={setUploads}
+              onSessionExpired={onSessionExpired}
             />
           </section>
           <section
@@ -328,7 +330,7 @@ export function PostEditorPage({ initial }: PostEditorPageProps) {
             hidden={view.mode === "edit"}
             className="min-w-0 flex-1 overflow-y-auto bg-surface px-10 py-7 [--article-bleed:40px] max-md:px-4 max-md:py-4 max-md:[--article-bleed:16px]"
           >
-            <MarkdownPreview title={draft.title} body={draft.body} uploadNames={uploadNames} onSourceEdit={onSourceEdit} />
+            <MarkdownPreview title={draft.title} body={draft.body} uploads={uploads} onSourceEdit={onSourceEdit} />
           </section>
           {settingsOpen && (
             <PostSettingsDrawer

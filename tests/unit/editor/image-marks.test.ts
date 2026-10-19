@@ -34,6 +34,22 @@ describe("toggleMark", () => {
     expect(results).toEqual(cases.map(([, , expected]) => `前文\n\n![山](${SRC}${expected} "图注")\n\n后文`));
   });
 
+  // UT-164（SC-LAYOUT-14，= TC-US12-21）：实况标记——去掉时保留其他标记，加上时放在末尾
+  it("实况标记的合并矩阵", () => {
+    const cases: [string, string][] = [
+      ["#wide,live", "#wide"],
+      ["#live", ""],
+      ["#wide", "#wide,live"],
+      ["#accordion", "#accordion,live"],
+    ];
+    const results = cases.map(([fragment]) => {
+      const source = `![山](${SRC}${fragment})\n![水](${SRC}${fragment})`;
+      const edit = toggleMark(source, at(source), "live");
+      return edit && source.slice(0, edit.from) + edit.insert + source.slice(edit.to);
+    });
+    expect(results).toEqual(cases.map(([fragment, expected]) => `![山](${SRC}${expected})\n![水](${SRC}${fragment})`));
+  });
+
   it("不传 on 时按源码当前状态取反；连续改写时过期的 end 不影响定位", () => {
     const source = `![山](${SRC})`;
     const location = at(source);

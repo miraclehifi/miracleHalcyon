@@ -3,13 +3,14 @@
 **US ID**: US-11
 **Story**: [story.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-11-live-photo-upload/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-001-文章写作/stories/post-editor/US-11-live-photo-upload/behaviors.md)
-**最后更新**: 2026-10-15
-**Version Tag**: v1.1
+**最后更新**: 2026-10-16
+**Version Tag**: v1.2
 
 > 验收用例来自 behaviors.md 的 Given-When-Then，另外补充了等价类、边界值、错误猜测和 NFR 用例（nfr.md §2.2：存储格式只允许 png/jpg/webp/gif；实况视频为 mp4，≤ 10MB；服务端按文件头判断类型）。
 > 写法和 R2 key 以 [ADR-005](../../../../../engineering/features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) 为准，浏览器端处理以 [ADR-006](../../../../../engineering/features/F-001-文章写作/architecture/adr/ADR-006-live-photo-browser-processing.md) 为准。
 > 接口路径暂写为 `POST /api/admin/images`（multipart：`file`，可选 `video`、`width`、`height`、`rgb`），**最终以 design-domain 的 API 契约为准**。
 > 普通图片的占位、大小、类型、失败处理由 US-05 覆盖，这里不重复；HEIC / HEIF、单独的 mov / mp4 按 US-05 的类型错误处理。
+> **实况开关**（2026-10-16 起默认关闭）：TC-US11-01、05、06（动态照片部分）、07、09、10、14、16、17、21、22 的环境前置都包含"实况开关已开启"——测试用 `addInitScript` 预先写入本地存储键（键名以 design-domain 为准）或在页面上点开开关；开关关闭时的行为由 TC-US11-26 ~ 28 覆盖。动态照片的静态图会按 US-05 压缩，引用扩展名按压缩结果为 `.webp` 或 `.jpg`。
 > 编号不重排：2026-10-15 去掉苹果相关后，TC-US11-03、04、08、12、18 标为已删除（[drop-apple-live-photo](../../../../../backlog/drop-apple-live-photo.md)）。
 
 ---
@@ -65,10 +66,13 @@
 | TC-US11-19 | SC-LIVE-01, SC-LIVE-08 | 安全：伪造视频魔数、未登录、跨站 Origin | security | P0 |
 | TC-US11-20 | SC-LIVE-01 | 安全：客户端伪造宽高或主色参数，服务端校验 | security | P1 |
 | TC-US11-21 | SC-LIVE-01 | 性能：实况照片从拖入到插入引用 < 15s（首次加载组件） | performance | P2 |
-| TC-US11-22 | SC-LIVE-05 | 占位依次显示"处理中…"→"上传中…"，预览占位块，请求带主色与宽高 | ui-interaction | P0 |
+| TC-US11-22 | SC-LIVE-05 | 进度卡片依次显示压缩、处理实况视频、上传三个阶段，请求带主色与宽高 | ui-interaction | P0 |
 | TC-US11-23 | SC-LIVE-10 | 预览中桌面悬停播放、移出复原 | ui-interaction | P0 |
 | TC-US11-24 | SC-LIVE-10 | 手机长按播放、松手复原，不弹系统菜单 | ui-interaction | P1 |
 | TC-US11-25 | SC-LIVE-11 | 视频无法解码：只显示静态图，隐藏 LIVE | ui-interaction | P1 |
+| TC-US11-26 | SC-LIVE-14 | 开关默认关闭：动态照片只上传压缩后的静态图，不加载 mediabunny | e2e | P0 |
+| TC-US11-27 | SC-LIVE-15 | 开关状态持久化；本地存储不可用时按关闭 | ui-interaction | P1 |
+| TC-US11-28 | SC-LIVE-16 | "仅转为静态图"只放弃本张视频，其他照片与开关不受影响 | ui-interaction | P0 |
 
 ---
 
@@ -83,11 +87,11 @@
 | Version Tag | v1.1 |
 | Automation Feasibility | ✅ 适合自动化（`DataTransfer` 中放入一个 `File`） |
 | type | e2e |
-| Change History | 2026-10-12 v1.0 初始创建；2026-10-15 v1.1 改用安卓动态照片（drop-apple-live-photo） |
+| Change History | 2026-10-12 v1.0 初始创建；2026-10-15 v1.1 改用安卓动态照片（drop-apple-live-photo）；2026-10-16 v1.2 上传体验升级（media-upload-experience）：前置开启实况开关，静态图按压缩结果断言 |
 
 **前置条件：**
 - 【数据前置】草稿正文三行：`行1` / `行2` / `行3`
-- 【环境前置】chromium（`channel: "chromium"`）；已登录
+- 【环境前置】chromium（`channel: "chromium"`）；已登录；实况开关已开启
 
 **测试数据：** `IMG20260516172228.jpg`
 
@@ -98,7 +102,7 @@
 
 **预期结果：**
 - 上传请求发起 1 次（一个 multipart 请求同时含图片和视频）
-- 源码第 4 行匹配 `^!\[IMG20260516172228\]\(/img/\d{4}/\d{2}/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}\.jpg#live\)$`，宽高与静态图一致
+- 源码第 4 行匹配 `^!\[IMG20260516172228\]\(/img/\d{4}/\d{2}/[a-z2-7]{10}_\d+x\d+_[0-9a-f]{6}\.(webp|jpg)#live\)$`，宽高与压缩后的静态图一致（长边 2560）
 - 源码中只新增这一行，`行1`–`行3` 不变
 - 预览中该图片有 `LIVE` 标记（`[data-live-badge]` 可见）
 
@@ -332,23 +336,24 @@
 |------|------|
 | TC-ID | TC-US11-14 |
 | covers | SC-LIVE-08 |
-| Scenario | 网络失败 |
+| Scenario | 网络失败：两者都不保留，卡片可重试 |
 | Priority | P0 |
-| Version Tag | v1.1 |
+| Version Tag | v1.2 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | e2e |
-| Change History | 2026-10-12 v1.0 初始创建；2026-10-15 v1.1 改用安卓动态照片（drop-apple-live-photo） |
+| Change History | 2026-10-12 v1.0 初始创建；2026-10-15 v1.1 改用安卓动态照片（drop-apple-live-photo）；2026-10-16 v1.2 上传体验升级（media-upload-experience）：失败改为红框卡片 + 重试 |
 
-**前置条件：** 【数据前置】正文为 `前文`；【环境前置】`page.route('**/api/admin/images', r => r.abort())`
+**前置条件：** 【数据前置】正文为 `前文`；【环境前置】实况开关已开启；第一次上传请求 `abort()`，之后放行
 
 **测试数据：** `IMG_3000.jpg`（`IMG20260516172228.jpg` 改名）
 
-**步骤：** 拖入
+**步骤：**
+1. 拖入，等待卡片失败态
+2. 点击卡片"重试"
 
 **预期结果：**
-- 源码恢复为 `前文`，没有残留占位
-- 常驻错误提示"上传失败，请重试"，提示中包含 `IMG_3000`
-- R2 的 `list` 差集为空
+- 步骤 1：源码为 `前文` + `![上传失败]()`；卡片红框，文案"网络中断"，有"重试""移除"；不弹 Toast；R2 的 `list` 差集为空
+- 步骤 2：重新经过"正在处理实况视频…"，上传请求同时含 `file` 与 `video`，最终插入带 `#live` 的引用
 
 **清理：** 删除草稿
 
@@ -502,36 +507,38 @@
 
 ## UI 交互测试
 
-### TC-US11-22: 占位依次显示"处理中…"→"上传中…"，预览占位块，请求带主色与宽高
+### TC-US11-22: 进度卡片依次显示压缩、处理实况视频、上传三个阶段，请求带主色与宽高
 
 | 字段 | 值 |
 |------|------|
 | TC-ID | TC-US11-22 |
 | covers | SC-LIVE-05 |
-| Scenario | 处理阶段可见（普通图片计算主色；动态照片的切视频 / 转码走同一占位阶段） |
+| Scenario | 处理阶段可见：动态照片三个阶段；普通图片跳过视频阶段 |
 | Priority | P0 |
-| Version Tag | v1.1 |
+| Version Tag | v1.2 |
 | Automation Feasibility | ✅ 适合自动化 |
 | type | ui-interaction |
-| Change History | 2026-10-12 v1.0 初始创建；2026-10-15 v1.1 改用普通 JPEG 观察处理阶段，补充主色与宽高断言（drop-apple-live-photo） |
+| Change History | 2026-10-12 v1.0 初始创建；2026-10-15 v1.1 改用普通 JPEG 观察处理阶段，补充主色与宽高断言（drop-apple-live-photo）；2026-10-16 v1.2 上传体验升级（media-upload-experience）：占位块改为进度卡片的三个阶段 |
 
-**前置条件：** 【环境前置】`addInitScript` 让 `createImageBitmap` 延迟 1.5s 返回；上传请求延迟 2s
+**前置条件：** 【环境前置】实况开关已开启；`page.route` 给 `mediabunny` chunk 加 1.5s 延迟；上传请求延迟 2s
 
-**步骤：** 拖入 `b.jpg`，依次观察源码、预览和上传请求
+**步骤：**
+1. 拖入 `IMG20260516172228.jpg`，依次观察卡片、源码和上传请求
+2. 拖入 `b.jpg`，观察卡片
 
 **预期结果：**
-- 源码先出现 `处理中…` 占位，之后变为 `上传中…`，最后替换为引用
-- 上传中时预览对应位置显示"图片上传中… b"
-- 上传请求带 `width`、`height`（与图片一致）和 `rgb`（6 位小写 hex，不是缺省的 `808080`）；返回的 key 中主色与 `rgb` 一致
+- 步骤 1：卡片文案依次为"正在压缩…""正在处理实况视频…""正在上传… N%"；对应 `aria-valuenow` 区间 0–15、15–40、40–100，单调不减；处理阶段源码占位为 `处理中…`，上传阶段为 `上传中…`
+- 步骤 1：上传请求带 `width`、`height`（与压缩后的静态图一致）和 `rgb`（6 位小写 hex，不是缺省的 `808080`）；返回的 key 中主色与 `rgb` 一致
+- 步骤 2：卡片不出现"正在处理实况视频…"，也不出现"仅转为静态图"按钮
 
 **playwright_hint：**
 ```ts
-await page.addInitScript(() => { const o = window.createImageBitmap; window.createImageBitmap = (...a) => new Promise(f => setTimeout(() => f(o(...a)), 1500)); });
-await page.route('**/api/admin/images', async r => { await new Promise(f => setTimeout(f, 2000)); await r.continue(); });
-await expect(editor).toHaveValue(/处理中…/);
-await expect(editor).toHaveValue(/上传中…/);
-await expect(preview.getByText('图片上传中… b')).toBeVisible();
-await expect(editor).toHaveValue(/!\[b\]\(\/img\/.+_[0-9a-f]{6}\.jpg\)/, { timeout: 20000 });
+const card = preview.getByTestId('upload-card').first();
+await expect(card).toContainText('正在压缩…');
+await expect(card).toContainText('正在处理实况视频…');
+await expect(card.getByRole('button', { name: '仅转为静态图' })).toBeVisible();
+await expect(card).toContainText(/正在上传… \d+%/);
+await expect(editor).toHaveValue(/#live\)/, { timeout: 30000 });
 ```
 
 **清理：** 同上
@@ -632,6 +639,113 @@ await expect(fig.locator('img')).toBeVisible();
 
 **清理：** 删除草稿
 
+### TC-US11-26: 开关默认关闭——动态照片只上传压缩后的静态图
+
+| 字段 | 值 |
+|------|------|
+| TC-ID | TC-US11-26 |
+| covers | SC-LIVE-14 |
+| Scenario | 默认状态下动态照片按普通图片处理，不加载视频组件 |
+| Priority | P0 |
+| Version Tag | v1.2 |
+| Automation Feasibility | ✅ 适合自动化（全新 context，本地存储为空） |
+| type | e2e |
+| Change History | 2026-10-16 v1.2 上传体验升级（media-upload-experience）：新增 |
+
+**前置条件：** 【数据前置】空正文草稿；【环境前置】全新 context，已登录；监听所有请求
+
+**测试数据：** `IMG20260516172228.jpg`
+
+**步骤：**
+1. 打开写文章页，检查工具栏"实况照片"开关
+2. 拖入文件，等待引用插入
+
+**预期结果：**
+- 步骤 1：开关为关闭（`aria-checked="false"`）
+- 卡片只出现"正在压缩…""正在上传…"，从未出现"正在处理实况视频…"
+- 整个过程没有请求 `mediabunny` 的 chunk
+- 上传请求只有 `file` 字段、没有 `video`；`file` 不含 `ftyp` 视频字节，为压缩后的 WebP / JPEG
+- 引用不带 `#live`；R2 中无 `.live.mp4`，`images` 新行的视频 key 为空
+
+**清理：** 删除 R2 对象；删除草稿
+
+---
+
+### TC-US11-27: 开关状态持久化；本地存储不可用时按关闭
+
+| 字段 | 值 |
+|------|------|
+| TC-ID | TC-US11-27 |
+| covers | SC-LIVE-15 |
+| Scenario | 开关选择记在本浏览器；存储异常不影响写作 |
+| Priority | P1 |
+| Version Tag | v1.2 |
+| Automation Feasibility | ✅ 适合自动化（存储异常：`addInitScript` 让 `Storage.prototype.getItem` / `setItem` 抛错） |
+| type | ui-interaction |
+| Change History | 2026-10-16 v1.2 上传体验升级（media-upload-experience）：新增 |
+
+**前置条件：** 【数据前置】两篇草稿 A、B；【环境前置】已登录
+
+**步骤：**
+1. 打开 A，打开"实况照片"开关，刷新页面
+2. 打开 B
+3. 新 context 注入存储抛错脚本，打开 A；切换开关后拖入 `IMG20260516172228.jpg`
+
+**预期结果：**
+- 步骤 1、2：开关均为开启
+- 步骤 3：页面无报错，开关初始为关闭；切换为开启后本次页面内生效（引用带 `#live`）
+
+**playwright_hint：**
+```ts
+const toggle = page.getByRole('switch', { name: '实况照片' });
+await expect(toggle).toHaveAttribute('aria-checked', 'false');
+await toggle.click();
+await page.reload(); await waitForHydration(page);
+await expect(toggle).toHaveAttribute('aria-checked', 'true');
+```
+
+**清理：** 删除 R2 对象；删除草稿
+
+---
+
+### TC-US11-28: "仅转为静态图"只放弃本张视频
+
+| 字段 | 值 |
+|------|------|
+| TC-ID | TC-US11-28 |
+| covers | SC-LIVE-16 |
+| Scenario | 卡片快捷操作：本张改为静态图，其他照片与开关不变 |
+| Priority | P0 |
+| Version Tag | v1.2 |
+| Automation Feasibility | ✅ 适合自动化（`page.route` 给 `mediabunny` chunk 加 3s 延迟，保证点击时仍在视频阶段） |
+| type | ui-interaction |
+| Change History | 2026-10-16 v1.2 上传体验升级（media-upload-experience）：新增 |
+
+**前置条件：** 【环境前置】实况开关已开启；mediabunny chunk 延迟 3s
+
+**测试数据：** `IMG_A.jpg`、`IMG_B.jpg`（均为 `IMG20260516172228.jpg` 改名，一次拖入）
+
+**步骤：**
+1. 拖入两张，等第一张卡片显示"仅转为静态图"
+2. 点击第一张卡片的"仅转为静态图"
+3. 等两张都完成
+
+**预期结果：**
+- 步骤 2 后第一张卡片立即进入"正在上传…"，按钮消失
+- `IMG_A` 的上传请求无 `video` 字段，引用不带 `#live`
+- `IMG_B` 的上传请求有 `video` 字段，引用带 `#live`
+- 工具栏开关仍为开启；进入上传阶段的卡片、普通图片卡片都不显示该按钮
+
+**playwright_hint：**
+```ts
+const first = preview.getByTestId('upload-card').first();
+await first.getByRole('button', { name: '仅转为静态图' }).click();
+await expect(first.getByRole('button', { name: '仅转为静态图' })).toHaveCount(0);
+await expect(editor).toHaveValue(/!\[IMG_A\]\(\/img\/[^)#]+\)\n!\[IMG_B\]\(\/img\/[^)]+#live\)/, { timeout: 30000 });
+```
+
+**清理：** 删除 R2 对象；删除草稿
+
 ---
 
 ## 覆盖矩阵
@@ -642,7 +756,7 @@ await expect(fig.locator('img')).toBeVisible();
 | SC-LIVE-02 | ~~BH-02 单张 HEIC~~（已删除） | — |
 | SC-LIVE-03 | BH-03 两种 XMP 格式识别 | TC-US11-05, 06 |
 | SC-LIVE-04 | BH-04 混合批次 | TC-US11-07 |
-| SC-LIVE-05 | BH-05 处理中 / 上传中占位 | TC-US11-22 |
+| SC-LIVE-05 | BH-05 进度卡片三个阶段 | TC-US11-22 |
 | SC-LIVE-06 | BH-06 视频超过 10MB | TC-US11-09, 10, 11 |
 | SC-LIVE-07 | ~~BH-07 只有视频~~（已删除） | — |
 | SC-LIVE-08 | BH-08 任一失败都不保留 | TC-US11-14, 15, 19 |
@@ -651,20 +765,25 @@ await expect(fig.locator('img')).toBeVisible();
 | SC-LIVE-11 | BH-11 播放失败降级 | TC-US11-25 |
 | SC-LIVE-12 | BH-12 插入图片选择动态照片 | TC-US11-17 |
 | SC-LIVE-13 | ~~BH-13 HEIC 无法解码~~（已删除） | — |
+| SC-LIVE-14 | BH-14 开关关闭只传静态图 | TC-US11-26 |
+| SC-LIVE-15 | BH-15 开关持久化 | TC-US11-27 |
+| SC-LIVE-16 | BH-16 仅转为静态图 | TC-US11-28 |
 
 | 验收标准（story.md §2） | TC-IDs |
 |------------------------|--------|
 | AC1 安卓动态照片 | TC-US11-01, 02, 23 |
 | AC2 ~~单张 HEIC~~（已删除） | — |
 | AC3 两种 XMP 格式 / 普通 JPEG 不误识别 | TC-US11-05, 06 |
-| AC4 处理中占位 | TC-US11-22 |
+| AC4 进度卡片阶段 | TC-US11-22 |
 | AC5 视频 > 10MB | TC-US11-09, 10, 11 |
 | AC6 ~~只有视频~~（已删除） | — |
 | AC7 任一失败 | TC-US11-14, 15 |
 | AC8 不支持 H.264 | TC-US11-16, 25 |
+| AC9 实况开关默认关闭 | TC-US11-26, 27 |
+| AC10 仅转为静态图 | TC-US11-28 |
 | NFR §2.2 魔数、登录、CSRF | TC-US11-13, 19, 20 |
 
-**Gap 检查**：behaviors.md 现有 SC-LIVE-01 ~ SC-LIVE-13 中 10 个有效 SC-ID（02、07、13 已删除），每个都至少有 1 个 TC 覆盖。
+**Gap 检查**：behaviors.md 现有 SC-LIVE-01 ~ SC-LIVE-16 中 13 个有效 SC-ID（02、07、13 已删除），每个都至少有 1 个 TC 覆盖。
 
 **Gap: 无**
 
@@ -676,3 +795,4 @@ await expect(fig.locator('img')).toBeVisible();
 |------|------|----------|------|
 | 2026-10-12 | v1.0 | 初始创建 | miraclehifi |
 | 2026-10-15 | v1.1 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../../backlog/drop-apple-live-photo.md)）：TC-US11-03、04、08、12、18 删除；01、05、06、07、09、10、14、16、17、21、22 改用动态照片样本，13 改挂 SC-LIVE-01；夹具改为 OPPO 样本及其派生 | miraclehifi |
+| 2026-10-16 | v1.2 | 上传体验升级（[media-upload-experience](../../../../../backlog/media-upload-experience.md)）：动态照片用例前置"实况开关已开启"；TC-US11-01 按压缩后的静态图断言，14 改为红框卡片 + 重试，22 改为三阶段进度卡片；新增 TC-US11-26 ~ 28（开关默认关闭、持久化、仅转为静态图） | miraclehifi |

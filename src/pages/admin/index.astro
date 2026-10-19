@@ -22,6 +22,6 @@ const renderedAt = new Date().toISOString();
 ---
 
 <BaseLayout title="文章 · miracleHalcyon 后台">
-  <AdminHeader client:load />
+  <AdminHeader client:load current="posts" />
   <PostListPage client:load initial={initial} query={query} renderedAt={renderedAt} />
 </BaseLayout>

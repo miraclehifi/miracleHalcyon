@@ -1,8 +1,9 @@
 // 主色与尺寸（media-upload module-spec §2，ADR-005 文件名带主色）：上传前把图片解码为位图，缩到 32×32 采样，
 // 排除亮度 < 8% 和 > 92% 的像素（以及半透明像素）后取平均，输出 6 位小写 hex；全部被排除时退回全体平均。
 // 主色与宽高随上传请求上报（服务端宽高以文件头为准）；浏览器解码不了（不支持 createImageBitmap 或文件损坏）时返回 null，
-// 按缺省主色上传，由服务端照常校验
+// 按缺省主色上传，由服务端照常校验；采样画布分配失败时宽高照常、主色取缺省
 const SAMPLE = 32;
+const DEFAULT_RGB = "808080";
 const DARK = 0.08;
 const LIGHT = 0.92;
 
@@ -33,13 +34,13 @@ export function dominantColorFromPixels(data: Uint8ClampedArray): string {
     kept[3]++;
   }
   const [r, g, b, n] = kept[3] > 0 ? kept : all;
-  return n > 0 ? hex(r / n) + hex(g / n) + hex(b / n) : "808080";
+  return n > 0 ? hex(r / n) + hex(g / n) + hex(b / n) : DEFAULT_RGB;
 }
 
 export function dominantColor(bitmap: ImageBitmap): string {
   const canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(SAMPLE, SAMPLE) : Object.assign(document.createElement("canvas"), { width: SAMPLE, height: SAMPLE });
   const context = canvas.getContext("2d") as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
-  if (!context) return "808080";
+  if (!context) return DEFAULT_RGB;
   context.drawImage(bitmap, 0, 0, SAMPLE, SAMPLE);
   return dominantColorFromPixels(context.getImageData(0, 0, SAMPLE, SAMPLE).data);
 }
@@ -54,6 +55,8 @@ export async function measureImage(file: Blob): Promise<ImageMeta | null> {
   }
   try {
     return { width: bitmap.width, height: bitmap.height, rgb: dominantColor(bitmap) };
+  } catch {
+    return { width: bitmap.width, height: bitmap.height, rgb: DEFAULT_RGB };
   } finally {
     bitmap.close();
   }

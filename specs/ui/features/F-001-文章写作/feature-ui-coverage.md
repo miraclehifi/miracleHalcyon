@@ -4,7 +4,7 @@
 > 由 design-ui 阶段生成。
 
 **Feature**: F-001
-**最后更新**: 2026-10-13
+**最后更新**: 2026-10-16
 **设计稿**: [admin.pen](../../admin.pen)　**流程**: [flows.md](../../pages/flows.md)
 
 ## 覆盖矩阵
@@ -15,13 +15,13 @@
 | US-02 | admin-logout | [文章列表](../../pages/admin-post-list.md) 顶栏"登出"；[site-map](../../site-map.md) 全局导航 | ✅ |
 | US-03 | edit-post-info | [写文章页](../../pages/admin-post-editor.md)：标题输入、设置抽屉（slug 自动生成/锁定、标签补全、摘要计数、发布日期）、slug 冲突提示 | ✅ |
 | US-04 | markdown-preview | 写文章页：预览区、视图切换（编辑/并排/预览）、移动端 Tab、同步滚动 | ✅ |
-| US-05 | image-upload | 写文章页：粘贴/拖入、"插入图片"按钮、上传占位、三种错误提示 | ✅ |
+| US-05 | image-upload | 写文章页：粘贴/拖入、"插入图片"按钮、上传占位、上传进度卡片 `UploadCard`（进度、失败重试 / 移除、已中断）、上传前校验提示 | ✅ |
 | US-06 | autosave-draft | 写文章页：保存状态四态、本地内容恢复横幅、离开确认 | ✅ |
 | US-07 | post-list | 文章列表：列表行、状态筛选、标题搜索、分页、空状态 | ✅ |
 | US-08 | publish-post | 写文章页：主按钮随状态变化（发布/更新/置灰）、撤回确认框、发布校验、成功提示 | ✅ |
 | US-10 | format-toolbar | 写文章页：工具栏格式按钮与快捷键、图标按钮悬停提示（`Tooltip`，见"工具栏与悬停提示"） | ✅ |
-| US-11 | live-photo-upload | 写文章页：拖入 / 选择安卓动态照片、"处理中… → 上传中…"占位、预览 `LiveBadge` 悬停 / 长按播放、实况照片错误与警示提示（`Toast/Warning`） | ✅ |
-| US-12 | image-layout-marks | 写文章页：预览中的宽图 / 图注 / 组图（`ArticleImage`、`ImageGallery`）、图片菜单（`ImageMenu`）、底栏"图片写法"说明（手机在设置面板） | ✅ |
+| US-11 | live-photo-upload | 写文章页：工具栏"实况照片"开关（默认关）、拖入 / 选择安卓动态照片、卡片"正在处理实况视频…"阶段与"仅转为静态图"、预览 `LiveBadge` 悬停 / 长按播放、实况照片错误与警示提示（`Toast/Warning`） | ✅ |
+| US-12 | image-layout-marks | 写文章页：预览中的宽图 / 图注 / 组图（`ArticleImage`、`ImageGallery`）、图片菜单（`ImageMenu`，含"实况"勾选项）、底栏"图片写法"说明（手机在设置面板） | ✅ |
 | US-09 | delete-post | 文章列表行左滑抽屉"删除" / 全滑删除 + 撤销提示；写文章页设置抽屉"删除文章" + 删除确认框 | ✅ |
 
 ## 覆盖检查结果
@@ -42,6 +42,9 @@
 | 7 | 图片菜单执行后保持打开（方便连续调整），"拆成单图"后关闭；组图内的单张图片不单独出菜单；手机长按留给实况照片播放，点按才开菜单 | US-12 |
 | 8 | 实况视频被丢弃 / 保留 HEVC 时用常驻警示提示（新增 `Toast/Warning`），不自动消失 | US-11 |
 | 9 | "图片写法"在手机上放进设置底部面板；编辑区底栏在手机上隐藏 | US-12 |
+| 10 | 上传失败不弹 Toast，改为卡片红框 + 重试 / 移除；无任务的占位（刷新后）显示"上传已中断"只能移除；卡片阶段文案只在切换和失败时播报 | US-05 |
+| 11 | 实况开关做成工具栏图标开关（`role="switch"`，与 `LiveBadge` 同图标），手机工具栏也放；只影响之后加入的图片 | US-11 |
+| 12 | 单图菜单"实况"项只在该图有视频时出现，第一次打开菜单时检查、会话内缓存 | US-12 |
 | 6 | 二级标题、任务列表、插入图片不设快捷键（候选组合与浏览器 / 输入法冲突）；桌面带文字的按钮不加悬停提示 | US-10 |
 
 ## 变更历史
@@ -53,3 +56,4 @@
 | 2026-10-12 | 新增 US-10 format-toolbar 覆盖（[Backlog](../../../backlog/editor-warm-tooltip.md)） | miraclehifi |
 | 2026-10-13 | 新增 US-11、US-12 覆盖（design-arch 范围变更） | miraclehifi |
 | 2026-10-15 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../backlog/drop-apple-live-photo.md)） | miraclehifi |
+| 2026-10-16 | 上传体验升级（[media-upload-experience](../../../backlog/media-upload-experience.md)）：US-05 / 11 / 12 覆盖补充上传进度卡片、实况开关、菜单实况项；新增决定 10–12 | miraclehifi |
