@@ -17,7 +17,7 @@ phases:
   implementation: done   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18）；Sprint 3 完成（14 / 14，含插入任务 13 raise-image-size-limit、14 fix-jpeg-sniff-large-metadata；2026-10-15 统一回归通过）
   code_review: done   # 2026-10-15 与 F-002 一起审查：6 项 MUST-FIX 已修复，报告 test/features/F-001-文章写作/reviews/code-review.md
   validation: done   # 2026-10-16 Sprint 5 后重新验证：P0 全部有测试并通过；已覆盖 189 / 部分 49 / 无测试 10（P1、P2）/ 线上 8，剩余缺口按作者决定记为已知风险，见 test/features/F-001-文章写作/validation/validation-report.md
-current_phase: deploy   # 2026-10-19 增量 media-upload-experience：Sprint 6 实现完成（9 / 9）；作者决定以轻量审查代替完整 code-review（修复 3 项，见 tasks/sprint-6/_index.md"审查修复"），跳过 verify 直接发布
+current_phase: deployed   # 2026-10-19 增量 media-upload-experience 已发布（版本 31b8f50c，提交 387d310）：Sprint 6 实现 9 / 9；作者决定以轻量审查代替完整 code-review、跳过 verify；线上冒烟通过（首页 / posts / 404 / 后台与存储页跳登录 / 存储与上传接口 401）
 blockers: []   # 2026-10-16 作者决定：只补 P0（Sprint 5）后发布，其余缺口记为已知风险
 increments:
   - backlog: specs/backlog/media-upload-experience.md
