@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | ready |
+| 状态 | scheduled |
 | 类型 | Feature（F-001 增量） |
 | 优先级 | P2-Medium |
 | 来源 | 作者需求 |
@@ -44,13 +44,26 @@
 **业务价值**: 摄影作品只维护一份（Afilmory + GitHub），写文章时直接引用，不占 R2 空间。
 
 **验收条件**:
-- [ ] 粘贴 `data-afilmory-photo` 分享代码或照片页链接 `https://miraclehalcyon.afilmory.art/photos/{id}` → 先显示"处理中…"占位，成功后换成图片 Markdown；粘贴 `data-afilmory-photos="a,b,c"` → 每行一张插入，自动成为组图
-- [ ] 粘贴 `data-afilmory-tag` 分享代码 → 不插入，提示改用单张或多张；其他域名的分享代码按普通文本粘贴
-- [ ] Afilmory 打不开、照片不存在 → 显示"上传失败"卡片并说明原因
-- [ ] 正文按原图宽高预留比例，先显示缩略图，进入视口后换成原图的主图部分；组图有主色；灯箱显示主图
-- [ ] 动态照片带 `#live` 时：浏览器能播放 HEVC → 和本站实况一样播放；不支持或播放出错 → 退回静态图，不显示实况标识
-- [ ] 只有 `site.ts` 里登记过的外链前缀才解析宽高、主色、视频；其他外链仍按普通外链图片显示
-- [ ] 放到其他 Markdown 阅读器里，退化为普通图片（原图地址）
+- [x] 粘贴 `data-afilmory-photo` 分享代码或照片页链接 `https://miraclehalcyon.afilmory.art/photos/{id}` → 先显示"处理中…"占位，成功后换成图片 Markdown；粘贴 `data-afilmory-photos="a,b,c"` → 每行一张插入，自动成为组图
+- [x] 粘贴 `data-afilmory-tag` 分享代码 → 不插入，提示改用单张或多张；其他域名的分享代码按普通文本粘贴
+- [x] Afilmory 打不开、照片不存在 → 显示"上传失败"卡片并说明原因
+- [x] 正文按原图宽高预留比例，先显示缩略图，进入视口后换成原图的主图部分；组图有主色；灯箱显示主图
+- [x] 动态照片带 `#live` 时：浏览器能播放 HEVC → 和本站实况一样播放；不支持或播放出错 → 退回静态图，不显示实况标识
+- [x] 只有 `site.ts` 里登记过的外链前缀才解析宽高、主色、视频；其他外链仍按普通外链图片显示
+- [x] 放到其他 Markdown 阅读器里，退化为普通图片（原图地址）
+
+## SDD 产出（2026-10-19）
+
+| 阶段 | 产出 |
+|------|------|
+| Story / Behavior | [US-13](../product/features/F-001-文章写作/stories/post-editor/US-13-afilmory-photo-embed/story.md) |
+| 验收 | [US-13-tests](../test/features/F-001-文章写作/acceptance/post-editor/US-13-tests.md)、[frontend-unit-tests §17](../test/features/F-001-文章写作/unit/frontend-unit-tests.md) |
+| UI | admin-post-editor"粘贴 Afilmory 照片"、components.md（`UploadCard` `fetching`、`ArticleImage` `external`）、reader-post-detail；无新组件 |
+| 架构 | [ADR-010](../engineering/features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)、feature-architecture §3.2 / §4.2 / §5.3 / §8.1 |
+| 领域 | media api-contract / domain-model §10；markdown、reader、editor、media-upload module-spec |
+| 任务 | [Sprint 8](../tasks/sprint-8/_index.md) |
+
+2026-10-19 复核修正：照片可在子目录（`手办/wf2026/23473.jpg`），缩略图统一在仓库根目录 `.afilmory/thumbnails/{id}.jpg`（不是"同目录"）；GitHub raw 的 OPTIONS 预检返回 403，但单段 `Range` 属于安全请求头，Chromium / WebKit 跨域读取不发预检、实测 206。
 
 ## 方案（2026-10-16 对话确定）
 
@@ -67,7 +80,7 @@
 | `live` / `wide` / `accordion` | 现有标记，照常可用 | 作者手写或用预览图片菜单（US-12） |
 
 - 现有标记解析会忽略不认识的片段，与 ADR-005 兼容
-- 缩略图地址按规则推导：`{目录}/.afilmory/thumbnails/{文件名}`，粘贴时用清单核对
+- 缩略图地址按规则推导：`{存储前缀}.afilmory/thumbnails/{文件名去扩展名}.jpg`（2026-10-19 修正），粘贴时用清单核对
 - 地址前缀白名单放在 `src/config/site.ts`，防止构造 `mp=` 让读者页去读任意地址
 
 ### 数据来源

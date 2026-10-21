@@ -21,12 +21,14 @@
       失败（任一步）   占位改为 ![上传失败]()，state = error（带原因）；retry → 回到 compressing；remove → 删占位
 ```
 
+Afilmory 照片（US-13，[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)）：`insertAfilmoryPhotos(ids, at?)` 每个 id 一个任务（来源 `{ kind: 'afilmory', id }`，`name` = `Afilmory {id}`，无缩略图），同样插入 `![处理中…]()`；`fetching`（进度按时间趋近）→ `fetchAfilmoryPhoto(id)`（`src/lib/afilmory/client.ts`，`GET /api/admin/afilmory/photos/{id}`，错误文案取接口 `error.message`，401 同上传）→ `afilmoryMarkdown(info, { storage, live: task.liveEnabled })` → 替换占位，`warning` 经 `onWarning`。不进上传并发队列（只是一次小请求），重试重新请求，移除同上。已实现（Sprint 8 任务 4）：`src/lib/afilmory/`（`paste.ts`、`markdown.ts`、`client.ts`），`use-image-uploads.ts` 任务带 `name` 与可选 `file` / `afilmoryId`，插入公共部分为 `start`。
+
 占位的插入位置在批次开始时一次确定，之后按占位槽位（editor module-spec §1）替换，乱序完成也保持顺序（US-05 BH-04）。
 
 ## 2. 接口
 
 ```ts
-type Stage = 'waiting' | 'compressing' | 'processing-live' | 'uploading' | 'error';
+type Stage = 'waiting' | 'compressing' | 'processing-live' | 'fetching' | 'uploading' | 'error';   // fetching：Afilmory 照片
 interface UploadTask {
   id: string; file: File; name: string;          // name：alt 用（去扩展名、转义）
   thumbUrl: string;                               // URL.createObjectURL(file)，完成 / 移除 / 卸载时回收
@@ -83,7 +85,7 @@ function dominantColor(bitmap: ImageBitmap): string;
 
 ## 4. 单元测试
 
-见 [frontend-unit-tests.md](../../../../test/features/F-001-文章写作/unit/frontend-unit-tests.md) §8（UT-85 – UT-94）、§14（UT-142、UT-144 – UT-147、UT-152；UT-141、UT-143 已删除）、§16（UT-153 – UT-165）。
+见 [frontend-unit-tests.md](../../../../test/features/F-001-文章写作/unit/frontend-unit-tests.md) §8（UT-85 – UT-94）、§14（UT-142、UT-144 – UT-147、UT-152；UT-141、UT-143 已删除）、§16（UT-153 – UT-165）、§17（UT-175）。
 
 ---
 
@@ -94,3 +96,4 @@ function dominantColor(bitmap: ImageBitmap): string;
 | 2026-10-13 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-15 | 1.1 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：删除 `pairFiles`、`decodeHeic` 与 HEIC 输出规则，`Item` 去掉 `motion` / `error` | miraclehifi |
 | 2026-10-16 | 1.2 | 上传体验升级（[media-upload-experience](../../../../backlog/media-upload-experience.md)）：流程改为 `UploadTask` 状态机（等待 / 压缩 / 处理实况视频 / 上传 / 失败）；新增浏览器端压缩、进度映射、XHR 上传、实况开关、仅转为静态图、重试 / 移除 / 已中断、实况视频检查；失败不再移除占位与弹 Toast | miraclehifi |
+| 2026-10-19 | 1.x | Afilmory 照片任务（`insertAfilmoryPhotos`、`fetching` 阶段）（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | miraclehifi |

@@ -13,6 +13,10 @@ const input: SiteConfigInput = {
   github: "https://github.com/example",
   photo: "",
   email: "me@example.com",
+  afilmory: {
+    site: "https://miraclehalcyon.afilmory.art",
+    storage: "https://raw.githubusercontent.com/miraclehifi/photo-assets/main/",
+  },
 };
 
 export const site = normalizeSiteConfig(input);

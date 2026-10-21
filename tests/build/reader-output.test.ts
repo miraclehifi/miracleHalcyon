@@ -48,6 +48,35 @@ describe("reader-fixture 构建产物", () => {
     expect(article).not.toMatch(/data-upload-placeholder|upload-placeholder|图片上传中|上传中…|处理中…|上传失败|上传已中断|src=""|<p>\s*<\/p>/);
   });
 
+  // [TC-US13-12][SC-AFIL-08][SC-AFIL-11] 外链照片（ADR-010）：img 为缩略图、带宽高与 data-thumb / data-mp；未登记前缀不解析扩展片段
+  it("[TC-US13-12] 外链照片输出缩略图与扩展属性", () => {
+    const page = html("posts/filler-23.html");
+    const storage = "https://raw.githubusercontent.com/miraclehifi/photo-assets/main/";
+    // 构建产物里属性按 HTML 转义输出；取 data-src 为指定地址的 figure 开始标签及其中第一个 img 标签的属性
+    const attrs = (tag: string) => Object.fromEntries([...tag.matchAll(/([a-z-]+)(?:="([^"]*)")?/g)].slice(1).map((m) => [m[1], m[2] ?? ""]));
+    const figure = (src: string) => {
+      const at = page.indexOf(`data-src="${src}"`);
+      const open = page.lastIndexOf("<figure", at);
+      const tag = page.slice(open, page.indexOf(">", at) + 1);
+      const imgAt = page.indexOf("<img", open);
+      return { figure: attrs(tag), img: attrs(page.slice(imgAt, page.indexOf(">", imgAt) + 1)) };
+    };
+    const live = figure(`${storage}e2e/live.jpg`);
+    expect(live.figure).toMatchObject({
+      "data-w": "960",
+      "data-h": "1280",
+      "data-rgb": "6b7f8e",
+      "data-thumb": `${storage}.afilmory/thumbnails/live.jpg`,
+      "data-mp": "21119+81755",
+      "data-live": "",
+    });
+    expect([live.img.src, live.img.width, live.img.height]).toEqual([`${storage}.afilmory/thumbnails/live.jpg`, "960", "1280"]);
+    expect(figure(`${storage}%E6%89%8B%E5%8A%9E/e2e/grid-a.jpg`).figure["data-thumb"]).toBe(`${storage}.afilmory/thumbnails/grid-a.jpg`);
+    const forged = figure("https://example.com/a.jpg");
+    expect(Object.keys(forged.figure).filter((key) => ["data-w", "data-h", "data-rgb", "data-thumb", "data-mp", "data-live"].includes(key))).toEqual([]);
+    expect(forged.img.src).toBe("https://example.com/a.jpg");
+  });
+
   // ADR-007 验证结果②：构建数据与 Markdown 渲染（Shiki）不进运行时 Worker 包
   it("Worker 包不含读者数据与 Shiki", () => {
     const worker = files(SERVER, (path) => relative(SERVER, path).startsWith(".prerender"))

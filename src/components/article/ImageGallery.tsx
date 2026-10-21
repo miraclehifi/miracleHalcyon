@@ -3,12 +3,13 @@
 // AccordionGallery（3–7 张，默认展开中间一张，高度按断点传入）。实况照片的播放层经 renderOverlay 叠加：网格单元格在
 // 图片加载完成后、手风琴只在展开项上（不受网格聚光的灰度滤镜影响）。onImageClick 留给读者端打开 Lightbox，预览中不传。
 // 渲染期不依赖 window（媒体查询、主题在服务端取默认值），可在构建时预渲染
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import AccordionGallery from "../vendor/react-bits/AccordionGallery";
 import ChromaGrid from "../vendor/react-bits/ChromaGrid";
 import RefineFrame from "../vendor/react-bits/RefineFrame";
 import { NARROW_QUERY, useMediaQuery } from "../../lib/dom/media";
 import { useColorScheme } from "../../lib/dom/theme";
+import { useInView, useMainFallback, useMainImages, type ExternalSource } from "./external-media";
 import { IMAGE_RADIUS, LOAD_LABELS, STAGE_MS, useImageLoad } from "./image-load";
 import { LivePhotoLayer, type LiveSource } from "./live-photo";
 
@@ -20,6 +21,7 @@ export interface GalleryImage {
   height?: number;
   accent?: string; // 图片主色 "#rrggbb"；无主色时卡片描边用白色
   live?: LiveSource;
+  external?: ExternalSource; // 外链照片：src 为原图，首屏显示 thumb，进入视口后换成主图（ADR-010）
 }
 
 export interface ImageGalleryProps {
@@ -42,8 +44,9 @@ export function galleryColumns(count: number, narrow: boolean): number {
   return count === 3 ? 3 : 2;
 }
 
-function GridCell({ image, onComplete }: { image: GalleryImage; onComplete: (complete: boolean) => void }) {
-  const { status, url, imgRef, onLoad, onError, onRetry } = useImageLoad(image.src);
+function GridCell({ image, main, onComplete }: { image: GalleryImage; main?: string; onComplete: (complete: boolean) => void }) {
+  const { status, url, imgRef, onLoad, onError, onRetry } = useImageLoad(image.external?.thumb ?? image.src);
+  const { shown, onMainError } = useMainFallback(main);
   useEffect(() => onComplete(status === "complete"), [status, onComplete]); // 上报幂等，回调每次渲染都是新的也不会循环
   return (
     <span data-gallery-item="" data-accent={image.accent} className="block h-full w-full">
@@ -61,14 +64,14 @@ function GridCell({ image, onComplete }: { image: GalleryImage; onComplete: (com
         <img
           key={url}
           ref={imgRef}
-          src={url}
+          src={shown ?? url}
           alt={image.alt}
           width={image.width}
           height={image.height}
           loading="lazy"
           decoding="async"
           onLoad={onLoad}
-          onError={onError}
+          onError={shown ? onMainError : onError}
         />
       </RefineFrame>
     </span>
@@ -88,6 +91,10 @@ export function ImageGallery({ variant, images, caption, onImageClick, actions }
   const phone = useMediaQuery(ACCORDION_PHONE_QUERY);
   const theme = useColorScheme();
   const [loaded, setLoaded] = useState<ReadonlySet<string>>(new Set());
+  const figureRef = useRef<HTMLElement>(null);
+  const inView = useInView(figureRef, images.some((image) => image.external));
+  const mains = useMainImages(images, inView);
+  const shown = (index: number) => mains[index] ?? images[index].external?.thumb ?? images[index].src;
   const markLoaded = (src: string, complete: boolean) =>
     setLoaded((prev) => {
       if (prev.has(src) === complete) return prev;
@@ -105,10 +112,10 @@ export function ImageGallery({ variant, images, caption, onImageClick, actions }
 
   if (variant === "accordion") {
     return (
-      <figure data-image-gallery="accordion" data-count={images.length} className="group/image-gallery not-prose relative my-8">
+      <figure ref={figureRef} data-image-gallery="accordion" data-count={images.length} className="group/image-gallery not-prose relative my-8">
         {actions && <Actions>{actions}</Actions>}
         <AccordionGallery
-          items={images.map((image) => ({ image: image.src, label: image.caption, alt: image.alt }))}
+          items={images.map((image, index) => ({ image: shown(index), label: image.caption, alt: image.alt }))}
           defaultIndex={Math.floor(images.length / 2)}
           trigger="hover"
           expandRatio={0.52}
@@ -123,7 +130,7 @@ export function ImageGallery({ variant, images, caption, onImageClick, actions }
           onActiveClick={onImageClick}
           renderOverlay={(_, index, active) => {
             const live = images[index].live;
-            return active && live ? <LivePhotoLayer videoSrc={live.videoSrc} radius={IMAGE_RADIUS} /> : null;
+            return active && live ? <LivePhotoLayer {...live} radius={IMAGE_RADIUS} /> : null;
           }}
         />
       </figure>
@@ -131,10 +138,10 @@ export function ImageGallery({ variant, images, caption, onImageClick, actions }
   }
 
   return (
-    <figure data-image-gallery="grid" data-count={images.length} className="group/image-gallery not-prose relative my-8">
+    <figure ref={figureRef} data-image-gallery="grid" data-count={images.length} className="group/image-gallery not-prose relative my-8">
       {actions && <Actions>{actions}</Actions>}
       <ChromaGrid
-        items={images.map((image) => ({ image: image.src, alt: image.alt, accent: image.accent }))}
+        items={images.map((image, index) => ({ image: shown(index), alt: image.alt, accent: image.accent }))}
         columns={galleryColumns(images.length, narrow)}
         minCardWidth={100}
         gap={8}
@@ -145,10 +152,10 @@ export function ImageGallery({ variant, images, caption, onImageClick, actions }
         frame={false}
         theme={theme}
         onItemClick={onImageClick}
-        renderMedia={(_, index) => <GridCell image={images[index]} onComplete={(complete) => markLoaded(images[index].src, complete)} />}
+        renderMedia={(_, index) => <GridCell image={images[index]} main={mains[index]} onComplete={(complete) => markLoaded(images[index].src, complete)} />}
         renderOverlay={(_, index) => {
           const { src, live } = images[index];
-          return live && loaded.has(src) ? <LivePhotoLayer videoSrc={live.videoSrc} radius={IMAGE_RADIUS} /> : null;
+          return live && loaded.has(src) ? <LivePhotoLayer {...live} radius={IMAGE_RADIUS} /> : null;
         }}
       />
       {groupCaption && <figcaption className="mt-3 text-center font-prose text-meta text-ink-faint italic">{groupCaption}</figcaption>}

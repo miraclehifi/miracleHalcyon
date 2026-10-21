@@ -115,6 +115,7 @@ graph LR
 | US-09 删除 | 写文章页：确认框 → `DELETE /api/admin/posts/:id`；列表：6s 撤销期后 `fetch(…, { method: 'DELETE', keepalive: true })` → `post.delete` → `onPublicationChanged` |
 | US-10 格式工具栏 | 纯前端：`EditorToolbar` / 快捷键 → `applyFormat(textarea, command)` → `execCommand('insertText')`（ADR-004） |
 | US-11 / US-12（新增，见 §8） | 实况照片成对上传；预览图片菜单改写源码中的 `#wide` / `#accordion` 标记 |
+| US-13 Afilmory 照片 | 粘贴分享代码 → `parseAfilmoryPaste` 识别 id → 占位文本 → `GET /api/admin/afilmory/photos/:id` → `media.afilmory` 抓 `{site}/photos/:id`、解析清单 → `afilmoryMarkdown` 生成外链引用 → 替换占位。读者端：缩略图 → 进入视口按字节范围读主图（浏览器直连 GitHub raw），见 ADR-010 |
 
 ---
 
@@ -135,6 +136,7 @@ graph LR
 | 文章 | `/api/admin/posts*` | 需会话 | `GET` 列表、`POST` 新建、`GET/PUT/DELETE :id`、`POST :id/publish`、`POST :id/unpublish`、`GET /api/admin/tags` |
 | 读者只读 | `/api/posts`、`/api/posts/:slug` | 公开 | 已发布快照查询（F-001 用于验证读者可见性，F-002 可直接复用） |
 | 图片 | `/api/admin/images` | 需会话 | `POST` 上传（单图或图 + 视频） |
+| Afilmory 照片信息 | `/api/admin/afilmory/photos/:id` | 需会话 | `GET` 照片原图地址、宽高、主色、缩略图、内嵌视频范围（ADR-010；只抓登记站点） |
 | 图片读取 | `/img/*` | 公开 | Worker 从 R2 读取并返回，长缓存（同源，免额外域名配置） |
 
 ---
@@ -167,6 +169,7 @@ POST /api/admin/login {username, password}
 
 - Markdown：`rehype-sanitize` 在高亮之前执行（白名单 schema，去除 `script`、事件属性、`javascript:` 链接）；高亮与图片插件在 sanitize 之后生成受信任的结构
 - 上传：服务端按**文件头魔数**再校验类型（不信任 `Content-Type`）；静态图 png/jpg/webp/gif ≤ 5MB；配对视频 mp4 ≤ 10MB（需改 NFR，见 §8）；禁止 svg
+- Afilmory 外链（ADR-010）：扩展片段 `ext=` / `mp=` 只在 `site.ts` 登记的存储前缀下生效；照片信息接口只请求登记站点、id 字符白名单、不跟随重定向
 - 文件名由服务端生成随机 id；宽高由服务端从文件头解析（png/jpg/webp/gif 头部均可读），主色由客户端提供、服务端校验格式（6 位 hex）后写入
 
 ---
@@ -266,6 +269,8 @@ src/
 | 渲染规则 | F-002 使用 `src/lib/markdown`，不得另写渲染 |
 | 图片组件 | `ArticleImage`、`LiveBadge`、`ImageGallery` 由 F-001 实现；`Lightbox` 仍归 F-002 |
 | 读者页重建 | 读者页构建时预渲染；F-002 实现 `onPublicationChanged` 为调用 Workers Builds Deploy Hook，重建完成后可见（P95 ≤ 5 分钟）（F-002 ADR-007） |
+| Afilmory 外链照片（2026-10-19，ADR-010） | 读者页正文与 `Lightbox` 同时支持：`collectArticleImages` 读出 `data-thumb` / `data-mp`，`ArticleImage` / `ImageGallery` / `Lightbox` 按 `external` 加载主图；`renderMarkdown` 输出新增 `data-thumb` / `data-mp`，读者页仍构建时预渲染（ADR-007 不变）；reader 构建夹具新增 Afilmory 文章 |
+| 对 F-006 的影响（2026-10-19） | 无：外链不写 `images` 表、不进 R2，孤立检测只看 `/img/` 引用；外链地址出现在正文里不会被误判（F-006 按站内 key 匹配） |
 | F-002 反向增量 | `post` 新增 `cover`（迁移 0003）、`markdown` 新增引用署名插件、`ArticleImage` 新增可选 `onClick`、`BaseLayout` 首屏主题脚本——见 [F-002 feature-architecture](../../F-002-博客首页与阅读/architecture/feature-architecture.md) §6 |
 
 ### 8.2 范围变更（本阶段决策：实况照片 / 宽图 / 组图 F-001 全做）
@@ -291,6 +296,7 @@ src/
 | [ADR-004](adr/ADR-004-textarea-editor.md) | 源码区用原生 textarea，格式命令走 `execCommand('insertText')` | Accepted |
 | [ADR-005](adr/ADR-005-self-describing-image-markdown.md) | 自描述图片 URL + GFM 兼容的扩展写法 | Accepted |
 | [ADR-006](adr/ADR-006-live-photo-browser-processing.md) | 实况照片在浏览器端配对与转换（参考 Afilmory） | Accepted |
+| [ADR-010](adr/ADR-010-external-photo-storage.md) | Afilmory 外链照片：登记前缀下的 `ext=` / `mp=` 扩展片段、服务端读清单、浏览器按字节范围读主图与视频 | Accepted |
 
 ---
 
@@ -303,3 +309,4 @@ src/
 | 2026-10-13 | 1.2 | 框架由 Astro 5 改为 Astro 7（作者决定，implement 开始时）| miraclehifi |
 | 2026-10-13 | 1.3 | 读者页改为构建时预渲染，缓存失效钩子改为触发重建（ADR-001 修订） | miraclehifi |
 | 2026-10-15 | 1.4 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：技术选型去掉 `heic-to`，浏览器预处理与 `upload/` 目录同步 | miraclehifi |
+| 2026-10-19 | 1.5 | Afilmory 外链照片（[afilmory-photo-embed](../../../../backlog/afilmory-photo-embed.md)）：US-13 数据流、照片信息接口分组、外链安全规则、对 F-002 / F-006 的影响、ADR-010 | miraclehifi |

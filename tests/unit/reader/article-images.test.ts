@@ -37,3 +37,19 @@ describe("collectArticleImages", () => {
     expect(images[8].live).toEqual({ videoSrc: "/img/2026/10/jjjjjjjjjj_960x1280_6b7f8e.live.mp4" });
   });
 });
+
+// [UT-171][SC-AFIL-08][SC-AFIL-09][SC-AFIL-10] 外链照片（ADR-010）：读出缩略图、主图字节数与视频范围
+describe("collectArticleImages 外链照片", () => {
+  const S = "https://raw.githubusercontent.com/miraclehifi/photo-assets/main/";
+  it("有 mp：external 带 mainBytes，live 为原图 + 范围 + hevc；无 mp：只有 thumb、无 live", async () => {
+    const { images } = collectArticleImages(await rootOf(`![a](${S}a.jpg#ext=960x1280x6b7f8e,mp=21119+81755,live)\n\n![b](${S}b.jpg#ext=800x600x112233,live)`));
+    expect(images[0]).toMatchObject({
+      src: `${S}a.jpg`,
+      width: 960,
+      accent: "#6b7f8e",
+      external: { thumb: `${S}.afilmory/thumbnails/a.jpg`, mainBytes: 21119 },
+      live: { videoSrc: `${S}a.jpg`, range: { offset: 21119, size: 81755 }, codec: "hevc" },
+    });
+    expect([images[1].external, images[1].live]).toEqual([{ thumb: `${S}.afilmory/thumbnails/b.jpg` }, undefined]);
+  });
+});

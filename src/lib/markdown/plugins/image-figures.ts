@@ -6,6 +6,8 @@
 import type { Element, ElementContent, Properties, Root, RootContent } from "hast";
 import type { Position } from "unist";
 import type { VFile } from "vfile";
+import { site } from "../../../config/site";
+import { parseExternalPhoto } from "./external-photo";
 import { parseImageKey, parseMarks, stripFragment, type ImageMarks } from "./image-key";
 
 export interface ImageRef {
@@ -16,6 +18,8 @@ export interface ImageRef {
   w?: number;
   h?: number;
   rgb?: string;
+  thumb?: string; // 登记前缀下的外链照片（ADR-010）：缩略图地址
+  mp?: { offset: number; size: number }; // 外链动态照片内嵌视频的字节范围
   marks: ImageMarks;
   sourceStart: number; // 图片语法在源码中的字符偏移
   sourceEnd: number;
@@ -62,24 +66,29 @@ function sourceRange(ctx: Context, start: number, end: number): Properties {
 function figure(img: MarkdownImage, ctx: Context): Element {
   const rawSrc = img.properties.src;
   const src = stripFragment(rawSrc);
-  const key = parseImageKey(src);
+  const external = parseExternalPhoto(rawSrc, site.afilmory?.storage);
+  const key = external ? { w: external.w, h: external.h, rgb: external.rgb } : parseImageKey(src);
   const marks = parseMarks(rawSrc);
-  const live = marks.live && src.startsWith(SITE_IMAGE_PREFIX);
+  const live = marks.live && (src.startsWith(SITE_IMAGE_PREFIX) || external?.mp !== undefined);
   const alt = typeof img.properties.alt === "string" ? img.properties.alt : "";
   const title = typeof img.properties.title === "string" && img.properties.title !== "" ? img.properties.title : undefined;
   const [start, end] = offsets(img);
 
-  ctx.images.push({ id: `img-${ctx.images.length}`, src, alt, title, ...key, marks: { ...marks, live }, sourceStart: start, sourceEnd: end });
+  const externalRef = external && { thumb: external.thumb, ...(external.mp && { mp: external.mp }) };
+  ctx.images.push({ id: `img-${ctx.images.length}`, src, alt, title, ...key, ...externalRef, marks: { ...marks, live }, sourceStart: start, sourceEnd: end });
 
   const properties: Properties = {
     dataArticleImage: true,
     dataSrc: src,
     ...(key && { dataW: key.w, dataH: key.h, dataRgb: key.rgb }),
+    ...(external && { dataThumb: external.thumb }),
+    ...(external?.mp && { dataMp: `${external.mp.offset}+${external.mp.size}` }),
     ...(marks.wide && { dataWide: true }),
     ...(live && { dataLive: true }),
     ...sourceRange(ctx, start, end),
   };
-  const imgProps: Properties = { src, alt, ...(key && { width: key.w, height: key.h }), loading: "lazy", decoding: "async" };
+  // 外链照片首屏只下载缩略图（无 JS、RSS 也一样），原图地址留在 data-src，客户端进入视口后换成主图
+  const imgProps: Properties = { src: external?.thumb ?? src, alt, ...(key && { width: key.w, height: key.h }), loading: "lazy", decoding: "async" };
   const children: ElementContent[] = [{ type: "element", tagName: "img", properties: imgProps, children: [] }];
   if (title) children.push({ type: "element", tagName: "figcaption", properties: {}, children: [{ type: "text", value: title }] });
   return { type: "element", tagName: "figure", properties, children, position: img.position };
@@ -143,11 +152,17 @@ function splitMixedParagraph(p: Element, ctx: Context): Element[] {
       flush();
       out.push(figure(child, ctx));
     } else {
-      run.push(child);
+      run.push(isMarkdownImage(child, ctx) ? inlineImage(child) : child);
     }
   });
   flush();
   return out;
+}
+
+// 行内图片（与文字同段）保持 img，但登记前缀下的外链照片换成缩略图：原图可能含几十 MB 的内嵌视频（ADR-010）
+function inlineImage(img: MarkdownImage): MarkdownImage {
+  const external = parseExternalPhoto(img.properties.src, site.afilmory?.storage);
+  return external ? { ...img, properties: { ...img.properties, src: external.thumb } } : img;
 }
 
 function transformParagraph(p: Element, ctx: Context): Element[] {

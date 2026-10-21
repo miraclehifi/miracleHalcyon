@@ -16,7 +16,7 @@ interface Mounted {
   island: ArticleIsland;
 }
 
-const toGalleryImage = ({ src, alt, caption, width, height, accent, live }: ArticleImageData) => ({ src, alt, caption, width, height, accent, live });
+const toGalleryImage = ({ src, alt, caption, width, height, accent, live, external }: ArticleImageData) => ({ src, alt, caption, width, height, accent, live, external });
 const Lightbox = lazy(() => import("./Lightbox"));
 
 export function ArticleImagesIsland({ rootSelector }: ArticleImagesIslandProps) {
@@ -62,6 +62,7 @@ export function ArticleImagesIsland({ rootSelector }: ArticleImagesIslandProps) 
               height={island.image.height}
               wide={island.image.wide}
               live={island.image.live}
+              external={island.image.external}
               onClick={() => open(island.start)}
             />
           ) : (

@@ -1,7 +1,7 @@
 # 文章写作 User Stories 索引
 
 **Feature ID**: F-001
-**最后更新**: 2026-10-16
+**最后更新**: 2026-10-19
 
 ---
 
@@ -10,7 +10,7 @@
 | 分组 | 说明 | US 数量 | 状态 |
 |------|------|---------|------|
 | admin-auth | 管理员登录、登出与后台访问保护 | 2 | draft |
-| post-editor | 写文章页：信息表单、实时预览、图片上传、自动保存、格式工具栏、实况照片、图片排版 | 7 | draft |
+| post-editor | 写文章页：信息表单、实时预览、图片上传、自动保存、格式工具栏、实况照片、图片排版、Afilmory 照片 | 8 | draft |
 | post-management | 文章管理列表、发布/更新/撤回、删除 | 3 | draft |
 
 ---
@@ -39,6 +39,7 @@
 | US-10 | format-toolbar | implemented | 工具栏格式命令、格式快捷键、按钮悬停提示 |
 | US-11 | live-photo-upload | implemented | 安卓动态照片（JPEG 内嵌视频）识别为实况照片上传；实况开关默认关闭（2026-10-16 增量） |
 | US-12 | image-layout-marks | implemented | 宽图、组图网格 / 手风琴写法，预览图片菜单（Sprint 3）；菜单实况勾选项（2026-10-16 增量） |
+| US-13 | afilmory-photo-embed | implemented | 粘贴 Afilmory 分享代码 / 照片页链接插入外链照片，读者端缩略图 → 主图、实况按字节范围读取（2026-10-19 增量） |
 
 ### post-management
 
@@ -62,6 +63,7 @@ US-01 admin-login（基础：所有后台功能的前提）
        ├─ US-05 image-upload
        │    └─ US-11 live-photo-upload
        ├─ US-12 image-layout-marks（依赖 US-04 预览）
+       │    └─ US-13 afilmory-photo-embed（复用 US-05 占位与进度卡片、US-11 实况播放、US-12 图片菜单）
        ├─ US-06 autosave-draft
        ├─ US-10 format-toolbar
        ├─ US-07 post-list
@@ -89,6 +91,7 @@ US-01 admin-login（基础：所有后台功能的前提）
 | 10 | US-12 | image-layout-marks | 依赖 US-04 预览与图片组件 |
 | 11 | US-02 | admin-logout | 简单独立 |
 | 12 | US-09 | delete-post | 边缘操作 |
+| 13 | US-13 | afilmory-photo-embed | 2026-10-19 增量，依赖 US-05 / US-11 / US-12 |
 
 ---
 
@@ -100,3 +103,4 @@ US-01 admin-login（基础：所有后台功能的前提）
 | 2026-10-12 | 1.1 | 新增 US-10 format-toolbar（[Backlog](../../../../backlog/editor-warm-tooltip.md)） | miraclehifi |
 | 2026-10-12 | 1.2 | 新增 US-11 live-photo-upload、US-12 image-layout-marks（design-arch 范围变更，[Backlog](../../../../backlog/article-image-display.md)） | miraclehifi |
 | 2026-10-15 | 1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)） | miraclehifi |
+| 2026-10-19 | 1.4 | 新增 US-13 afilmory-photo-embed（[afilmory-photo-embed](../../../../backlog/afilmory-photo-embed.md)） | miraclehifi |

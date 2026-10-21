@@ -22,4 +22,22 @@ describe("normalizeSiteConfig", () => {
     expect(() => normalizeSiteConfig({ ...base, bio: [] })).toThrow(/site\.bio/);
     expect(() => normalizeSiteConfig({ ...base, name: " " })).toThrow(/site\.name/);
   });
+
+  // [UT-176][SC-AFIL-11][SC-AFIL-13] Afilmory 登记：缺省为 undefined；site 只能是 https 根地址（末尾 / 去掉）；storage 为 https 且以 / 结尾
+  it("afilmory 配置校验", () => {
+    const storage = "https://raw.githubusercontent.com/miraclehifi/photo-assets/main/";
+    expect(normalizeSiteConfig(base).afilmory).toBeUndefined();
+    expect(normalizeSiteConfig({ ...base, afilmory: { site: "https://miraclehalcyon.afilmory.art/", storage } }).afilmory).toEqual({
+      site: "https://miraclehalcyon.afilmory.art",
+      storage,
+    });
+    const bad = [
+      { site: "http://miraclehalcyon.afilmory.art", storage },
+      { site: "https://miraclehalcyon.afilmory.art/photos", storage },
+      { site: "https://miraclehalcyon.afilmory.art", storage: "http://raw.githubusercontent.com/x/" },
+      { site: "https://miraclehalcyon.afilmory.art", storage: "https://raw.githubusercontent.com/x/main" },
+      { site: "https://miraclehalcyon.afilmory.art", storage: "https://raw.githubusercontent.com/x/?a=1" },
+    ];
+    for (const afilmory of bad) expect(() => normalizeSiteConfig({ ...base, afilmory })).toThrow(/site\.afilmory/);
+  });
 });

@@ -20,6 +20,8 @@ import { hasLiveVideo } from "../../../lib/upload/live-video-check";
 import type { UploadView } from "../../../lib/upload/use-image-uploads";
 import MarkdownWorker from "../../../lib/markdown/worker.ts?worker";
 import { ArticleImage } from "../../article/ArticleImage";
+import type { ExternalSource } from "../../article/external-media";
+import type { LiveSource } from "../../article/live-photo";
 import { ImageGallery, type GalleryImage } from "../../article/ImageGallery";
 import { Alert } from "../../ui/Alert";
 import { ImageMenu } from "./ImageMenu";
@@ -153,7 +155,13 @@ interface Island {
 const contentKey = (content: IslandContent): string =>
   content.kind === "image" ? islandKey(content.image) : `${content.variant}[${content.images.map(islandKey).join("|")}]`;
 
-const liveOf = (image: ImageRef) => (image.marks.live ? { videoSrc: liveVideoSrc(image.src) } : undefined);
+// 外链动态照片（ADR-010）：视频在原图的 mp 字节范围内，HEVC；站内：同名 .live.mp4
+const liveOf = (image: ImageRef): LiveSource | undefined => {
+  if (!image.marks.live) return undefined;
+  return image.mp ? { videoSrc: image.src, range: image.mp, codec: "hevc" } : { videoSrc: liveVideoSrc(image.src) };
+};
+const externalOf = (image: ImageRef): ExternalSource | undefined =>
+  image.thumb ? { thumb: image.thumb, ...(image.mp && { mainBytes: image.mp.offset }) } : undefined;
 
 const toGalleryImage = (image: ImageRef): GalleryImage => ({
   src: image.src,
@@ -163,6 +171,7 @@ const toGalleryImage = (image: ImageRef): GalleryImage => ({
   height: image.h,
   accent: image.rgb ? `#${image.rgb}` : undefined,
   live: liveOf(image),
+  external: externalOf(image),
 });
 
 const HOST_ATTRIBUTES = ["data-line", "data-source-start", "data-source-end"]; // 同步滚动、图片菜单定位用，随每次渲染更新
@@ -277,7 +286,7 @@ export function MarkdownPreview({ title, body, uploads = [], onSourceEdit }: Mar
           wide={image.marks.wide}
           onToggleWide={() => rewrite((source) => toggleMark(source, locationOf(image), "wide"), document.activeElement as HTMLElement | null)}
           live={image.marks.live}
-          hasLiveVideo={() => hasLiveVideo(image.src)}
+          hasLiveVideo={() => (image.thumb ? Promise.resolve(image.mp !== undefined) : hasLiveVideo(image.src))} // 外链照片按 mp 判断，不发请求（US-13）
           onToggleLive={() => rewrite((source) => toggleMark(source, locationOf(image), "live"), document.activeElement as HTMLElement | null)}
         />
       );
@@ -341,6 +350,7 @@ export function MarkdownPreview({ title, body, uploads = [], onSourceEdit }: Mar
                 height={content.image.h}
                 wide={content.image.marks.wide}
                 live={liveOf(content.image)}
+                external={externalOf(content.image)}
                 actions={menuFor(content)}
               />
             ) : (

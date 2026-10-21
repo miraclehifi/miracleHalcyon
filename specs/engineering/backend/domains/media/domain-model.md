@@ -1,6 +1,6 @@
 # media 领域模型
 
-**最后更新**: 2026-10-16
+**最后更新**: 2026-10-19
 **状态**: self-checked
 **来源**: [feature-architecture.md](../../../features/F-001-文章写作/architecture/feature-architecture.md) §2、§5.3 · [ADR-005](../../../features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) · [ADR-006](../../../features/F-001-文章写作/architecture/adr/ADR-006-live-photo-browser-processing.md) · F-006 [feature-architecture](../../../features/F-006-媒体存储清理/architecture/feature-architecture.md) · [ADR-009](../../../features/F-006-媒体存储清理/architecture/adr/ADR-009-orphan-detection-in-d1.md)
 
@@ -9,6 +9,7 @@
 ## 1. 职责与边界
 
 - 负责：上传校验（魔数、大小、配对）、生成自描述 key、写 R2、记录 `images`、公开读取 `/img/*`；未引用资源的检测与清理（F-006，§9）
+- 外链照片：只读取登记的 Afilmory 站点的照片信息（§10），外链不进 R2、不记录、不清理
 - 不负责：安卓动态照片识别与切视频、视频转封装 / 转码、主色计算——都在浏览器端完成（[media-upload 模块](../../../frontend/modules/media-upload/module-spec.md)）；Markdown 引用的生成与解析（编辑器 / `markdown` 模块）
 - 与 `post` 的唯一关联：清理时经 `post` 提供的只读 `ImageReferenceQuery` 判定引用（不读 `posts` 表）；正文只存 URL 字符串；删除文章不删图片（US-09 约束），其图片在 24 小时保护期后由 F-006 按未引用清理
 
@@ -197,6 +198,25 @@ function summarize(c: { images: ImageRecord[]; videos: ImageRecord[]; protectedC
 
 ---
 
+## 10. Afilmory 照片信息（F-001 US-13）
+
+> [ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)。只读外部，不建表、不写 R2。已实现（Sprint 8 任务 1）：`src/domains/media/afilmory.ts`（纯函数 + 可注入 fetch）+ `src/pages/api/admin/afilmory/photos/[id].ts`；夹具 `tests/fixtures/afilmory/photo-page.html` 取自真实页面（4 张）。2026-10-21 对真实站点核对：18369、子目录 23473、18382 解析正确。
+
+| 函数 | 说明 |
+|------|------|
+| `parseAfilmoryManifest(html): AfilmoryPhoto[]` | 取 `<script id="manifest">window.__MANIFEST__ = {…};</script>` 中的 JSON（找不到 / 解析失败 / 无 `data` 数组 → `AfilmoryUpstreamError`）；每项保留 `id`、`originalUrl`、`thumbnailUrl`、`width`、`height`、`thumbHash`、`video` |
+| `toPhotoInfo(photo): AfilmoryPhotoInfo` | 校验宽高 1–20000、地址为 https（否则 `AfilmoryUpstreamError`）；`encodeURI` 编码地址（已编码的不重复编码）；`rgb` = `thumbHashToAverageRGBA`（`thumbhash` 包）的结果转 6 位 hex，失败为 `808080`；`video` 仅 motion-photo 且正整数 |
+| `fetchAfilmoryPhoto(id, { site, fetch, timeoutMs })` | 校验 id（`AfilmoryValidationError`）→ `fetch(`${site}/photos/${id}`, { redirect: "manual", signal })` → 非 200 / 网络错误 / 超时 → `AfilmoryUpstreamError` → 解析清单 → 找不到 id → `AfilmoryNotFoundError` |
+
+| UT-ID | 用例 | 预期 |
+|-------|------|------|
+| MEDIA-UT-11 | `parseAfilmoryManifest`：夹具页（10 张）；无 manifest 脚本；JSON 截断；`data` 不是数组 | 10 项且字段正确；其余抛 `AfilmoryUpstreamError` |
+| MEDIA-UT-12 | `toPhotoInfo`：18369（有 video）、18382（无）、子目录中文路径、`video.type` 不是 motion-photo、宽为 0、`http:` 地址、thumbHash 非法 | video 有 / 无；地址 `%E6%89%8B%E5%8A%9E/…`；无 video；后两项抛错；rgb `808080` |
+| MEDIA-UT-13 | `fetchAfilmoryPhoto`（fake fetch）：非法 id；上游 500 / 302 / 抛错 / 超时；id 不在清单 | 不调用 fetch；502 类错误；`NotFound`；请求地址与 `redirect: "manual"` 正确 |
+| MEDIA-UT-14 | 路由（Workers 集成，替换 `fetch`） | US-13 TC-US13-13 全部行 |
+
+---
+
 ## 变更历史
 
 | 日期 | 版本 | 变更内容 | 作者 |
@@ -206,3 +226,4 @@ function summarize(c: { images: ImageRecord[]; videos: ImageRecord[]; protectedC
 | 2026-10-14 | 1.2 | `sniffImage` 改为扫描整个图片字节（[sniff-jpeg-large-metadata](../../../../backlog/sniff-jpeg-large-metadata.md)） | miraclehifi |
 | 2026-10-16 | 1.4 | F-006：新增 §9 存储清理（`StorageService`）、仓储方法 `listAll` / `removeOrphans` / `deleteMany`；不变量 1 允许清理只移除视频（[ADR-009](../../../features/F-006-媒体存储清理/architecture/adr/ADR-009-orphan-detection-in-d1.md)） | miraclehifi |
 | 2026-10-15 | 1.3 | 去掉苹果相关（HEIC、HEIC + MOV、iPhone 说明、同名配对），只保留安卓动态照片（[drop-apple-live-photo](../../../../backlog/drop-apple-live-photo.md)）：只改职责描述，接口与数据结构不变 | miraclehifi |
+| 2026-10-19 | 1.5 | F-001 US-13：新增 §10 Afilmory 照片信息（纯函数 + 只读接口，无表）、MEDIA-UT-11–14（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | miraclehifi |

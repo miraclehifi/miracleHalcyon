@@ -286,6 +286,22 @@
 | UT-164 | S | `toggleMark(source, range, 'live')` | `#wide,live` 去 live → `#wide`；`#live` 去 live → 无片段；`#wide` 加 live → `#wide,live`；`#accordion` 首张加 live → `#accordion,live`；只改 `range` 内的 URL（即 TC-US12-21） | SC-LAYOUT-14 |
 | UT-165 | R | `ImageMenu` 实况项 | `hasLiveVideo` 为 `true` 时显示 `menuitemcheckbox`"实况"，`aria-checked` 与 URL 中 `live` 一致；`false` / 检查中 → 不显示；同一 key 的检查函数在一次会话内只调用 1 次（缓存） | SC-LAYOUT-14, SC-LAYOUT-15 |
 
+## 17. Afilmory 外链照片（2026-10-19，[afilmory-photo-embed](../../../../backlog/afilmory-photo-embed.md)）
+
+| UT-ID | 类 | 用例 | 预期 | covers |
+|------|------|------|------|------|
+| UT-166 | S | `parseExternalPhoto(url, storage)` | 登记前缀 + `#ext=3072x4096x8a7b6c,mp=3337665+14749941,live` → `{ w, h, rgb, thumb, mp: { offset, size } }`；只有 ext → 无 mp；`ext=0x600x112233`、`ext=800x600`、`ext=800x600xZZZZZZ`、`ext=20001x1x000000` → null；`mp=0+10`、`mp=10`、`mp=a+b` → 忽略 mp；其他前缀（`…/main.evil/…`、`…/main/../x`）→ null | SC-AFIL-08, SC-AFIL-11 |
+| UT-167 | S | `thumbnailFor(url, storage)` | `{storage}18369.jpg` → `{storage}.afilmory/thumbnails/18369.jpg`；子目录 `{storage}%E6%89%8B%E5%8A%9E/wf2026/23473.jpg` → `{storage}.afilmory/thumbnails/23473.jpg`；`.png` 原图 → `….jpg`；不在前缀下 → null | SC-AFIL-07, SC-AFIL-08 |
+| UT-168 | S | `renderMarkdown` 外链照片 | figure 带 `data-src`（原图）、`data-w` / `data-h` / `data-rgb`、`data-thumb`、`data-mp`；`img[src]` = 缩略图、带宽高；`live` 只在有 mp 时输出 `data-live`；`wide` 照常；未登记前缀同写法 → 普通外链；`ImageRef` 带 `thumb` / `mp`；组图中同样输出 | SC-AFIL-08, SC-AFIL-11 |
+| UT-169 | S | `parseAfilmoryPaste(text, site)` | 单张代码 → `{ kind: 'photos', ids: ['18369'] }`；多张 `"23473, 23514 ,,18382"` → 3 个；照片页链接（前后空白、末尾 `/`、带查询串）→ 1 个；tag 代码 → `{ kind: 'tag' }`；其他站点代码、站点首页、`https://example.com/photos/1`、夹带文字、非法 id、空 ids → null | SC-AFIL-01 ~ 04 |
+| UT-170 | S | `afilmoryMarkdown(info, { storage, live })` | 18369 + live → `![](url#ext=3072x4096x8a7b6c,mp=3337665+14749941,live)`；live 关 → 无 live；无 video → 无 mp 且忽略 live；thumbnail 不符或 url 不在前缀 → `![](url)` + warning | SC-AFIL-01, SC-AFIL-06, SC-AFIL-07 |
+| UT-171 | S | `collectArticleImages` 外链字段 | `data-thumb` / `data-mp` → `external: { thumb, mainBytes: offset }`、`live: { videoSrc: 原图, range, codec: 'hevc' }`（仅 `data-live`）；无 mp → `external: { thumb }`、无 live | SC-AFIL-08 ~ 10 |
+| UT-172 | S | `loadMainImage` / `loadVideoRange`（fetch mock） | 主图 `Range: bytes=0-{mainBytes-1}`，206 / 200 → `blob:` URL；同一地址复用同一个 Promise；网络错误 / 4xx / 5xx → reject 且下次可重试；无 mainBytes → 不 fetch，预加载原图后 resolve 原图地址；视频 `bytes={offset}-{offset+size-1}`，只接受 206，Blob 类型 `video/mp4` | SC-AFIL-08, 09, 10, 12 |
+| UT-173 | R | `ArticleImage` 外链（IntersectionObserver / 读取 mock） | 初始 `img[src]` = 缩略图；进入视口前不读取；进入后读取一次，resolve 后 `src` = 主图、`[data-status]` 保持 complete；reject → 仍为缩略图、不显示失败 | SC-AFIL-08, SC-AFIL-12 |
+| UT-174 | R | `LivePhotoLayer` 外链视频 | `codec: 'hevc'` 且 `canPlayType('video/mp4; codecs="hvc1"')` 为空 → 不渲染；支持时初始 `video` 无 `src`；触发播放时调用 `loadVideoRange` 一次，resolve 后设置 `src` 并 `play()`；reject → 隐藏 | SC-AFIL-10 |
+| UT-175 | S | `useImageUploads.insertAfilmoryPhotos(ids)`（接口 mock） | 一次插入 n 行占位；卡片 `state: 'fetching'`、`name` 为"Afilmory {id}"、无缩略图；乱序完成按占位顺序替换；502 / 404 → `error` 为接口文案、占位"上传失败"；`retry` 重新请求；401 → `onUnauthenticated`；warning 经 `onWarning` | SC-AFIL-01, 02, 05, 07 |
+| UT-176 | S | `normalizeSiteConfig` 的 `afilmory` | 缺省 → undefined；`site` 非 https 或带路径 → 构建失败（末尾 `/` 去掉）；`storage` 非 https 或不以 `/` 结尾 → 构建失败 | SC-AFIL-11, SC-AFIL-13 |
+
 ---
 
 ## 覆盖说明
@@ -305,6 +321,7 @@
 | US-10 工具栏 | SC-TOOLBAR-01 ~ 05, 07 ~ 10 |
 | US-11 实况照片 | SC-LIVE-01, 03 ~ 06, 08 ~ 11, 14 ~ 16（02、07、13 已删除） |
 | US-12 图片排版 | SC-LAYOUT-01 ~ 08, 10 ~ 15 |
+| US-13 Afilmory 照片 | SC-AFIL-01 ~ 12（13 为服务端，见 media domain-model MEDIA-UT-11 ~ 14） |
 
 未在单元层覆盖（纯服务端 / 跨系统，由 acceptance 覆盖）：SC-LOGIN-02/03/07/08/09、SC-LOGOUT-*、SC-POSTINFO-02/11、SC-IMAGE-08、SC-AUTOSAVE-03、SC-POSTLIST-03、SC-PUBLISH-01/02/06/07、SC-DELETE-04 ~ 06、SC-TOOLBAR-06（原生撤销栈）、SC-TOOLBAR-11（页面级接线）、SC-LIVE-12（文件选择器接线）、SC-LAYOUT-09（触屏手势）。
 
@@ -326,3 +343,4 @@
 | 2026-10-14 | v1.7 | UT-53 由按标题映射改为按 `data-line` 行映射（editor module-spec §3，作者确认） | miraclehifi |
 | 2026-10-14 | v1.6 | UT-52 补充默认视图与存储；UT-55 宽屏视图切换按设计稿改为单选组 | miraclehifi |
 | 2026-10-14 | v1.5 | UT-110 文案按设计稿改为"删除《标题》？"；UT-113 补充进行中不可取消；UT-116 触发元素改为"删除文章"按钮 | miraclehifi |
+| 2026-10-19 | v1.x | 新增 §17 Afilmory 外链照片（UT-166 ~ UT-176，US-13） | miraclehifi |

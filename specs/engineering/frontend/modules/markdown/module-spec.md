@@ -1,6 +1,6 @@
 # markdown 模块（同构渲染）
 
-**最后更新**: 2026-10-16
+**最后更新**: 2026-10-19
 **状态**: self-checked
 **来源**: [ADR-001](../../../features/F-001-文章写作/architecture/adr/ADR-001-isomorphic-markdown.md) · [ADR-005](../../../features/F-001-文章写作/architecture/adr/ADR-005-self-describing-image-markdown.md) · feature-architecture §6.3
 **位置**: `src/lib/markdown/`
@@ -22,6 +22,7 @@ export interface ImageRef {          // 预览用于挂载 ArticleImage / ImageG
   id: string;                        // 渲染内序号 "img-0"
   src: string; alt: string; title?: string;
   w?: number; h?: number; rgb?: string;
+  thumb?: string; mp?: { offset: number; size: number };   // 登记前缀下的外链照片（ADR-010）
   marks: { wide: boolean; live: boolean; accordion: boolean };
   sourceStart: number; sourceEnd: number;   // 图片语法在源码中的字符偏移
 }
@@ -29,6 +30,10 @@ export interface ImageRef {          // 预览用于挂载 ArticleImage / ImageG
 // 纯函数，编辑器的图片菜单也会用到
 export function parseImageKey(url: string): { w: number; h: number; rgb: string } | null;
 export function parseMarks(url: string): { wide: boolean; live: boolean; accordion: boolean };
+// 外链照片（ADR-010，plugins/external-photo.ts）：storage 为 site.afilmory.storage
+export function parseExternalPhoto(url: string, storage: string | undefined):
+  { w: number; h: number; rgb: string; thumb: string; mp?: { offset: number; size: number } } | null;
+export function thumbnailFor(url: string, storage: string): string | null;
 ```
 
 ## 2. 处理链
@@ -87,7 +92,8 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 |------|------|
 | 解析失败 | `parseImageKey` 返回 null（外链、文件名不符）→ 不输出 `data-w`/`data-h`/`data-rgb`、`img` 不带宽高 |
 | 标记 | URL 片段按 `,` 拆分，只认小写 `wide`、`live`、`accordion`，其余忽略；输出 `src` 时去掉片段 |
-| `live` | 只对站内 `/img/` 路径生效；视频地址 = 图片地址去扩展名 + `.live.mp4`（由组件推导，不写入 HTML） |
+| `live` | 站内 `/img/` 路径：视频地址 = 图片地址去扩展名 + `.live.mp4`（由组件推导，不写入 HTML）；外链照片：只在有合法 `mp=` 时生效；其余外链忽略 |
+| 外链照片（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | `src`（去片段）以 `site.afilmory.storage` 开头（`new URL` 规范化后比较，含 `..` 的路径不认）且 `ext=` 合法 → figure 加 `data-w` / `data-h` / `data-rgb`、`data-thumb`（`thumbnailFor`）、有合法 `mp=` 时 `data-mp="{offset}+{size}"`；`img[src]` 为缩略图、带宽高；`data-src` 仍为原图。`ext=` 不合法 → 按普通外链；`mp=` 不合法 → 只忽略 mp（及 live）。已实现（Sprint 8 任务 2）：`plugins/external-photo.ts`，`rehypeImageFigures` 从 `src/config/site.ts` 取前缀。与文字同段的行内外链照片同样把 `img[src]` 换成缩略图（verify 发现：原图可能含几十 MB 的内嵌视频） |
 | 图注 | 只来自 Markdown title；转义后作为文本 |
 | 无 JS 降级 | 输出本身就是可读的 `figure` + `img`；React 组件挂载是增强 |
 | 源码位置属性 | 仅 `sourceMap: true` 时输出 `data-source-start`/`data-source-end` |
@@ -134,3 +140,4 @@ remark-parse → remark-gfm → [remarkImageGroups] → remark-rehype(allowDange
 | 2026-10-14 | 1.6 | §4：Worker 回传 `images`；预览单图挂载与 `reconcileIslands`（add-article-image-display） | miraclehifi |
 | 2026-10-15 | 1.7 | F-002：新增 `rehypeQuoteAttribution`（引用署名）与 MD-UT-07 | miraclehifi |
 | 2026-10-16 | 1.8 | 新增 §2.1 上传占位：`RenderOptions.uploadPlaceholders`，预览输出挂载点、读者端删除占位（[media-upload-experience](../../../../backlog/media-upload-experience.md)） | miraclehifi |
+| 2026-10-19 | 1.9 | 外链照片：`parseExternalPhoto` / `thumbnailFor`、`ImageRef.thumb` / `mp`、输出 `data-thumb` / `data-mp`（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | miraclehifi |

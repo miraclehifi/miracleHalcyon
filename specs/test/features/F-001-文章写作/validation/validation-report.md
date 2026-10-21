@@ -1,6 +1,6 @@
 # 验证报告：F-001 文章写作
 
-**验证日期**: 2026-10-15 首次；2026-10-16 Sprint 5 后重新验证
+**验证日期**: 2026-10-15 首次；2026-10-16 Sprint 5 后重新验证；2026-10-21 Sprint 8 增量（US-13 Afilmory 外链照片，见下方同名一节）
 **范围**: Sprint 1–3（72 + 18 + 14 个任务）、Sprint 5（P0 验收测试补齐，4 个任务），连同 Sprint 4 对 F-001 的增量（封面、Deploy Hook），与 F-002 一起验证
 **环境**: 本地（Windows 11，Node 24.21，Astro 7.3 + `@astrojs/cloudflare` 14，workerd 本地运行）；未做本地前端联调（作者决定）
 
@@ -40,6 +40,23 @@
 ### 验收文档同步
 
 US-01、03、06、07、08 共 5 份验收文档中过时的期望值已改为现行契约（登录失败文案、空标题存为"无标题"、标题 200 / slug 80 上限、slugify 先 NFKD、发布缺字段 422 `MISSING_FIELDS`、PUT 提交整份工作稿、标签包含匹配、保存中有新编辑则完成后立即再存、列表条目不含 slug 等），详见 [sync-f001-acceptance-expectations](../../../../tasks/sprint-5/sync-f001-acceptance-expectations.md)。
+
+## Sprint 8 增量验证（2026-10-21，US-13 Afilmory 外链照片）
+
+范围：[afilmory-photo-embed](../../../../backlog/afilmory-photo-embed.md)（[Sprint 8](../../../../tasks/sprint-8/_index.md) 6 个任务）。前置：全面审查通过（[code-review 增量审查](../reviews/code-review.md)）。
+
+| 项 | 结果 |
+|----|------|
+| 全量回归 | `npm test` 147 个文件 468/468；`npm run test:build` 7/7；lint 0、check 0 |
+| 自动化 E2E | `afilmory-photos.spec.ts` chromium + webkit 通过（2 个按浏览器限定跳过）；并行时 WebKit 偶发失败的 TC-US13-06 单 worker 连跑 3 次通过。全量 E2E 见 [sprint-8-task-results](sprint-8-task-results.md) |
+| **真实链路（本地联调）** | playwright-skill 脚本 `../e2e/playwright-test-afilmory-live.js`：完整版 Chromium、**不打桩**（接口真实请求 Afilmory，浏览器真实按 Range 读 GitHub raw），6/6 通过——真实分享代码插入、缩略图 → 主图（3072 宽）、**外链实况真实 HEVC 播放**（Main 10，解码 2880×3840）、多张成组（子目录地址编码）、按标签提示、动态照片原图从不整体下载。报告 [playwright-report-20261021-1134](../e2e/report/playwright-report-20261021-1134.md)，截图 `screenshots/us13-*.png` |
+| 跨 Feature | F-002：读者构建产物（TC-US13-12）、读者页组图主色与灯箱（TC-US13-09）、既有读者 E2E 通过；F-006：外链不入 R2 / D1，存储检测与清理测试在全量回归中通过 |
+| 追溯 | US-13 14 条验收用例全部有测试并通过（[traceability](traceability.md)） |
+| 结论 | **通过** |
+
+**verify 中发现并修复的问题**（返回 implement 修复，TDD：先加失败用例）：照片与文字（或上传占位）同段时为行内图片，行内图片直接用原图地址，动态照片会整体下载约 18MB（含内嵌视频）。真实链路脚本的请求记录暴露了这一点（粘贴过程中照片与占位同段的瞬间），自动化 E2E 因打桩未察觉 → 行内外链照片改用缩略图（`image-figures.ts` `inlineImage`）；`external-photo.test.ts` 补用例，TC-US13-01 断言改为缩略图，真实链路脚本新增"原图从不整体下载"检查。
+
+**未覆盖 / 已知**：真实 Safari（Windows 上无法运行；Playwright WebKit 认 HEVC 但不能播放 blob 视频）——上线后建议在 iPhone / Mac Safari 看一次外链实况；GitHub raw 在国内的可达性与 5 分钟缓存（ADR-010"后果"）；blob 常驻内存（code-review CONCERN）。
 
 ## 全量回归、跨 Feature 集成、E2E
 

@@ -7,6 +7,12 @@ export interface SiteConfigInput {
   github?: string;
   photo?: string;
   email?: string;
+  afilmory?: AfilmoryConfig; // US-13（ADR-010）：外链照片只认登记的 Afilmory 站点与照片存储前缀
+}
+
+export interface AfilmoryConfig {
+  site: string; // 站点 origin，如 https://miraclehalcyon.afilmory.art
+  storage: string; // 原图存储前缀，以 / 结尾
 }
 
 export interface SiteConfig {
@@ -17,6 +23,7 @@ export interface SiteConfig {
   github: string | undefined;
   photo: string | undefined;
   email: string | undefined;
+  afilmory: AfilmoryConfig | undefined;
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,6 +45,26 @@ function optionalUrl(field: string, value: string | undefined): string | undefin
   return v;
 }
 
+function httpsUrl(field: string, value: string): URL {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    fail(field, `不是合法地址：${value}`);
+  }
+  if (url.protocol !== "https:") fail(field, `只允许 https 地址：${value}`);
+  return url;
+}
+
+function afilmoryConfig(raw: AfilmoryConfig | undefined): AfilmoryConfig | undefined {
+  if (!raw) return undefined;
+  const site = httpsUrl("afilmory.site", raw.site.trim().replace(/\/+$/, ""));
+  if (site.href !== `${site.origin}/`) fail("afilmory.site", `只能是站点根地址：${raw.site}`);
+  const storage = httpsUrl("afilmory.storage", raw.storage.trim());
+  if (!storage.pathname.endsWith("/") || storage.search || storage.hash) fail("afilmory.storage", `必须以 / 结尾：${raw.storage}`);
+  return { site: site.origin, storage: storage.href };
+}
+
 export function normalizeSiteConfig(raw: SiteConfigInput): SiteConfig {
   if (!raw.name?.trim()) fail("name", "不能为空");
   if (!raw.avatar?.trim()) fail("avatar", "不能为空");
@@ -52,5 +79,6 @@ export function normalizeSiteConfig(raw: SiteConfigInput): SiteConfig {
     github: optionalUrl("github", raw.github),
     photo: optionalUrl("photo", raw.photo),
     email,
+    afilmory: afilmoryConfig(raw.afilmory),
   };
 }

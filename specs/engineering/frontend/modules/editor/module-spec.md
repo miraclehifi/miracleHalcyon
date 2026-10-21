@@ -38,6 +38,8 @@ function applyEdit(textarea: HTMLTextAreaElement, e: Edit): void;
 
 > 已实现（Sprint 6）：识别函数 `placeholderEdit(prev, next, caret)`（`src/lib/editor/format-commands.ts`：纯删除 / 纯插入按光标，否则先取公共后缀再取前缀，区间边界落在占位中间时扩到整个占位）；槽位在 `src/lib/upload/use-image-uploads.ts`。槽位的 input 监听挂在 window 上分两步：捕获阶段（React 处理之前）只更新槽位 ref，冒泡阶段（React 处理完受控 textarea 的 onChange 之后）再通知卡片列表——先于 React 触发重渲染会把值写回旧值、吞掉撤销；只在冒泡阶段更新槽位又会被 React 同步渲染里的"渲染后核对"抢先重置（TC-US05-39）。源码被受控赋值改变时，每次渲染后按占位数核对一次（本 hook 自身写入期间跳过）。
 
+**粘贴 Afilmory 照片**（US-13，[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)）：`MarkdownEditor` 的粘贴处理在剪贴板没有文件时，用 `parseAfilmoryPaste(text, site.afilmory.site)`（`src/lib/afilmory/paste.ts`）判断整段文本：`photos` → `preventDefault`，交给 `useImageUploads.insertAfilmoryPhotos(ids)`（与文件上传共用占位槽位与卡片）；`tag` → `preventDefault` + Toast/Error；null → 照常粘贴。图片菜单的"实况"项：外链照片按 `ImageRef.mp` 判断，不发请求。已实现（Sprint 8 任务 4、5）：`MarkdownEditor.tsx`、`MarkdownPreview.tsx`。
+
 markdown 模块在预览模式下把空 URL 且 alt 为"处理中…"/"上传中…"/"上传失败"的图片输出为挂载点（见 markdown module-spec §2.1"上传占位"），`MarkdownPreview` 按槽位序号挂载 `UploadCard`：绑定槽位按任务状态显示，空槽位显示 `interrupted`。
 
 ## 2. 自动保存（`useAutosave`）
@@ -106,3 +108,4 @@ idle ──编辑──▶ dirty ──2s 无输入──▶ saving ──200─
 | 2026-10-14 | 1.1 | §3 同步滚动已实现；防回声由 50ms 锁改为按写入值识别 | miraclehifi |
 | 2026-10-15 | — | F-002：设置抽屉封面 `CoverField`；`cover` 进入自动保存与本地暂存 | miraclehifi |
 | 2026-10-16 | 1.4 | 上传占位改为槽位模型（绑定 / 空槽位，支持"上传失败"占位与刷新后的孤立占位）；预览挂载 `UploadCard`；`toggleMark` 支持 `live`；菜单实况项检查（[media-upload-experience](../../../../backlog/media-upload-experience.md)） | miraclehifi |
+| 2026-10-19 | 1.x | 粘贴 Afilmory 照片；外链照片的菜单实况项（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | miraclehifi |

@@ -88,6 +88,7 @@ Props：`cards: CardModel[]`。渲染 `AnimatedList`（`bare`，参数见 compon
 | 挂载 | 复用 `reconcile-islands` 与 `MarkdownPreview` 相同的宿主替换方式：portal 渲染 `ArticleImage` / `ImageGallery`；正文只渲染一次，不需要复用逻辑 |
 | 点击 | 单图：`ArticleImage` 新增可选 `onClick`（外层渲染为 `button`，`aria-label="查看大图：{alt}"`；不传时结构不变，预览不受影响）；组图：`ImageGallery` 的 `onImageClick(index)`（网格）/ 手风琴已展开项；加载失败的图片不打开 |
 | 灯箱 | 首次打开时 `import('./Lightbox')`（含 gsap、DepthCarousel）；打开时记录触发元素，关闭后 `focus()` 回去 |
+| 外链照片（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | `collectArticleImages` 读出 `data-thumb` / `data-mp` → `ArticleImageData.external = { thumb, mainBytes? }`；`data-live` 且有 mp → `live = { videoSrc: 原图, range: { offset, size }, codec: 'hevc' }`。`ArticleImage`、组图单元格与 `Lightbox` 用 `src/components/article/external-media.ts` 的 `loadMainImage(src, mainBytes?)`（按地址缓存 Promise，正文与灯箱共用）；灯箱中未读取的照片先显示缩略图，读完换成主图。已实现（Sprint 8 任务 3、6）：`external-media.ts`（另有 `useInView`、`useMainImages`），`Lightbox` 只读取当前张 |
 
 ### 4.3 `Lightbox`（`src/components/reader/Lightbox.tsx`）
 
@@ -122,6 +123,10 @@ export default {
   github: 'https://github.com/example',
   photo: '',
   email: 'me@example.com',
+  afilmory: {                       // US-13（ADR-010）：外链照片只认这里登记的站点与存储前缀；缺省则不识别粘贴、不解析扩展片段
+    site: 'https://miraclehalcyon.afilmory.art',
+    storage: 'https://raw.githubusercontent.com/miraclehifi/photo-assets/main/',
+  },
   footerTagline: '写字，写代码，慢慢来。',
 } satisfies SiteConfigInput;
 ```
@@ -155,3 +160,4 @@ export default {
 |------|------|----------|------|
 | 2026-10-15 | 1.0 | 初始版本（F-002 design-domain） | miraclehifi |
 | 2026-10-16 | 1.1 | 读者端渲染不输出上传占位（F-001 [media-upload-experience](../../../../backlog/media-upload-experience.md)，TC-US05-38） | miraclehifi |
+| 2026-10-19 | 1.x | 外链照片：`ArticleImageData.external`、`live.range` / `codec`，灯箱主图；`site.afilmory`（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | miraclehifi |

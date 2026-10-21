@@ -1,6 +1,8 @@
 // MarkdownEditor（components.md，admin-post-editor.md"编辑区"，ADR-004 textarea 编辑器）：标题 + 源码区 + 底栏
 // 标题是无边框大号输入（自动增高、不含换行），回车把光标移到正文；工具栏按钮与快捷键改写源码（US-10，可撤销）
 import { useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent } from "react";
+import { site } from "../../../config/site";
+import { parseAfilmoryPaste } from "../../../lib/afilmory/paste";
 import { applyEdit, applyFormat, type FormatCommand } from "../../../lib/editor/format-commands";
 import { isMacPlatform, matchShortcut } from "../../../lib/editor/shortcuts";
 import { offsetFromPoint } from "../../../lib/editor/textarea-mirror";
@@ -24,6 +26,7 @@ export interface MarkdownEditorProps {
 
 const countFormat = new Intl.NumberFormat("en-US");
 const noopSubscribe = () => () => {};
+const AFILMORY_TAG_MESSAGE = "按标签分享的代码不能插入，请改用单张或多张分享";
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif"; // heic / 实况视频在 Sprint 3（US-11）放开
 
 // 底栏"图片写法"：文字按钮打开 Popover（底栏上方、与底栏文字左对齐，admin.pen 03b）；关闭后焦点回到按钮
@@ -76,7 +79,7 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
     setChosen(next);
     writeLivePref(next);
   }, []);
-  const { uploadFiles } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange, onError: showUploadError, onWarning: showUploadWarning, liveEnabled: live, onUnauthenticated: onSessionExpired });
+  const { uploadFiles, insertAfilmoryPhotos } = useImageUploads(bodyRef, { onTasksChange: onUploadsChange, onError: showUploadError, onWarning: showUploadWarning, liveEnabled: live, onUnauthenticated: onSessionExpired });
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0); // dragenter / dragleave 在子元素间成对出现，计数归零才算离开
 
@@ -100,12 +103,20 @@ export function MarkdownEditor({ title, body, titleInvalid, bodyInvalid, onTitle
     applyEdit(element, applyFormat(element.value, [element.selectionStart, element.selectionEnd], command));
   };
 
-  // 粘贴图片（US-05）：剪贴板里有文件时按图片上传（不支持的类型给出提示），否则照常粘贴文字
+  // 粘贴图片（US-05）：剪贴板里有文件时按图片上传（不支持的类型给出提示）；整段文本是 Afilmory 分享代码 / 照片页链接时
+  // 插入外链照片（US-13），按标签分享的代码只提示；否则照常粘贴文字
   const onBodyPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
     const files = [...(event.clipboardData?.files ?? [])];
-    if (files.length === 0) return;
+    if (files.length > 0) {
+      event.preventDefault();
+      uploadFiles(files);
+      return;
+    }
+    const pasted = parseAfilmoryPaste(event.clipboardData?.getData("text/plain") ?? "", site.afilmory?.site);
+    if (!pasted) return;
     event.preventDefault();
-    uploadFiles(files);
+    if (pasted.kind === "tag") showUploadError(AFILMORY_TAG_MESSAGE);
+    else insertAfilmoryPhotos(pasted.ids);
   };
 
   // 拖入图片（US-05）：只响应带文件的拖动；放到源码区按落点换算插入位置，放在标题等其他位置插在光标处

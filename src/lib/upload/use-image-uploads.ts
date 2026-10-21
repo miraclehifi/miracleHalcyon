@@ -4,8 +4,12 @@
 // 压缩 / 视频阶段没有真实进度按时间趋近，上传阶段按字节；成功后先淡出 fadeOutMs 再替换占位。缩略图 blob URL 在任务结束或卸载时回收。每项经 uploadItem 处理（实况项另处理视频、同一请求上传），警示与错误带文件名。
 // 占位槽位（editor module-spec §1）：源码中的占位按出现顺序对应一个槽位，槽位绑定一个任务或为空（孤立占位：刷新后已有的、
 // 撤销"移除"或粘贴带回的），空槽位的卡片为"上传已中断"、只能移除。作者删掉占位时按改动区间找出对应槽位移出（任务完成后
-// 不再插入），新出现的占位插入空槽位；判断不了时全部转为空槽位、不改写源码。上传前校验类型与大小，被拒的不插占位、不上传
+// 不再插入），新出现的占位插入空槽位；判断不了时全部转为空槽位、不改写源码。上传前校验类型与大小，被拒的不插占位、不上传。
+// Afilmory 照片（US-13，insertAfilmoryPhotos）：任务来源为照片 id，同样占位与卡片；fetching 阶段请求照片信息后生成外链引用，不进上传队列
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { site } from "../../config/site";
+import { fetchAfilmoryPhoto } from "../afilmory/client";
+import { afilmoryMarkdown, type AfilmoryPhotoInfo } from "../afilmory/markdown";
 import {
   applyEdit,
   countPlaceholders,
@@ -32,7 +36,9 @@ import { MESSAGE_FAILED, validateImageFile, withFileName } from "./validate-file
 
 interface UploadTask {
   id: string;
-  file: File;
+  name: string; // 卡片与提示里的名称：文件名，或"Afilmory {id}"
+  file?: File; // 文件上传任务
+  afilmoryId?: string; // Afilmory 照片任务（无文件、无缩略图）
   batchSize: number;
   thumbUrl?: string;
   stage: UploadStage | "error";
@@ -60,7 +66,7 @@ const isTask = (slot: Slot): slot is UploadTask => !("empty" in slot);
 export interface UploadView {
   id: string;
   name: string;
-  state: "waiting" | "compressing" | "processing-live" | "uploading" | "error" | "interrupted";
+  state: "waiting" | "compressing" | "processing-live" | "fetching" | "uploading" | "error" | "interrupted";
   progress: number;
   thumbUrl?: string;
   error?: string;
@@ -109,6 +115,8 @@ export interface UseImageUploadsOptions {
   fadeOutMs?: number; // 成功后卡片淡出的时长，之后才替换占位；缺省按减弱动效设置
   onUnauthenticated?: () => void; // 上传返回 401：会话过期处理（暂存、跳登录），占位已改为"上传失败"
   liveEnabled?: boolean; // 实况照片开关（缺省关闭）：关闭时动态照片只传静态图
+  fetchPhoto?: (id: string) => Promise<AfilmoryPhotoInfo>; // Afilmory 照片信息（US-13）
+  photoStorage?: string; // 登记的照片存储前缀（site.afilmory.storage）
 }
 
 // JPEG 内嵌视频（安卓动态照片）展开为实况项；其余按普通图片
@@ -138,6 +146,8 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
     fadeOutMs,
     liveEnabled = false,
     onUnauthenticated,
+    fetchPhoto = fetchAfilmoryPhoto,
+    photoStorage = site.afilmory?.storage,
   }: UseImageUploadsOptions = {},
 ) {
   const slots = useRef<Slot[]>([]);
@@ -146,7 +156,7 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
     isTask(slot) ? taskView(slot) : { id: slot.id, name: "", state: "interrupted", progress: 0, leaving: false, remove: () => remove(slot) };
   const taskView = (task: UploadTask): UploadView => ({
     id: task.id,
-    name: task.file.name,
+    name: task.name,
     state: task.stage === "done" ? "uploading" : task.stage,
     progress: task.progress,
     thumbUrl: task.thumbUrl,
@@ -303,7 +313,7 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
     task.timer = undefined;
     task.stage = stage;
     task.ratio = 0;
-    if ((stage === "compressing" || stage === "processing-live") && slots.current.includes(task)) {
+    if ((stage === "compressing" || stage === "processing-live" || stage === "fetching") && slots.current.includes(task)) {
       task.timer = setInterval(() => {
         task.ratio = creep(task.ratio);
         update(task);
@@ -332,12 +342,29 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
     if (error instanceof UploadError && error.status === 401) onUnauthenticatedRef.current?.();
   };
 
+  // Afilmory 照片：请求照片信息 → 生成引用；不受上传并发限制（只是一次小请求）
+  const runAfilmory = (task: UploadTask, id: string) => {
+    enter(task, "fetching");
+    fetchPhoto(id)
+      .then((info) => {
+        const { markdown, warning } = afilmoryMarkdown(info, { storage: photoStorage, live: task.liveEnabled });
+        if (warning) onWarning?.(withFileName(warning, task.name, task.batchSize));
+        return markdown;
+      })
+      .then(
+        (markdown) => succeed(task, markdown),
+        (error: unknown) => fail(task, error),
+      );
+  };
+
   const run = (task: UploadTask) => {
+    if (task.afilmoryId) return runAfilmory(task, task.afilmoryId);
+    const file = task.file!;
     const abort = new AbortController();
     task.abort = abort;
     limit(async () => {
       enter(task, "compressing");
-      return uploadItem(await toItem(task.file), { compress, measure, upload, processVideo }, {
+      return uploadItem(await toItem(file), { compress, measure, upload, processVideo }, {
         onProcessingLive: () => {
           task.live = true;
           enter(task, "processing-live");
@@ -350,7 +377,7 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
           task.ratio = total > 0 ? loaded / total : 0;
           update(task);
         },
-        onWarning: (message) => onWarning?.(withFileName(message, task.file.name, task.batchSize)),
+        onWarning: (message) => onWarning?.(withFileName(message, task.name, task.batchSize)),
       }, { live: task.liveEnabled, signal: abort.signal });
     }).then(
       (markdown) => succeed(task, markdown),
@@ -395,6 +422,21 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
   }
 
 
+  // 一批任务在插入位置一次插入"处理中…"占位（每个一行），挂上卡片按钮并开始处理
+  const start = (element: HTMLTextAreaElement, batch: UploadTask[], at?: number) => {
+    const from = at ?? element.selectionStart;
+    const to = at ?? element.selectionEnd;
+    sync(element);
+    const position = placeholdersBefore(element.value, from);
+    edit(element, { ...insertPlaceholders(from, batch.length, PLACEHOLDER_PROCESSING), to });
+    slots.current = [...slots.current.slice(0, position), ...batch, ...slots.current.slice(position)];
+    notify();
+    for (const task of batch) {
+      task.actions = { retry: () => retry(task), remove: () => remove(task), stillOnly: () => stillOnly(task) };
+      run(task);
+    }
+  };
+
   const uploadFiles = useCallback(
     // at：插入位置（拖放位置），缺省为当前光标 / 选区
     (files: File[], at?: number) => {
@@ -404,24 +446,25 @@ export function useImageUploads(textareaRef: RefObject<HTMLTextAreaElement | nul
       for (const file of files) {
         const problem = validateImageFile(file);
         if (problem) onError?.(withFileName(problem, file.name, files.length));
-        else batch.push({ id: `upload-${++nextTaskId}`, file, batchSize: files.length, thumbUrl: createThumb(file), stage: "waiting", ratio: 0, progress: 0, live: false, liveEnabled, leaving: false });
+        else batch.push({ id: `upload-${++nextTaskId}`, name: file.name, file, batchSize: files.length, thumbUrl: createThumb(file), stage: "waiting", ratio: 0, progress: 0, live: false, liveEnabled, leaving: false });
       }
-      if (batch.length === 0) return;
-      const from = at ?? element.selectionStart;
-      const to = at ?? element.selectionEnd;
-      sync(element);
-      const position = placeholdersBefore(element.value, from);
-      edit(element, { ...insertPlaceholders(from, batch.length, PLACEHOLDER_PROCESSING), to });
-      slots.current = [...slots.current.slice(0, position), ...batch, ...slots.current.slice(position)];
-      notify();
-      for (const task of batch) {
-        task.actions = { retry: () => retry(task), remove: () => remove(task), stillOnly: () => stillOnly(task) };
-        run(task);
-      }
+      if (batch.length > 0) start(element, batch, at);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 任务列表在 ref 中，回调只依赖 ref 与上传函数
     [textareaRef, upload, compress, measure, processVideo, toItem, onError, onWarning, limit, fadeOutMs, liveEnabled],
   );
 
-  return { uploadFiles };
+  // Afilmory 照片（US-13）：每个 id 一个任务、一行占位，按 id 顺序
+  const insertAfilmoryPhotos = useCallback(
+    (ids: string[], at?: number) => {
+      const element = textareaRef.current;
+      if (!element || ids.length === 0) return;
+      const batch = ids.map((afilmoryId): UploadTask => ({ id: `upload-${++nextTaskId}`, name: `Afilmory ${afilmoryId}`, afilmoryId, batchSize: ids.length, stage: "waiting", ratio: 0, progress: 0, live: false, liveEnabled, leaving: false }));
+      start(element, batch, at);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 同 uploadFiles
+    [textareaRef, fetchPhoto, photoStorage, onWarning, fadeOutMs, liveEnabled],
+  );
+
+  return { uploadFiles, insertAfilmoryPhotos };
 }

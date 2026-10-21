@@ -20,6 +20,7 @@ export interface RenderOptions {
 
 export type { ImageRef } from "./plugins/image-figures";
 export { parseImageKey, parseMarks } from "./plugins/image-key";
+export { parseExternalPhoto, thumbnailFor } from "./plugins/external-photo";
 
 export interface RenderResult {
   html: string;

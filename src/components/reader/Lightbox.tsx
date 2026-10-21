@@ -1,9 +1,11 @@
 // Lightbox（components.md"文章图片"`Lightbox`、reader-post-detail.md"图片与灯箱"）：scrim 底、计数、关闭、图注、下滑关闭；
 // 中间内容区为 React Bits DepthCarousel（参数见 components.md"灯箱层叠参数"）。由 ArticleImagesIsland 首次打开时动态加载。
-// 焦点在灯箱内循环；实况照片在当前卡片上叠播放层；当前图片加载失败时显示"图片加载失败"+"重试"（地址带 ?retry=n）
+// 焦点在灯箱内循环；实况照片在当前卡片上叠播放层；当前图片加载失败时显示"图片加载失败"+"重试"（地址带 ?retry=n）。
+// 外链照片（external，ADR-010）：当前张读取主图（与正文共用缓存），读完前显示缩略图
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { LivePhotoLayer } from "../article/live-photo";
+import { loadMainImage, type ExternalSource } from "../article/external-media";
+import { LivePhotoLayer, type LiveSource } from "../article/live-photo";
 import DepthCarousel, { type DepthCarouselApi, type DepthCarouselItem } from "../vendor/react-bits/DepthCarousel";
 import { OverlayButton } from "../ui/OverlayButton";
 
@@ -13,7 +15,8 @@ export interface LightboxImage {
   caption?: string;
   width?: number;
   height?: number;
-  live?: { videoSrc: string };
+  live?: LiveSource;
+  external?: ExternalSource;
 }
 
 export interface LightboxProps {
@@ -55,6 +58,23 @@ function useScrollLock() {
 
 export function Lightbox({ images, index, onClose }: LightboxProps) {
   const [current, setCurrent] = useState(index);
+  const [mains, setMains] = useState<Record<number, string>>({});
+
+  // 外链照片：切到哪张读哪张的主图；失败保留缩略图
+  useEffect(() => {
+    const image = images[current];
+    if (!image?.external || mains[current]) return;
+    let alive = true;
+    loadMainImage(image.src, image.external.mainBytes).then(
+      (main) => {
+        if (alive) setMains((prev) => ({ ...prev, [current]: main }));
+      },
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, [current, images, mains]);
   const { w, h } = useViewport();
   const phone = w <= PHONE_MAX;
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -79,7 +99,8 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
     const ratio = image.width && image.height ? image.width / image.height : 3 / 4;
     const width = Math.round(Math.min(maxW, maxH * ratio));
     const retry = retries[i];
-    const src = retry ? `${image.src}${image.src.includes("?") ? "&" : "?"}retry=${retry}` : image.src;
+    const base = image.external?.thumb ?? image.src;
+    const src = mains[i] ?? (retry ? `${base}${base.includes("?") ? "&" : "?"}retry=${retry}` : base);
     return { image: src, alt: image.alt, width, height: Math.round(width / ratio) };
   });
   const cardWidth = phone ? w - 60 : Math.max(...items.map((item) => item.width ?? 540));
@@ -216,7 +237,7 @@ export function Lightbox({ images, index, onClose }: LightboxProps) {
               ) : null;
             }
             const live = images[i]?.live;
-            return live && focused ? <LivePhotoLayer videoSrc={live.videoSrc} radius={8} /> : null;
+            return live && focused ? <LivePhotoLayer {...live} radius={8} /> : null;
           }}
           ariaLabel="文中图片"
           onChange={(i) => setCurrent(i)}

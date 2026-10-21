@@ -98,6 +98,7 @@
 ## 图片与灯箱（US-10）
 
 - 正文图片由 `ArticleImage` / `ImageGallery` / `LiveBadge` 渲染（F-001 已实现），构建时输出带宽高比的结构，客户端水合后接管加载渐显与实况播放
+- Afilmory 外链照片（F-001 US-13，[ADR-010](../../engineering/features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)）：版式与本站图片相同；构建产物中 `img` 为缩略图，水合后进入视口换成主图，灯箱显示主图（复用已读取的）；实况只在浏览器能播放 HEVC 时可用。已实现（Sprint 8）
 - 点击单图、网格单元格、手风琴已展开项（`onItemClick` / `onActiveClick`）打开 `Lightbox`，传入正文全部图片（按出现顺序）与当前下标；手风琴未展开项点击只展开
 - 图片可聚焦（`button` 包裹，`aria-label="查看大图：{alt}"`），Enter 打开
 - 加载失败的图片点击不打开灯箱（显示重试）

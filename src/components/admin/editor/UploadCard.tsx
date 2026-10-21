@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Button } from "../../ui/Button";
 import { ICONS, type IconName } from "../../ui/icons";
 
-export type UploadCardState = "waiting" | "compressing" | "processing-live" | "uploading" | "error" | "interrupted";
+export type UploadCardState = "waiting" | "compressing" | "processing-live" | "fetching" | "uploading" | "error" | "interrupted"; // fetching：Afilmory 照片获取信息中（US-13）
 
 export interface UploadCardProps {
   state: UploadCardState;
@@ -25,6 +25,7 @@ const STAGES: Record<Exclude<UploadCardState, "error" | "interrupted">, { label:
   waiting: { label: "等待中…", icon: "loader-circle" },
   compressing: { label: "正在压缩…", icon: "loader-circle" },
   "processing-live": { label: "正在处理实况视频…", icon: "loader-circle" },
+  fetching: { label: "正在获取照片信息…", icon: "loader-circle" },
   uploading: { label: "正在上传…", icon: "cloud-upload" },
 };
 
