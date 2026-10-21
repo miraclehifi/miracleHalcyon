@@ -17,13 +17,13 @@ phases:
   implementation: done   # Sprint 1 完成（72 / 72）；Sprint 2 完成（18 / 18）；Sprint 3 完成（14 / 14，含插入任务 13 raise-image-size-limit、14 fix-jpeg-sniff-large-metadata；2026-10-15 统一回归通过）
   code_review: done   # 2026-10-15 与 F-002 一起审查：6 项 MUST-FIX 已修复，报告 test/features/F-001-文章写作/reviews/code-review.md
   validation: done   # 2026-10-16 Sprint 5 后重新验证：P0 全部有测试并通过；已覆盖 189 / 部分 49 / 无测试 10（P1、P2）/ 线上 8，剩余缺口按作者决定记为已知风险，见 test/features/F-001-文章写作/validation/validation-report.md
-current_phase: deployed   # 2026-10-19 增量 media-upload-experience 已发布（版本 31b8f50c，提交 387d310）：Sprint 6 实现 9 / 9；作者决定以轻量审查代替完整 code-review、跳过 verify；线上冒烟通过（首页 / posts / 404 / 后台与存储页跳登录 / 存储与上传接口 401）
+current_phase: deployed   # 2026-10-21 增量 afilmory-photo-embed 已发布（版本 cddbd7ac，提交 c098a7f）：Sprint 8 实现 6 / 6，全面审查 + verify（含真实链路 6/6）通过；线上冒烟：首页 / posts / 404 / 后台跳登录 / 照片信息与存储接口未登录 401
 blockers: []   # 2026-10-16 作者决定：只补 P0（Sprint 5）后发布，其余缺口记为已知风险
 increments:
   - backlog: specs/backlog/media-upload-experience.md
     started: 2026-10-16
     stories: [US-05, US-11, US-12]
-    done: [user_stories, behaviors, acceptance_tests, ui_design, domain_design, task_planning, implementation, code_review, validation]   # code_review 为轻量审查；verify 按作者决定跳过
+    done: [user_stories, behaviors, acceptance_tests, ui_design, domain_design, task_planning, implementation, code_review, validation, deployment]   # code_review 为轻量审查；verify 按作者决定跳过
     sprint: sprint-6
     completed_tasks: [add-image-compression, strip-reader-upload-placeholders, add-upload-progress-card, add-upload-failure-actions, handle-interrupted-placeholders, handle-compression-fallbacks, add-live-photo-toggle, add-still-only-action, add-image-menu-live-toggle]   # 9 / 9，2026-10-19 统一测试通过（validation/sprint-6-task-results.md）
     current_task: null   # domain_design self-checked：media-upload / editor / markdown / reader module-spec、ADR-006、media 契约说明；服务端接口与数据模型不变
@@ -33,7 +33,7 @@ increments:
     done: [user_stories, behaviors, acceptance_tests, ui_design, architecture, domain_design, task_planning, implementation, code_review]   # ui_design：无新组件、设计稿不变；architecture：ADR-010；domain_design self-checked；code_review：轻量审查（3 项修复）后作者要求全面审查，2026-10-21 完成（1 项 MUST-FIX 已修，报告 test/features/F-001-文章写作/reviews/code-review.md"增量审查"）
     sprint: sprint-8
     completed_tasks: [add-afilmory-photo-api, render-external-photos, add-external-photo-loading, add-afilmory-paste, add-external-live-playback, add-lightbox-external-main]   # 6 / 6，2026-10-21（validation/sprint-8-task-results.md）
-    current_task: null   # 2026-10-21 verify 通过（validation-report"Sprint 8 增量验证"，含真实链路 6/6；verify 中修复 1 项：行内外链照片用缩略图）；待作者确认发布
+    current_task: null   # 2026-10-21 已发布（版本 cddbd7ac）；verify 中修复 1 项：行内外链照片用缩略图
 notes: "范围决策：含文章管理列表与删除；仅支持 GFM Markdown（不支持 MDX）；不做版本历史、定时发布、图片库；2026-10-12 新增 US-10 format-toolbar（工具栏格式快捷键 + WarmTooltip 悬停提示，backlog/editor-warm-tooltip.md）"
 approvals:
   requirements: true

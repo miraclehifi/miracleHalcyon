@@ -1,6 +1,6 @@
 # Sprint 8：Afilmory 外链照片
 
-**状态**: completed（verify 通过，待发布）
+**状态**: completed（已发布 2026-10-21，版本 cddbd7ac）
 **创建**: 2026-10-19
 **Feature**: F-001 文章写作（[Backlog: afilmory-photo-embed](../../backlog/afilmory-photo-embed.md)）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）

@@ -13,6 +13,6 @@
 | [Sprint 5](sprint-5/_index.md) | completed | F-001 P0 验收测试补齐 | F-001：verify 发现的 4 个无测试 P0（登录提交中 / 失败状态、非法 slug 行内提示、未保存离开确认）补 E2E；验收文档期望值同步现行契约（[f001-p0-test-gaps](../backlog/f001-p0-test-gaps.md)） | 4 |
 | [Sprint 6](sprint-6/_index.md) | completed（待 code-review） | 图片上传体验升级 | F-001 增量：浏览器端压缩、上传进度卡片（失败重试 / 移除、已中断）、读者页不渲染上传占位、实况照片开关（默认关）与"仅转为静态图"、图片菜单实况项（[media-upload-experience](../backlog/media-upload-experience.md)） | 9 |
 | [Sprint 7](sprint-7/_index.md) | in_progress | 媒体存储清理 | F-006：后台 `/admin/storage` 未引用图片 / 实况视频检测与一键清理（检测接口、清理接口、存储页、清理流程；与 Sprint 6 并行，文件不重叠） | 4 |
-| [Sprint 8](sprint-8/_index.md) | completed（verify 通过，待发布） | Afilmory 外链照片 | F-001 增量 US-13：照片信息接口、外链照片渲染、缩略图 → 主图加载、粘贴分享代码、外链实况、灯箱主图（[afilmory-photo-embed](../backlog/afilmory-photo-embed.md)） | 6 |
+| [Sprint 8](sprint-8/_index.md) | completed（已发布） | Afilmory 外链照片 | F-001 增量 US-13：照片信息接口、外链照片渲染、缩略图 → 主图加载、粘贴分享代码、外链实况、灯箱主图（[afilmory-photo-embed](../backlog/afilmory-photo-embed.md)） | 6 |
 
 规划方式：迭代递进（2026-10-13 作者选择）——只详细拆当前 Sprint，下一个 Sprint 在上一个完成后基于最新设计拆分。

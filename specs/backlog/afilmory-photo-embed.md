@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | scheduled |
+| 状态 | done |
 | 类型 | Feature（F-001 增量） |
 | 优先级 | P2-Medium |
 | 来源 | 作者需求 |
@@ -51,6 +51,10 @@
 - [x] 动态照片带 `#live` 时：浏览器能播放 HEVC → 和本站实况一样播放；不支持或播放出错 → 退回静态图，不显示实况标识
 - [x] 只有 `site.ts` 里登记过的外链前缀才解析宽高、主色、视频；其他外链仍按普通外链图片显示
 - [x] 放到其他 Markdown 阅读器里，退化为普通图片（原图地址）
+
+## 完成与知识吸收（2026-10-21）
+
+已发布：版本 cddbd7ac（提交 c098a7f）。知识去向：写法与加载策略 → [ADR-010](../engineering/features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)；接口 → media api-contract / domain-model §10；渲染规则 → markdown module-spec §3；读者端加载 → reader module-spec §4.2；粘贴与任务 → editor / media-upload module-spec；行为与验收 → US-13 behaviors、US-13-tests；测试环境限制（Playwright WebKit 不能播 blob 视频、Chrome 的 HEVC 判断需带 profile）→ sprint-8-task-results、code-review"增量审查"。上线后待办：在 Safari（iPhone / Mac）看一次外链实况；"后续：Worker 缓存代理"仍为备注，未立条目。
 
 ## SDD 产出（2026-10-19）
 
