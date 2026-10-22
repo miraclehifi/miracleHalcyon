@@ -13,10 +13,10 @@
   --line: light-dark(#e6e6e6, #3a4148);
   --line-strong: light-dark(#d4d4d4, #555555);
   --input-border: light-dark(#8a8a8a, #737b84);
-  --focus: light-dark(#8b6238, #e8a15a);
-  --accent: light-dark(#8b6238, #e8a15a);
+  --focus: light-dark(#2563eb, #60a5fa);
+  --accent: light-dark(#2563eb, #60a5fa);
   --accent-ink: light-dark(#ffffff, #21262b);
-  --accent-soft: light-dark(#f5ede4, #3a3026);
+  --accent-soft: light-dark(#eff6ff, #1e2b3f);
   --ok: light-dark(#3d6a2c, #9cc27f);
   --ok-soft: light-dark(#e6eedf, #26332a);
   --warn: light-dark(#85570c, #e3b65e);
@@ -28,6 +28,10 @@
   --button-ink: light-dark(#fafafa, #f5f5f5);
   --button-base: light-dark(#3f3f46, #525252);
   --specular-line: light-dark(#ffffff, #ffffff);
+  --rating-star: light-dark(#facc15, #ffed76);
+  --rating-face: #121621;
+  --flip-surface: light-dark(#ffffff, #27272a);
+  --flip-ink: light-dark(#262626, #f5f5f5);
 
   /* 图片浮层（亮暗相同） */
   --overlay: rgb(0 0 0 / 55%);
@@ -68,6 +72,10 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-rating-star: var(--rating-star);
+  --color-rating-face: var(--rating-face);
+  --color-flip-surface: var(--flip-surface);
+  --color-flip-ink: var(--flip-ink);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-warn: var(--warn);

@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { Field } from "../../../src/components/ui/Field";
 
@@ -32,5 +32,24 @@ describe("Field", () => {
       slug: { tag: "INPUT", invalid: "true", described: "slug 已存在，请换一个" },
       account: { invalid: null, described: "登录用的账号" },
     });
+  });
+
+  // 输入框质感（design-tokens"输入框质感"）：鼠标进入时外圈泛起光晕、圆心跟随光标，离开收起；触屏不显示
+  it("悬停光晕：鼠标进入显示并跟随，离开收起；触屏不显示", () => {
+    render(
+      <Field label="标题">
+        <input />
+      </Field>,
+    );
+    const glow = screen.getByLabelText("标题").parentElement!;
+    expect(glow.hasAttribute("data-field-glow")).toBe(true);
+    fireEvent.pointerEnter(glow, { pointerType: "touch" });
+    expect(glow.hasAttribute("data-glow")).toBe(false);
+    fireEvent.pointerEnter(glow, { pointerType: "mouse" });
+    fireEvent.pointerMove(glow, { pointerType: "mouse", clientX: 30, clientY: 12 });
+    expect(glow.hasAttribute("data-glow")).toBe(true);
+    expect(glow.style.getPropertyValue("--field-glow-x")).toBe("30px");
+    fireEvent.pointerLeave(glow, { pointerType: "mouse" });
+    expect(glow.hasAttribute("data-glow")).toBe(false);
   });
 });

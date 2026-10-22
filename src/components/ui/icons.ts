@@ -1,8 +1,20 @@
 // 图标注册表：组件的 icon 属性用 lucide 图标名（与设计稿一致），只打包这里登记的图标
-import { ArrowLeft, Bold, Check, CircleAlert, CircleCheck, CircleDot, CircleDotDashed, CloudCheck, CloudOff, CloudUpload, Code, Columns2, Copy, Ellipsis, ExternalLink, Eye, Feather, FileText, HardDrive, Heading2, History, Image, ImageOff, ImagePlus, Italic, Link, List, ListTodo, Loader, LoaderCircle, LogOut, PenLine, RefreshCw, RotateCcw, Search, Settings2, SquarePen, TextQuote, Trash2, TriangleAlert, Undo2, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bold, BookImage, BookOpen, CircleX, Clapperboard, Dices, EyeOff, Film, Gamepad2, Library, Link2, Pencil, ScanText, Sparkles, Tv, Check, CircleAlert, CircleCheck, CircleDot, CircleDotDashed, CloudCheck, CloudOff, CloudUpload, Code, Columns2, Copy, Ellipsis, ExternalLink, Eye, Feather, FileText, HardDrive, Heading2, History, Image, ImageOff, ImagePlus, Italic, Link, List, ListTodo, Loader, LoaderCircle, LogOut, PenLine, RefreshCw, RotateCcw, Search, Settings2, SquarePen, TextQuote, Trash2, TriangleAlert, Undo2, X, type LucideIcon } from "lucide-react";
 
 export const ICONS = {
   "arrow-left": ArrowLeft,
+  "book-image": BookImage,
+  "book-open": BookOpen,
+  dices: Dices,
+  "eye-off": EyeOff,
+  film: Film,
+  "gamepad-2": Gamepad2,
+  library: Library,
+  "link-2": Link2,
+  pencil: Pencil,
+  "scan-text": ScanText,
+  sparkles: Sparkles,
+  tv: Tv,
   bold: Bold,
   check: Check,
   code: Code,
@@ -17,6 +29,8 @@ export const ICONS = {
   "text-quote": TextQuote,
   "circle-alert": CircleAlert,
   "circle-check": CircleCheck,
+  "circle-x": CircleX,
+  clapperboard: Clapperboard,
   "circle-dot": CircleDot,
   "circle-dot-dashed": CircleDotDashed,
   "cloud-check": CloudCheck,

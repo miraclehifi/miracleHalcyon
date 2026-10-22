@@ -1,0 +1,30 @@
+{
+  "id": "1291561",
+  "type": "movie",
+  "subtype": "movie",
+  "is_tv": false,
+  "title": "千与千寻",
+  "year": "2001",
+  "pubdate": [
+    "2019-06-21(中国大陆)"
+  ],
+  "directors": [
+    {
+      "name": "宫崎骏"
+    }
+  ],
+  "genres": [
+    "剧情",
+    "动画",
+    "奇幻"
+  ],
+  "pic": {
+    "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2557573348.jpg",
+    "normal": "https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2557573348.jpg"
+  },
+  "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2557573348.jpg",
+  "url": "https://movie.douban.com/subject/1291561/",
+  "sharing_url": "https://www.douban.com/doubanapp/dispatch/movie/1291561",
+  "card_subtitle": "2001 / 日本 / 剧情 动画 奇幻 / 宫崎骏 / 柊瑠美 入野自由",
+  "release_date": null
+}

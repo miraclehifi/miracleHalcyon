@@ -1,15 +1,16 @@
-// AdminHeader（components.md"业务区块"，admin-post-list.md"布局"、admin-storage.md）：后台顶栏，站点名 + 导航"文章 / 存储" +"查看博客""登出"
-// current 标当前项（accent + 600，aria-current）；手机端导航与两个操作都只留图标（44×44，带 aria-label），隐藏"后台"字样。
+// AdminHeader（components.md"业务区块"，admin-post-list.md"布局"、admin-storage.md、admin-media.md）：后台顶栏，站点名 + 导航"文章 / 书影音 / 存储" +"查看博客""登出"
+// current 标当前项（accent + 600，aria-current）；手机端导航与两个操作都只留图标（44×44、间距 0，带 aria-label），隐藏"后台"字样，站点名 18px 以容纳 5 个图标。
 // "登出"：POST 登出接口后跳登录页（列表页没有未保存内容，不需确认）
 import { logout } from "../../lib/admin/logout";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
 import { ICONS, type IconName } from "../ui/icons";
 
-export type AdminSection = "posts" | "storage";
+export type AdminSection = "posts" | "media" | "storage";
 
 const NAV: { section: AdminSection; label: string; href: string; icon: IconName }[] = [
   { section: "posts", label: "文章", href: "/admin", icon: "file-text" },
+  { section: "media", label: "书影音", href: "/admin/media", icon: "library" },
   { section: "storage", label: "存储", href: "/admin/storage", icon: "hard-drive" },
 ];
 
@@ -24,7 +25,7 @@ export function AdminHeader({ current }: AdminHeaderProps) {
     <header className="flex items-center justify-between border-b border-line px-10 py-3.5 max-md:py-1 max-md:pr-1 max-md:pl-4">
       <div className="flex items-center gap-8">
         <a href="/admin" className="flex items-baseline gap-2.5">
-          <span className="text-title-sm font-semibold text-ink">miracleHalcyon</span>
+          <span className="text-title-sm font-semibold text-ink max-md:text-[18px]">miracleHalcyon</span>
           <span className="text-meta text-ink-muted max-md:hidden">后台</span>
         </a>
         <nav aria-label="后台导航" className="flex items-center gap-5 max-md:hidden">

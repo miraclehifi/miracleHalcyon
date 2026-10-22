@@ -1,0 +1,30 @@
+{
+  "id": "37501131",
+  "type": "tv",
+  "subtype": "tv",
+  "is_tv": true,
+  "title": "现在不是出轨的问题",
+  "year": "2026",
+  "pubdate": [
+    "2026-07-31(韩国)"
+  ],
+  "directors": [
+    {
+      "name": "李昌熙"
+    }
+  ],
+  "genres": [
+    "剧情",
+    "喜剧",
+    "惊悚"
+  ],
+  "pic": {
+    "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2934748119.jpg",
+    "normal": "https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2934748119.jpg"
+  },
+  "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2934748119.jpg",
+  "url": "https://movie.douban.com/subject/37501131/",
+  "sharing_url": "https://www.douban.com/doubanapp/dispatch/movie/37501131",
+  "card_subtitle": "2026 / 韩国 / 剧情 喜剧 惊悚 犯罪 / 李昌熙 / 金惠秀 金志勋",
+  "release_date": null
+}

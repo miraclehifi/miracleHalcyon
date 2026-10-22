@@ -1,5 +1,6 @@
 // ConfirmDialog（components.md"反馈组件"，admin-post-editor"模态框"）
 // 打开时背景 inert、焦点限制在框内、初始焦点在"取消"（防误删）；Esc 和点遮罩都等于取消；关闭后焦点回到触发元素
+// （WebKit 点击按钮不会聚焦，打开时的 activeElement 可能是 body——调用方可用 returnFocus 指定触发元素）
 // onConfirm 返回 Promise 时为进行中：确认按钮加载并禁用，"取消"禁用，Esc / 遮罩不关闭（防重复提交）
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
@@ -18,6 +19,7 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   onConfirm(): void | Promise<unknown>;
   onCancel(): void;
+  returnFocus?: HTMLElement | null; // 关闭后聚焦的元素；不传时用打开时的 activeElement
 }
 
 const TONES: Record<ConfirmDialogTone, { iconClass: string; confirm: "danger" | "primary" }> = {
@@ -32,12 +34,16 @@ function makeBackgroundInert(host: HTMLElement): () => void {
   return () => changed.forEach((el) => el.removeAttribute("inert"));
 }
 
-export function ConfirmDialog({ open, tone, icon, title, description, confirmLabel, cancelLabel = "取消", onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, tone, icon, title, description, confirmLabel, cancelLabel = "取消", onConfirm, onCancel, returnFocus }: ConfirmDialogProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
   const [pending, setPending] = useState(false);
+  const returnFocusRef = useRef(returnFocus);
+  useEffect(() => {
+    returnFocusRef.current = returnFocus;
+  });
   const { iconClass, confirm } = TONES[tone];
   const Icon = ICONS[icon];
 
@@ -55,12 +61,12 @@ export function ConfirmDialog({ open, tone, icon, title, description, confirmLab
   // effect 在提交后运行，此时弹窗已挂到 body 上
   useEffect(() => {
     if (!open || !rootRef.current) return;
-    const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const restoreBackground = makeBackgroundInert(rootRef.current);
     dialogRef.current?.querySelector<HTMLElement>("[data-dialog-cancel]")?.focus();
     return () => {
       restoreBackground();
-      returnFocus?.focus();
+      (returnFocusRef.current ?? previous)?.focus();
     };
   }, [open]);
 
@@ -91,7 +97,7 @@ export function ConfirmDialog({ open, tone, icon, title, description, confirmLab
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         onKeyDown={onKeyDown}
-        className="relative flex w-full max-w-[380px] flex-col gap-4 rounded-card bg-surface p-6 shadow-[0_12px_32px_rgb(42_37_31/20%)]"
+        className="relative flex w-full max-w-[380px] flex-col gap-4 rounded-card bg-surface p-6 shadow-[0_12px_32px_rgb(0_0_0/20%)]"
       >
         <div className="flex items-center gap-2.5">
           <Icon size={20} aria-hidden="true" className={`shrink-0 ${iconClass}`} />

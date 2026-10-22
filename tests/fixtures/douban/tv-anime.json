@@ -1,0 +1,30 @@
+{
+  "id": "36093351",
+  "type": "tv",
+  "subtype": "tv",
+  "is_tv": true,
+  "title": "葬送的芙莉莲",
+  "year": "2023",
+  "pubdate": [
+    "2023-09-29(日本)"
+  ],
+  "directors": [
+    {
+      "name": "斋藤圭一郎"
+    }
+  ],
+  "genres": [
+    "动画",
+    "奇幻",
+    "冒险"
+  ],
+  "pic": {
+    "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2897218476.jpg",
+    "normal": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2897218476.jpg"
+  },
+  "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2897218476.jpg",
+  "url": "https://movie.douban.com/subject/36093351/",
+  "sharing_url": "https://www.douban.com/doubanapp/dispatch/movie/36093351",
+  "card_subtitle": "2023 / 日本 / 动画 奇幻 冒险 / 斋藤圭一郎 / 种崎敦美 冈本信彦",
+  "release_date": null
+}

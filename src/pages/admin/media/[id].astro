@@ -1,0 +1,35 @@
+---
+// 书影音编辑（admin-media.md §二，US-01）：服务端读取条目；id 非法或条目不存在 → 404
+import { env } from "cloudflare:workers";
+import { AdminHeader } from "../../../components/admin/AdminHeader";
+import { MediaEntryForm } from "../../../components/admin/media/MediaEntryForm";
+import { R2CoverStore } from "../../../domains/shelf/cover-store";
+import { D1ShelfRepo } from "../../../domains/shelf/repo";
+import { createShelfService } from "../../../domains/shelf/service";
+import { formFromEntry } from "../../../lib/admin/shelf-form";
+import { entryView, parseEntryId } from "../../../lib/api/shelf-http";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+export const prerender = false;
+
+const id = parseEntryId(Astro.params.id);
+const service = createShelfService({ repo: new D1ShelfRepo(env.DB), store: new R2CoverStore(env.MEDIA) });
+const entry = id === null ? null : await service.get(id).then(entryView, () => null);
+if (!entry) Astro.response.status = 404;
+---
+
+<BaseLayout title={entry ? `${entry.title} · 编辑 · 书影音` : "条目不存在 · miracleHalcyon 后台"}>
+  <AdminHeader client:load current="media" />
+  {
+    entry ? (
+      <MediaEntryForm client:load mode="edit" initial={formFromEntry(entry)} entry={entry} listHref="/admin/media" />
+    ) : (
+      <main class="flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-4 text-center">
+        <p class="text-title font-semibold text-ink">条目不存在或已被删除</p>
+        <a href="/admin/media" class="text-ui text-ink underline underline-offset-4 hover:text-ink-muted">
+          返回书影音
+        </a>
+      </main>
+    )
+  }
+</BaseLayout>

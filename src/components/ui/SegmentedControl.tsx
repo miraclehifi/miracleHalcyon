@@ -16,9 +16,10 @@ export interface SegmentedControlProps {
   onChange(value: string): void;
   "aria-label": string;
   children: ReactNode;
+  className?: string; // 追加样式，如撑满列宽：`flex w-full [&>button]:flex-1`
 }
 
-export function SegmentedControl({ value, onChange, children, ...rest }: SegmentedControlProps) {
+export function SegmentedControl({ value, onChange, children, className = "", ...rest }: SegmentedControlProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -39,7 +40,7 @@ export function SegmentedControl({ value, onChange, children, ...rest }: Segment
         role="radiogroup"
         aria-label={rest["aria-label"]}
         onKeyDown={onKeyDown}
-        className="inline-flex items-center gap-0.5 rounded-control bg-surface-sunken p-[3px]"
+        className={`inline-flex items-center gap-0.5 rounded-control bg-surface-sunken p-[3px] ${className}`}
       >
         {children}
       </div>
@@ -69,7 +70,7 @@ function SegmentedItem({ value, icon, count, children }: SegmentedItemProps) {
       data-value={value}
       onClick={() => group.select(value)}
       className={`inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[5px] px-3.5 py-1.5 text-meta leading-[17px] transition-colors duration-200 ease-in-out ${
-        selected ? "bg-surface font-medium text-ink shadow-[0_1px_2px_rgb(42_37_31/8%)]" : "text-ink-muted hover:text-ink"
+        selected ? "bg-surface font-medium text-ink shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-ink-muted hover:text-ink"
       }`}
     >
       {Icon && <Icon size={14} aria-hidden="true" />}

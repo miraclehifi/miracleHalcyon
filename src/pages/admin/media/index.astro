@@ -1,0 +1,28 @@
+---
+// 书影音条目列表（admin-media.md §一，F-005 US-01）：会话已由 middleware 校验；首屏数据在服务端读取（含隐藏条目）
+import { env } from "cloudflare:workers";
+import { AdminHeader } from "../../../components/admin/AdminHeader";
+import { MediaEntryList } from "../../../components/admin/media/MediaEntryList";
+import { MediaTypeTabs } from "../../../components/reader/MediaTypeTabs";
+import { R2CoverStore } from "../../../domains/shelf/cover-store";
+import { isShelfType, SHELF_TYPES, TYPE_LABELS, type ShelfType } from "../../../domains/shelf/entry";
+import { D1ShelfRepo } from "../../../domains/shelf/repo";
+import { createShelfService } from "../../../domains/shelf/service";
+import { entryView } from "../../../lib/api/shelf-http";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+export const prerender = false;
+
+const param = Astro.url.searchParams.get("type");
+const type: ShelfType = isShelfType(param) ? param : "book"; // 非法参数回默认分类
+const service = createShelfService({ repo: new D1ShelfRepo(env.DB), store: new R2CoverStore(env.MEDIA) });
+const [entries, counts] = await Promise.all([service.list(type), service.counts(type)]);
+const tabs = SHELF_TYPES.map((t) => ({ label: TYPE_LABELS[t], href: `/admin/media?type=${t}` }));
+---
+
+<BaseLayout title="书影音 · miracleHalcyon 后台">
+  <AdminHeader client:load current="media" />
+  <MediaEntryList client:load type={type} entries={entries.map(entryView)} counts={counts}>
+    <MediaTypeTabs slot="tabs" client:load items={tabs} activeIndex={SHELF_TYPES.indexOf(type)} />
+  </MediaEntryList>
+</BaseLayout>

@@ -1,0 +1,30 @@
+{
+  "id": "26302614",
+  "type": "tv",
+  "subtype": "tv",
+  "is_tv": true,
+  "title": "请回答1988",
+  "year": "2015",
+  "pubdate": [
+    "2015-11-06(韩国)"
+  ],
+  "directors": [
+    {
+      "name": "申元浩"
+    }
+  ],
+  "genres": [
+    "剧情",
+    "喜剧",
+    "爱情"
+  ],
+  "pic": {
+    "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2272563445.jpg",
+    "normal": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2272563445.jpg"
+  },
+  "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2272563445.jpg",
+  "url": "https://movie.douban.com/subject/26302614/",
+  "sharing_url": "https://www.douban.com/doubanapp/dispatch/movie/26302614",
+  "card_subtitle": "2015 / 韩国 / 剧情 喜剧 爱情 / 申元浩 / 成东日 李一花",
+  "release_date": null
+}

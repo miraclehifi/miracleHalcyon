@@ -1,22 +1,26 @@
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 
-// create-d1-init-migration：auth / post / media 三个 data-model 的全部 DDL
+// create-d1-init-migration：auth / post / media 三个 data-model 的全部 DDL；0004 起含 shelf（F-005）
 const EXPECTED_SCHEMA = [
   "index:idx_images_created_at",
   "index:idx_posts_pub_list",
   "index:idx_posts_updated",
   "index:idx_sessions_expires_at",
+  "index:idx_shelf_entries_type",
+  "index:uk_shelf_entries_douban_id",
   "index:uq_posts_pub_slug",
   "index:uq_posts_slug",
   "table:images",
   "table:login_attempts",
   "table:posts",
   "table:sessions",
+  "table:shelf_entries",
   "trigger:trg_images_db_update_time",
   "trigger:trg_login_attempts_db_update_time",
   "trigger:trg_posts_db_update_time",
   "trigger:trg_sessions_db_update_time",
+  "trigger:trg_shelf_entries_db_update_time",
 ];
 const STALE_TIME = "2000-01-01 00:00:00.000";
 const NOW = "2026-10-13T00:00:00.000Z";

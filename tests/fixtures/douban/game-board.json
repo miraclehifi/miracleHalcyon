@@ -1,0 +1,23 @@
+{
+  "id": "10757298",
+  "type": "game",
+  "subtype": "game",
+  "title": "卡坦岛 Catan",
+  "developers": [
+    "Capcom",
+    "Big Huge Games"
+  ],
+  "genres": [
+    "问答/桌游",
+    "策略"
+  ],
+  "pic": {
+    "large": "https://qnmob3-sign.doubanio.com/lpic/s34672657.jpg?sa_cv=26cc6ad585bbf377ab32d4cee87aff26&sa_ct=6ad875bb&imageView2/2/q/80/w/600/h/3000/format/jpg",
+    "normal": "https://qnmob3-sign.doubanio.com/lpic/s34672657.jpg?sa_cv=26cc6ad585bbf377ab32d4cee87aff26&sa_ct=6ad875bb&imageView2/2/q/80/w/200/h/300/format/jpg"
+  },
+  "cover_url": "https://img3.doubanio.com/lpic/s34672657.jpg",
+  "url": "https://www.douban.com/game/10757298/",
+  "sharing_url": "https://www.douban.com/doubanapp/dispatch/game/10757298",
+  "card_subtitle": "Settlers of Catan/问答/桌游/策略/PC/Nintendo Switch/Capcom/Big Huge Games/2005-10-10",
+  "release_date": "2005-10-10"
+}

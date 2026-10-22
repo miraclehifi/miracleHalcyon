@@ -1,0 +1,29 @@
+{
+  "id": "1292052",
+  "type": "movie",
+  "subtype": "movie",
+  "is_tv": false,
+  "title": "肖申克的救赎",
+  "year": "1994",
+  "pubdate": [
+    "2026-08-28(中国大陆)"
+  ],
+  "directors": [
+    {
+      "name": "弗兰克·德拉邦特"
+    }
+  ],
+  "genres": [
+    "剧情",
+    "犯罪"
+  ],
+  "pic": {
+    "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2934829882.jpg",
+    "normal": "https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2934829882.jpg"
+  },
+  "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2934829882.jpg",
+  "url": "https://movie.douban.com/subject/1292052/",
+  "sharing_url": "https://www.douban.com/doubanapp/dispatch/movie/1292052",
+  "card_subtitle": "1994 / 美国 / 剧情 犯罪 / 弗兰克·德拉邦特 / 蒂姆·罗宾斯 摩根·弗里曼",
+  "release_date": null
+}

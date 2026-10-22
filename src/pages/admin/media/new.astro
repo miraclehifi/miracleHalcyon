@@ -1,0 +1,17 @@
+---
+// 书影音录入（admin-media.md §二，US-01）：入口分类取 ?type=（非法回"书"）。表单用 client:only：标记日期默认浏览器本地的今天
+import { MediaEntryForm } from "../../../components/admin/media/MediaEntryForm";
+import { AdminHeader } from "../../../components/admin/AdminHeader";
+import { isShelfType, type ShelfType } from "../../../domains/shelf/entry";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+export const prerender = false;
+
+const param = Astro.url.searchParams.get("type");
+const type: ShelfType = isShelfType(param) ? param : "book";
+---
+
+<BaseLayout title="新增条目 · 书影音 · miracleHalcyon 后台">
+  <AdminHeader client:load current="media" />
+  <MediaEntryForm client:only="react" mode="new" defaultType={type} listHref="/admin/media" />
+</BaseLayout>

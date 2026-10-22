@@ -1,0 +1,22 @@
+{
+  "id": "10734307",
+  "type": "game",
+  "subtype": "game",
+  "title": "传送门2 Portal 2",
+  "developers": [
+    "Valve Corporation"
+  ],
+  "genres": [
+    "第一人称射击",
+    "益智"
+  ],
+  "pic": {
+    "large": "https://qnmob3-sign.doubanio.com/lpic/s29830262.jpg?sa_cv=ea86dfc82a941850168c6aa221bc464f&sa_ct=6ad875bb&imageView2/2/q/80/w/600/h/3000/format/jpg",
+    "normal": "https://qnmob3-sign.doubanio.com/lpic/s29830262.jpg?sa_cv=ea86dfc82a941850168c6aa221bc464f&sa_ct=6ad875bb&imageView2/2/q/80/w/200/h/300/format/jpg"
+  },
+  "cover_url": "https://img3.doubanio.com/lpic/s29830262.jpg",
+  "url": "https://www.douban.com/game/10734307/",
+  "sharing_url": "https://www.douban.com/doubanapp/dispatch/game/10734307",
+  "card_subtitle": "第一人称射击/益智/PC/Mac/Linux/Nintendo Switch/Nintendo Switch 2/Steam Deck/PlayStation 3/Xbox 360/Valve Corporation/2011-04-19",
+  "release_date": "2011-04-19"
+}

@@ -222,3 +222,137 @@ html[data-theme-vt="active"]::view-transition-group(root) {
     opacity: 0.65;
   }
 }
+
+/* 评分星（components.md"评分动效参数"）：参考 Stars rating animation（aaroniker）的 SCSS 改写；
+   [data-current] 当前星、[data-pulse] 选中后播一次、[data-move] 滑动起止星、ul[data-slide] 滑动方向 */
+.star-rating .star-body {
+  transition: color 0.2s ease var(--star-delay, 0s);
+}
+.star-rating .star-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.star-rating-item:not([data-current]) svg {
+  transition: transform 0.2s ease;
+}
+.star-rating-item:not([data-current]):active svg {
+  transform: scale(0.9);
+}
+.star-rating-item[data-current]:not([data-n="5"]) .star-eyes {
+  animation: star-blink 3s linear infinite;
+}
+.star-rating-item[data-pulse][data-n="4"] .star-rating-face {
+  animation: star-pop-4 0.4s ease;
+}
+.star-rating-item[data-pulse][data-n="5"] .star-rating-face {
+  animation: star-pop-5 0.72s ease;
+}
+.star-rating-sparks {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 2px;
+  margin: -1px 0 0 -1px;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.6);
+  --spark: color-mix(in srgb, var(--rating-star) 36%, transparent);
+  box-shadow: 16px -16px 0 var(--spark), -16px -16px 0 var(--spark), -21px 8px 0 var(--spark), 21px 8px 0 var(--spark), 0 22px 0 var(--spark);
+}
+.star-rating-item[data-pulse] .star-rating-sparks {
+  animation: star-sparks 0.32s ease;
+}
+.star-rating[data-slide="right"] [data-move="to"] .star-eyes { animation: star-glance-right 0.31s ease 0.36s; }
+.star-rating[data-slide="right"] [data-move="from"] .star-eyes { animation: star-glance-left 0.28s ease; }
+.star-rating[data-slide="left"] [data-move="to"] .star-eyes { animation: star-glance-left 0.31s ease 0.36s; }
+.star-rating[data-slide="left"] [data-move="from"] .star-eyes { animation: star-glance-right 0.28s ease; }
+.star-rating-stretch {
+  --spark: color-mix(in srgb, var(--rating-star) 36%, transparent);
+}
+.star-rating[data-slide="right"] .star-rating-stretch { animation: star-stretch 0.28s linear 0.24s, star-trail-right 0.32s linear 0.24s; }
+.star-rating[data-slide="left"] .star-rating-stretch { animation: star-stretch 0.28s linear 0.24s, star-trail-left 0.32s linear 0.24s; }
+.star-rating[data-slide="right"] .star-rating-slider svg { animation: star-lean-right 0.3s ease, star-settle-right 0.4s ease 0.4s; }
+.star-rating[data-slide="left"] .star-rating-slider svg { animation: star-lean-left 0.3s ease, star-settle-left 0.4s ease 0.4s; }
+.star-rating[data-reduced] *,
+.star-rating[data-reduced] .star-body {
+  animation: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .star-rating *,
+  .star-rating .star-body {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@keyframes star-blink {
+  0%, 5%, 15%, 100% { transform: scaleY(1); }
+  10% { transform: scaleY(0.4); }
+}
+@keyframes star-pop-4 {
+  40% { transform: scale(1.25); }
+}
+@keyframes star-pop-5 {
+  15% { transform: rotate(180deg) scale(1.1); }
+  30% { transform: rotate(360deg) scale(1.2); }
+  70% { transform: rotate(360deg) translateY(14%) scaleY(0.72); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes star-sparks {
+  60% { opacity: 1; }
+  100% { transform: scale(1.16); opacity: 0; }
+}
+@keyframes star-stretch {
+  60% { transform: scaleX(1.32); filter: blur(0.5px); }
+}
+@keyframes star-trail-right {
+  60% { filter: drop-shadow(-5px 0 1px var(--spark)) drop-shadow(4px 0 1px var(--spark)); }
+}
+@keyframes star-trail-left {
+  60% { filter: drop-shadow(5px 0 1px var(--spark)) drop-shadow(-4px 0 1px var(--spark)); }
+}
+@keyframes star-lean-right {
+  0%, 100% { transform-origin: 17% 100%; }
+  50% { transform: rotate(-12deg) skewX(12deg); }
+}
+@keyframes star-lean-left {
+  0%, 100% { transform-origin: 83% 100%; }
+  50% { transform: rotate(12deg) skewX(-12deg); }
+}
+@keyframes star-settle-right {
+  0%, 100% { transform-origin: 17% 100%; }
+  40% { transform: rotate(-6deg) skewX(4deg) scaleX(0.92); }
+  70% { transform: rotate(1deg) skewX(-8deg) scaleX(1.04); }
+}
+@keyframes star-settle-left {
+  0%, 100% { transform-origin: 83% 100%; }
+  40% { transform: rotate(6deg) skewX(-4deg) scaleX(0.92); }
+  70% { transform: rotate(-1deg) skewX(8deg) scaleX(1.04); }
+}
+@keyframes star-glance-right {
+  40% { transform: translateX(3px); }
+}
+@keyframes star-glance-left {
+  40% { transform: translateX(-3px); }
+}
+
+/* 输入框悬停光晕（design-tokens"输入框质感"）：Field / RecognizeBox 外圈 2px，accent 径向渐变跟随光标；
+   半径注册为 <length> 才能过渡出现 / 收拢；触屏与减弱动效不显示 */
+@property --field-glow-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+.field-glow {
+  background: radial-gradient(var(--field-glow-r) circle at var(--field-glow-x, 50%) var(--field-glow-y, 50%), var(--accent), transparent 80%);
+  transition: --field-glow-r 0.3s ease;
+}
+.field-glow[data-glow] {
+  --field-glow-r: 100px;
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .field-glow {
+    background: none;
+  }
+}
