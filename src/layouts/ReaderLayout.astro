@@ -11,16 +11,17 @@ interface Props {
   description?: string;
   current?: NavCurrent;
   back?: string; // `> cd ..` 的目标；首页不传
-  width?: "narrow" | "list" | "wide"; // 主体版心：首页 640、列表 896、详情三栏 1338
+  clipX?: boolean; // 主体横向裁切（overflow-x: clip，不形成滚动容器）：书影音分类导航 GooeyNav 画布外扩 72px，手机上会撑出横向滚动
+  width?: "narrow" | "list" | "wide" | "full"; // 主体版心：首页 640、列表 896、详情三栏 1338；full 满宽，左右 50（手机 20），与 SiteHeader 对齐
 }
-const { title, description, current, back, width = "list" } = Astro.props;
-const widths = { narrow: "max-w-[640px]", list: "max-w-[896px]", wide: "max-w-[1338px]" };
+const { title, description, current, back, width = "list", clipX = false } = Astro.props;
+const widths = { narrow: "max-w-[640px]", list: "max-w-[896px]", wide: "max-w-[1338px]", full: "md:px-[50px]" };
 ---
 
 <BaseLayout title={title} description={description}>
   <SiteHeader current={current} />
   <slot name="before-main" />
-  <main class:list={["mx-auto w-full px-5 pt-14 pb-20 max-md:pt-8", widths[width]]}>
+  <main class:list={["mx-auto w-full px-5 pt-14 pb-20 max-md:pt-8", widths[width], clipX && "overflow-x-clip"]}>
     <slot />
     {
       back && (

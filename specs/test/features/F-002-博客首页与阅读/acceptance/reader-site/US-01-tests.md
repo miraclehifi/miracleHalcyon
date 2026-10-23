@@ -130,7 +130,7 @@
 
 | 字段 | 值 |
 |------|------|
-| 路径 | `/media`、`/rss.xml`、`/nope`、`/posts/nope/extra` |
+| 路径 | `/media/music`（2026-10-22 F-005 上线 `/media`，改用未生成的分类）、`/rss.xml`、`/nope`、`/posts/nope/extra` |
 
 **步骤：**
 1. 逐个 `page.goto` 并记录响应状态

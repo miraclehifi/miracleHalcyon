@@ -80,11 +80,23 @@ describe("MediaTypeTabs", () => {
     expect([navigate.mock.calls.length, link("书").getAttribute("aria-current")]).toEqual([0, "page"]);
   });
 
+  // code-review：当前项的普通点击也要阻止浏览器默认跳转（否则整页刷新）
   it("点击当前项不跳转", () => {
     render(<MediaTypeTabs items={ITEMS} activeIndex={0} />);
-    fireEvent.click(link("书"));
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+    act(() => void link("书").dispatchEvent(event));
     act(() => vi.advanceTimersByTime(1000));
-    expect(navigate).not.toHaveBeenCalled();
+    expect([event.defaultPrevented, navigate.mock.calls.length]).toEqual([true, 0]);
+  });
+
+  // code-review：动画期间再点另一项，只跳到最后点的那一项
+  it("连续点击两项只跳最后一项", () => {
+    render(<MediaTypeTabs items={ITEMS} activeIndex={0} />);
+    fireEvent.click(link("电影"));
+    act(() => vi.advanceTimersByTime(300));
+    fireEvent.click(link("游戏"));
+    act(() => vi.advanceTimersByTime(1000));
+    expect(navigate.mock.calls).toEqual([["/media/game"]]);
   });
 
   it("减弱动效时立即跳转", () => {

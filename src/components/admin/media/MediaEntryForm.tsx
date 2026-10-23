@@ -143,7 +143,11 @@ function FormContent({ mode, initial: given, defaultType = "book", entry, listHr
             else if (field === "year") next.year = FORM_MESSAGES.year;
             else if (field === "creator" || field === "markedOn" || field === "comment") next[field] = FORM_MESSAGES.invalid;
           }
-          return showErrors(next);
+          // 出错字段在表单上没有对应控件（如 doubanUrl、rating）时，用服务端说明提示，不能毫无反馈
+          if (Object.keys(next).length > 0) return showErrors(next);
+          const message = (error.body as { error?: { message?: string } } | null)?.error?.message;
+          toast.show({ tone: "error", message: message ? `保存失败：${message}` : "保存失败，请检查填写内容" });
+          return;
         }
       }
       if (error instanceof ShelfApiError && error.status === 409) {

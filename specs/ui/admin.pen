@@ -3538,6 +3538,16 @@
                                         },
                                         {
                                           "type": "text",
+                                          "id": "y8h20A",
+                                          "name": "Nav 书影音",
+                                          "fill": "$ink-muted",
+                                          "content": "书影音",
+                                          "fontFamily": "$font-body",
+                                          "fontSize": 14,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "text",
                                           "id": "N9t8FU",
                                           "name": "Nav 存储",
                                           "fill": "$ink-muted",
@@ -3641,7 +3651,7 @@
                                       "fill": "$ink",
                                       "content": "miracleHalcyon",
                                       "fontFamily": "$font-body",
-                                      "fontSize": 20,
+                                      "fontSize": 18,
                                       "fontWeight": "600",
                                       "letterSpacing": 0.8
                                     },
@@ -3664,7 +3674,6 @@
                                   "type": "frame",
                                   "id": "JXIw7",
                                   "name": "Top Actions",
-                                  "gap": 4,
                                   "alignItems": "center",
                                   "children": [
                                     {
@@ -3677,6 +3686,21 @@
                                       "descendants": {
                                         "wxuvG": {
                                           "icon": "file-text",
+                                          "width": 20,
+                                          "height": 20
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "id": "S32QR",
+                                      "type": "ref",
+                                      "ref": "BIEtO",
+                                      "name": "书影音",
+                                      "width": 44,
+                                      "height": 44,
+                                      "descendants": {
+                                        "wxuvG": {
+                                          "icon": "library",
                                           "width": 20,
                                           "height": 20
                                         }
@@ -5500,6 +5524,733 @@
                               "fontFamily": "$font-body",
                               "fontSize": 24,
                               "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tyjFA",
+              "name": "Row 7",
+              "gap": 72,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "A8GD8p",
+                  "name": "MediaEntryRow",
+                  "layout": "vertical",
+                  "gap": 14,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vdngJ",
+                      "name": "Label",
+                      "fill": "$ink-muted",
+                      "content": "MediaEntryRow · /Mobile（后台书影音条目列表行，F-005）",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ca2Fd",
+                      "name": "Variants",
+                      "layout": "vertical",
+                      "gap": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "YMV9W",
+                          "name": "MediaEntryRow",
+                          "reusable": true,
+                          "width": 896,
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "bottom": 1
+                          },
+                          "gap": 16,
+                          "padding": [
+                            10,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "CcuJn",
+                              "name": "Cover",
+                              "clip": true,
+                              "width": 32,
+                              "height": 48,
+                              "fill": "$surface-sunken",
+                              "cornerRadius": 3,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "xSZYM",
+                                  "name": "Fallback",
+                                  "width": 14,
+                                  "height": 14,
+                                  "icon": "image-off",
+                                  "library": "lucide",
+                                  "fill": "$ink-faint"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "J6Jpd",
+                              "name": "Title Line",
+                              "width": "fill_container",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "J4cgul",
+                                  "name": "Title",
+                                  "fill": "$ink",
+                                  "content": "原则",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 15,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "A3OMDT",
+                                  "x": 0,
+                                  "y": 0,
+                                  "name": "Progress Badge",
+                                  "enabled": false,
+                                  "fill": "$accent-soft",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    2,
+                                    6
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "UH7cd",
+                                      "name": "Badge Text",
+                                      "fill": "$accent",
+                                      "content": "在读",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "ROpcE",
+                                  "x": 0,
+                                  "y": 0,
+                                  "name": "Hidden Badge",
+                                  "enabled": false,
+                                  "fill": "$surface-sunken",
+                                  "cornerRadius": 4,
+                                  "gap": 4,
+                                  "padding": [
+                                    2,
+                                    6
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "A7u8M",
+                                      "name": "Icon",
+                                      "width": 12,
+                                      "height": 12,
+                                      "icon": "eye-off",
+                                      "library": "lucide",
+                                      "fill": "$ink-muted"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "Lxn4v",
+                                      "name": "Hidden Text",
+                                      "fill": "$ink-muted",
+                                      "content": "已隐藏",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "KnTGS",
+                              "name": "Creator",
+                              "fill": "$ink-muted",
+                              "textGrowth": "fixed-width",
+                              "width": 160,
+                              "content": "瑞·达利欧",
+                              "fontFamily": "$font-body",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "nifwT",
+                              "name": "Rating",
+                              "width": 80,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "rEpqo",
+                                  "name": "Stars",
+                                  "fill": "$accent",
+                                  "content": "★★★★",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "SbopE",
+                                  "name": "Empty",
+                                  "fill": "$line-strong",
+                                  "content": "☆",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "b8ZRtH",
+                              "name": "Status",
+                              "fill": "$ink-muted",
+                              "textGrowth": "fixed-width",
+                              "width": 36,
+                              "content": "读过",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Tm1Lb",
+                              "name": "Date",
+                              "fill": "$ink-faint",
+                              "textGrowth": "fixed-width",
+                              "width": 80,
+                              "content": "2026-10-01",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "b7TGxk",
+                              "name": "Actions",
+                              "gap": 2,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "id": "EpCEH",
+                                  "type": "ref",
+                                  "ref": "BIEtO",
+                                  "name": "编辑",
+                                  "descendants": {
+                                    "wxuvG": {
+                                      "icon": "pencil"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "vkf7y",
+                                  "type": "ref",
+                                  "ref": "BIEtO",
+                                  "name": "隐藏",
+                                  "descendants": {
+                                    "wxuvG": {
+                                      "icon": "eye-off"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "Hvu6U",
+                                  "type": "ref",
+                                  "ref": "BIEtO",
+                                  "name": "删除",
+                                  "descendants": {
+                                    "wxuvG": {
+                                      "icon": "trash-2"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "F6RC8s",
+                          "name": "MediaEntryRow/Mobile",
+                          "reusable": true,
+                          "width": 358,
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "bottom": 1
+                          },
+                          "gap": 12,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "BuVrP",
+                              "name": "Cover",
+                              "clip": true,
+                              "width": 40,
+                              "height": 60,
+                              "fill": "$surface-sunken",
+                              "cornerRadius": 3,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "Odh9A",
+                                  "name": "Fallback",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "image-off",
+                                  "library": "lucide",
+                                  "fill": "$ink-faint"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "mQu7x",
+                              "name": "Text",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 4,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "rc4P0",
+                                  "name": "Title Line",
+                                  "width": "fill_container",
+                                  "gap": 6,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "EUOal",
+                                      "name": "Title",
+                                      "fill": "$ink",
+                                      "content": "原则",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 15,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "hyQuR",
+                                      "x": 0,
+                                      "y": 0,
+                                      "name": "Progress Badge",
+                                      "enabled": false,
+                                      "fill": "$accent-soft",
+                                      "cornerRadius": 4,
+                                      "padding": [
+                                        1,
+                                        5
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "gn8ja",
+                                          "name": "Badge Text",
+                                          "fill": "$accent",
+                                          "content": "在读",
+                                          "fontFamily": "$font-body",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "BQrDx",
+                                      "x": 0,
+                                      "y": 0,
+                                      "name": "Hidden Badge",
+                                      "enabled": false,
+                                      "fill": "$surface-sunken",
+                                      "cornerRadius": 4,
+                                      "padding": [
+                                        1,
+                                        5
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "R3dJSF",
+                                          "name": "Hidden Text",
+                                          "fill": "$ink-muted",
+                                          "content": "已隐藏",
+                                          "fontFamily": "$font-body",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "T83RE",
+                                  "name": "Meta",
+                                  "fill": "$ink-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "瑞·达利欧 · ★★★★ · 读过 2026-10-01",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "id": "nmI7v",
+                              "type": "ref",
+                              "ref": "BIEtO",
+                              "name": "更多",
+                              "width": 44,
+                              "height": 44,
+                              "descendants": {
+                                "wxuvG": {
+                                  "icon": "ellipsis",
+                                  "width": 20,
+                                  "height": 20
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kGk6C",
+                  "name": "RecognizeBox",
+                  "layout": "vertical",
+                  "gap": 14,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "o5BWg",
+                      "name": "Label",
+                      "fill": "$ink-muted",
+                      "content": "RecognizeBox · RatingInput（录入表单，F-005）",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ylz1D",
+                      "name": "Variants",
+                      "layout": "vertical",
+                      "gap": 32,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Cle8m",
+                          "name": "RecognizeBox",
+                          "reusable": true,
+                          "width": 600,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "njz9G",
+                              "name": "Box",
+                              "width": "fill_container",
+                              "fill": "$surface",
+                              "cornerRadius": "$radius",
+                              "stroke": "$line-strong",
+                              "strokeWidth": 1,
+                              "layout": "vertical",
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "sZZaW",
+                                  "name": "Input",
+                                  "fill": "$ink-faint",
+                                  "textGrowth": "fixed-width-height",
+                                  "width": "fill_container",
+                                  "height": 44,
+                                  "content": "粘贴豆瓣分享链接或分享文字，自动识别条目信息",
+                                  "lineHeight": 1.6,
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "B5CUB",
+                                  "name": "Bar",
+                                  "width": "fill_container",
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "H1vSY",
+                                      "name": "Source",
+                                      "gap": 6,
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "icon",
+                                          "id": "YZHWa",
+                                          "name": "Icon",
+                                          "width": 14,
+                                          "height": 14,
+                                          "icon": "link-2",
+                                          "library": "lucide",
+                                          "fill": "$ink-faint"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "RUTd4",
+                                          "name": "Source Text",
+                                          "fill": "$ink-faint",
+                                          "content": "支持 book / movie / m.douban.com 链接与 App 分享文字",
+                                          "fontFamily": "$font-body",
+                                          "fontSize": 12,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "wMtz9",
+                                      "name": "Buttons",
+                                      "gap": 4,
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "id": "U84J3b",
+                                          "type": "ref",
+                                          "ref": "BIEtO",
+                                          "name": "清空",
+                                          "enabled": false,
+                                          "descendants": {
+                                            "wxuvG": {
+                                              "icon": "x"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "id": "o6Hfi",
+                                          "type": "ref",
+                                          "ref": "ex3Og",
+                                          "name": "识别",
+                                          "descendants": {
+                                            "V2UuKm": {
+                                              "icon": "scan-text"
+                                            },
+                                            "EtOGZ": {
+                                              "content": "识别"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "serEL",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Result",
+                              "enabled": false,
+                              "width": "fill_container(0)",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "padding": [
+                                0,
+                                2
+                              ],
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "WefMD",
+                                  "name": "Recognized",
+                                  "gap": 6,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "I7wXa",
+                                      "name": "Icon",
+                                      "width": 14,
+                                      "height": 14,
+                                      "icon": "circle-check",
+                                      "library": "lucide",
+                                      "fill": "$ok"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "v5obG",
+                                      "name": "Text",
+                                      "fill": "$ink-muted",
+                                      "content": "已识别：分类、标题、封面、作者、年份",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "L8E49u",
+                                  "x": 0,
+                                  "y": 0,
+                                  "name": "Missing",
+                                  "enabled": false,
+                                  "gap": 6,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "b32OZ6",
+                                      "name": "Icon",
+                                      "width": 14,
+                                      "height": 14,
+                                      "icon": "circle-alert",
+                                      "library": "lucide",
+                                      "fill": "$warn"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "ucghH",
+                                      "name": "Text",
+                                      "fill": "$warn",
+                                      "content": "未识别：年份，请手动填写",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "uBKOS",
+                          "name": "RatingInput",
+                          "reusable": true,
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "vwF7V",
+                              "name": "Star 1",
+                              "fill": "$accent",
+                              "content": "★",
+                              "fontFamily": "$font-body",
+                              "fontSize": 22,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "hJNJt",
+                              "name": "Star 2",
+                              "fill": "$accent",
+                              "content": "★",
+                              "fontFamily": "$font-body",
+                              "fontSize": 22,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "BGxlq",
+                              "name": "Star 3",
+                              "fill": "$accent",
+                              "content": "★",
+                              "fontFamily": "$font-body",
+                              "fontSize": 22,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "LS0Rn",
+                              "name": "Star 4",
+                              "fill": "$accent",
+                              "content": "★",
+                              "fontFamily": "$font-body",
+                              "fontSize": 22,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "NNFPI",
+                              "name": "Star 5",
+                              "fill": "$line-strong",
+                              "content": "☆",
+                              "fontFamily": "$font-body",
+                              "fontSize": 22,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "CB0s2",
+                              "name": "Value",
+                              "fill": "$ink-faint",
+                              "content": "4 / 5",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "T6Q0Sl",
+                              "name": "清除",
+                              "fill": "$ink-muted",
+                              "content": "清除",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -19011,7 +19762,7 @@
       "id": "rsENY",
       "x": 7998,
       "y": 16314,
-      "name": "09 书影音 /media（分类 ?type= 切换）",
+      "name": "09 书影音 /media（书；其他分类 /media/:type）",
       "clip": true,
       "width": 1440,
       "fill": "$bg",
@@ -19565,7 +20316,7 @@
                   "id": "TmHrz",
                   "name": "Source Note",
                   "fill": "$ink-faint",
-                  "content": "只收录读过、看过、玩过和正在进行的条目，数据同步自豆瓣。",
+                  "content": "只收录读过、看过、玩过和正在进行的条目，条目信息来自豆瓣。",
                   "fontFamily": "$font-body",
                   "fontSize": 13,
                   "fontWeight": "normal"
@@ -20178,7 +20929,7 @@
               "fill": "$ink-faint",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "只收录读过、看过、玩过和正在进行的条目，数据同步自豆瓣。",
+              "content": "只收录读过、看过、玩过和正在进行的条目，条目信息来自豆瓣。",
               "fontFamily": "$font-body",
               "fontSize": 13,
               "fontWeight": "normal"
@@ -20883,6 +21634,2775 @@
                   ]
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "NCbWO",
+      "x": 9550,
+      "y": 11974,
+      "name": "10 书影音条目 /admin/media?type=book",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$bg",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "id": "zFSUJ",
+          "type": "ref",
+          "ref": "tKtYk",
+          "name": "AdminHeader",
+          "width": "fill_container",
+          "descendants": {
+            "y8h20A": {
+              "fill": "$accent",
+              "fontWeight": "600"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "NBBlu",
+          "name": "Main",
+          "width": 896,
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            48,
+            0,
+            80,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "tNjz8",
+              "name": "PageHeader",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TCUSp",
+                  "name": "Title Group",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LtGdF",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "content": "书影音",
+                      "fontFamily": "$font-body",
+                      "fontSize": 32,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "iLVJ1",
+                      "name": "Sub",
+                      "fill": "$ink-faint",
+                      "content": "12 本 · 在读 2 · 已隐藏 1　读者页：/media",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "id": "scsiL",
+                  "type": "ref",
+                  "ref": "dSHzl",
+                  "name": "新增条目",
+                  "descendants": {
+                    "qYTrZ": {
+                      "content": "新增条目"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "P7XEUA",
+              "name": "MediaTypeTabs",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "B2aXLu",
+                  "type": "ref",
+                  "ref": "vrg8F",
+                  "name": "书",
+                  "descendants": {
+                    "xZXYw": {
+                      "content": "书"
+                    }
+                  }
+                },
+                {
+                  "id": "yrPvD",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "漫画",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "漫画"
+                    }
+                  }
+                },
+                {
+                  "id": "k4DO7i",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "电影",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "电影"
+                    }
+                  }
+                },
+                {
+                  "id": "i57klL",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "剧",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "剧"
+                    }
+                  }
+                },
+                {
+                  "id": "Q2ATfv",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "动画",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "动画"
+                    }
+                  }
+                },
+                {
+                  "id": "IAcLU",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "游戏",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "游戏"
+                    }
+                  }
+                },
+                {
+                  "id": "X27mRg",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "桌游",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "桌游"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "cOJDD",
+              "name": "List",
+              "width": "fill_container",
+              "stroke": "$line",
+              "strokeWidth": {
+                "top": 1
+              },
+              "layout": "vertical",
+              "children": [
+                {
+                  "id": "J2Kvt",
+                  "type": "ref",
+                  "ref": "YMV9W",
+                  "name": "三体",
+                  "width": "fill_container",
+                  "descendants": {
+                    "CcuJn": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1669023414171-56f0740e34cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "xSZYM": {
+                      "enabled": false
+                    },
+                    "J4cgul": {
+                      "content": "三体"
+                    },
+                    "A3OMDT": {
+                      "enabled": true
+                    },
+                    "KnTGS": {
+                      "content": "刘慈欣"
+                    },
+                    "rEpqo": {
+                      "content": "",
+                      "enabled": false
+                    },
+                    "SbopE": {
+                      "content": "☆☆☆☆☆",
+                      "enabled": false
+                    },
+                    "b8ZRtH": {
+                      "content": "在读"
+                    },
+                    "Tm1Lb": {
+                      "content": "2026-08-01"
+                    }
+                  }
+                },
+                {
+                  "id": "rLR2Z",
+                  "type": "ref",
+                  "ref": "YMV9W",
+                  "name": "窗边的小豆豆",
+                  "width": "fill_container",
+                  "descendants": {
+                    "CcuJn": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1717704067715-57d14b090290?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "xSZYM": {
+                      "enabled": false
+                    },
+                    "J4cgul": {
+                      "content": "窗边的小豆豆"
+                    },
+                    "A3OMDT": {
+                      "enabled": true
+                    },
+                    "KnTGS": {
+                      "content": "黑柳彻子"
+                    },
+                    "rEpqo": {
+                      "content": "",
+                      "enabled": false
+                    },
+                    "SbopE": {
+                      "content": "☆☆☆☆☆",
+                      "enabled": false
+                    },
+                    "b8ZRtH": {
+                      "content": "在读"
+                    },
+                    "Tm1Lb": {
+                      "content": "2026-07-12"
+                    }
+                  }
+                },
+                {
+                  "id": "IrZzA",
+                  "type": "ref",
+                  "ref": "YMV9W",
+                  "name": "原则",
+                  "width": "fill_container",
+                  "descendants": {
+                    "CcuJn": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1630825865551-b3f3e5135403?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "xSZYM": {
+                      "enabled": false
+                    },
+                    "J4cgul": {
+                      "content": "原则"
+                    },
+                    "KnTGS": {
+                      "content": "瑞·达利欧"
+                    },
+                    "rEpqo": {
+                      "content": "★★★★",
+                      "enabled": true
+                    },
+                    "SbopE": {
+                      "content": "☆",
+                      "enabled": true
+                    },
+                    "b8ZRtH": {
+                      "content": "读过"
+                    },
+                    "Tm1Lb": {
+                      "content": "2026-10-01"
+                    }
+                  }
+                },
+                {
+                  "id": "tCr7P",
+                  "type": "ref",
+                  "ref": "YMV9W",
+                  "name": "人类简史",
+                  "width": "fill_container",
+                  "descendants": {
+                    "CcuJn": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1622975895954-2221f0b7d484?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "xSZYM": {
+                      "enabled": false
+                    },
+                    "J4cgul": {
+                      "content": "人类简史"
+                    },
+                    "KnTGS": {
+                      "content": "尤瓦尔·赫拉利"
+                    },
+                    "rEpqo": {
+                      "content": "★★★★★",
+                      "enabled": true
+                    },
+                    "SbopE": {
+                      "content": "",
+                      "enabled": true
+                    },
+                    "b8ZRtH": {
+                      "content": "读过"
+                    },
+                    "Tm1Lb": {
+                      "content": "2026-09-15"
+                    }
+                  }
+                },
+                {
+                  "id": "IF6UP",
+                  "type": "ref",
+                  "ref": "YMV9W",
+                  "name": "置身事内",
+                  "width": "fill_container",
+                  "descendants": {
+                    "CcuJn": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1515896170792-227587541d49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "xSZYM": {
+                      "enabled": false
+                    },
+                    "J4cgul": {
+                      "content": "置身事内",
+                      "fill": "$ink-muted"
+                    },
+                    "ROpcE": {
+                      "enabled": true
+                    },
+                    "KnTGS": {
+                      "content": "兰小欢"
+                    },
+                    "rEpqo": {
+                      "content": "★★★",
+                      "enabled": true
+                    },
+                    "SbopE": {
+                      "content": "☆☆",
+                      "enabled": true
+                    },
+                    "b8ZRtH": {
+                      "content": "读过"
+                    },
+                    "Tm1Lb": {
+                      "content": "2026-06-03"
+                    },
+                    "vkf7y/wxuvG": {
+                      "icon": "eye"
+                    }
+                  }
+                },
+                {
+                  "id": "zDKpe",
+                  "type": "ref",
+                  "ref": "YMV9W",
+                  "name": "手记",
+                  "width": "fill_container",
+                  "descendants": {
+                    "J4cgul": {
+                      "content": "手记"
+                    },
+                    "KnTGS": {
+                      "content": "—"
+                    },
+                    "rEpqo": {
+                      "content": "",
+                      "enabled": false
+                    },
+                    "SbopE": {
+                      "content": "☆☆☆☆☆",
+                      "enabled": false
+                    },
+                    "b8ZRtH": {
+                      "content": "读过"
+                    },
+                    "Tm1Lb": {
+                      "content": "2026-03-01"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "r8xUB",
+              "name": "Hint",
+              "fill": "$ink-faint",
+              "content": "进行中的条目置顶，其余按标记日期倒序。隐藏的条目只在后台显示。",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "HoHkl",
+      "x": 11070,
+      "y": 11974,
+      "name": "10m 书影音条目（移动 <768px）",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "IVQq0",
+          "type": "ref",
+          "ref": "mTfjy",
+          "name": "AdminHeader/Mobile",
+          "width": "fill_container",
+          "descendants": {
+            "S32QR/wxuvG": {
+              "fill": "$accent"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "WYQ4w",
+          "name": "Main",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            16,
+            32,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "A2ms0c",
+              "name": "PageHeader",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Us85a",
+                  "name": "Title Group",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "I0GvgT",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "content": "书影音",
+                      "fontFamily": "$font-body",
+                      "fontSize": 24,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "LhAHu",
+                      "name": "Sub",
+                      "fill": "$ink-faint",
+                      "content": "12 本 · 在读 2 · 已隐藏 1",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "id": "SNCGq",
+                  "type": "ref",
+                  "ref": "dSHzl",
+                  "name": "新增",
+                  "descendants": {
+                    "qYTrZ": {
+                      "content": "新增"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ERjV6",
+              "name": "MediaTypeTabs (横向滚动)",
+              "clip": true,
+              "width": "fill_container",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "WOL5w",
+                  "type": "ref",
+                  "ref": "vrg8F",
+                  "name": "书",
+                  "descendants": {
+                    "xZXYw": {
+                      "content": "书"
+                    }
+                  }
+                },
+                {
+                  "id": "sWcV7",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "漫画",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "漫画"
+                    }
+                  }
+                },
+                {
+                  "id": "p1DBa",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "电影",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "电影"
+                    }
+                  }
+                },
+                {
+                  "id": "i0esj5",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "剧",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "剧"
+                    }
+                  }
+                },
+                {
+                  "id": "j8fnKV",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "动画",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "动画"
+                    }
+                  }
+                },
+                {
+                  "id": "cs6Qv",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "游戏",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "游戏"
+                    }
+                  }
+                },
+                {
+                  "id": "h7rr2D",
+                  "type": "ref",
+                  "ref": "n728S",
+                  "name": "桌游",
+                  "descendants": {
+                    "eqjwY": {
+                      "content": "桌游"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "URjUL",
+              "name": "List",
+              "width": "fill_container",
+              "stroke": "$line",
+              "strokeWidth": {
+                "top": 1
+              },
+              "layout": "vertical",
+              "children": [
+                {
+                  "id": "Cp1zS",
+                  "type": "ref",
+                  "ref": "F6RC8s",
+                  "name": "三体",
+                  "width": "fill_container",
+                  "descendants": {
+                    "BuVrP": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1669023414171-56f0740e34cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "Odh9A": {
+                      "enabled": false
+                    },
+                    "EUOal": {
+                      "content": "三体"
+                    },
+                    "hyQuR": {
+                      "enabled": true
+                    },
+                    "T83RE": {
+                      "content": "刘慈欣 · 在读 2026-08-01"
+                    }
+                  }
+                },
+                {
+                  "id": "h4Y0IT",
+                  "type": "ref",
+                  "ref": "F6RC8s",
+                  "name": "窗边的小豆豆",
+                  "width": "fill_container",
+                  "descendants": {
+                    "BuVrP": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1717704067715-57d14b090290?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "Odh9A": {
+                      "enabled": false
+                    },
+                    "EUOal": {
+                      "content": "窗边的小豆豆"
+                    },
+                    "hyQuR": {
+                      "enabled": true
+                    },
+                    "T83RE": {
+                      "content": "黑柳彻子 · 在读 2026-07-12"
+                    }
+                  }
+                },
+                {
+                  "id": "W5SKEZ",
+                  "type": "ref",
+                  "ref": "F6RC8s",
+                  "name": "原则",
+                  "width": "fill_container",
+                  "descendants": {
+                    "BuVrP": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1630825865551-b3f3e5135403?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "Odh9A": {
+                      "enabled": false
+                    },
+                    "EUOal": {
+                      "content": "原则"
+                    },
+                    "T83RE": {
+                      "content": "瑞·达利欧 · ★★★★ · 读过 2026-10-01"
+                    }
+                  }
+                },
+                {
+                  "id": "L7bcUJ",
+                  "type": "ref",
+                  "ref": "F6RC8s",
+                  "name": "人类简史",
+                  "width": "fill_container",
+                  "descendants": {
+                    "BuVrP": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1622975895954-2221f0b7d484?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "Odh9A": {
+                      "enabled": false
+                    },
+                    "EUOal": {
+                      "content": "人类简史"
+                    },
+                    "T83RE": {
+                      "content": "尤瓦尔·赫拉利 · ★★★★★ · 读过 2026-09-15"
+                    }
+                  }
+                },
+                {
+                  "id": "JSW3n",
+                  "type": "ref",
+                  "ref": "F6RC8s",
+                  "name": "置身事内",
+                  "width": "fill_container",
+                  "descendants": {
+                    "BuVrP": {
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1515896170792-227587541d49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      }
+                    },
+                    "Odh9A": {
+                      "enabled": false
+                    },
+                    "EUOal": {
+                      "content": "置身事内",
+                      "fill": "$ink-muted"
+                    },
+                    "BQrDx": {
+                      "enabled": true
+                    },
+                    "T83RE": {
+                      "content": "兰小欢 · ★★★ · 读过 2026-06-03"
+                    }
+                  }
+                },
+                {
+                  "id": "IvId9",
+                  "type": "ref",
+                  "ref": "F6RC8s",
+                  "name": "手记",
+                  "width": "fill_container",
+                  "descendants": {
+                    "EUOal": {
+                      "content": "手记"
+                    },
+                    "T83RE": {
+                      "content": "读过 2026-03-01"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "KCW6L",
+              "name": "Hint",
+              "fill": "$ink-faint",
+              "content": "点条目编辑；⋯ 菜单：隐藏 / 删除",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "m42cz",
+      "x": 11540,
+      "y": 11974,
+      "name": "11 录入条目 /admin/media/new（识别后）",
+      "clip": true,
+      "width": 1440,
+      "height": 1060,
+      "fill": "$bg",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "id": "CDvcG",
+          "type": "ref",
+          "ref": "tKtYk",
+          "name": "AdminHeader",
+          "width": "fill_container",
+          "descendants": {
+            "y8h20A": {
+              "fill": "$accent",
+              "fontWeight": "600"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "y0dqV",
+          "name": "Main",
+          "width": 760,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            32,
+            0,
+            80,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "C3K5i",
+              "name": "BackLink",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "q6aLuY",
+                  "name": "Icon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "arrow-left",
+                  "library": "lucide",
+                  "fill": "$ink-muted"
+                },
+                {
+                  "type": "text",
+                  "id": "onwVL",
+                  "name": "Text",
+                  "fill": "$ink-muted",
+                  "content": "书影音",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NN6Tn",
+              "name": "Title Group",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "p1E04",
+                  "name": "Title",
+                  "fill": "$ink",
+                  "content": "新增条目",
+                  "fontFamily": "$font-body",
+                  "fontSize": 28,
+                  "fontWeight": "600",
+                  "letterSpacing": 0.8
+                },
+                {
+                  "type": "text",
+                  "id": "DE5uv",
+                  "name": "Sub",
+                  "fill": "$ink-faint",
+                  "content": "粘贴豆瓣链接可自动填好条目信息；状态、评分、日期、短评由你填写",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "wgt6F",
+              "type": "ref",
+              "ref": "Cle8m",
+              "name": "RecognizeBox",
+              "width": "fill_container",
+              "descendants": {
+                "sZZaW": {
+                  "content": "【豆瓣】我读过《原则》 https://douc.cc/2Xk9aQ",
+                  "fill": "$ink"
+                },
+                "U84J3b": {
+                  "enabled": true
+                },
+                "serEL": {
+                  "enabled": true
+                },
+                "v5obG": {
+                  "content": "已识别：分类、标题、封面、作者"
+                },
+                "L8E49u": {
+                  "enabled": true
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "Z6yHep",
+              "name": "Form",
+              "width": "fill_container",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xfIfY",
+                  "name": "CoverField",
+                  "width": 160,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "h1PSJA",
+                      "name": "Label",
+                      "fill": "$ink-muted",
+                      "content": "封面",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IVR2r",
+                      "name": "Thumb",
+                      "clip": true,
+                      "width": 128,
+                      "height": 192,
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1630825865551-b3f3e5135403?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                        "mode": "cover"
+                      },
+                      "cornerRadius": "$radius",
+                      "stroke": "$accent",
+                      "strokeWidth": 2
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QRLNg",
+                      "name": "Actions",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "id": "wFkJP",
+                          "type": "ref",
+                          "ref": "ex3Og",
+                          "name": "更换",
+                          "descendants": {
+                            "V2UuKm": {
+                              "icon": "image-up"
+                            },
+                            "EtOGZ": {
+                              "content": "更换"
+                            }
+                          }
+                        },
+                        {
+                          "id": "wqdL0",
+                          "type": "ref",
+                          "ref": "BIEtO",
+                          "name": "移除",
+                          "width": 36,
+                          "height": 36,
+                          "descendants": {
+                            "wxuvG": {
+                              "icon": "x"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "JVUWe",
+                      "name": "Hint",
+                      "fill": "$ink-faint",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "来自豆瓣，保存时存入本站；也可上传 jpg / png / webp，≤ 5 MB",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "HYXrQ",
+                  "name": "Fields",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "bkRSe",
+                      "name": "Row 分类 标题",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "id": "n32Sa",
+                          "type": "ref",
+                          "ref": "f2fHt",
+                          "name": "分类",
+                          "width": 140,
+                          "descendants": {
+                            "VLqII": {
+                              "content": "分类"
+                            },
+                            "v5CHU": {
+                              "type": "frame",
+                              "id": "Fwe3v",
+                              "name": "Select",
+                              "width": "fill_container",
+                              "fill": "$accent-soft",
+                              "cornerRadius": "$radius",
+                              "stroke": "$accent",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                9,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ym3mg",
+                                  "name": "Value",
+                                  "fill": "$ink",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "书",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "icon",
+                                  "id": "e1KtQ9",
+                                  "name": "Chevron",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "chevron-down",
+                                  "library": "lucide",
+                                  "fill": "$ink-muted"
+                                }
+                              ]
+                            },
+                            "VShDl": {
+                              "enabled": false
+                            }
+                          }
+                        },
+                        {
+                          "id": "UKoGm",
+                          "type": "ref",
+                          "ref": "f2fHt",
+                          "name": "标题",
+                          "width": "fill_container",
+                          "descendants": {
+                            "VLqII": {
+                              "content": "标题 *"
+                            },
+                            "v5CHU": {
+                              "fill": "$accent-soft",
+                              "stroke": "$accent"
+                            },
+                            "NGkKP": {
+                              "content": "原则",
+                              "fill": "$ink"
+                            },
+                            "VShDl": {
+                              "enabled": false
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iPboR",
+                      "name": "Row 作者 年份",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "id": "yMobg",
+                          "type": "ref",
+                          "ref": "f2fHt",
+                          "name": "作者",
+                          "width": "fill_container",
+                          "descendants": {
+                            "VLqII": {
+                              "content": "作者"
+                            },
+                            "v5CHU": {
+                              "fill": "$accent-soft",
+                              "stroke": "$accent"
+                            },
+                            "NGkKP": {
+                              "content": "瑞·达利欧",
+                              "fill": "$ink"
+                            },
+                            "VShDl": {
+                              "enabled": false
+                            }
+                          }
+                        },
+                        {
+                          "id": "jVv1p",
+                          "type": "ref",
+                          "ref": "f2fHt",
+                          "name": "年份",
+                          "width": 140,
+                          "descendants": {
+                            "VLqII": {
+                              "content": "年份"
+                            },
+                            "v5CHU": {
+                              "stroke": "$warn"
+                            },
+                            "NGkKP": {
+                              "content": "如 2018",
+                              "fill": "$ink-faint"
+                            },
+                            "VShDl": {
+                              "content": "未识别，请手动填写",
+                              "fill": "$warn"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "McUcq",
+                      "name": "豆瓣链接",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "mo1AW",
+                          "name": "Label",
+                          "fill": "$ink-muted",
+                          "content": "豆瓣链接",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "gUwB6",
+                          "name": "Value Row",
+                          "width": "fill_container",
+                          "fill": "$surface-sunken",
+                          "cornerRadius": "$radius",
+                          "gap": 8,
+                          "padding": [
+                            9,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "njb9w",
+                              "name": "Icon",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "link-2",
+                              "library": "lucide",
+                              "fill": "$ink-faint"
+                            },
+                            {
+                              "type": "text",
+                              "id": "BDKGv",
+                              "name": "Url",
+                              "fill": "$ink-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "https://book.douban.com/subject/26958954/",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "t8VCfK",
+                              "name": "清除",
+                              "fill": "$ink-muted",
+                              "content": "清除",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tpgQC",
+                      "name": "Divider",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YcM3S",
+                          "name": "Text",
+                          "fill": "$ink-faint",
+                          "content": "我的记录",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "H6SwT",
+                          "name": "Line",
+                          "fill": "$line",
+                          "width": "fill_container",
+                          "height": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ia8yQ",
+                      "name": "Row 状态 日期",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "U5gtb0",
+                          "name": "状态",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "AMeob",
+                              "name": "Label",
+                              "fill": "$ink-muted",
+                              "content": "状态",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "jlMF5",
+                              "name": "Segmented",
+                              "fill": "$surface-sunken",
+                              "cornerRadius": 6,
+                              "gap": 2,
+                              "padding": 2,
+                              "children": [
+                                {
+                                  "id": "eJOE0",
+                                  "type": "ref",
+                                  "ref": "cVaMr",
+                                  "name": "读过",
+                                  "descendants": {
+                                    "Y2Jzvc": {
+                                      "content": "读过"
+                                    },
+                                    "EQhxt": {
+                                      "enabled": false
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "odAqI",
+                                  "type": "ref",
+                                  "ref": "sGfMJ",
+                                  "name": "在读",
+                                  "descendants": {
+                                    "u5KayT": {
+                                      "content": "在读"
+                                    },
+                                    "Y2KhZT": {
+                                      "enabled": false
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "Iq0Hl",
+                          "type": "ref",
+                          "ref": "f2fHt",
+                          "name": "标记日期",
+                          "width": 200,
+                          "descendants": {
+                            "VLqII": {
+                              "content": "标记日期（开始日期）"
+                            },
+                            "NGkKP": {
+                              "content": "2026-09-01",
+                              "fill": "$ink"
+                            },
+                            "VShDl": {
+                              "enabled": false
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lcnPa",
+                      "name": "评分",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "HbFhV",
+                          "name": "Label",
+                          "fill": "$ink-muted",
+                          "content": "我的评分",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "id": "d4OCc",
+                          "type": "ref",
+                          "ref": "uBKOS",
+                          "name": "RatingInput"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "t1VpOq",
+                      "type": "ref",
+                      "ref": "f2fHt",
+                      "name": "短评",
+                      "width": "fill_container",
+                      "descendants": {
+                        "VLqII": {
+                          "content": "短评"
+                        },
+                        "v5CHU": {
+                          "height": 96,
+                          "alignItems": "start"
+                        },
+                        "NGkKP": {
+                          "content": "读到第三部分，系统化思考很受用。",
+                          "fill": "$ink"
+                        },
+                        "VShDl": {
+                          "content": "18 / 1000",
+                          "fill": "$ink-faint"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "BRDoT",
+              "name": "Footer",
+              "width": "fill_container",
+              "stroke": "$line",
+              "strokeWidth": {
+                "top": 1
+              },
+              "gap": 8,
+              "padding": [
+                16,
+                0,
+                0,
+                0
+              ],
+              "justifyContent": "end",
+              "children": [
+                {
+                  "id": "nnJAR",
+                  "type": "ref",
+                  "ref": "j2w1J",
+                  "name": "取消"
+                },
+                {
+                  "id": "t1Cei9",
+                  "type": "ref",
+                  "ref": "dSHzl",
+                  "name": "保存",
+                  "descendants": {
+                    "qYTrZ": {
+                      "content": "保存"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "O7zDE",
+      "x": 13060,
+      "y": 11974,
+      "name": "11m 录入条目（移动 <768px）",
+      "clip": true,
+      "width": 390,
+      "height": 1468,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "pllYe",
+          "type": "ref",
+          "ref": "mTfjy",
+          "name": "AdminHeader/Mobile",
+          "width": "fill_container",
+          "descendants": {
+            "S32QR/wxuvG": {
+              "fill": "$accent"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "ZGFku",
+          "name": "Main",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            16,
+            16,
+            24,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "b1gW5",
+              "name": "BackLink",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "tbRlo",
+                  "name": "Icon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "arrow-left",
+                  "library": "lucide",
+                  "fill": "$ink-muted"
+                },
+                {
+                  "type": "text",
+                  "id": "tgPna",
+                  "name": "Text",
+                  "fill": "$ink-muted",
+                  "content": "书影音",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "N6n6Ck",
+              "name": "Title",
+              "fill": "$ink",
+              "content": "新增条目",
+              "fontFamily": "$font-body",
+              "fontSize": 24,
+              "fontWeight": "600",
+              "letterSpacing": 0.8
+            },
+            {
+              "id": "HYdCd",
+              "type": "ref",
+              "ref": "Cle8m",
+              "name": "RecognizeBox",
+              "width": "fill_container",
+              "descendants": {
+                "sZZaW": {
+                  "content": "【豆瓣】我读过《原则》 https://douc.cc/2Xk9aQ",
+                  "fill": "$ink",
+                  "fontSize": 16,
+                  "height": 52
+                },
+                "RUTd4": {
+                  "enabled": false
+                },
+                "U84J3b": {
+                  "enabled": true,
+                  "width": 44,
+                  "height": 44
+                },
+                "serEL": {
+                  "enabled": true
+                },
+                "v5obG": {
+                  "content": "已识别：分类、标题、封面、作者"
+                },
+                "L8E49u": {
+                  "enabled": true
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "PRrli",
+              "name": "CoverField",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "QyBov",
+                  "name": "Thumb",
+                  "clip": true,
+                  "width": 96,
+                  "height": 144,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "https://images.unsplash.com/photo-1630825865551-b3f3e5135403?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                    "mode": "cover"
+                  },
+                  "cornerRadius": "$radius",
+                  "stroke": "$accent",
+                  "strokeWidth": 2
+                },
+                {
+                  "type": "frame",
+                  "id": "BdRaa",
+                  "name": "Side",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "if7kW",
+                      "name": "Label",
+                      "fill": "$ink-muted",
+                      "content": "封面",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LbIgt",
+                      "name": "Actions",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "id": "Ykcnr",
+                          "type": "ref",
+                          "ref": "ex3Og",
+                          "name": "更换",
+                          "descendants": {
+                            "V2UuKm": {
+                              "icon": "image-up"
+                            },
+                            "EtOGZ": {
+                              "content": "更换"
+                            }
+                          }
+                        },
+                        {
+                          "id": "aqSJL",
+                          "type": "ref",
+                          "ref": "BIEtO",
+                          "name": "移除",
+                          "width": 44,
+                          "height": 44,
+                          "descendants": {
+                            "wxuvG": {
+                              "icon": "x",
+                              "width": 20,
+                              "height": 20
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "lt7ku",
+                      "name": "Hint",
+                      "fill": "$ink-faint",
+                      "content": "来自豆瓣，保存时存入本站",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "avQrJ",
+              "type": "ref",
+              "ref": "f2fHt",
+              "name": "分类",
+              "width": "fill_container",
+              "descendants": {
+                "VLqII": {
+                  "content": "分类"
+                },
+                "v5CHU": {
+                  "fill": "$accent-soft",
+                  "stroke": "$accent"
+                },
+                "NGkKP": {
+                  "content": "书",
+                  "fill": "$ink",
+                  "fontSize": 16
+                },
+                "VShDl": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "id": "F3Cf5q",
+              "type": "ref",
+              "ref": "f2fHt",
+              "name": "标题",
+              "width": "fill_container",
+              "descendants": {
+                "VLqII": {
+                  "content": "标题 *"
+                },
+                "v5CHU": {
+                  "fill": "$accent-soft",
+                  "stroke": "$accent"
+                },
+                "NGkKP": {
+                  "content": "原则",
+                  "fill": "$ink",
+                  "fontSize": 16
+                },
+                "VShDl": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "id": "e8JSl0",
+              "type": "ref",
+              "ref": "f2fHt",
+              "name": "作者",
+              "width": "fill_container",
+              "descendants": {
+                "VLqII": {
+                  "content": "作者"
+                },
+                "v5CHU": {
+                  "fill": "$accent-soft",
+                  "stroke": "$accent"
+                },
+                "NGkKP": {
+                  "content": "瑞·达利欧",
+                  "fill": "$ink",
+                  "fontSize": 16
+                },
+                "VShDl": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "id": "r16m3",
+              "type": "ref",
+              "ref": "f2fHt",
+              "name": "年份",
+              "width": "fill_container",
+              "descendants": {
+                "VLqII": {
+                  "content": "年份"
+                },
+                "v5CHU": {
+                  "stroke": "$warn"
+                },
+                "NGkKP": {
+                  "content": "如 2018",
+                  "fill": "$ink-faint",
+                  "fontSize": 16
+                },
+                "VShDl": {
+                  "content": "未识别，请手动填写",
+                  "fill": "$warn"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "N0y5qT",
+              "name": "豆瓣链接",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "AkoQR",
+                  "name": "Label",
+                  "fill": "$ink-muted",
+                  "content": "豆瓣链接",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "XfhUi",
+                  "name": "Value Row",
+                  "width": "fill_container",
+                  "fill": "$surface-sunken",
+                  "cornerRadius": "$radius",
+                  "gap": 8,
+                  "padding": [
+                    9,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XBj6o",
+                      "name": "Url",
+                      "fill": "$ink-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "book.douban.com/subject/26958954",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "iuQPZ",
+                      "name": "清除",
+                      "fill": "$ink-muted",
+                      "content": "清除",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PinCQ",
+              "name": "Divider",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "gUV8o",
+                  "name": "Text",
+                  "fill": "$ink-faint",
+                  "content": "我的记录",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "clSy7",
+                  "name": "Line",
+                  "fill": "$line",
+                  "width": "fill_container",
+                  "height": 1
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DNyzr",
+              "name": "状态",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Y7VrPw",
+                  "name": "Label",
+                  "fill": "$ink-muted",
+                  "content": "状态",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "b6AAT",
+                  "name": "Segmented",
+                  "width": "fill_container",
+                  "fill": "$surface-sunken",
+                  "cornerRadius": 6,
+                  "gap": 2,
+                  "padding": 2,
+                  "children": [
+                    {
+                      "id": "BHjXW",
+                      "type": "ref",
+                      "ref": "cVaMr",
+                      "name": "读过",
+                      "width": "fill_container",
+                      "height": 40,
+                      "descendants": {
+                        "Y2Jzvc": {
+                          "content": "读过"
+                        },
+                        "EQhxt": {
+                          "enabled": false
+                        }
+                      }
+                    },
+                    {
+                      "id": "qZ8Gp",
+                      "type": "ref",
+                      "ref": "sGfMJ",
+                      "name": "在读",
+                      "width": "fill_container",
+                      "height": 40,
+                      "descendants": {
+                        "u5KayT": {
+                          "content": "在读"
+                        },
+                        "Y2KhZT": {
+                          "enabled": false
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "m6iLv",
+              "type": "ref",
+              "ref": "f2fHt",
+              "name": "标记日期",
+              "width": "fill_container",
+              "descendants": {
+                "VLqII": {
+                  "content": "标记日期（开始日期）"
+                },
+                "NGkKP": {
+                  "content": "2026-09-01",
+                  "fill": "$ink",
+                  "fontSize": 16
+                },
+                "VShDl": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "MVIez",
+              "name": "评分",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "b8rFE",
+                  "name": "Label",
+                  "fill": "$ink-muted",
+                  "content": "我的评分",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "id": "EZzYV",
+                  "type": "ref",
+                  "ref": "uBKOS",
+                  "name": "RatingInput",
+                  "descendants": {
+                    "vwF7V": {
+                      "fontSize": 28
+                    },
+                    "hJNJt": {
+                      "fontSize": 28
+                    },
+                    "BGxlq": {
+                      "fontSize": 28
+                    },
+                    "LS0Rn": {
+                      "fontSize": 28
+                    },
+                    "NNFPI": {
+                      "fontSize": 28
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cpPfh",
+              "type": "ref",
+              "ref": "f2fHt",
+              "name": "短评",
+              "width": "fill_container",
+              "descendants": {
+                "VLqII": {
+                  "content": "短评"
+                },
+                "v5CHU": {
+                  "height": 96,
+                  "alignItems": "start"
+                },
+                "NGkKP": {
+                  "content": "读到第三部分，系统化思考很受用。",
+                  "fill": "$ink",
+                  "fontSize": 16
+                },
+                "VShDl": {
+                  "content": "18 / 1000",
+                  "fill": "$ink-faint"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "balc8",
+          "name": "Sticky Footer",
+          "width": "fill_container",
+          "fill": "$bg",
+          "stroke": "$line",
+          "strokeWidth": {
+            "top": 1
+          },
+          "gap": 8,
+          "padding": [
+            12,
+            16
+          ],
+          "children": [
+            {
+              "id": "qV5GC",
+              "type": "ref",
+              "ref": "j2w1J",
+              "name": "取消",
+              "height": 44
+            },
+            {
+              "id": "BtJom",
+              "type": "ref",
+              "ref": "dSHzl",
+              "name": "保存",
+              "width": "fill_container",
+              "height": 44,
+              "descendants": {
+                "qYTrZ": {
+                  "content": "保存"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "poXwF",
+      "x": 13530,
+      "y": 11974,
+      "name": "11b 书影音后台状态",
+      "width": 1000,
+      "fill": "$bg",
+      "layout": "vertical",
+      "gap": 32,
+      "padding": 48,
+      "children": [
+        {
+          "type": "text",
+          "id": "d874u",
+          "name": "Board Title",
+          "fill": "$ink",
+          "content": "11b 书影音后台状态",
+          "fontFamily": "$font-body",
+          "fontSize": 28,
+          "fontWeight": "600"
+        },
+        {
+          "type": "frame",
+          "id": "gVOBo",
+          "name": "Cell 识别中（按钮加载、表单可继续输入）",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "IJf4e",
+              "name": "Label",
+              "fill": "$ink-muted",
+              "content": "识别中（按钮加载、表单可继续输入）",
+              "fontFamily": "$font-mono",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "id": "u6S5Sh",
+              "type": "ref",
+              "ref": "Cle8m",
+              "name": "RecognizeBox 识别中",
+              "width": 600,
+              "descendants": {
+                "sZZaW": {
+                  "content": "https://movie.douban.com/subject/1292052/",
+                  "fill": "$ink"
+                },
+                "U84J3b": {
+                  "enabled": true
+                },
+                "o6Hfi": {
+                  "opacity": 0.6
+                },
+                "o6Hfi/V2UuKm": {
+                  "icon": "loader-circle"
+                },
+                "o6Hfi/EtOGZ": {
+                  "content": "识别中…"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "dE5HI",
+          "name": "Cell 识别失败（表单保持原样，可全部手填）",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "zn15h",
+              "name": "Label",
+              "fill": "$ink-muted",
+              "content": "识别失败（表单保持原样，可全部手填）",
+              "fontFamily": "$font-mono",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "id": "M1UlZ",
+              "type": "ref",
+              "ref": "Cle8m",
+              "name": "RecognizeBox 失败",
+              "width": 600,
+              "descendants": {
+                "sZZaW": {
+                  "content": "https://www.douban.com/doulist/123456/",
+                  "fill": "$ink"
+                },
+                "U84J3b": {
+                  "enabled": true
+                },
+                "serEL": {
+                  "enabled": true
+                },
+                "WefMD": {
+                  "enabled": false
+                },
+                "L8E49u": {
+                  "enabled": true
+                },
+                "b32OZ6": {
+                  "icon": "circle-x",
+                  "fill": "$danger"
+                },
+                "ucghH": {
+                  "content": "不是豆瓣条目链接，请粘贴书 / 电影 / 游戏条目的分享链接",
+                  "fill": "$danger"
+                }
+              }
+            },
+            {
+              "type": "text",
+              "id": "CY4M7",
+              "name": "Note",
+              "fill": "$ink-faint",
+              "content": "其他失败文案：不是豆瓣链接 / 链接打不开 / 解析不出条目信息 / 识别失败，请稍后重试",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "N5CMAp",
+          "name": "Cell 重复条目（不填入识别结果，提供“去编辑”）",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "dBbz3",
+              "name": "Label",
+              "fill": "$ink-muted",
+              "content": "重复条目（不填入识别结果，提供“去编辑”）",
+              "fontFamily": "$font-mono",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "id": "hLhMv",
+              "type": "ref",
+              "ref": "Cle8m",
+              "name": "RecognizeBox 重复",
+              "width": 600,
+              "descendants": {
+                "sZZaW": {
+                  "content": "https://book.douban.com/subject/26958954/",
+                  "fill": "$ink"
+                },
+                "U84J3b": {
+                  "enabled": true
+                },
+                "serEL": {
+                  "enabled": true
+                },
+                "WefMD": {
+                  "enabled": false
+                },
+                "L8E49u": {
+                  "enabled": true
+                },
+                "b32OZ6": {
+                  "icon": "copy",
+                  "fill": "$warn"
+                },
+                "ucghH": {
+                  "content": "这条已经录入过：《原则》 · 读过 2026-10-01",
+                  "fill": "$ink"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "eLGpO",
+              "name": "去编辑 Link",
+              "gap": 4,
+              "padding": [
+                0,
+                22
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "VbyKN",
+                  "name": "Text",
+                  "fill": "$accent",
+                  "content": "去编辑",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "dcjfn",
+                  "name": "Icon",
+                  "width": 12,
+                  "height": 12,
+                  "icon": "arrow-right",
+                  "library": "lucide",
+                  "fill": "$accent"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "q92s5",
+          "name": "Cell 删除确认（ConfirmDialog/Danger）与封面下载失败提示",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "c7jl2",
+              "name": "Label",
+              "fill": "$ink-muted",
+              "content": "删除确认（ConfirmDialog/Danger）与封面未识别（识别时下载失败）",
+              "fontFamily": "$font-mono",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "U2D82",
+              "name": "Row",
+              "gap": 32,
+              "children": [
+                {
+                  "id": "hlOb4",
+                  "type": "ref",
+                  "ref": "UsYSj",
+                  "name": "删除确认",
+                  "descendants": {
+                    "j411qu": {
+                      "content": "删除「原则」？"
+                    },
+                    "DTipY": {
+                      "content": "此操作不可撤销，封面一并删除。读者页将在重建后不再显示。"
+                    },
+                    "O7N5j/rXRGa": {
+                      "content": "删除"
+                    }
+                  }
+                },
+                {
+                  "id": "qrsfU",
+                  "type": "ref",
+                  "ref": "Cle8m",
+                  "name": "RecognizeBox 封面未识别",
+                  "width": 420,
+                  "descendants": {
+                    "sZZaW": {
+                      "content": "https://book.douban.com/subject/26958954/",
+                      "fill": "$ink"
+                    },
+                    "RUTd4": {
+                      "enabled": false
+                    },
+                    "U84J3b": {
+                      "enabled": true
+                    },
+                    "serEL": {
+                      "enabled": true
+                    },
+                    "v5obG": {
+                      "content": "已识别：分类、标题、作者、年份"
+                    },
+                    "L8E49u": {
+                      "enabled": true
+                    },
+                    "ucghH": {
+                      "content": "未识别：封面，可手动上传"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qw3MB",
+          "name": "Cell 空分类（EmptyState）",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "TshpS",
+              "name": "Label",
+              "fill": "$ink-muted",
+              "content": "空分类（EmptyState）",
+              "fontFamily": "$font-mono",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "id": "JVlv0",
+              "type": "ref",
+              "ref": "lL9sT",
+              "name": "EmptyState 桌游",
+              "descendants": {
+                "aR1ZR": {
+                  "icon": "dices"
+                },
+                "TnCKG": {
+                  "content": "还没有桌游条目"
+                },
+                "gPVom": {
+                  "content": "粘贴豆瓣链接，几秒录好一条"
+                },
+                "kcJdZ/qYTrZ": {
+                  "content": "新增条目"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "G1old",
+      "x": 9988,
+      "y": 16314,
+      "name": "09c 书影音 /media/movie（列表行：电影 / 剧 / 动画 / 游戏 / 桌游）",
+      "clip": true,
+      "width": 1440,
+      "height": 1026,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "FItLu",
+          "type": "ref",
+          "ref": "v8Pxr",
+          "name": "SiteHeader",
+          "width": "fill_container",
+          "descendants": {
+            "S29YH/vsGwx": {
+              "fill": "$ink-muted",
+              "fontWeight": "normal"
+            },
+            "S29YH/kouYP": {
+              "fill": "$accent",
+              "fontWeight": "600"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "aFg10",
+          "name": "Body",
+          "width": "fill_container",
+          "padding": [
+            56,
+            0,
+            80,
+            0
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Ivwwk",
+              "name": "Main",
+              "width": 896,
+              "layout": "vertical",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TpAHL",
+                  "name": "MediaHeader",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "tTn9o",
+                      "name": "Title",
+                      "fill": "$ink",
+                      "content": "书影音",
+                      "fontFamily": "$font-body",
+                      "fontSize": 32,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "RXuzX",
+                      "name": "Count",
+                      "fill": "$ink-faint",
+                      "content": "86 部 · 在看 1",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LWv1F",
+                  "name": "MediaTypeTabs",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "id": "voKe6",
+                      "type": "ref",
+                      "ref": "n728S",
+                      "name": "Tab 书",
+                      "descendants": {
+                        "eqjwY": {
+                          "content": "书"
+                        }
+                      }
+                    },
+                    {
+                      "id": "T0lum",
+                      "type": "ref",
+                      "ref": "n728S",
+                      "name": "Tab 漫画",
+                      "descendants": {
+                        "eqjwY": {
+                          "content": "漫画"
+                        }
+                      }
+                    },
+                    {
+                      "id": "wmell",
+                      "type": "ref",
+                      "ref": "vrg8F",
+                      "name": "Tab 电影",
+                      "descendants": {
+                        "xZXYw": {
+                          "content": "电影"
+                        }
+                      }
+                    },
+                    {
+                      "id": "a3E48F",
+                      "type": "ref",
+                      "ref": "n728S",
+                      "name": "Tab 剧",
+                      "descendants": {
+                        "eqjwY": {
+                          "content": "剧"
+                        }
+                      }
+                    },
+                    {
+                      "id": "qSu7s",
+                      "type": "ref",
+                      "ref": "n728S",
+                      "name": "Tab 动画",
+                      "descendants": {
+                        "eqjwY": {
+                          "content": "动画"
+                        }
+                      }
+                    },
+                    {
+                      "id": "EaHz9",
+                      "type": "ref",
+                      "ref": "n728S",
+                      "name": "Tab 游戏",
+                      "descendants": {
+                        "eqjwY": {
+                          "content": "游戏"
+                        }
+                      }
+                    },
+                    {
+                      "id": "hmCC9",
+                      "type": "ref",
+                      "ref": "n728S",
+                      "name": "Tab 桌游",
+                      "descendants": {
+                        "eqjwY": {
+                          "content": "桌游"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "h6YK7",
+                  "name": "MediaList",
+                  "width": "fill_container",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "id": "mZzyw",
+                      "type": "ref",
+                      "ref": "f7vTJC",
+                      "name": "沙丘 2",
+                      "width": "fill_container",
+                      "descendants": {
+                        "txXxi": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1669023414171-56f0740e34cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                            "mode": "cover"
+                          }
+                        },
+                        "e4Ir2": {
+                          "enabled": false
+                        },
+                        "G8ZDO": {
+                          "content": "沙丘 2"
+                        },
+                        "zmE1t": {
+                          "enabled": true
+                        },
+                        "UmHFj": {
+                          "content": "在看"
+                        },
+                        "v9YUJk": {
+                          "content": "丹尼斯·维伦纽瓦"
+                        },
+                        "CImLe": {
+                          "content": "",
+                          "enabled": false
+                        },
+                        "jVPwb": {
+                          "content": "☆☆☆☆☆",
+                          "enabled": false
+                        },
+                        "dc3kJ": {
+                          "content": "2026-10"
+                        }
+                      }
+                    },
+                    {
+                      "id": "J0Vvz",
+                      "type": "ref",
+                      "ref": "f7vTJC",
+                      "name": "肖申克的救赎",
+                      "width": "fill_container",
+                      "descendants": {
+                        "txXxi": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1717704067715-57d14b090290?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                            "mode": "cover"
+                          }
+                        },
+                        "e4Ir2": {
+                          "enabled": false
+                        },
+                        "G8ZDO": {
+                          "content": "肖申克的救赎"
+                        },
+                        "v9YUJk": {
+                          "content": "弗兰克·德拉邦特"
+                        },
+                        "CImLe": {
+                          "content": "★★★★★",
+                          "enabled": true
+                        },
+                        "jVPwb": {
+                          "content": "",
+                          "enabled": true
+                        },
+                        "dc3kJ": {
+                          "content": "2026-08"
+                        }
+                      }
+                    },
+                    {
+                      "id": "pkhBp",
+                      "type": "ref",
+                      "ref": "f7vTJC",
+                      "name": "花样年华",
+                      "width": "fill_container",
+                      "descendants": {
+                        "txXxi": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1630825865551-b3f3e5135403?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                            "mode": "cover"
+                          }
+                        },
+                        "e4Ir2": {
+                          "enabled": false
+                        },
+                        "G8ZDO": {
+                          "content": "花样年华"
+                        },
+                        "v9YUJk": {
+                          "content": "王家卫"
+                        },
+                        "CImLe": {
+                          "content": "★★★★",
+                          "enabled": true
+                        },
+                        "jVPwb": {
+                          "content": "☆",
+                          "enabled": true
+                        },
+                        "dc3kJ": {
+                          "content": "2026-07"
+                        }
+                      }
+                    },
+                    {
+                      "id": "xD5Bt",
+                      "type": "ref",
+                      "ref": "f7vTJC",
+                      "name": "完美的日子",
+                      "width": "fill_container",
+                      "descendants": {
+                        "txXxi": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1622975895954-2221f0b7d484?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
+                            "mode": "cover"
+                          }
+                        },
+                        "e4Ir2": {
+                          "enabled": false
+                        },
+                        "G8ZDO": {
+                          "content": "完美的日子"
+                        },
+                        "v9YUJk": {
+                          "content": "维姆·文德斯"
+                        },
+                        "CImLe": {
+                          "content": "★★★★★",
+                          "enabled": true
+                        },
+                        "jVPwb": {
+                          "content": "",
+                          "enabled": true
+                        },
+                        "dc3kJ": {
+                          "content": "2026-05"
+                        }
+                      }
+                    },
+                    {
+                      "id": "AIVyq",
+                      "type": "ref",
+                      "ref": "f7vTJC",
+                      "name": "某部老片",
+                      "width": "fill_container",
+                      "descendants": {
+                        "G8ZDO": {
+                          "content": "某部老片"
+                        },
+                        "v9YUJk": {
+                          "content": "—"
+                        },
+                        "CImLe": {
+                          "content": "★★★",
+                          "enabled": true
+                        },
+                        "jVPwb": {
+                          "content": "☆☆",
+                          "enabled": true
+                        },
+                        "dc3kJ": {
+                          "content": "2026-02"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "i45Zyo",
+                  "name": "Source Note",
+                  "fill": "$ink-faint",
+                  "content": "只收录读过、看过、玩过和正在进行的条目，条目信息来自豆瓣。",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "id": "s2jIHG",
+                  "type": "ref",
+                  "ref": "ZEW8M",
+                  "name": "BackLink"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "WqCt7",
+          "name": "Footer Wrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            50
+          ],
+          "children": [
+            {
+              "id": "eU1Af",
+              "type": "ref",
+              "ref": "c5X20",
+              "name": "SiteFooter",
+              "width": "fill_container"
             }
           ]
         }

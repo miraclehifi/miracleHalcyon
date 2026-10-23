@@ -1,6 +1,6 @@
 # 跨 Feature 共享 Domain
 
-**最后更新**: 2026-10-16
+**最后更新**: 2026-10-21
 
 > Domain 注册表见 [backend/domains/_index.md](backend/domains/_index.md)。本文件只记录被多个 Feature 使用的 Domain / 模块及其对外契约。
 
@@ -11,4 +11,7 @@
 | `post`（引用查询） | F-001 | F-006 | `ImageReferenceQuery.classify`（`src/domains/post/image-reference-query.ts`，post domain-model §6.1） | 只读工作稿与快照四列 `body`、`cover`、`pub_body`、`pub_cover`；`media` 不得直接读 `posts` 表 |
 | `markdown` | F-001 | F-002 | `renderMarkdown`、`parseImageKey`、`parseMarks`、图片 HTML 结构（`data-article-image`、`data-gallery`）、引用署名（`footer[data-attribution]`，F-002 增量） | F-002 不得另写渲染规则；读者页版式后处理（h1 降级、首字下沉标记、标题 id）在 `src/lib/reader/article-html.ts` |
 | 图片组件 `ArticleImage`、`LiveBadge`、`ImageGallery` | F-001 | F-002 | components.md"文章图片" | `Lightbox` 归 F-002；F-002 增量：`ArticleImage` 可选 `onClick`（不传时结构不变） |
-| `reader`（无状态模块）、`ReaderLayout`、`virtual:reader-data` | F-002 | F-003 / F-004 / F-005 | [reader module-spec](frontend/modules/reader/module-spec.md) | 后续读者页沿用外壳与构建数据方式；F-004 Pagefind 索引构建产物 |
+| `reader`（无状态模块）、`ReaderLayout`、`virtual:reader-data` | F-002 | F-003 / F-004 / F-005 | [reader module-spec](frontend/modules/reader/module-spec.md) | 后续读者页沿用外壳与构建数据方式；F-004 Pagefind 索引构建产物；F-005 增量：`virtual:shelf-data`（§1.3）、`src/lib/reader/shelf.ts` |
+| 重建钩子 `createDeployHookHooks` | F-002 | F-001、F-005 | reader module-spec §5 | F-005 以 `ShelfHooks.onShelfChanged` 适配，同一个 `DEPLOY_HOOK_URL` |
+| R2 绑定 `MEDIA` | F-001（`media`） | F-005（`shelf`） | key 前缀划分：`img/` 归 `media`，`covers/` 归 `shelf` | 各领域只读写自己的前缀；F-006 存储清理只处理 `images` 表登记的 key，不触及 `covers/` |
+| 组件 `AdminHeader` | F-001 | F-005、F-006 | components.md | F-005 增量：导航"书影音"、`current="media"` |

@@ -1,12 +1,13 @@
 # Domain 注册表
 
-**最后更新**: 2026-10-16
+**最后更新**: 2026-10-21
 
 | Domain | 类型 | 职责 | 引入 Feature | 使用 Feature | 文档 |
 |--------|------|------|-------------|-------------|------|
 | `auth` | 支撑 | 管理员凭据校验、会话、登录限流 | F-001 | F-001 | [domain-model](auth/domain-model.md) · [api](auth/api-contract.md) · [data](auth/data-model.md) |
 | `post` | 核心 | 文章工作稿 / 已发布快照、发布状态流转、已发布只读查询；封面（F-002 增量）；图片引用查询（F-006 增量） | F-001 | F-001（写）、F-002（读；封面字段）、F-006（读：图片引用） | [domain-model](post/domain-model.md) · [api](post/api-contract.md) · [data](post/data-model.md) |
 | `media` | 支撑 | 图片与实况视频上传、R2 存取、图片读取路由；未引用资源检测与清理（F-006 增量） | F-001 | F-001（写）、F-002（读 URL）、F-006（清理） | [domain-model](media/domain-model.md) · [api](media/api-contract.md) · [data](media/data-model.md) |
+| `shelf` | 核心 | 书影音条目（界面称"书影音"，路由 `/media`、`/admin/media`）：增删改、隐藏、读者端公开列表、豆瓣链接识别（防腐层 `douban/`）、封面 R2 存取（`covers/`） | F-005 | F-005 | [domain-model](shelf/domain-model.md) · [api](shelf/api-contract.md) · [data](shelf/data-model.md) |
 
 非 Domain 的共享模块（前端 / 同构）：[markdown](../../frontend/modules/markdown/module-spec.md)、[editor](../../frontend/modules/editor/module-spec.md)、[media-upload](../../frontend/modules/media-upload/module-spec.md)、[reader](../../frontend/modules/reader/module-spec.md)（F-002，读者页构建期视图模型与运行时脚本）。
 

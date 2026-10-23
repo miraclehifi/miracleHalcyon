@@ -1,0 +1,50 @@
+---
+// MediaCard · /Mobile（components.md，设计稿 09 / 09m）：书、漫画卡片。封面向上探出卡片 32px；有豆瓣链接整卡为外链，
+// 否则不是链接、不显示"豆瓣 ↗"、悬停不放大封面
+import { StarRating } from "../ui/StarRating";
+import { statusLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
+import { markedMonth } from "../../lib/reader/shelf";
+import MediaCover from "./MediaCover.astro";
+
+interface Props {
+  entry: ShelfPublicEntry;
+}
+const { entry } = Astro.props;
+const linked = entry.doubanUrl !== null;
+const Wrapper = linked ? "a" : "div";
+const linkAttrs = linked ? { href: entry.doubanUrl, target: "_blank", rel: "noopener noreferrer", "aria-label": `在豆瓣查看《${entry.title}》（新标签页）` } : {};
+const inProgress = entry.status === "in_progress";
+---
+
+<li data-media-item data-media-card class="list-none">
+  <Wrapper {...linkAttrs} class:list={["group relative block pt-8", linked && "cursor-pointer"]}>
+    <div class="rounded-[4px] border border-line bg-bg">
+      <div class="flex min-h-[200px] gap-4 p-4 pl-40 max-md:min-h-[150px] max-md:pl-32">
+        <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+          <p data-media-title class="truncate text-body font-semibold text-ink">{entry.title}</p>
+          {entry.creator && <p class="truncate text-meta text-ink-faint">{entry.creator}</p>}
+          <StarRating value={entry.rating} size="sm" readOnly />
+          {entry.comment && <p class="whitespace-pre-line line-clamp-4 text-meta leading-[1.6] text-ink-muted">{entry.comment}</p>}
+        </div>
+      </div>
+      <div class="flex items-center justify-between border-t border-line px-4 py-3 text-caption text-ink-faint">
+        {
+          inProgress ? (
+            <span class="rounded-[4px] bg-accent-soft px-1.5 py-0.5 font-semibold text-accent">{statusLabel(entry.type, entry.status)}</span>
+          ) : (
+            <span>{`${statusLabel(entry.type, entry.status)} · ${markedMonth(entry.markedOn)}`}</span>
+          )
+        }
+        {linked && <span aria-hidden="true">豆瓣 ↗</span>}
+      </div>
+    </div>
+    <MediaCover
+      src={entry.cover}
+      iconSize={20}
+      class:list={[
+        "absolute top-0 left-4 h-48 w-32 rounded-[2px] shadow-[0_2px_8px_rgb(0_0_0/0.18)] max-md:h-36 max-md:w-24",
+        linked && "transition-transform duration-300 ease-out group-hover:scale-104 motion-reduce:transition-none motion-reduce:group-hover:scale-100",
+      ]}
+    />
+  </Wrapper>
+</li>

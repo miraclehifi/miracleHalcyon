@@ -1,0 +1,17 @@
+---
+// MediaHeader（components.md，设计稿 09 / 09m / 09dm）："书影音" + 当前分类计数（隐藏不计；进行中为 0 时不显示）；
+// toggleSlot：电影、剧集页手机端在计数右侧留"按时间"按钮槽（按钮由 MediaPosterWall portal 进来）
+interface Props {
+  count: string;
+  toggleSlot?: boolean;
+}
+const { count, toggleSlot = false } = Astro.props;
+---
+
+<header class="flex items-end justify-between gap-4">
+  <h1 class="text-display font-semibold text-ink max-md:text-title">书影音</h1>
+  <div class="flex items-center gap-3 pb-1">
+    <p data-media-count class="text-ui text-ink-muted tabular-nums">{count}</p>
+    {toggleSlot && <span data-time-toggle-slot="mobile" class="contents md:hidden" />}
+  </div>
+</header>

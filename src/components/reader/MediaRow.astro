@@ -1,0 +1,35 @@
+---
+// MediaRow · /Mobile（components.md，设计稿 09c / 09m）：游戏、桌游列表行。桌面一行：封面 40×60 · 标题（+ 进行中徽标）·
+// 开发商（宽 200）· 评分列（宽 88，无评分保留占位以对齐年月）· 年月；手机封面 44×66，右侧标题一行、下方"开发商 · 评分 · 年月"
+import { StarRating } from "../ui/StarRating";
+import { statusLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
+import { markedMonth } from "../../lib/reader/shelf";
+import MediaCover from "./MediaCover.astro";
+
+interface Props {
+  entry: ShelfPublicEntry;
+}
+const { entry } = Astro.props;
+const linked = entry.doubanUrl !== null;
+const Wrapper = linked ? "a" : "div";
+const linkAttrs = linked ? { href: entry.doubanUrl, target: "_blank", rel: "noopener noreferrer", "aria-label": `在豆瓣查看《${entry.title}》（新标签页）` } : {};
+---
+
+<li data-media-item data-media-row class="list-none border-b border-line last:border-b-0">
+  <Wrapper {...linkAttrs} class:list={["flex items-center gap-4 py-3 max-md:gap-3", linked && "cursor-pointer transition-colors duration-200 hover:bg-surface"]}>
+    <MediaCover src={entry.cover} class="relative h-[60px] w-10 rounded-[4px] max-md:h-[66px] max-md:w-11" />
+    <div class="flex min-w-0 flex-1 items-center gap-4 max-md:flex-col max-md:items-start max-md:gap-1">
+      <div class="flex min-w-0 flex-1 items-center gap-2 max-md:w-full">
+        <p data-media-title class="truncate text-body text-ink">{entry.title}</p>
+        {entry.status === "in_progress" && <span class="shrink-0 rounded-[4px] bg-accent-soft px-1.5 py-0.5 text-caption font-semibold text-accent">{statusLabel(entry.type, entry.status)}</span>}
+      </div>
+      <div class="flex shrink-0 items-center gap-4 max-md:gap-2">
+        <p class="w-[200px] truncate text-ui text-ink-muted max-md:w-auto max-md:max-w-[160px] max-md:text-meta">{entry.creator ?? "—"}</p>
+        <div data-rating-slot class="flex w-[88px] shrink-0 items-center max-md:w-auto">
+          <StarRating value={entry.rating} size="sm" readOnly />
+        </div>
+        <p data-media-date class="w-[60px] font-mono text-caption text-ink-faint max-md:w-auto">{markedMonth(entry.markedOn)}</p>
+      </div>
+    </div>
+  </Wrapper>
+</li>

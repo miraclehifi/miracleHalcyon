@@ -82,7 +82,7 @@ graph LR
     Detail -->|cd ..| Posts
     Posts -->|cd ..| Home
     Tag -->|cd ..| Home
-    Any["未匹配路径（含 /media、/rss.xml）"] --> NF[404]
+    Any["未匹配路径（含 /media/未知分类、/rss.xml）"] --> NF[404]
     NF -->|回首页| Home
     NF -->|看看全部文章| Posts
 ```
@@ -115,9 +115,28 @@ stateDiagram-v2
     关闭 --> [*]
 ```
 
+## 8. 书影音录入（F-005）
+
+```mermaid
+graph LR
+    List["条目列表 /admin/media?type="] -->|新增条目| New["/admin/media/new?type="]
+    List -->|编辑 / 点标题| Edit["/admin/media/:id"]
+    New --> Paste[粘贴豆瓣分享内容] -->|点 识别| Rec{识别结果}
+    Rec -->|成功 / 部分| Fill[填入条目字段并高亮，提示已识别 / 未识别]
+    Rec -->|失败| Keep[提示原因，表单不变]
+    Rec -->|重复| Dup[提示已录入] -->|去编辑| Edit
+    Fill --> Mine[补状态、评分、日期、短评] -->|保存| Save[保存：豆瓣封面转存 R2，触发重建]
+    Keep -->|全部手填| Mine
+    Edit -->|保存 / 删除| Save
+    Save --> List
+    List -->|隐藏 / 取消隐藏 / 删除| Rebuild[触发重建] --> Reader["/media、/media/:type"]
+    Save --> Rebuild
+```
+
 ## 变更历史
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
 | 2026-10-10 | 初始版本 | miraclehifi |
 | 2026-10-15 | 新增读者端页面跳转、发布到读者可见、灯箱（F-002） | miraclehifi |
+| 2026-10-21 | 新增书影音录入流程（F-005）；404 说明去掉 `/media` | miraclehifi |

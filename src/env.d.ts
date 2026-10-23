@@ -21,3 +21,9 @@ declare module "virtual:reader-data" {
   const data: import("./lib/reader/types").ReaderData;
   export default data;
 }
+
+// 书影音构建数据（ADR-012）：同上，只允许 prerender 页面引用
+declare module "virtual:shelf-data" {
+  const data: import("./integrations/reader-data").ShelfData;
+  export default data;
+}

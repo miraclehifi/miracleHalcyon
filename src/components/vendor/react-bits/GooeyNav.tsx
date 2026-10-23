@@ -10,6 +10,7 @@
  *    加 data-ready 后改由画布 / 叠层绘制，避免首屏先无选中态再闪出胶囊
  * 3. 新增 ariaLabel，渲染为 <nav aria-label>
  * 4. 根节点透传 data-* 属性（测试定位）
+ * 5. 有 onNavigate 时点击当前项也 preventDefault，不整页刷新（2026-10-23 code-review）
  */
 'use client';
 
@@ -911,8 +912,8 @@ const GooeyNav = ({
           // 改动 1：带修饰键或非左键的点击交给浏览器（新标签页等），不切换
           if (onNavigate && item.href && item.href !== '#') {
             if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-            if (index === current) return;
             event.preventDefault();
+            if (index === current) return; // 改动 5：当前项不再整页刷新
             select(index);
             onNavigate(item.href, index);
             return;

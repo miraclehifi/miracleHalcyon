@@ -95,7 +95,23 @@ export function normalizeEntryInput(raw: unknown): EntryData {
   return { type: body.type as ShelfType, title, creator, year, status: body.status as ShelfStatus, rating, markedOn: body.markedOn as string, comment, douban };
 }
 
-export const ENTRY_FIELDS = ["type", "title", "creator", "year", "status", "rating", "markedOn", "comment", "doubanUrl"];
+// 公开条目（api-contract ShelfPublicEntry）：读者页构建数据，不含 id、豆瓣 ID、隐藏标记与时间戳
+export interface ShelfPublicEntry {
+  type: ShelfType;
+  title: string;
+  creator: string | null;
+  year: number | null;
+  status: ShelfStatus;
+  rating: number | null;
+  markedOn: string;
+  comment: string | null;
+  cover: string | null;
+  doubanUrl: string | null;
+}
+
+export const isDoubanUrl = (value: string) => doubanKindOfUrl(value) !== null;
+
+export const ENTRY_FIELDS =["type", "title", "creator", "year", "status", "rating", "markedOn", "comment", "doubanUrl"];
 
 function parseDoubanRef(id: unknown, url: unknown, invalid: Set<string>): EntryData["douban"] {
   const noId = id === null || id === undefined || id === "";

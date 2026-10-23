@@ -101,6 +101,9 @@ export function createShelfService({ repo, store, hooks = noopShelfHooks, douban
 
     get: mustGet,
 
+    // 读者端：只含显示中，按 id 降序（同日新建在前，供 sortEntries 稳定排序）
+    listPublic: (): Promise<ShelfEntry[]> => repo.listVisible(),
+
     async create(raw: unknown, cover?: CoverUpload): Promise<ShelfEntry> {
       const data = normalizeEntryInput(raw);
       if (data.douban) {

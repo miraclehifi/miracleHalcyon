@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { loadReaderData, ReaderDataError } from "../../../src/integrations/reader-data";
+import { loadReaderData, loadShelfData, ReaderDataError } from "../../../src/integrations/reader-data";
 import type { ReaderPost } from "../../../src/lib/reader/types";
 
 const post = (slug: string, publishedAt: string, extra: Partial<ReaderPost> = {}): ReaderPost => ({
@@ -83,5 +83,81 @@ describe("loadReaderData", () => {
     await expect(loadReaderData({ dev: true, readFixture })).resolves.toEqual({ posts: [] });
     expect(readFixture).toHaveBeenCalledWith("reader-fixture");
     await expect(loadReaderData({ readFixture })).rejects.toThrow(/READER_API_ORIGIN/);
+  });
+});
+
+const shelfEntry = (title: string, extra: Record<string, unknown> = {}) => ({
+  type: "movie",
+  title,
+  creator: null,
+  year: null,
+  status: "completed",
+  rating: null,
+  markedOn: "2026-08-20",
+  comment: null,
+  cover: null,
+  doubanUrl: null,
+  ...extra,
+});
+
+// reader module-spec §1.3：virtual:shelf-data 取数（[TC-US03-08][SC-SHELF-18]）
+describe("loadShelfData", () => {
+  const origin = "https://halcyon.example.com";
+
+  it("线上接口：GET /api/shelf，返回 items", async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => json({ items: [shelfEntry("肖申克的救赎", { rating: 5, cover: "/covers/2026/10/k3j7x2m4q5ab.jpg", doubanUrl: "https://movie.douban.com/subject/1292052/" })] }));
+    const data = await loadShelfData({ apiOrigin: `${origin}/`, fetch });
+    expect(data.entries.map((e) => e.title)).toEqual(["肖申克的救赎"]);
+    expect(String(fetch.mock.calls[0][0])).toBe(`${origin}/api/shelf`);
+  });
+
+  it("404（线上 Worker 尚无该接口）→ 空数组 + 警告", async () => {
+    const warn = vi.fn();
+    const fetch = vi.fn(async () => json({ error: { code: "NOT_FOUND" } }, 404));
+    await expect(loadShelfData({ apiOrigin: origin, fetch, warn })).resolves.toEqual({ entries: [] });
+    expect(warn).toHaveBeenCalledOnce();
+  });
+
+  it("500 报错含地址与状态；非 JSON 报错", async () => {
+    await expect(loadShelfData({ apiOrigin: origin, fetch: vi.fn(async () => new Response("boom", { status: 500 })) })).rejects.toThrow(/https:\/\/halcyon\.example\.com\/api\/shelf.*500/);
+    await expect(loadShelfData({ apiOrigin: origin, fetch: vi.fn(async () => new Response("<html>", { status: 200 })) })).rejects.toThrow(/非 JSON/);
+  });
+
+  it("READER_BOOTSTRAP：不可达时空数组 + 警告；未开启时报错", async () => {
+    const fetch = vi.fn(async () => {
+      throw new TypeError("fetch failed");
+    });
+    const warn = vi.fn();
+    await expect(loadShelfData({ apiOrigin: origin, bootstrap: true, fetch, warn })).resolves.toEqual({ entries: [] });
+    expect(warn).toHaveBeenCalledOnce();
+    await expect(loadShelfData({ apiOrigin: origin, fetch })).rejects.toThrow(ReaderDataError);
+  });
+
+  it("夹具：读 {name}.shelf；不存在 → 空数组；dev 用默认夹具；都未配置且非 bootstrap 报错", async () => {
+    const readFixture = vi.fn(async (name: string) => {
+      if (name === "ok.shelf" || name === "reader-fixture.shelf") return JSON.stringify({ entries: [shelfEntry("A")] });
+      throw Object.assign(new Error("ENOENT"), { code: "ENOENT" });
+    });
+    expect((await loadShelfData({ fixture: "ok", readFixture })).entries).toHaveLength(1);
+    await expect(loadShelfData({ fixture: "reader-fixture-empty", readFixture })).resolves.toEqual({ entries: [] });
+    expect((await loadShelfData({ dev: true, readFixture })).entries).toHaveLength(1);
+    await expect(loadShelfData({ bootstrap: true, readFixture })).resolves.toEqual({ entries: [] });
+    await expect(loadShelfData({ readFixture })).rejects.toThrow(/READER_API_ORIGIN/);
+  });
+
+  it("字段非法时报错并指出标题", async () => {
+    const bad = [
+      shelfEntry("分类错", { type: "anime" }),
+      shelfEntry(" "),
+      shelfEntry("日期错", { markedOn: "2026-02-30" }),
+      shelfEntry("评分错", { rating: 6 }),
+      shelfEntry("封面错", { cover: "https://img.doubanio.com/x.jpg" }),
+      shelfEntry("链接错", { doubanUrl: "http://movie.douban.com/subject/1/" }),
+      shelfEntry("状态错", { status: "wish" }),
+    ];
+    for (const entry of bad) {
+      const fetch = vi.fn(async () => json({ items: [entry] }));
+      await expect(loadShelfData({ apiOrigin: origin, fetch }), entry.title).rejects.toThrow(entry.title.trim() === "" ? /（无标题）/ : new RegExp(entry.title));
+    }
   });
 });

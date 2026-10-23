@@ -46,7 +46,7 @@ test("[TC-US01-06] 404 页返回上一级", async ({ page }) => {
 
 // [TC-US01-07][TC-US01-08][SC-SHELL-08][SC-SHELL-09] 未知路径 404 页；读者端无后台入口
 test("[TC-US01-07][TC-US01-08] 未知路径返回 404 页且无后台入口", async ({ page }) => {
-  for (const path of ["/media", "/rss.xml", "/nope", "/posts/nope/extra"]) {
+  for (const path of ["/media/music", "/rss.xml", "/nope", "/posts/nope/extra"]) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(404);
     await expect(page.getByRole("heading", { level: 1, name: "页面不存在" })).toBeVisible();

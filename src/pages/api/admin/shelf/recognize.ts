@@ -1,14 +1,14 @@
 // POST /api/admin/shelf/recognize（shelf api-contract §3，ADR-011）：粘贴豆瓣分享内容识别条目数据。会话与 Origin 已由 middleware 校验
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { BadRequestError, parseEntryId, shelfErrorResponse, shelfServiceFor, type ShelfRouteDeps } from "../../../../lib/api/shelf-http";
+import { BadRequestError, exceedsBodyLimit, parseEntryId, shelfErrorResponse, shelfServiceFor, type ShelfRouteDeps } from "../../../../lib/api/shelf-http";
 
 export const prerender = false;
 
 const MAX_BODY_BYTES = 64 * 1024;
 
 async function readBody(request: Request): Promise<{ text: unknown; excludeId: unknown }> {
-  if (Number(request.headers.get("Content-Length") ?? 0) > MAX_BODY_BYTES) throw new BadRequestError("请求内容过大");
+  if (await exceedsBodyLimit(request, MAX_BODY_BYTES)) throw new BadRequestError("请求内容过大");
   try {
     const body = JSON.parse(await request.text());
     return body && typeof body === "object" ? body : { text: undefined, excludeId: undefined };

@@ -1,0 +1,14 @@
+---
+// /media/{type}：书以外的 5 个分类；未生成的分类（含 book、已去掉的 anime）走站点 404
+import type { GetStaticPaths } from "astro";
+import MediaPage from "../../components/reader/MediaPage.astro";
+import { SHELF_TYPES, type ShelfType } from "../../domains/shelf/entry";
+
+export const prerender = true;
+
+export const getStaticPaths = (() => SHELF_TYPES.filter((type) => type !== "book").map((type) => ({ params: { type } }))) satisfies GetStaticPaths;
+
+const type = Astro.params.type as ShelfType;
+---
+
+<MediaPage type={type} />

@@ -1,0 +1,35 @@
+---
+// 书影音读者页（reader-media.md，US-03）：/media 与 /media/{type} 共用。数据来自构建时的 virtual:shelf-data（ADR-012），
+// 只在 prerender 页面引用；React 岛只有 MediaTypeTabs（client:load）
+import data from "virtual:shelf-data";
+import { countLabel, SHELF_TYPES, TYPE_LABELS, type ShelfType } from "../../domains/shelf/entry";
+import ReaderLayout from "../../layouts/ReaderLayout.astro";
+import { groupShelf, shelfPath } from "../../lib/reader/shelf";
+import MediaHeader from "./MediaHeader.astro";
+import MediaList from "./MediaList.astro";
+import { MediaTypeTabs } from "./MediaTypeTabs";
+
+interface Props {
+  type: ShelfType;
+}
+const { type } = Astro.props;
+const entries = groupShelf(data.entries)[type];
+const inProgress = entries.filter((e) => e.status === "in_progress").length;
+const tabs = SHELF_TYPES.map((t) => ({ label: TYPE_LABELS[t], href: shelfPath(t) }));
+const posters = (type === "movie" || type === "series") && entries.length > 0; // 海报墙：主体满宽、"按时间"按钮槽
+const title = type === "book" ? "书影音 · miracleHalcyon" : `${TYPE_LABELS[type]} · 书影音 · miracleHalcyon`;
+---
+
+<ReaderLayout title={title} current="media" back="/" width={posters ? "full" : "list"} clipX>
+  <div class="flex flex-col gap-8">
+    <MediaHeader count={countLabel(type, entries.length, inProgress)} toggleSlot={posters} />
+    <div class="flex items-start justify-between gap-4">
+      <div class="min-w-0 flex-1">
+        <MediaTypeTabs client:load items={tabs} activeIndex={SHELF_TYPES.indexOf(type)} />
+      </div>
+      {posters && <span data-time-toggle-slot="desktop" class="contents max-md:hidden" />}
+    </div>
+    <MediaList type={type} entries={entries} />
+    <p class="text-meta text-ink-faint">只收录读过、看过、玩过和正在进行的条目，条目信息来自豆瓣。</p>
+  </div>
+</ReaderLayout>

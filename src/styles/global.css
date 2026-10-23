@@ -18,6 +18,16 @@
   }
 }
 
+/* 海报墙（components.md"海报墙参数"）：有 JS 时静态网格只占位，挂载后换成 Masonry，避免先看到静态网格再闪掉；
+   无 JS 时静态网格海报不能翻面，"豆瓣 ↗"常显在右下角 */
+html[data-js] [data-poster-static] {
+  visibility: hidden;
+}
+html:not([data-js]) [data-douban-link] {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 /* 主题切换扩散动画（reader-shell.md"主题切换"）：只在切换期间（html[data-theme-vt]）生效，不影响其他 View Transitions；
    新快照的 clip-path 由脚本动画驱动，起始值先用变量固定 */
 html[data-theme-vt="active"]::view-transition-old(root),

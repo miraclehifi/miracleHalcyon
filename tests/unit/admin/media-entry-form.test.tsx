@@ -58,6 +58,16 @@ describe("MediaEntryForm", () => {
     expect(screen.getByLabelText<HTMLInputElement>("作者").value).toBe("瑞·达利欧");
   });
 
+  // [SC-MANAGE-07] code-review：服务端 400 的出错字段表单上没有对应控件时，用 toast 给出服务端说明，不能毫无反馈
+  it("服务端校验失败、字段无对应控件时提示", async () => {
+    fetchMock.mockResolvedValue(Response.json({ error: { code: "VALIDATION_FAILED", message: "豆瓣链接不正确", fields: ["doubanUrl"] } }, { status: 400 }));
+    renderNew("book");
+    fireEvent.change(screen.getByLabelText("标题"), { target: { value: "原则" } });
+    await act(async () => void save());
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(screen.getByText("保存失败：豆瓣链接不正确")).toBeTruthy();
+  });
+
   // [SC-MANAGE-10][SC-MANAGE-11] 封面：合规显示预览；svg / 超 5 MB 提示且保留原预览
   it("封面选择与拒绝", () => {
     renderNew("book");

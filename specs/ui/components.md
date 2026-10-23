@@ -1,6 +1,6 @@
 # 组件清单（设计稿 ↔ 前端）
 
-**最后更新**: 2026-10-15
+**最后更新**: 2026-10-22
 **状态**: draft
 
 > 设计稿组件与前端 React 组件**同名**。来源：[admin.pen](admin.pen) 顶部的"组件区 Components"；颜色、字号、圆角等令牌见 [design-tokens.md](design-tokens.md)。
@@ -26,7 +26,7 @@
 | `IconButton/Ghost` · `Outline` · `/Ghost/Checked` | `IconButton` | `variant`；`icon`；`aria-label`（必填）；`size`：`sm` 28px（桌面）/ `touch` 44px（手机）；`checked?`（传了即开关：`role="switch"` + `aria-checked`，为真时 `accent-soft` 底 + `accent` 图标，对应设计稿 `/Ghost/Checked`，**不是 variant**） | 工具栏按钮（含"实况照片"开关）、关闭、列表行"更多操作"（`⋯`）、顶栏图标、轻提示关闭。已实现：`src/components/ui/IconButton.tsx`（图标 `ink-muted`，悬停 `surface-sunken` 底 + `ink`；Outline 1px `line-strong`；父元素可设 `--icon-button-ink` 改图标色，Toast 设为 `currentColor`；`checked` 开关态 Sprint 6 已实现） |
 | `StatusBadge/Draft` · `Published` · `Modified` | `StatusBadge` | `status`：`draft` / `published` / `modified`（已发布 · 有未发布修改）；配色见 design-tokens"文章状态配色" | 文章列表、写文章页顶栏、04 主按钮变体。已实现：`src/components/ui/StatusBadge.tsx`（含 `badgeStatus(status, hasUnpublishedChanges)`） |
 | `TagChip` | `TagChip` | `label`（`onRemove` 时带 × "删除标签 X"；`href` 时为链接，读者端标签入口，F-002）。已实现：`src/components/ui/TagChip.tsx`；设置抽屉的 `TagInput` 在 `src/components/admin/editor/TagInput.tsx` | 首页标签入口、设置抽屉标签输入 |
-| `Field` | `Field` | `label`；`hint?`；`error?`；`children`（输入控件） | 登录表单、设置抽屉（slug、日期）、04 校验。已实现：`src/components/ui/Field.tsx`（给唯一子控件补 id / `aria-invalid` / `aria-describedby` 与输入框样式 `FIELD_CONTROL_CLASS`；手机 16px 断点用 `md`（768px），与全站移动端定义一致） |
+| `Field` | `Field` | `label`；`hint?`；`error?`；`children`（输入控件） | 登录表单、设置抽屉（slug、日期）、04 校验。已实现：`src/components/ui/Field.tsx`（给唯一子控件补 id / `aria-invalid` / `aria-describedby` 与输入框样式 `FIELD_CONTROL_CLASS`；手机 16px 断点用 `md`（768px），与全站移动端定义一致）。2026-10-22 起标签 `ink`、间距 8，输入框加轻投影与 `accent` 悬停光晕（见 design-tokens"输入框质感"，待 Sprint 9 任务 5 实现） |
 | `SearchInput` | `SearchInput` | `placeholder`；`value`；`onChange`；手机端字号 16px。已实现：`src/components/ui/SearchInput.tsx`（防抖由使用方处理） | 文章列表 |
 | `SegmentedItem/Selected` · `Default` | `SegmentedControl` + `SegmentedControl.Item` | 容器：`value`；`onChange`；`aria-label`（单选组 `radiogroup`，← / → 切换）。Item：`value`；`icon?`；`count?`（`tabular-nums`）；`children`；`selected` 由容器 `value` 推导（对应设计稿 `/Selected`） | 文章列表状态筛选（带数量）、写文章页视图切换（带图标）。已实现：`src/components/ui/SegmentedControl.tsx` |
 | `TabItem/Selected` · `Default` | `Tabs` + `Tabs.Item` | 容器：`value`；`onChange`；`aria-label`（`tablist`，← / → 切换并选中）。Item：`value`；`controls`（面板 id）；`children`；`selected` 由容器 `value` 推导 | 写文章页（移动）编辑 / 预览。已实现：`src/components/ui/Tabs.tsx` |
@@ -100,7 +100,7 @@
 |-----------|-----------|----------------|---------|
 | `Alert/Error` | `Alert` | `tone`：`error`；`children` | 登录页"凭据错误"。已实现：`src/components/ui/Alert.tsx` |
 | `Toast/Error` · `Success` · `Warning` · `Undo` | `Toast` | `tone`：`error`（常驻、可关闭）/ `warning`（常驻、可关闭，`warn-soft` 底 + `warn` 图标与字，`role="status"`）/ `success`（4 秒自动消失）；`action?`（`{ label, onClick }`，传了即 `/Undo` 形态：文字后一个文字按钮"撤销"，6 秒消失）；规则见 design-tokens"轻提示" | 04 校验与错误提示；实况照片降级提示（warning）；文章列表删除后的"已删除《标题》· 撤销"。已实现：`src/components/ui/Toast.tsx`（`ToastProvider` + `useToast().show()`，页面底部居中堆叠）；`/Undo`（Sprint 2）：`surface` 底 + `line-strong` 边框、`trash-2` 图标、`accent` 文字按钮，不自动消失，由使用方按撤销期关闭；另有 `onHold(held)`（悬停、光标移动或焦点在提示内时为真，用于暂停计时），提示聚焦时 Ctrl/⌘+Z 等同点 action |
-| `ConfirmDialog/Danger` · `Default` | `ConfirmDialog` | `tone`：`danger`（删除）/ `default`（撤回）；`icon`；`title`；`description`；`confirmLabel` | 04 删除确认、撤回确认。已实现：`src/components/ui/ConfirmDialog.tsx`（`open`、`onConfirm`、`onCancel`；`role="alertdialog"`；`onConfirm` 返回 Promise 时确认按钮加载并禁用、不可取消） |
+| `ConfirmDialog/Danger` · `Default` | `ConfirmDialog` | `returnFocus?`（关闭后聚焦的元素；不传时用打开时的焦点元素——WebKit 点击按钮不聚焦，列表行操作需显式传入触发按钮）；`tone`：`danger`（删除）/ `default`（撤回）；`icon`；`title`；`description`；`confirmLabel` | 04 删除确认、撤回确认。已实现：`src/components/ui/ConfirmDialog.tsx`（`open`、`onConfirm`、`onCancel`；`role="alertdialog"`；`onConfirm` 返回 Promise 时确认按钮加载并禁用、不可取消） |
 | `EmptyState` | `EmptyState` | `icon`；`title`；`description`；`action?`。已实现：`src/components/ui/EmptyState.tsx`（文案在 `role="status"` 区域） | 文章列表空状态 |
 | `RestoreBanner` | `RestoreBanner` | `savedAt`；`onRestore`；`onDiscard` | 写文章页顶栏下方。已实现：`src/components/ui/RestoreBanner.tsx`（`section` 以标题命名；时间按浏览器时区"M月D日 HH:mm"） |
 
@@ -108,13 +108,33 @@
 
 | 设计稿组件 | React 组件 | Props | 使用位置 |
 |-----------|-----------|-------|---------|
-| `AdminHeader` · `AdminHeader/Mobile` | `AdminHeader` | `current?`：`posts` / `storage`（当前项 `accent` + 600，`aria-current="page"`）；左侧站点名（回 `/admin`）+ 导航"文章"（`/admin`）"存储"（`/admin/storage`，F-006）；右侧"查看博客""登出"；手机端导航与两个操作都只留图标（`file-text`、`hard-drive`、外链、登出，44×44，带 `aria-label`）。已实现：`src/components/admin/AdminHeader.tsx`（"登出"已接线，Sprint 2；导航与 `current`，F-006 Sprint 7）；同目录 `PageHeader.tsx` | 文章列表、存储页 |
+| `AdminHeader` · `AdminHeader/Mobile` | `AdminHeader` | `current?`：`posts` / `media` / `storage`（当前项 `accent` + 600，`aria-current="page"`）；左侧站点名（回 `/admin`）+ 导航"文章"（`/admin`）"书影音"（`/admin/media`，F-005）"存储"（`/admin/storage`，F-006）；右侧"查看博客""登出"；手机端导航与两个操作都只留图标（`file-text`、`library`、`hard-drive`、外链、登出，44×44、间距 0，带 `aria-label`；站点名 18px 以容纳 5 个图标，F-005）。已实现：`src/components/admin/AdminHeader.tsx`（"登出"已接线，Sprint 2；导航与 `current`，F-006 Sprint 7）；同目录 `PageHeader.tsx` | 文章列表、存储页、书影音条目页 |
 | `StatCard` · `StatCard/Highlight` | `StatCard` | `label`；`value`（主数字文本，如"12 张""25.3 MB"）；`detail?`（副行，如体积）；`highlight?`（对应 `/Highlight`：实线 `accent` 边 + `accent-soft` 底 + 主数字 `accent`，**不是 variant**）；`loading?`（主数字处骨架条）。外框同 `PostListItem`（虚线 `line-strong`、圆角 12），不可点无悬停；渲染为 `<dl>`；规则见 [admin-storage.md](pages/admin-storage.md)"StatCard"。已实现：`src/components/ui/StatCard.tsx`（主数字 `text-title` 24px） | 存储页统计区（F-006） |
+| `MediaEntryRow` · `MediaEntryRow/Mobile` | `MediaEntryRow`（F-005，已实现：`src/components/admin/media/MediaEntryRow.tsx`、列表 `MediaEntryList.tsx`） | `entry`（`id`、`title`、`creator`、`rating`、`status`、`markedOn`、`cover`、`hidden`、`type`）；`onHide`；`onDelete`。桌面：封面 32×48 · 标题（15px，进行中徽标 `accent-soft`；隐藏时标题 `ink-muted` + "已隐藏"徽标 `surface-sunken` 底 `eye-off`）· 作者（宽 160）· 评分（宽 88，`StarRating/Small` 只读，无评分留空）· 状态动词（宽 36）· 标记日期（`font-mono` 12px，宽 80）· 三个 `IconButton/Ghost`（编辑 `pencil` / 隐藏 `eye-off` ↔ `eye` / 删除 `trash-2`）；行底 1px `line`。手机：封面 40×60、右侧标题行 + "作者 · 星级 · 状态 日期"、右侧 `IconButton` ⋯（44）打开 `Menu`；规则见 [admin-media.md](pages/admin-media.md) | 书影音条目列表 |
+| `RecognizeBox` | `RecognizeBox`（F-005） | `excludeId?`（编辑时排除自身做去重）；`onRecognized(fields, filled, missing)`；`onDuplicate(entry)`。标签"豆瓣分享内容" + 多行输入框（圆角 12、`input-border` 描边，质感同 `Field`（见 design-tokens"输入框质感"），框内右下清空 ✕、`Button/Secondary`"识别" `scan-text`）+ 可识别类型小卡片 6 个（书 / 漫画 / 电影 / 剧集 / 游戏 / 桌游，手机隐藏）+ 结果卡（预览行：缩略图 32×48 + 标题 + 分类 · 作者 · 年份，失败时无；结果行：已识别 `circle-check` `ok` / 未识别 `circle-alert` `warn` / 失败 `circle-x` `danger` / 重复 `copy` `warn` + "去编辑 →"）；识别中按钮 `loader-circle` + "识别中…"；状态与文案见 [admin-media.md](pages/admin-media.md)"RecognizeBox" | 书影音录入表单 |
+| `StarRating` · `StarRating/Small` | `StarRating`（F-005） | `value`（1–5 / `null`）；`onChange?`；`size?`：`md`（默认）/ `sm`（对应设计稿 `/Small`，**不是 variant**）；`readOnly?`。5 颗表情星，累计点亮前 N 颗：`rating-star` 实心底 + `rating-face` 表情（每颗保留自己的表情），其余 `input-border` 底 + `line` 表情。`md`：36×34、间距 16，手机同尺寸，右侧 "N / 5"（`font-mono` 12px，空值"未评分"），`role="radiogroup"`，方向键改值，再点当前星取消评分（无"清除"按钮），切换动效见"评分动效参数"。`sm` + `readOnly`：16×15、间距 2（总宽 88），无文字、无动画，`role="img"` `aria-label="评分 N / 5"`；有评分时 5 颗都渲染（未点亮的为灰色占位），**空值不渲染**（调用方保留列宽）；静态 HTML 即可（读者页不水合） | `md`：书影音录入表单；`sm`：读者端 `MediaRow`、`MediaCard` |
 | `PostListItem` · `PostListItem/Mobile` · `/Open` · `/Mobile/Open` · `/Mobile/Commit` | `PostListItem` | `post`（`title`、`status`、`updatedAt`）；`onDelete`；`active`（由 `PostList` 传入，为真时显示悬停态，见"列表动效参数"）；`open` / `onOpenChange`（抽屉开合，由 `PostList` 控制，同一时间只开一行）；外框与 `PostCard` 一致（悬停同 `PostCard/Hover`），内容只有标题、状态徽标 + 更新时间和右侧 `IconButton/Ghost`（`⋯` 更多操作）。卡片本身是 SwipeRow 的拖动面，左滑露出抽屉"编辑 / 删除"，参数见"行滑动参数"。`/Open`（抽屉展开）、`/Mobile/Commit`（全滑、删除块铺满）是运行时状态，**不是 prop**；规则见 [admin-post-list.md](pages/admin-post-list.md)"行操作"。已实现：`src/components/admin/PostListItem.tsx`——外框、`active` 双层错位、标题链接、徽标 + 相对时间（Sprint 1）；SwipeRow 抽屉、`⋯`、全滑删除、删除后撤销（Sprint 2；`onDelete(post, index)` 带删除前位置，撤销时插回） | 文章列表 |
 | `ImageMenu` · `ImageMenu/Gallery` · `ImageMenu/Mobile` | `ImageMenu` | `kind`：`image` / `gallery`；`wide?`（单图）；`live?`（单图 URL 片段含 `live`）、`hasLiveVideo?`（`true` 时显示"实况"勾选项）、`onToggleLive`（单图）；`mode?`：`grid` / `accordion`，`count`（组图）；`onToggleWide` / `onModeChange` / `onSplit`。由触发按钮 `OverlayButton`（`size` 32）+ `Menu` 组成；`/Gallery` 对应 `kind="gallery"`，`/Mobile` 为触屏形态（菜单项 44px），**都不是 variant**；规则见 [admin-post-editor.md](pages/admin-post-editor.md)"图片菜单"。已实现：`src/components/admin/editor/ImageMenu.tsx`（开合由 `MarkdownPreview` 按图片 / 组图首张的源码起点 + 地址记录，改写后重新挂载仍打开并停在原项；改写经 `src/lib/editor/image-marks.ts` 双重定位；挂在 `ArticleImage` / `ImageGallery` 的 `actions` 插槽，即右上角内侧 8px；`/Mobile`：< 768px 时按钮 44、菜单项 44，点按图片 / 组图直接展开，按压超过 300ms 不算点按）；"实况"项（Sprint 6）：`hasLiveVideo` 为检查函数，菜单打开时调用，检查中与结果为 false 时不显示 | 写文章页 `MarkdownPreview` |
 | `EditorToolbar` · `EditorToolbar/Mobile` | `EditorToolbar` | `onCommand`；桌面 8 个格式按钮 + 插入图片（9 个都是 `IconButton/Ghost`，插入图片前加竖分隔线）；手机 7 个、固定在键盘上方；全部按钮包在一个 `TooltipGroup` 里，每个按钮一个 `Tooltip`（桌面 `side="bottom"`，手机 `side="top"`），名称与快捷键见 [admin-post-editor.md](pages/admin-post-editor.md)"工具栏与悬停提示"；末尾"实况照片"开关（`IconButton` `checked`，`live` / `onLiveChange`，Sprint 6 已实现） | 写文章页 |
 
 | `UploadCard` · `/ProcessingLive` · `/Error` · `/Interrupted` | `UploadCard` | `state`：`waiting` / `compressing` / `processing-live` / `fetching` / `uploading` / `error` / `interrupted`（`fetching`：Afilmory 照片获取信息中，文案"正在获取照片信息…"，US-13）；`fileName`；`thumbUrl?`（`blob:` URL）；`progress`（0–100）；`error?`（失败原因文案）；`onRetry?`；`onRemove`；`onStillOnly?`（有值且 `state="processing-live"` 时显示"仅转为静态图"）。设计稿 `UploadCard` 为上传中，`/ProcessingLive`、`/Error`、`/Interrupted` 对应同名 `state`，`waiting` / `compressing` / `fetching` 与上传中同形态只换文案（`fetching` 没有缩略图，与缩略图生成失败时相同）；**都不是 variant**。规则见 [admin-post-editor.md](pages/admin-post-editor.md)"上传进度卡片"。已实现（Sprint 6）：`src/components/admin/editor/UploadCard.tsx`（`interrupted` 为单独的 120px 卡片，只有"移除"；`MarkdownPreview` 按占位序号挂载，同槽位跨渲染复用宿主） | 写文章页 `MarkdownPreview`（源码上传占位的位置） |
+
+### 评分动效参数
+
+`StarRating` 参考 CodePen Stars rating animation（aaroniker，源码 [references/code/stars-rating-animation](../../references/code/stars-rating-animation/)，jQuery + SCSS，实现时改写为 React + CSS，不引入 jQuery）。星形路径、表情坐标取原作 `viewBox 0 0 36 34`。
+
+| 项 | 规则 |
+|----|------|
+| 表情 | 1 星眼睛 + 下撇嘴（难过）、2 星只有眼睛、3 星一字嘴、4 星微笑、5 星眯眼 "^ ^" + 张嘴笑 |
+| 切换 | 点新星：一颗高亮星从旧位置滑到新位置（`transform` 0.3s `cubic-bezier(0, 0, .265, 1.1)`，延迟 0.24s），滑动中横向拉伸 1.32 倍并有拖影（`rating-star` 36%），起止两端果冻式倾斜回弹（0.3s + 0.4s）；旧星、新星的眼睛朝滑动方向瞟 3px；途经的星随高光到达逐颗点亮（加分）或熄灭（减分），各 0.2s；全程 0.8s，期间点击忽略 |
+| 选中后 | 当前星（第 N 颗）眼睛每 3s 眨一次（1–4 星）；4 星放大到 1.25 倍弹一下（0.4s）、5 星转一圈后压扁回弹（0.72s），二者同时迸出 5 个小光点（0.32s） |
+| 按下 | 未选中的星按下缩到 0.9 倍（0.2s） |
+| 首次选择 / 取消 | 原作没有空值：从未评分到有分时高光不滑动，新星直接点亮并播"选中后"动画；再点当前星（或键盘在当前星上按空格）取消评分，全灰、无动画，焦点留在该星 |
+| 只读（`sm`） | 读者端展示，不播任何动画（含眨眼）；表情随尺寸等比缩小，描边宽 0.6 |
+| 键盘 | 方向键改值时同样播放切换动画；焦点环画在当前星（无值时第一颗）上 |
+| 降级 | `prefers-reduced-motion`：无滑动、拉伸、弹跳、眨眼，直接换色 |
+| 颜色 | 原作黄 `#FFED76` 在白底不可辨，亮色改 `#FACC15`；未选中星原作比底色更暗（暗色主题），亮色改为 `input-border` 中灰以满足 3:1。表情对比度 `rating-face` 在 `rating-star` 上 ≥ 11:1 |
+| 设计稿 | 只画静止态：组件区 `StarRating`、`StarRating/Small`（4 星）；11b 列出空值与 1–5 星；09 / 09m 读者端使用 `/Small` |
 
 ## 读者端区块
 
@@ -127,9 +147,13 @@
 | `SiteFooter` | `SiteFooter` | —（站点名、签名一句话、版权、RSS / GitHub 链接）。已实现：`src/components/reader/SiteFooter.astro`（与 `SiteHeader`、`SiteNav`、`BackLink`、`NotFound` 同为 Astro 组件，不水合） | 读者端全部页面 |
 | （SiteNav 内的主题切换按钮） | `ThemeToggle`（已实现：`src/components/reader/ThemeToggle.astro`，原生脚本，不加载 React） | —；`IconButton/Ghost`，亮 / 暗两态翻转 + 圆形扩散动画（View Transitions），图标固定为半填充圆（自绘 SVG），`aria-label="主题：…"`；规则见 [reader-shell.md](pages/reader-shell.md)"主题切换" | `SiteNav`、`SiteNav/Mobile` |
 | `BackLink` | `BackLink` | `href`；文字 `> cd ..`，`font-mono` 14px `ink-muted`，上下内边距 12（可点高度 ≥ 44） | 读者端子页主体末尾（05、05m、07、07m、09、09m；首页不用） |
-| `MediaTypeTab/Selected` · `Default` | `MediaTypeTabs` + `MediaTypeTabs.Item`（F-005 先行稿） | 容器：`value`（`book` / `comic` / `movie` / `series` / `anime` / `game` / `boardgame`）。Item：`value`；`href`；文字 书 / 漫画 / 电影 / 剧 / 动画 / 游戏 / 桌游，`font-body` 14px，内边距 4 10，圆角 4；`/Selected` 为反色（底 `ink`、字 `bg`、600，参考 pseudoyu），`/Default` 为 `ink-muted`、无底 | 书影音 `/media` |
-| `MediaRow` · `MediaRow/Mobile` | `MediaRow`（F-005 先行稿） | `item`（`title`、`creator`、`rating?` 1–5、`markedAt`、`status`、`cover`、`doubanUrl`）；整行链接到豆瓣（新标签页）。桌面一行：封面 40×60（圆角 4，`object-fit: cover`，`referrerpolicy="no-referrer"`，加载失败时显示 `surface-sunken` 底 + 图标）· 标题（16px `ink`，正在进行的条目后接 `accent-soft` 底 `accent` 字的"在读 / 在看 / 在玩"徽标）· 作者 / 导演 / 开发商（14px `ink-muted`，宽 200）· 评分（★ 用 `accent`，☆ 用 `line-strong`，无评分不渲染）· 标记年月（`font-mono` 12px `ink-faint`）；行间 1px `line` 分隔。手机：封面 44×66，右侧标题一行、下方"作者 · 评分 · 年月"一行 | 书影音 `/media`（书、漫画以外的分类） |
-| `MediaCard` · `MediaCard/Mobile` | `MediaCard`（F-005 先行稿，参考 [book-store-ui](../../references/code/book-store-ui/src) 的 `.book-card`） | `item`（同 `MediaRow`，另加 `comment?` 我的短评）。卡片 `bg` 底、1px `line` 描边、圆角 4，不加卡片投影；封面 128×192（手机 96×144），圆角 2，向上探出卡片顶边 32px，投影 `0 2px 8px` 黑 18%，悬停放大 1.04 倍（0.3s ease，减弱动效时不放大）；封面右侧：标题（16px 600 `ink`，单行省略）· 作者（13px `ink-faint`）· 评分星级（★ `accent`、☆ `line-strong`，无评分不渲染）· 短评（13px `ink-muted`，行高 1.6，最多 4 行，没有短评时不渲染）；底部分隔线下一行：左侧状态与日期（"读过 · 2026-08-14"，进行中的条目用"在读"徽标代替"读过"），右侧"豆瓣 ↗"（12px `ink-faint`，新标签页）；整卡可点，去豆瓣页。桌面两列、列距 32、行距 48；手机单列 | 书影音 `/media`（书、漫画） |
+| `MediaTypeTab/Selected` · `Default` | `MediaTypeTabs`（F-005 先行稿；已实现：`src/components/reader/MediaTypeTabs.tsx`，后台已接入、读者页随任务 8；React 岛，内部渲染 React Bits GooeyNav，见"分类导航参数"） | `value`（当前分类：`book` / `comic` / `movie` / `series` / `game` / `boardgame`）；`hrefFor(type)`（读者端 `/media`、`/media/{type}`；后台 `/admin/media?type=`）。每项是 `<a href>`，当前项 `aria-current="page"`，外层 `<nav aria-label="书影音分类">`；文字 书 / 漫画 / 电影 / 剧集 / 游戏 / 桌游，`font-body` 14px 500，内边距 6 13，胶囊全圆角；`/Selected` 为反色胶囊（底 `ink`、字 `bg`，参考 pseudoyu），`/Default` 为 `ink-muted`、无底，悬停字变 `ink` 并有浅色胶囊底。切换分类时旧胶囊碎成水滴飞向新项再整页跳转（[Backlog](../backlog/gooey-media-tabs.md)）；空间不够时换行，不横向滚动 | 书影音 `/media`、后台书影音条目页 |
+| `MediaRow` · `MediaRow/Mobile` | `MediaRow`（F-005 先行稿；已实现：`src/components/reader/MediaRow.astro`，Sprint 9 任务 8） | `item`（`title`、`creator`、`rating?` 1–5、`markedAt`、`status`、`cover`、`doubanUrl?`）；有 `doubanUrl` 时整行链接到豆瓣（新标签页），没有时不是链接。桌面一行：封面 40×60（圆角 4，`object-fit: cover`，封面为站内 R2 地址，加载失败时显示 `surface-sunken` 底 + 图标）· 标题（16px `ink`，正在进行的条目后接 `accent-soft` 底 `accent` 字的"在读 / 在看 / 在玩"徽标）· 作者 / 导演 / 开发商（14px `ink-muted`，宽 200）· 评分（`StarRating/Small` 只读，无评分不渲染）· 标记年月（`font-mono` 12px `ink-faint`）；行间 1px `line` 分隔。手机：封面 44×66，右侧标题一行、下方"作者 · 评分 · 年月"一行 | 书影音 `/media/boardgame` |
+| `MediaCard` · `MediaCard/Mobile` | `MediaCard`（F-005 先行稿；已实现：`src/components/reader/MediaCard.astro`，Sprint 9 任务 8；参考 [book-store-ui](../../references/code/book-store-ui/src) 的 `.book-card`） | `item`（同 `MediaRow`，另加 `comment?` 我的短评）。卡片 `bg` 底、1px `line` 描边、圆角 4，不加卡片投影；封面 128×192（手机 96×144），圆角 2，向上探出卡片顶边 32px，投影 `0 2px 8px` 黑 18%，悬停放大 1.04 倍（0.3s ease，减弱动效时不放大）；封面右侧：标题（16px 600 `ink`，单行省略）· 作者（13px `ink-faint`）· 评分（`StarRating/Small` 只读，无评分不渲染）· 短评（13px `ink-muted`，行高 1.6，最多 4 行，没有短评时不渲染）；底部分隔线下一行：左侧状态与年月（"读过 · 2026-08"，`yyyy-MM`，进行中的条目用"在读"徽标代替"读过"），右侧"豆瓣 ↗"（12px `ink-faint`，新标签页）；有 `doubanUrl` 时整卡可点去豆瓣页，没有时不是链接、不显示"豆瓣 ↗"、悬停不放大封面；封面为站内 R2 地址。桌面两列、列距 32、行距 48；手机单列 | 书影音 `/media`（书、漫画） |
+| `MediaPoster/Front` · `MediaPoster/Hover` · `MediaPoster/Back` | `MediaPoster`（F-005，底层 React Bits FlipCard，见"海报墙参数"；已实现：`src/components/reader/MediaPoster.tsx`，Sprint 9 任务 10） | `item`（`title`、`rating?`、`markedOn`、`status`、`cover?`、`comment?`、`doubanUrl?`）；`flipped`、`onFlipChange`（受控，由 `MediaPosterWall` 管理）；`width` / `height`（所在砖块尺寸：电影、剧集固定 2:3；游戏按封面原始比例，高 = 列宽 ÷ 封面宽高比，封面不裁切，无封面按 3:4）。`/Front`：封面铺满（`object-fit: cover`，圆角 4），不显示状态徽标；无封面 / 加载失败：`surface-sunken` 底，居中 `image-off` 图标 + 下方片名（13px `ink-muted`，最多 2 行），`role="img"` `aria-label="图片不可用"`。`/Hover`（指针悬停或键盘聚焦，仅精确指针设备）：**游戏条目不浮出片名**，改为左下角（距左 10、距底 10）淡入 `PlatformBadge`，不加底部渐变（徽标自带深色底）；电影、剧集底部浮出片名（样式与动效同 Masonry caption：底部透明 → 黑 54% 渐变，内边距上 40 左右 14 下 12，片名 14px 600 白、字距 -0.01em，从下移 6px、透明渐入到原位，0.35s / 0.5s），无封面时不浮出（占位已显示片名）。`/Back`：底色 `flip-surface`、片名色 `flip-ink`（同 FlipCard 示例的 `background` / `color`），内边距 16（手机 12），自上而下：片名（15px 600，最多 2 行）· 评分（`StarRating/Small` 只读，无评分不渲染）· 短评（13px `ink-muted`，行高 1.6，占满剩余高度后省略，无短评不渲染）· 底部分隔线下一行：左"看过 · 2026-10-14"（`font-mono` 12px `ink-faint`；手机只显示日期；进行中为"在看"徽标），右侧留给"豆瓣 ↗"。**不显示导演**；游戏条目在片名下方（间距 8）显示 `PlatformBadge`（电影、剧集不渲染），不显示开发商。点击 / Enter / 空格翻面（Y 轴），悬停倾斜 + 跟随指针的反光；"豆瓣 ↗"（12px `ink-faint`，新标签页）是 FlipCard 的兄弟节点，覆盖在背面右下角，只在翻开时可点、可聚焦；无 `doubanUrl` 不渲染 | `MediaPosterWall` 内 |
+| `MediaTimeHeading` | `MediaTimeHeading`（F-005；已实现，任务 10） | `label`（`在看` / `本月` / `上个月` / `本年` / `去年` / 四位年份）、`meta`（"10 月 · 3 部"，规则见 [reader-media.md](pages/reader-media.md)"按时间分段"）。`bg` 底，内边距上 14 下 12，`label` 16px 600 `ink` + 间距 10 + `meta`（`font-mono` 12px `ink-faint`），底边 1px `line`；`position: sticky; top: 0`，下缘挂一条 GradualBlur（见"海报墙参数"；只在吸顶时显示，未吸顶时它会盖住本段第一排海报顶部）；`label` 渲染为 `<h2>`，`meta` 为同行 `<span>`（不在标题内） | `MediaPosterWall`（按时间分段时） |
+| `PlatformBadge` | `PlatformBadge`（F-005） | `platform`。高 22 胶囊，内边距 0 9 0 7，间距 5，`#171A21` 85% 底 + 背景模糊 8，0.5px 白 18% 描边；左侧 12px 平台标志（Simple Icons 官方路径，内联 SVG，`#E6EDF3`）+ 文字（Inter 600 10.5px、字距 0.2，`#E6EDF3`）：`ps5` PlayStation 标志 +"PS5"，`ps4` PlayStation 标志 +"PS4"，`switch` Switch 标志 +"Switch"，`switch2` Switch 标志 +"Switch 2"（Simple Icons 无 Switch 2 图标），`steam` Steam 标志 +"Steam"；整体 `aria-label="平台：PS5"` 等。平台标志来自 Simple Icons（CC0），内联 SVG，不是图片素材 | `MediaPoster/Hover` 内（仅游戏） |
+| `MediaTimeToggle/On` · `MediaTimeToggle/Off` | `MediaTimeToggle`（F-005；已实现，任务 10） | `pressed`、`onChange`。`<button aria-pressed>`，`calendar-days` 图标 16px + "按时间"（14px 500），内边距 6 12，圆角 `radius`，间距 6；`/Off`：`bg` 底、1px `line` 描边、`ink-muted`；`/On`：`accent-soft` 底、1px `accent` 描边、`accent` 字与图标（不用反色，避免与选中的分类胶囊混淆）；悬停 `/Off` 字变 `ink` | 电影、剧集页：桌面在分类标签行右端，手机在标题行计数右侧 |
 
 ### 列表动效参数
 
@@ -331,6 +355,96 @@
 | `prefers-reduced-motion` 在挂载时就读取，并订阅变化 | 原实现只在 autoplay 的 effect 里读取一次 |
 | 缩放余量 `120` 改为 `edgePadding` prop（默认 120） | 原余量写死，手机上当前图只有屏宽的 60% |
 
+### 分类导航参数
+
+`MediaTypeTabs` 内部渲染 React Bits GooeyNav（TypeScript + Tailwind 版，文件 `GooeyNav.tsx`，无额外依赖，WebGL2 绘制，不支持时用组件自带的 DOM 胶囊兜底；只供 `MediaTypeTabs` 使用，页面不直接引用）。读者页与后台页都以 `client:load` 挂载；读者页除它之外不加载 React（[Backlog](../backlog/gooey-media-tabs.md)）。
+
+| Prop | 值 | 说明 |
+|------|----|------|
+| `items` | 7 个分类：`label` = 中文名，`href` = `hrefFor(type)` | 顺序同上表 |
+| `initialActiveIndex` | 当前分类的序号 | 非受控：点击后组件自己切到新项、播放水滴，再由 `onNavigate` 跳转 |
+| `theme` | `useColorScheme()` | 亮 / 暗主题决定悬停底色和投影深浅 |
+| `color` / `activeTextColor` | `useTokenColor("ink")` / `useTokenColor("bg")` | 胶囊反色，随主题切换（与 `Button` 同一套令牌解析） |
+| `colors` | `[]` | 水滴同胶囊色，不加彩色 |
+| `size` | `"sm"`，另用 `style` 覆盖 `--gn-font: 14px`、`--gn-ink: var(--ink)`、`--gn-muted: var(--ink-muted)` | 字号对齐设计稿，文字颜色走站点令牌而不是组件自带的灰 |
+| `frame` | `false` | 不要磨砂底板，保持纸面风格 |
+| `animationTime` / `timeVariance` | `600` / `300` | 默认值 |
+| `particleCount` / `spread` | `12` / `40` | 标签短、间距小，比默认少一点、散得近一点 |
+| `gooeyness` / `wobble` | `0.5` / `0.4` | 新胶囊轻微回弹 |
+| `hoverEffect` | `true` | — |
+| `onNavigate`（新增） | `(href) => setTimeout(() => navigate(href), reduced ? 0 : 700)` | `navigate` 来自 `src/lib/dom/navigate.ts`；700ms 覆盖水滴飞行（`animationTime` × 0.94 + 时间抖动的一半）；减弱动效时立即跳转 |
+| `ariaLabel`（新增） | `"书影音分类"` | — |
+
+**需要在源码上补的改动**（implement 阶段，保留原组件其余行为；上游路径 `src/ts-tailwind/Components/GooeyNav`，改动清单写在文件头）：
+
+| 改动 | 原因 |
+|------|------|
+| 新增 `onNavigate(href, index)`：传入时，未选中项的普通左键点击（`button === 0` 且无 Ctrl / ⌘ / Shift / Alt）先 `preventDefault`、切换选中项，再调用它；带修饰键或中键点击不拦截、不切换 | 分类是独立的预渲染页，原组件让链接直接跳转，动画来不及播；修饰键点击要保留"新标签页打开" |
+| 引擎就绪前（服务端渲染、无 JS、水合前）当前项链接直接显示 `--gn-pill` 底、`--gn-active-ink` 字；布局 effect 里给 `<nav>` 加 `data-ready` 后改由画布绘制 | 原组件水合前没有胶囊，首屏会先看到无选中态再闪出胶囊 |
+| 新增 `ariaLabel`，渲染为 `<nav aria-label>` | 原组件的 `<nav>` 没有名称 |
+| 根节点透传 `data-*`（测试用 `data-media-tabs`） | E2E 定位 |
+
+### 海报墙参数
+
+`MediaPosterWall` 内部渲染 React Bits Masonry（`Masonry.tsx`），每块砖是 `MediaPoster`（内部渲染 React Bits FlipCard，`FlipCard.tsx`），按时间分段时每段标题 `MediaTimeHeading` 下缘挂 React Bits GradualBlur（`GradualBlur.tsx`）。三个文件都只供海报墙使用，页面不直接引用。上游源码：[reactbits-masonry.tsx](../../references/code/reactbits-masonry.tsx)、[reactbits-flip-card.tsx](../../references/code/reactbits-flip-card.tsx)、[reactbits-gradual-blur.tsx](../../references/code/reactbits-gradual-blur.tsx)（[Backlog](../backlog/media-poster-wall.md)）。
+
+#### Masonry
+
+不分段时整面墙一个实例；按时间分段时每段一个实例（每段各自排布）。
+
+| Prop | 值 | 说明 |
+|------|----|------|
+| `items` | 条目 → `{ id, img: cover ?? "", width: 2, height: 3, title }` | 统一 2:3，不量图；无封面由 `renderTile` 画占位 |
+| `columns` / `columnWidth` / `gap` | 容器宽 < 600px 时 `2`，否则 `'auto'` / `200` / `16` | 1440 宽（主体 1340）→ 6 列，每张约 210×315；手机（主体 350）→ 2 列，每张约 167×250。列数取自 `MediaPosterWall` 量到的容器宽 |
+| `radius` | `4` | 与 `MediaCard` 封面一致 |
+| `animateFrom` / `stagger` / `duration` / `bounce` | `'bottom'` / `0.04` / `0.6` / `0.15` | 自下而上依次弹入 |
+| `blurToFocus` / `revealOnScroll` | `true` / `true` | 滚到时才入场 |
+| `hoverEffect` / `focusOnHover` / `captions` / `parallax` | `'none'` / `false` / `'none'` / `0` | 悬停倾斜交给 FlipCard；片名浮层由 `MediaPoster` 自己画（沿用本组件 `CAPTION` / `TITLE` 的样式类） |
+| `lightbox` / `draggable` | `false` / `false` | 点击用于翻面；读者不需要拖动排序 |
+| `renderTile`（新增） | `(item, { w, h }) => <MediaPoster …/>` | 见下方源码改动 |
+
+#### FlipCard（`MediaPoster` 内）
+
+| Prop | 值 | 说明 |
+|------|----|------|
+| `front` / `back` | `MediaPoster` 的正面（封面 + 悬停片名）/ 背面（详情） | — |
+| `flipped` / `onFlipChange` | 受控：`MediaPosterWall` 记录当前翻开的 `id`（最多一个，跨分段） | 翻另一张时前一张翻回；Esc 翻回（墙上监听 `keydown`）；切换"按时间"时全部翻回 |
+| `axis` / `flipOnClick` / `draggable` | `'y'` / `true` / `false` | 关拖动：避免与滚动、误触冲突 |
+| `width` / `height` / `radius` | 砖块 `w` / `h` / `4` | — |
+| `tilt` / `tiltMax` / `hoverScale` | `true` / `8` / `1.02` | 比默认收敛，砖块小 |
+| `glare` / `glareOpacity` | `true` / `0.22` | 默认值：悬停时跟随指针的白色径向反光 |
+| `perspective` / `stiffness` / `damping` | `1100` / `170` / `20` | 默认值 |
+| `background` / `color` | `useTokenColor("flip-surface")` / `useTokenColor("flip-ink")` | 背面底色与文字：亮 `#FFFFFF` / 正文色，暗 `#27272A` / `#F5F5F5`（同示例默认值，见 [design-tokens.md](design-tokens.md)"海报墙"） |
+| `shadow` / `shadowColor` / `shadowOpacity` | `true` / `"#000000"` / `0.25` | 比默认淡，保持纸面风格 |
+| `ariaLabel` | `《{title}》` | 正反面由 `aria-pressed` 表达 |
+
+#### GradualBlur（`MediaTimeHeading` 下缘）
+
+| Prop | 值 | 说明 |
+|------|----|------|
+| `position` / `target` | `'top'` / `'parent'` | 挂在标题底边下方 56px 的绝对定位条里，越靠近标题越模糊 |
+| `height` | `56` | — |
+| `strength` / `layers` / `curve` / `exponential` | `2` / `8` / `'linear'` / `true` | 默认值 |
+| `tint` | `useTokenColor("bg")` | 海报滚到标题下时淡入页面底色 |
+| `autoHide` / `hoverIntensity` / `zIndex` | `false` / `1` / `1`（标题为 `2`） | 只在吸顶时有意义；不随悬停变化 |
+
+**减弱动效**：Masonry 自带（无位移、无模糊直接出现）；FlipCard 用 `useReducedMotion` 直接切换正反面；悬停片名只淡入不位移。GradualBlur 为静态效果，不受影响。
+
+**无 JS 与水合前**：Masonry 在服务端量不到宽度、不输出砖块，所以 `MediaPosterWall` 服务端渲染静态网格（`<ul data-poster-static>`，CSS grid `repeat(auto-fill, minmax(200px, 1fr))`，< 600px 时 2 列，间距 16，不分段），每项是正面朝上的 `MediaPoster`，背面详情文字在 HTML 中（`aria-hidden`）；无 JS 时"豆瓣 ↗"固定显示在海报右下角（`html:not([data-js])`），`MediaTimeToggle` 不渲染。`BaseLayout` 的 `<head>` 内联脚本给 `<html>` 加 `data-js`，有 JS 时静态网格 `visibility: hidden` 占位，挂载后换成 Masonry 并播放入场，避免先看到静态网格再闪掉。
+
+**切换按钮的挂载**：`MediaTimeToggle` 由 `MediaPosterWall` 渲染，通过 `createPortal` 放进页面预留的空槽 `[data-time-toggle-slot]`：桌面槽在分类标签行右端，手机槽在标题行计数右侧；按 `(min-width: 768px)` 选一个槽挂载，断点变化时换槽（同一时刻只有一个按钮）。读者选择存 `localStorage` 键 `media:by-time`（`"1"` / `"0"`），读写包 `try/catch`，读不到按关闭。
+
+**需要在源码上补的改动**（implement 阶段，保留其余行为；改动清单写在文件头）：
+
+| 文件 | 改动 | 原因 |
+|------|------|------|
+| `Masonry.tsx` | 新增 `renderTile?(item, size: { w, h }, index)`：传入时砖块内容用它的返回值，不渲染内置的 `<button>` / `<a>` 卡片，也不挂内置的点击、拖动、悬停处理；砖块容器（定位、入场、`role="listitem"`）不变 | 原组件砖块只能是图片，翻面需要放 FlipCard |
+| `Masonry.tsx` | `@hugeicons/*` 换成 `lucide-react` 的 `ArrowLeft` / `ArrowRight` / `ArrowUpRight` / `X` | 不新增依赖；灯箱代码保留，便于以后复用 |
+| `Masonry.tsx` | 导出 `CAPTION`、`TITLE` 样式常量；根节点透传 `data-*`（分段用 `data-poster-segment`；`data-poster-wall` 挂在 `MediaPosterWall` 外层，分段时也只有一个） | `MediaPoster` 的悬停片名复用同一样式；E2E 定位 |
+| `Masonry.tsx` | 传 `renderTile` 时砖块不等内置图片加载、直接入场 | 没有内置 `<img>`，原逻辑会等 2.5 秒兜底才显示 |
+| `FlipCard.tsx` | `flip()` 按目标角度判断朝向（原为当前角度取整） | 受控用法下海报被动翻回的动画未结束时，点击 / Enter 会被判为"背面"而再翻回，表现为点了没反应（任务 10 E2E 发现） |
+| `GradualBlur.tsx` | 无行为改动 | — |
+
 ## 页面区块（单处使用，未做 Pencil 组件）
 
 | 图层名 | React 组件 | 所在画板 |
@@ -346,11 +460,13 @@
 | `ReadingProgress/Bar` | `ReadingProgress` | 05m / 05m-b（顶栏下 2px 进度细条，< 1280px） |
 | `TocButton` · `TocDrawer` | `TocDrawer` | 05m 右下角浮动按钮 / 05m-b 底部目录抽屉（< 1280px） |
 | `NotFound` | `NotFound` | 08（404：代码、标题、说明、回首页 / 看看全部文章） |
-| `MediaHeader` | `MediaHeader` | 09 / 09m（"书影音" + 当前分类数量与进行中数量） |
-| `MediaList` | `MediaList` | 09 / 09m（书、漫画用 `MediaCard` 网格，其余分类用 `MediaRow` 列表；进行中的条目置顶，其余按标记时间倒序；列表下方一行来源说明） |
+| `MediaHeader` | `MediaHeader`（已实现，任务 8） | 09 / 09m（"书影音" + 当前分类数量与进行中数量） |
+| `MediaList` | `MediaList`（已实现，任务 8、10） | 09 / 09m / 09c / 09d / 09e / 09dm（书、漫画用 `MediaCard` 网格，电影、剧集用 `MediaPosterWall`，游戏用 `MediaPosterWall`（同电影，砖块保持封面原比例），桌游用 `MediaRow` 列表；进行中的条目置顶，其余按标记日期倒序；列表下方一行来源说明；规则见 [reader-media.md](pages/reader-media.md)） |
+| `MediaPosterWall` | `MediaPosterWall`（已实现，任务 10） | 09e（不分段，默认）/ 09d（按时间分段）/ 09d-s（分段标题吸顶）/ 09dm（手机）/ 09f（游戏）：电影、剧集、游戏海报墙（游戏砖块保持封面原比例，悬停显示平台），React 岛 `client:load`，底层 React Bits Masonry，砖块为 `MediaPoster`；`MediaTimeToggle` 切换是否分段；同一时间只翻开一张，Esc 翻回；参数与无 JS 兜底见"海报墙参数"
+| `MediaEntryForm` | `MediaEntryForm` | 11 / 11m（书影音录入 / 编辑表单主体：卡片容器（头部图标块 + 标题）内依次 `RecognizeBox`、条目信息（封面区 + 字段）、我的记录、底部操作，F-005；见 [admin-media.md](pages/admin-media.md)） |
 | `CoverField` | `CoverField` | 03 设置抽屉（封面：缩略图 + 更换 / 移除，空时为拖放区）。已实现：`src/components/admin/editor/CoverField.tsx` |
 | `LoginForm` | `LoginForm` | 01 / 01m |
-| `PageHeader` | `PageHeader` | 02 / 02m |
+| `PageHeader` | `PageHeader` | 02 / 02m（辅助信息在标题右侧）；10 / 10m 用 `stacked`：辅助信息在标题下方一行，12px `ink-faint`（书影音：计数 + 读者页地址） |
 | `PostList` | `PostList` | 02 / 02m（底层 AnimatedList，见"列表动效参数"） |
 | `EditorTopBar` | `EditorTopBar` | 03 / 03m |
 | `MarkdownEditor` | `MarkdownEditor` | 03 / 03m |
@@ -375,6 +491,20 @@
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-22 | `RecognizeBox` 已实现；`Field` 新增 `warning`（识别缺失）与 `highlight`（识别填入）（Sprint 9 任务 6） | miraclehifi |
+| 2026-10-22 | `StarRating`（含 `/Small`）、`MediaEntryForm` 已实现；`Field` 加悬停光晕；`SegmentedControl` 加 `className`（撑满列宽）（Sprint 9 任务 5） | miraclehifi |
+| 2026-10-22 | `MediaRow`、`MediaCard`、`MediaHeader`、`MediaList`（任务 8）与 `MediaPoster`、`MediaTimeHeading`、`MediaTimeToggle`、`MediaPosterWall`（任务 10）已实现；`MediaCard` 底部日期统一为 `yyyy-MM`（与验收口径一致）；海报墙参数补 FlipCard 朝向修正、GradualBlur 只在吸顶时显示、Masonry `renderTile` 直接入场 | miraclehifi |
+| 2026-10-22 | `PageHeader` 新增 `stacked`（设计稿 10）；`ConfirmDialog` 新增 `returnFocus`（WebKit 焦点归还）；`AdminHeader`（书影音）、`MediaEntryRow`、`MediaTypeTabs` 已实现（Sprint 9 任务 4） | miraclehifi |
+| 2026-10-22 | 新增 `MediaPoster/Front` · `/Hover` · `/Back`（FlipCard 翻面海报，悬停显示片名，背面不显示导演）、`MediaTimeHeading`、`MediaTimeToggle/On` · `/Off`，页面区块 `MediaPosterWall`（满宽 Masonry 海报墙，可按时间分段）与"海报墙参数"；电影、剧集改用海报墙，`MediaRow` 只用于游戏、桌游（[media-poster-wall](../backlog/media-poster-wall.md)） | miraclehifi |
+| 2026-10-22 | 展示场景（`/Small`）无评分恢复为不渲染；录入组件空值仍显示 5 颗灰星（作者要求） | miraclehifi |
+| 2026-10-22 | 星级改为累计点亮：打 N 分时前 N 颗都是黄色实心星（各带表情），其余灰色占位；取代"只亮当前一颗"（作者要求） | miraclehifi |
+| 2026-10-22 | 星级始终显示 5 颗：未亮的星为灰色占位，无评分时 5 颗全灰，不再隐藏（作者要求，[rating-face-stars](../backlog/rating-face-stars.md)） | miraclehifi |
+| 2026-10-22 | `RatingInput` 改名 `StarRating`（读者端也用）：去掉"清除"按钮，再点当前星取消；新增 `StarRating/Small`（只读 16px），`MediaRow`、`MediaCard` 的 ★☆ 字符改为它（[rating-face-stars](../backlog/rating-face-stars.md)） | miraclehifi |
+| 2026-10-22 | `RatingInput` 改为表情星（参考 Stars rating animation）：只亮当前一颗、表情随分值、切换滑动动效；新增"评分动效参数"（[rating-face-stars](../backlog/rating-face-stars.md)） | miraclehifi |
+| 2026-10-22 | `Field` 与 `RecognizeBox` 输入框参考 Aceternity signup-form：标签 `ink`、轻投影、悬停光晕（[media-form-card-layout](../backlog/media-form-card-layout.md)） | miraclehifi |
+| 2026-10-22 | `RecognizeBox` 加标签、可识别类型小卡片、结果预览卡，输入框圆角 12；`MediaEntryForm` 收进卡片容器（[media-form-card-layout](../backlog/media-form-card-layout.md)）；`MediaTypeTabs` 去掉"动画"、"剧"改名"剧集"（[drop-anime-type](../backlog/drop-anime-type.md)） | miraclehifi |
+| 2026-10-22 | `MediaTypeTabs` 改为 React 岛，内部渲染 React Bits GooeyNav（水滴切换、悬停胶囊），新增"分类导航参数"；`/Selected` 圆角改为胶囊，手机端换行代替横向滚动（[gooey-media-tabs](../backlog/gooey-media-tabs.md)） | miraclehifi |
+| 2026-10-21 | F-005 design-ui：新增 `MediaEntryRow` · `/Mobile`、`RecognizeBox`、`RatingInput`（组件区业务区块 Row 7），页面区块 `MediaEntryForm`；`AdminHeader` 加"书影音"与 `current="media"`；`MediaRow` / `MediaCard` 封面改为 R2 地址、无豆瓣链接时非链接；`MediaTypeTabs.Item` 的 `href` 规则（[media-douban-sync](../backlog/media-douban-sync.md)） | miraclehifi |
 | 2026-10-16 | F-005 书影音先行稿（09 / 09m，参考 pseudoyu）：新增 `MediaTypeTab/Selected` · `Default`、`MediaRow` · `MediaRow/Mobile`、`MediaCard` · `MediaCard/Mobile`（书、漫画的卡片，参考 book-store-ui），页面区块 `MediaHeader`、`MediaList`（[media-douban-sync](../backlog/media-douban-sync.md)） | miraclehifi |
 | 2026-10-15 | `ThemeToggle` 改两态 + 圆形扩散动画，图标换成半填充圆；admin.pen `SiteNav` / `SiteNav/Mobile` 同步（[animated-theme-toggle](../backlog/animated-theme-toggle.md)） | miraclehifi |
 | 2026-10-15 | F-002 design-ui：06 拆为首页（06 / 06m）与 `/posts`（07 / 07m），`HomeTags` / `HomePosts` 改名 `TagIndex` / `PostCardList`，新增 `PostsHeader`；05 补左栏 `TagPostsNav`、文末 `PostPager`、`BackLink`，05m 目录改为 `TocButton` + `TocDrawer`（05m-b）、新增 `ReadingProgress/Bar`、`TagPostsNav/Mobile`；新增 08 `NotFound`、`ThemeToggle`、03 `CoverField`；`PostCard` 摘要优先用 `summary` | miraclehifi |

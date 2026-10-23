@@ -31,6 +31,7 @@
 2. key 一经写入不再修改、不覆盖（随机 id 冲突时重新生成）
 3. 不接受 SVG 及任何魔数不在白名单内的文件，不论扩展名和 `Content-Type`
 4. `width`、`height` 是文件真实尺寸
+5. 本领域只管 R2 `img/` 前缀与 `images` 表；`covers/` 前缀归 `shelf`（F-005 书影音封面），上传、读取、清理都不处理它（见 [shared-domains](../../../shared-domains.md)）
 
 ## 3. 值对象
 

@@ -1,0 +1,37 @@
+---
+// MediaList（components.md，reader-media.md"MediaList"）：书、漫画用 MediaCard 网格；电影、剧集用 MediaPosterWall 岛；
+// 游戏、桌游用 MediaRow 列表；空分类显示 EmptyState（无按钮，图标按分类；电影、剧集空分类不挂海报墙，也就没有"按时间"按钮）
+import { EmptyState } from "../ui/EmptyState";
+import type { IconName } from "../ui/icons";
+import { TYPE_LABELS, type ShelfPublicEntry, type ShelfType } from "../../domains/shelf/entry";
+import { emptyIcon } from "../../lib/reader/shelf";
+import MediaCard from "./MediaCard.astro";
+import { MediaPosterWall } from "./MediaPosterWall";
+import MediaRow from "./MediaRow.astro";
+
+interface Props {
+  type: ShelfType;
+  entries: ShelfPublicEntry[];
+}
+const { type, entries } = Astro.props;
+const cards = type === "book" || type === "comic";
+const posters = type === "movie" || type === "series";
+// 海报墙不显示导演：岛的 props 会序列化进 HTML，先去掉
+const posterEntries = posters ? entries.map((entry) => ({ ...entry, creator: null })) : [];
+---
+
+{
+  entries.length === 0 ? (
+    <EmptyState icon={emptyIcon(type) as IconName} title={`还没有记录${TYPE_LABELS[type]}`} />
+  ) : posters ? (
+    <MediaPosterWall client:load entries={posterEntries} />
+  ) : cards ? (
+    <ul class="grid grid-cols-2 gap-x-8 gap-y-12 pt-2 max-md:grid-cols-1 max-md:gap-y-8">
+      {entries.map((entry) => <MediaCard entry={entry} />)}
+    </ul>
+  ) : (
+    <ul class="flex flex-col">
+      {entries.map((entry) => <MediaRow entry={entry} />)}
+    </ul>
+  )
+}

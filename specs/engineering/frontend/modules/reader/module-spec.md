@@ -1,6 +1,6 @@
 # reader 模块（读者页构建期视图模型与运行时脚本）
 
-**最后更新**: 2026-10-15
+**最后更新**: 2026-10-22
 **状态**: self-checked
 **来源**: [F-002 feature-architecture](../../../features/F-002-博客首页与阅读/architecture/feature-architecture.md) · [ADR-007](../../../features/F-002-博客首页与阅读/architecture/adr/ADR-007-reader-build-data.md) · [ADR-008](../../../features/F-002-博客首页与阅读/architecture/adr/ADR-008-reader-interactivity.md)
 
@@ -44,6 +44,17 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | 类型声明 | `src/env.d.ts` 声明 `virtual:reader-data` 的默认导出为 `ReaderData` |
 | 只用于预渲染 | 只允许 `prerender = true` 的页面引用；构建产物检查运行时 Worker 包中不含 `virtual:reader-data` 内容 |
 
+### 1.3 书影音数据 `virtual:shelf-data`（F-005 增量，[ADR-012](../../../features/F-005-书影音/architecture/adr/ADR-012-shelf-reader-build-and-covers.md)）
+
+| 项 | 规则 |
+|----|------|
+| 模块（已实现） | 同一插件 `readerData()` 增加 `virtual:shelf-data`，默认导出 `{ entries: ShelfPublicEntry[] }`（字段见 [shelf api-contract](../../../backend/domains/shelf/api-contract.md) §2） |
+| 夹具 | `READER_FIXTURE` → `tests/fixtures/reader/{name}.shelf.json`；文件不存在 → 空数组（不报错，现有夹具无需改动） |
+| HTTP | `GET {origin}/api/shelf`，超时 15 秒；**404 → 空数组 + `console.warn`**（首次部署时线上 Worker 尚无该接口）；其他失败同 §1.2（`READER_BOOTSTRAP=1` 才回退为空） |
+| 校验 | 每项校验 `type` 枚举、`title` 非空、`markedOn` 日期、`rating` 1–5 或 null、`cover` 为 `/covers/` 路径或 null、`doubanUrl` 为豆瓣 https 地址或 null；不合法 → 报错并指出标题 |
+| 缓存 / 类型 / 只用于预渲染 | 同 §1.2；`src/env.d.ts` 声明默认导出类型 |
+| 视图模型（已实现，Sprint 9 任务 7） | `src/lib/reader/shelf.ts`：`groupShelf`、`sortPublic`（公开数据无 id，以倒序下标代替 id 调 `sortEntries`，`groupByTime` 共用）、`shelfPath`、`markedMonth`、`emptyIcon`，规则见 [shelf domain-model](../../../backend/domains/shelf/domain-model.md) §6；排序与文案复用 `src/domains/shelf/entry.ts` 的 `sortEntries`、`statusLabel`、`countLabel` |
+
 ## 2. 纯函数（`src/lib/reader/`，全部可在 Node / jsdom 单元测试）
 
 | 函数 | 文件 | 规则 | 关联 |
@@ -61,6 +72,8 @@ export interface TocItem { id: string; text: string; depth: 2 | 3 }
 | `updatedDate(post)`（已实现） | `reading-stats.ts` | `lastPublishedAt` 取 UTC 日期；晚于 `publishedAt` 时返回该日期，否则 `null` | TC-US07-05 |
 | `formatLongDate(date)`（已实现） | `reading-stats.ts` | `yyyy-MM-dd` → "2026年10月10日 星期六"（按日历计算星期，不依赖时区） | TC-US07-04 |
 | `prepareArticleHtml(html)`（已实现：h1 降级、标题 id、目录、hasImages；`data-dropcap` 已实现） | `article-html.ts` | 在 `renderMarkdown`（默认选项：不带 `uploadPlaceholders`，正文中残留的上传占位被删除，见 markdown module-spec §2.1，2026-10-16）结果上（rehype 解析 → 变换 → 序列化）：① 正文 `h1` 改为 `h2`；② 第一个顶层元素是 `p` 时加 `data-dropcap`；③ 只有正文顶层的 h2 / h3 进目录并补 `id`（按 `github-slugger` 规则生成，同名追加 `-1`、`-2`）；引用、列表、脚注区里的标题不收，已有 id 的不覆盖（脚注区标题被 `aria-describedby` 引用），空标题不进目录；返回 `{ html, toc: TocItem[], hasImages }` | TC-US07-02、06、07、TC-US08-09 |
+| `posterAspect(type, cover)`（F-005；待实现，[ADR-013](../../../features/F-005-书影音/architecture/adr/ADR-013-game-cover-igdb-link.md)） | `shelf.ts` | movie / series → `"2 / 3"`；game：`cover.width`、`cover.height` 均为正整数 → `"{w} / {h}"`，否则 `"3 / 4"`；`MediaPosterWall` 用它算砖块高（列宽 ÷ 比值）与静态网格的 `aspect-ratio` | TC-US03-21、22、UT-17 |
+| `groupByTime(entries, today)`（F-005；已实现，Sprint 9 任务 10） | `shelf-time.ts` | 输入为同一分类、已过滤隐藏的条目与本地日期 `today`（`yyyy-MM-dd`）；段顺序：在看（`in_progress`）→ 本月（同年同月，或晚于 `today`）→ 上个月（上一个日历月，可跨年）→ 本年 → 去年 → 更早各年倒序；返回 `{ key, label, meta, entries }[]`，空段不返回，段内按 `sortEntries`；`meta` 用 `countLabel` 的量词：本月 / 上个月 "{M} 月 · {n} 部"，本年 / 去年 "{yyyy} · {n} 部"，在看与更早年份 "{n} 部"（游戏：进行中段为"在玩"、量词"款"，2026-10-23 待实现）；纯函数，日期按字符串拆分计算，不依赖时区 | TC-US03-20、UT-15 |
 | `normalizeSiteConfig(raw)`（已实现） | `site-config.ts` | `name`、`avatar`、`bio`（≥ 1 段）必填；`github` / `photo` 为空串或 `undefined` → 省略，否则必须 `http:` / `https:` URL；`email` 空 → 省略，否则 `^[^\s@]+@[^\s@]+\.[^\s@]+$`；不合法抛 `Error('site.{字段} …')`，构建失败 | TC-US02-03、04 |
 
 ## 3. 运行时脚本（原生，ADR-008；进度、目录、抽屉已实现：`src/components/reader/reading.ts`）
@@ -159,5 +172,8 @@ export default {
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|----------|------|
 | 2026-10-15 | 1.0 | 初始版本（F-002 design-domain） | miraclehifi |
+| 2026-10-21 | 1.y | F-005：§1.3 `virtual:shelf-data` 与 `src/lib/reader/shelf.ts`（[ADR-012](../../../features/F-005-书影音/architecture/adr/ADR-012-shelf-reader-build-and-covers.md)） | miraclehifi |
 | 2026-10-16 | 1.1 | 读者端渲染不输出上传占位（F-001 [media-upload-experience](../../../../backlog/media-upload-experience.md)，TC-US05-38） | miraclehifi |
 | 2026-10-19 | 1.x | 外链照片：`ArticleImageData.external`、`live.range` / `codec`，灯箱主图；`site.afilmory`（[ADR-010](../../../features/F-001-文章写作/architecture/adr/ADR-010-external-photo-storage.md)） | miraclehifi |
+| 2026-10-23 | 1.z+1 | F-005：§2 新增 `posterAspect`；`groupByTime` 支持游戏（[game-case-shelf](../../../../backlog/game-case-shelf.md)） | miraclehifi |
+| 2026-10-22 | 1.z | F-005：§2 新增 `groupByTime`（海报墙按时间分段，[media-poster-wall](../../../../backlog/media-poster-wall.md)） | miraclehifi |

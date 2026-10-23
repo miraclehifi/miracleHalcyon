@@ -16,6 +16,8 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- 首屏主题（reader-shell.md"主题切换"）：在样式之前设置 data-theme，避免先闪成另一种主题；后台页面共用同一选择 -->
     <script is:inline>
+      // 有 JS 的标记：海报墙静态网格在有 JS 时占位隐藏（components.md"海报墙参数"）
+      document.documentElement.dataset.js = "";
       try {
         const theme = localStorage.getItem("theme");
         if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;

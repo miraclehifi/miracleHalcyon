@@ -1,6 +1,6 @@
 # miracleHalcyon Feature 路线图
 
-**最后更新**: 2026-10-16
+**最后更新**: 2026-10-22
 **状态**: approved
 
 ---
@@ -18,8 +18,8 @@
 | P1 | F-001 | 文章写作 | 管理员登录后在线写作、预览、上传图片、自动保存草稿、发布文章 | — | in_progress |
 | P1 | F-002 | 博客首页与阅读 | 首页（自我介绍）、文章列表页 `/posts`、文章详情页、按标签浏览、读者端顶栏 / 页脚 | F-001 | in_progress |
 | 后续 | F-003 | 作品集 | 项目展示与项目详情 | F-002 | idea |
-| 后续 | F-004 | 互动与发现 | 评论（Giscus）、站内搜索、RSS、SEO | F-002 | idea |
-| 后续 | F-005 | 书影音 | `/media` 展示书、漫画、电影、剧、动画、游戏、桌游；后台手动录入，粘贴豆瓣链接自动识别填表（见 [Backlog](../backlog/media-douban-sync.md)） | F-002 | ready |
+| 后续 | F-004 | 互动与发现 | 评论（Giscus）、站内搜索、RSS、SEO | F-002 | idea（备注：站内搜索 Pagefind 是否索引 `/media` 待 F-004 决定，2026-10-22 F-005 任务 8） |
+| 后续 | F-005 | 书影音 | `/media` 展示书、漫画、电影、剧集、游戏、桌游；后台手动录入，粘贴豆瓣链接自动识别填表（见 [Backlog](../backlog/media-douban-sync.md)） | F-002 | in_progress（Sprint 9） |
 | P1 | F-006 | 媒体存储清理 | 后台 `/admin/storage` 统计未被文章引用的图片与实况视频并一键清理（见 [Backlog](../backlog/media-orphan-cleanup.md)） | F-001 | planning |
 
 **顺序理由**: F-001 先行，先有写作能力才能产出真实文章，F-002 直接使用真实数据，无需构造假数据。
@@ -57,3 +57,4 @@ F-001 文章写作 ──(post Domain: 已发布文章)──▶ F-002 博客首
 | 2026-10-15 | 1.2 | F-005 书影音范围确定：只同步豆瓣，分类为书 / 漫画 / 电影 / 剧 / 动画 / 游戏 / 桌游，不做 Steam / PS / Switch 和音乐（见 [Backlog](../backlog/media-douban-sync.md)） | miraclehifi |
 | 2026-10-16 | 1.3 | 新增 F-006 媒体存储清理（见 [Backlog](../backlog/media-orphan-cleanup.md)） | miraclehifi |
 | 2026-10-19 | 1.4 | F-005 书影音改方案：取消豆瓣 RSS 同步、全量导入和 Cron，改为后台手动录入 + 粘贴豆瓣分享链接识别填表（只解析条目数据，参考淘宝地址识别）（见 [Backlog](../backlog/media-douban-sync.md)） | miraclehifi |
+| 2026-10-22 | 1.5 | 去掉'动画'分类、'剧'改名'剧集'（[drop-anime-type](../backlog/drop-anime-type.md)） | miraclehifi |

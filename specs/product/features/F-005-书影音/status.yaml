@@ -1,0 +1,38 @@
+feature: F-005
+name: "书影音"
+status: in_progress
+created: 2026-10-21
+updated: 2026-10-23
+backlog: specs/backlog/media-douban-sync.md
+phases:
+  feature_overview: done
+  story_grouping: done
+  user_stories: done
+  behaviors: done
+  acceptance_tests: done
+  ui_design: done        # reader-media.md、admin-media.md；admin.pen 09c、09d、09d-s、09e、09dm、10、10m、11、11m、11b（2026-10-22 海报墙增量 media-poster-wall）；2026-10-23 游戏海报墙增量 game-case-shelf：09f、11g、09c 改桌游、组件区 Row 7
+  architecture: done     # feature-architecture.md、ADR-011、ADR-012、ADR-013（2026-10-23 游戏 IGDB 外链封面）
+  domain_design: done   # domain_model / api_contract / data_model: self-checked（shelf；DDL 迁移 0004；2026-10-23 迁移 0005 平台与 IGDB 封面）
+  task_planning: done   # self-checked；Sprint 9 共 8 个任务（2026-10-21），2026-10-22 插入任务 9 restyle-blue-accent、任务 10 add-media-poster-wall，2026-10-23 插入任务 12–14（game-case-shelf）
+  implementation: in_progress   # 2026-10-22 Sprint 9 任务 1–11 全部完成；2026-10-23 插入任务 12–14 待实现
+  code_review: in_progress   # 2026-10-23 任务 1–11 审查完成（MUST-FIX 4 项已修复，CONCERN 记入 backlog shelf-review-followups）；任务 12–14 实现后补审
+  validation: pending
+current_phase: implementation
+blockers: []
+notes: "后台手动录入 + 豆瓣分享链接识别填表；/media 分类展示。Domain 需避开已有 media（图片）命名"
+has_ui_changes: true
+approvals:
+  requirements: true   # 2026-10-21 文档阶段按作者偏好免逐阶段确认
+  ui_design: true   # 2026-10-21 按作者偏好直接继续，待事后审阅
+  design: true   # 2026-10-21 架构（ADR-011、ADR-012）按作者偏好直接继续，待事后审阅
+  tasks: true    # 2026-10-21 作者"开始开发书影音的需求"
+  release: false
+checkpoint:
+  sprint: sprint-9
+  current_task: null
+  current_phase: pending   # 2026-10-23 插入任务 12–14（游戏海报墙）；下一个 add-game-platform-api
+  completed_tasks: [spike-douban-rexxar, add-shelf-entry-api, add-douban-recognize-api, restyle-blue-accent, add-admin-media-list, drop-anime-type, add-admin-media-form, add-recognize-box, add-shelf-reader-data, add-media-reader-page, add-media-poster-wall]
+  blocked_tasks: []
+  env_info: "Node + npm；Vitest 4.1（unit jsdom / workers workerd）；Playwright chromium + webkit；Windows（Bash 反斜杠会被折叠，含转义内容用 Write）"
+  test_command: "npx vitest run <文件>（unit jsdom / workers）；E2E npx playwright test <文件> --project chromium；构建 npm run test:build"
+  last_updated: "2026-10-22"

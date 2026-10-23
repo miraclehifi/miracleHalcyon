@@ -1,0 +1,16 @@
+{
+  "entries": [
+    { "type": "comic", "title": "超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长标题漫画超长", "creator": "某作者", "year": 2020, "status": "completed", "rating": 4, "markedOn": "2026-09-01", "comment": "第一行\n第二行\n第三行\n第四行\n第五行\n第六行", "cover": null, "doubanUrl": null },
+    { "type": "series", "title": "C", "creator": null, "year": null, "status": "completed", "rating": null, "markedOn": "2026-09-15", "comment": null, "cover": null, "doubanUrl": null },
+    { "type": "series", "title": "B", "creator": null, "year": null, "status": "in_progress", "rating": null, "markedOn": "2026-01-10", "comment": null, "cover": null, "doubanUrl": null },
+    { "type": "series", "title": "A", "creator": null, "year": null, "status": "completed", "rating": null, "markedOn": "2026-03-01", "comment": null, "cover": null, "doubanUrl": null },
+    { "type": "game", "title": "无评游戏", "creator": null, "year": null, "status": "completed", "rating": null, "markedOn": "2026-04-01", "comment": null, "cover": null, "doubanUrl": null },
+    { "type": "game", "title": "旷野之息", "creator": "任天堂", "year": 2017, "status": "completed", "rating": 5, "markedOn": "2026-06-01", "comment": null, "cover": "/covers/2026/06/zeldabotw2ab.jpg", "doubanUrl": "https://www.douban.com/game/25967246/" },
+    { "type": "movie", "title": "无名片", "creator": null, "year": null, "status": "completed", "rating": null, "markedOn": "2026-07-01", "comment": null, "cover": "/covers/2026/07/nonexist2abc.jpg", "doubanUrl": null },
+    { "type": "movie", "title": "肖申克的救赎", "creator": "弗兰克·德拉邦特", "year": 1994, "status": "completed", "rating": 5, "markedOn": "2026-08-20", "comment": "希望是美好的事物", "cover": "/covers/2026/08/shawshank2ab.jpg", "doubanUrl": "https://movie.douban.com/subject/1292052/" },
+    { "type": "book", "title": "<b>粗体</b>", "creator": null, "year": null, "status": "completed", "rating": null, "markedOn": "2026-01-01", "comment": null, "cover": null, "doubanUrl": null },
+    { "type": "book", "title": "手记", "creator": null, "year": null, "status": "completed", "rating": 5, "markedOn": "2026-03-01", "comment": null, "cover": null, "doubanUrl": null },
+    { "type": "book", "title": "三体", "creator": "刘慈欣", "year": 2008, "status": "in_progress", "rating": null, "markedOn": "2026-08-01", "comment": null, "cover": null, "doubanUrl": "https://book.douban.com/subject/2567698/" },
+    { "type": "book", "title": "原则", "creator": "瑞·达利欧", "year": 2018, "status": "completed", "rating": 4, "markedOn": "2026-10-01", "comment": "值得反复读", "cover": "/covers/2026/10/k3j7x2m4q5ab.jpg", "doubanUrl": "https://book.douban.com/subject/27608239/" }
+  ]
+}

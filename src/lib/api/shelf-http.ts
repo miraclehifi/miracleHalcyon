@@ -2,7 +2,7 @@
 import type { APIContext } from "astro";
 import { R2CoverStore } from "../../domains/shelf/cover-store";
 import { createDoubanClient } from "../../domains/shelf/douban/client";
-import { coverUrl } from "../../domains/shelf/entry";
+import { coverUrl, type ShelfPublicEntry } from "../../domains/shelf/entry";
 import { CoverTooLargeError, CoverTypeError, DuplicateDoubanError, EntryNotFoundError, RecognizeError, ShelfValidationError, type RecognizeCode } from "../../domains/shelf/errors";
 import { noopShelfHooks, type ShelfHooks } from "../../domains/shelf/hooks";
 import { D1ShelfRepo, type ShelfEntry } from "../../domains/shelf/repo";
@@ -67,9 +67,16 @@ export interface EntryForm {
   coverChange: CoverChange;
 }
 
+// 按 Content-Length 判定超限；拒绝前读完请求体：本地 preview（miniflare）里带体请求没读就返回，同一连接上的下一个请求会失败
+export async function exceedsBodyLimit(request: Request, max: number): Promise<boolean> {
+  if (Number(request.headers.get("Content-Length") ?? 0) <= max) return false;
+  await request.arrayBuffer().catch(() => undefined);
+  return true;
+}
+
 // multipart：fields（JSON）+ 可选 cover 文件 + 可选 coverAction（keep / remove）
 export async function readEntryForm(request: Request): Promise<EntryForm> {
-  if (Number(request.headers.get("Content-Length") ?? 0) > ENTRY_PAYLOAD_MAX) throw new CoverTooLargeError();
+  if (await exceedsBodyLimit(request, ENTRY_PAYLOAD_MAX)) throw new CoverTooLargeError();
   let data: FormData;
   try {
     data = await request.formData();
@@ -114,6 +121,11 @@ export function entryView(entry: ShelfEntry) {
 }
 
 export type ShelfEntryView = ReturnType<typeof entryView>;
+
+export function publicEntryView(entry: ShelfEntry): ShelfPublicEntry {
+  const { type, title, creator, year, status, rating, markedOn, comment, cover, doubanUrl } = entryView(entry);
+  return { type, title, creator, year, status, rating, markedOn, comment, cover, doubanUrl };
+}
 
 export function shelfErrorResponse(error: unknown): Response {
   if (error instanceof ShelfValidationError) {

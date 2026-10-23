@@ -37,7 +37,9 @@ async function waitForServer() {
   for (let i = 0; i < 120; i++) {
     try {
       if ((await fetch(`${TARGET_URL}/admin/login`)).ok) return;
-    } catch {}
+    } catch {
+      // 服务未就绪，稍后重试
+    }
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
   throw new Error(`服务未就绪：${TARGET_URL}`);

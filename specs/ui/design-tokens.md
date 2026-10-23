@@ -1,12 +1,12 @@
-# 设计令牌（楷体 · 白底 · 暖棕）
+# 设计令牌（楷体 · 白底 · 蓝）
 
-**最后更新**: 2026-10-10
+**最后更新**: 2026-10-22
 **状态**: draft
 
-> 全站（后台 F-001 + 读者端 F-002）共用。风格参考 [潮流周刊 tw93](https://weekly.tw93.fun/posts/284)（见 [Backlog](../backlog/restyle-tw93-reference.md)）；设计稿变量在 [admin.pen](admin.pen)，实现时映射为 Tailwind CSS 4 `@theme` 变量。
+> 全站（后台 F-001 + 读者端 F-002）共用。风格参考 [潮流周刊 tw93](https://weekly.tw93.fun/posts/284)（见 [Backlog](../backlog/restyle-tw93-reference.md)），强调色改为参考 Aceternity 的蓝色（见 [Backlog](../backlog/restyle-blue-accent.md)）；设计稿变量在 [admin.pen](admin.pen)，实现时映射为 Tailwind CSS 4 `@theme` 变量。
 > 主题：亮色 / 暗色，默认跟随系统（见 [全局 NFR](../product/nfr.md) §4）。
 > **实现**（已实现，`src/styles/tokens.css`）：颜色用 `light-dark()` 定义，`<html data-theme="light|dark">` 强制主题；Tailwind 类名 = 令牌名（`bg-surface`、`text-ink-muted`、`font-body`、`text-caption`），圆角 `rounded-control`（8px）/ `rounded-card`（12px），版心 `max-w-prose`（864px）；Tailwind 默认色板已移除。webfont 加载（`unicode-range` 分片）尚未实现，当前只有字体栈。
-> 气质：像纸质读物，靠字体与留白撑起质感。**不使用**渐变、卡片阴影、emoji 装饰图标。例外：文字按钮 `Button` 的边缘流光 + 柔和投影（见下文"按钮质感"）；组图手风琴的底部渐变、面板投影与 3D 倾斜（见下文"组图手风琴"）；灯箱层叠卡片的投影与 3D 倾斜（见下文"灯箱层叠"）；组图网格卡片的浅渐变底与轻投影（见下文"组图网格"）；图片加载中的斜向扫光（见下文"图片加载"）；悬停提示的投影与弹出 / 滑动动效（见下文"悬停提示"）。
+> 气质：像纸质读物，靠字体与留白撑起质感。**不使用**渐变、卡片阴影、emoji 装饰图标。例外：文字按钮 `Button` 的边缘流光 + 柔和投影（见下文"按钮质感"）；组图手风琴的底部渐变、面板投影与 3D 倾斜（见下文"组图手风琴"）；灯箱层叠卡片的投影与 3D 倾斜（见下文"灯箱层叠"）；组图网格卡片的浅渐变底与轻投影（见下文"组图网格"）；图片加载中的斜向扫光（见下文"图片加载"）；悬停提示的投影与弹出 / 滑动动效（见下文"悬停提示"）；后台输入框的轻投影、悬停光晕与渐隐分隔线（见下文"输入框质感"）；书影音海报墙的悬停片名渐变、翻面卡片投影 / 倾斜 / 反光与分段标题下缘渐变模糊（见下文"海报墙"）。
 
 ## 颜色
 
@@ -23,9 +23,9 @@
 | `line` | `#E6E6E6` | `#3A4148` | 分隔线（纯结构，不承担识别） |
 | `line-strong` | `#D4D4D4` | `#555555` | 次按钮描边、竖分隔 |
 | `input-border` | `#8A8A8A` | `#737B84` | 输入框描边、取消按钮描边（≥ 3:1） |
-| `focus` | `#8B6238` | `#E8A15A` | 键盘焦点环 |
-| `accent` / `accent-ink` | `#8B6238` / `#FFFFFF` | `#E8A15A` / `#21262B` | 主操作、当前导航项、链接 hover（暖棕）/ 主按钮文字 |
-| `accent-soft` | `#F5EDE4` | `#3A3026` | 主色浅底 |
+| `focus` | `#2563EB` | `#60A5FA` | 键盘焦点环 |
+| `accent` / `accent-ink` | `#2563EB` / `#FFFFFF` | `#60A5FA` / `#21262B` | 主操作、当前导航项、链接 hover（蓝，Tailwind blue-600 / blue-400）/ 主按钮文字 |
+| `accent-soft` | `#EFF6FF` | `#1E2B3F` | 主色浅底 |
 | `ok` / `ok-soft` | `#3D6A2C` / `#E6EEDF` | `#9CC27F` / `#26332A` | 已发布、成功 |
 | `warn` / `warn-soft` | `#85570C` / `#F6EBD3` | `#E3B65E` / `#3A3222` | 有未发布修改、本地恢复提示、警示类轻提示 |
 | `danger` / `danger-ink` | `#A8382C` / `#FFFFFF` | `#EB8577` / `#21262B` | 删除、错误 / 危险按钮文字 |
@@ -34,6 +34,10 @@
 | `button-ink` | `#FAFAFA` | `#F5F5F5` | `Button` 文字与图标 |
 | `button-base` | `#3F3F46` | `#525252` | `Button` 边缘底线 |
 | `specular-line` | `#FFFFFF` | `#FFFFFF` | `Button` 边缘流光 |
+| `rating-star` | `#FACC15` | `#FFED76` | `StarRating` 已点亮的星（前 N 颗，只做图形，不做文字） |
+| `rating-face` | `#121621` | `#121621` | 已点亮星上的表情（在 `rating-star` 上亮 11.8:1、暗 15.2:1） |
+| `flip-surface` | `#FFFFFF` | `#27272A` | 海报背面底色（FlipCard `background`，暗色取示例默认值；其上 `ink-muted` / `ink-faint` 暗色 7.6:1 / 5.5:1） |
+| `flip-ink` | `#262626` | `#F5F5F5` | 海报背面片名（FlipCard `color`，暗色取示例默认值） |
 
 **图片浮层**（叠在照片上，亮暗主题取值相同）：
 
@@ -44,7 +48,7 @@
 | `overlay-ink-muted` | `#FFFFFF` 72% | 灯箱计数、操作提示 |
 | `scrim` | `#0D0D0D` 95% | 灯箱底 |
 
-- 亮色 `accent` 比参考站的 `#A67C52` 深一档：后者在白底仅 3.73:1，不满足文字与按钮 AA
+- 亮色 `accent` 用 blue-600 而非 Aceternity 光晕的 blue-500（`#3B82F6`）：后者在白底仅 3.68:1，不满足文字与按钮 AA
 - 强调色克制使用：主按钮、当前导航项、hover、焦点；正文链接默认与正文同色
 - **禁止**在组件里写死颜色值（例如按钮文字写死成白色），一律引用令牌，保证暗色主题可用
 
@@ -86,7 +90,7 @@
 |----|------|
 | 焦点环 | `:focus-visible` 时 2px `focus` 实线描边，外扩 2px（`outline: 2px solid; outline-offset: 2px`）；鼠标点击不显示；强制颜色模式下保留系统颜色 |
 | 链接 | 默认无下划线；hover 时出现 1px 底边线（`border-block-end: 1px solid currentColor`） |
-| 过渡 | 统一 `0.2s ease`，只过渡颜色、透明度、边框；例外：按钮边缘光跟随指针、按下缩放到 0.97（`0.25s`）；文章卡片 `PostCard` 悬停的双层错位（`transform` 位移 4px，`0.3s ease-out`）、动态照片播放时放大 1.06 倍（`0.3s ease-out`）、书影音卡片封面悬停放大 1.04 倍（`0.3s ease`）、组图网格悬停聚光（见"组图网格"）、组图手风琴展开（见"组图手风琴"）、灯箱层叠切换（见"灯箱层叠"）、图片加载渐显（见"图片加载"）、悬停提示弹出与组内滑动（见"悬停提示"）、文章列表入场（行从下方 12px 缩放 0.8 弹入，弹簧曲线 620ms，逐行错开 50ms，只在列表首次进入视口及筛选 / 翻页后播放，见 components.md"列表动效参数"）、后台列表行滑动（跟手位移、松手弹簧 0.3s、删除块跃出、删除后高度折叠 200ms，见 components.md"行滑动参数"）；`prefers-reduced-motion` 时例外项都去掉位移 / 缩放，只保留颜色或透明度变化（按钮边缘光停在静止位置，列表入场只渐显、不错开，行滑动松手后 0.2s ease-out 归位、无回弹无跃出） |
+| 过渡 | 统一 `0.2s ease`，只过渡颜色、透明度、边框；例外：按钮边缘光跟随指针、按下缩放到 0.97（`0.25s`）；文章卡片 `PostCard` 悬停的双层错位（`transform` 位移 4px，`0.3s ease-out`）、动态照片播放时放大 1.06 倍（`0.3s ease-out`）、书影音卡片封面悬停放大 1.04 倍（`0.3s ease`）、组图网格悬停聚光（见"组图网格"）、组图手风琴展开（见"组图手风琴"）、灯箱层叠切换（见"灯箱层叠"）、图片加载渐显（见"图片加载"）、悬停提示弹出与组内滑动（见"悬停提示"）、输入框悬停光晕（见"输入框质感"）、评分星切换（滑动、拉伸、弹跳、眨眼，见 components.md"评分动效参数"）、文章列表入场（行从下方 12px 缩放 0.8 弹入，弹簧曲线 620ms，逐行错开 50ms，只在列表首次进入视口及筛选 / 翻页后播放，见 components.md"列表动效参数"）、后台列表行滑动（跟手位移、松手弹簧 0.3s、删除块跃出、删除后高度折叠 200ms，见 components.md"行滑动参数"）；`prefers-reduced-motion` 时例外项都去掉位移 / 缩放，只保留颜色或透明度变化（按钮边缘光停在静止位置，列表入场只渐显、不错开，行滑动松手后 0.2s ease-out 归位、无回弹无跃出） |
 | 可点区域 | 桌面 ≥ 28×28px；触屏 ≥ 44×44px（图标保持 16–20px，可点框扩大） |
 | 轻提示 | 成功类 4 秒后自动消失（`role="status"`）；带撤销的（`Toast/Undo`）6 秒后消失，悬停或聚焦时暂停计时（`role="status"`）；错误类常驻，直到用户点 × 关闭或重新操作（`role="alert"`）；警示类（"做成了但打了折扣"，如实况视频被丢弃）同样常驻、可关闭，`role="status"` |
 
@@ -96,7 +100,7 @@
 |------|----|------|
 | `radius` | 8px | 按钮、输入框、图片；弹窗、文章卡片 12px；徽标全圆角；嵌套圆角遵循"外圆角 = 内圆角 + 内边距"（分段控件 8 = 5 + 3） |
 | 间距 | 4 的倍数 | 常用 8 / 12 / 16 / 24 / 32 / 48 |
-| 阴影 | 仅弹窗、下拉菜单、悬停提示、分段控件选中项、`Button`、组图网格卡片、组图手风琴面板、灯箱层叠卡片与书影音卡片的封面（`MediaCard`，`0 2px 8px` 黑 18%，卡片本身不加）使用 | 克制，不做卡片阴影；分区靠 `line` 分隔线；按钮投影 `0 10px 24px -14px` 黑 45% |
+| 阴影 | 仅弹窗、下拉菜单、悬停提示、分段控件选中项、`Button`、组图网格卡片、组图手风琴面板、灯箱层叠卡片、书影音卡片的封面（`MediaCard`，`0 2px 8px` 黑 18%，卡片本身不加）与后台输入框（见"输入框质感"）使用 | 克制，不做卡片阴影；分区靠 `line` 分隔线；按钮投影 `0 10px 24px -14px` 黑 45% |
 | 正文版心 | 最宽 864px | 读者端文章页与后台预览区 |
 
 ## 按钮质感（SpecularButton）
@@ -110,6 +114,21 @@
 | 投影 | 全部 `Button`（`0 10px 24px -14px` 黑 45%） |
 | 降级 | WebGL 不可用时只保留底边线；`prefers-reduced-motion` 时高光不跟随指针、不缩放 |
 | 设计稿 | Pencil 不能运行 WebGL，组件区用角向渐变描边画静止态（左上高光 + 右下反光） |
+
+## 输入框质感（参考 Aceternity）
+
+后台输入框（`Field` 包住的 input / select / textarea、`RecognizeBox` 输入框）借鉴 Aceternity UI signup-form（参考源码 [references/code/aceternity-signup-form.tsx](../../references/code/aceternity-signup-form.tsx)）：浮起的轻投影 + 悬停时光标附近泛起主色光晕。
+
+| 项 | 规则 |
+|----|------|
+| 静止 | `surface` 底 + 1px `input-border` 描边（保留，3:1 边界对比度不降）+ 投影 `0 2px 3px -1px` 黑 10% 与 `0 1px 0` 黑 2% |
+| 标签 | 13px 500 `ink`（原 `ink-muted`），与输入框间距 8px |
+| 悬停光晕 | 输入框外包 2px 内边距的容器（圆角 = 输入框圆角 + 2），底为 `accent` 径向渐变，半径 100px，圆心跟随光标，80% 处透明；指针进入时出现、离开时收拢到 0，`0.3s`；只在 2px 外圈露出，不影响输入区底色 |
+| 焦点 | 沿用"焦点与交互"的焦点环，不用 Aceternity 的灰色 ring |
+| 分隔线 | 表单底部操作栏上方的分隔线为两端渐隐（透明 → `line-strong` → 透明）；区块标题右侧细线从 `line` 渐隐到透明 |
+| 降级 | 触屏无悬停，不显示光晕；`prefers-reduced-motion` 时光晕不跟随光标、不显示；错误态、识别填入高亮时描边颜色照旧 |
+| 不借鉴 | 渐变主按钮与悬停底部亮线（已有按钮质感）、去掉描边（对比度不足） |
+| 设计稿 | 画不出跟随光标，11b 画两帧静止示意（光标在左 / 右上） |
 
 ## 悬停提示（WarmTooltip）
 
@@ -180,6 +199,19 @@
 | 降级 | `prefers-reduced-motion` 时切换无动画 |
 | 设计稿 | Pencil 不能画 3D 倾斜，组件区按透视缩放 + 压暗 + 模糊画静止态 |
 
+## 海报墙（Masonry · FlipCard · GradualBlur）
+
+书影音电影、剧集的海报墙底层采用 React Bits Masonry、FlipCard、GradualBlur。参数见 [components.md](components.md)"海报墙参数"。
+
+| 项 | 规则 |
+|----|------|
+| 悬停片名 | 叠在海报上，亮暗主题一致：底部透明 → 黑 54% 渐变（同 Masonry caption），片名白色 14px 600 |
+| 翻面卡片 | 背面 `flip-surface` 底、`flip-ink` 片名；投影黑 25% 模糊 22px，随翻转收窄；悬停倾斜 ≤ 8°、放大 1.02、白色径向反光（中心 22%） |
+| 分段标题 | `bg` 底吸顶，下缘 56px 渐变模糊（最远 24px）并淡入 `bg` |
+| 圆角 | 海报 4px |
+| 降级 | `prefers-reduced-motion` 时无入场位移与模糊、翻面不旋转、悬停片名不位移 |
+| 设计稿 | Pencil 渐变只取首色，悬停片名的渐变用 7 条递增透明度色带近似；3D 翻转、反光画不出，背面单独画静止态 |
+
 ## 文章状态配色（全站统一）
 
 | 状态 | 徽标 |
@@ -209,3 +241,7 @@
 | 2026-10-13 | 轻提示新增警示类（`warn-soft`，常驻）（F-001 US-11） | miraclehifi |
 | 2026-10-16 | 阴影、过渡例外补书影音卡片封面（F-005 先行稿，参考 book-store-ui） | miraclehifi |
 | 2026-10-13 | 补实现说明：令牌已落地到 `src/styles/tokens.css`，Tailwind 类名映射 | miraclehifi |
+| 2026-10-22 | 新增"输入框质感"：后台输入框参考 Aceternity signup-form，加轻投影、`accent` 悬停光晕，标签改 `ink`，底部分隔线渐隐；豁免渐变 / 阴影，过渡例外补光晕（[Backlog](../backlog/media-form-card-layout.md)） | miraclehifi |
+| 2026-10-22 | 强调色由暖棕改为蓝：`accent` / `focus` `#2563EB` / `#60A5FA`，`accent-soft` `#EFF6FF` / `#1E2B3F`；对比度重新验证（[Backlog](../backlog/restyle-blue-accent.md)） | miraclehifi |
+| 2026-10-22 | 新增 `flip-surface`、`flip-ink` 与"海报墙"一节，视觉例外补海报墙（[media-poster-wall](../backlog/media-poster-wall.md)） | miraclehifi |
+| 2026-10-22 | 新增 `rating-star`、`rating-face`；过渡例外补评分星切换（[Backlog](../backlog/rating-face-stars.md)） | miraclehifi |
