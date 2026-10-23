@@ -72,10 +72,45 @@ UPDATE shelf_entries SET platform = 'ps5', cover_key = NULL WHERE type = 'game';
 | `listVisible` | `SELECT type, title, creator, year, status, rating, marked_on, comment, cover_key, douban_url, platform, cover_url, cover_width, cover_height FROM shelf_entries WHERE hidden = 0 ORDER BY id DESC` |
 | `counts` | 由 `listByType` 结果在领域内计算 |
 | `findByDoubanId` | `SELECT id, title, type, status, marked_on FROM shelf_entries WHERE douban_id = ?1` |
+| `findByDoubanIds`（US-04） | `SELECT * FROM shelf_entries WHERE douban_id IN (?1, …, ?n)`（n ≤ 20，走 `uk_shelf_entries_douban_id`） |
 | `insert` | `INSERT … RETURNING *`；`SQLITE_CONSTRAINT_UNIQUE`（消息含 `uk_shelf_entries_douban_id` / `shelf_entries.douban_id`）→ `DuplicateDoubanError` |
 | `update` | `UPDATE shelf_entries SET …, updated_at = ?n WHERE id = ?1 RETURNING *` |
 | `setHidden` | `UPDATE shelf_entries SET hidden = ?2, updated_at = ?3 WHERE id = ?1 AND hidden <> ?2 RETURNING *`；无返回时再 `SELECT` 区分"无变化"与"不存在" |
 | `delete` | `DELETE FROM shelf_entries WHERE id = ?1 RETURNING *` |
+
+## shelf_import_state（D1，迁移 0006，US-04 增量同步）
+
+```sql
+-- F-005 书影音：豆瓣导入同步水位（ADR-014 §1.1）
+CREATE TABLE shelf_import_state (
+  uid            TEXT NOT NULL CHECK (length(uid) BETWEEN 1 AND 64 AND uid NOT GLOB '*[^A-Za-z0-9_.-]*'), -- 豆瓣用户 ID
+  kind           TEXT NOT NULL CHECK (kind IN ('movie','book','game')),                                   -- 豆瓣大类
+  status         TEXT NOT NULL CHECK (status IN ('done','doing')),                                        -- 豆瓣标记状态
+  watermark      TEXT CHECK (watermark IS NULL OR watermark GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]'), -- 已完整同步到的最新标记时间（豆瓣 create_time 原文）
+  synced_at      TEXT,                                                                                    -- 最近一次完整同步完成时间 ISO 8601 UTC
+  attempted_at   TEXT NOT NULL,                                                                           -- 最近一次导入请求时间 ISO 8601 UTC
+  db_create_time TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')), -- 数据创建时间（数据库专用，禁止用于业务）
+  db_update_time TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')), -- 数据修改时间（数据库专用，禁止用于业务）
+  PRIMARY KEY (uid, kind, status)
+) STRICT;
+
+CREATE INDEX idx_shelf_import_state_attempted ON shelf_import_state (attempted_at);
+
+CREATE TRIGGER trg_shelf_import_state_db_update_time AFTER UPDATE ON shelf_import_state
+BEGIN
+  UPDATE shelf_import_state SET db_update_time = strftime('%Y-%m-%d %H:%M:%f', 'now')
+  WHERE uid = NEW.uid AND kind = NEW.kind AND status = NEW.status;
+END;
+```
+
+| 用途 | 语句 |
+|------|------|
+| `get` | `SELECT kind, status, watermark, synced_at FROM shelf_import_state WHERE uid = ?1` |
+| `lastUid` | `SELECT uid FROM shelf_import_state ORDER BY attempted_at DESC LIMIT 1` |
+| `touch` | `INSERT INTO shelf_import_state (uid, kind, status, attempted_at) VALUES (?1, ?2, ?3, ?4) ON CONFLICT (uid, kind, status) DO UPDATE SET attempted_at = excluded.attempted_at` |
+| `complete` | `UPDATE shelf_import_state SET watermark = COALESCE(?4, watermark), synced_at = ?5 WHERE uid = ?1 AND kind = ?2 AND status = ?3`（`touch` 已保证行存在） |
+
+- 不与 `shelf_entries` 关联；删除条目不影响水位。只新建表，不改旧表；必须先于代码部署
 
 ## R2 对象（绑定 `MEDIA`）
 
@@ -95,3 +130,4 @@ UPDATE shelf_entries SET platform = 'ps5', cover_key = NULL WHERE type = 'game';
 | 2026-10-21 | 1.0 | 初始版本（F-005） | miraclehifi |
 | 2026-10-22 | 1.1 | 去掉'动画'分类、'剧'改名'剧集'（[drop-anime-type](../../../../backlog/drop-anime-type.md)） | miraclehifi |
 | 2026-10-23 | 1.2 | 迁移 0005：`platform`、`cover_url`、`cover_width`、`cover_height`（[game-case-shelf](../../../../backlog/game-case-shelf.md)） | miraclehifi |
+| 2026-10-23 | 1.3 | US-04 导入：`findByDoubanIds` 查询；迁移 0006 `shelf_import_state`（增量同步水位，ADR-014 §1.1） | miraclehifi |

@@ -1,9 +1,9 @@
 # F-005 书影音 — 架构设计
 
-**最后更新**: 2026-10-21
+**最后更新**: 2026-10-23
 **状态**: draft
 
-> 来源：[feature-scope](../../../../product/features/F-005-书影音/feature-scope.md) · [Feature NFR](../../../../product/features/F-005-书影音/nfr.md) · [US-01](../../../../product/features/F-005-书影音/stories/media-shelf/US-01-manage-entries/story.md) · [US-02](../../../../product/features/F-005-书影音/stories/media-shelf/US-02-douban-recognize/story.md) · [US-03](../../../../product/features/F-005-书影音/stories/media-shelf/US-03-media-page/story.md) · [admin-media.md](../../../../ui/pages/admin-media.md) · [reader-media.md](../../../../ui/pages/reader-media.md)
+> 来源：[feature-scope](../../../../product/features/F-005-书影音/feature-scope.md) · [Feature NFR](../../../../product/features/F-005-书影音/nfr.md) · [US-01](../../../../product/features/F-005-书影音/stories/media-shelf/US-01-manage-entries/story.md) · [US-02](../../../../product/features/F-005-书影音/stories/media-shelf/US-02-douban-recognize/story.md) · [US-03](../../../../product/features/F-005-书影音/stories/media-shelf/US-03-media-page/story.md) · [US-04](../../../../product/features/F-005-书影音/stories/media-shelf/US-04-douban-import/story.md) · [admin-media.md](../../../../ui/pages/admin-media.md) · [reader-media.md](../../../../ui/pages/reader-media.md)
 
 ---
 
@@ -15,6 +15,8 @@
    │ GET/POST/PUT/DELETE /api/admin/shelf/entries[/:id]          ▲  virtual:shelf-data
    │ POST /api/admin/shelf/entries/:id/{hide,unhide}             │  （readerData 插件，构建时 GET /api/shelf）
    │ POST /api/admin/shelf/recognize                             │
+   │ GET  /api/admin/shelf/import/state（US-04，ADR-014）        │
+   │ POST /api/admin/shelf/import[/finish]                       │
    ▼                                                             │
 middleware（会话 + Origin，沿用 auth；/api/shelf 公开）        GET /api/shelf ── 显示中条目
    ▼                                                             │
@@ -24,7 +26,7 @@ shelf · ShelfService（新领域，src/domains/shelf/）
    ├─ entry.ts      纯领域：校验、排序、状态与分类规则
    ├─ repo.ts       ShelfRepo（D1 shelf_entries）
    ├─ cover-store.ts CoverStore（R2 MEDIA，前缀 covers/）
-   ├─ douban/       防腐层：链接提取、白名单、Rexxar 客户端（不跟随跳转）、字段映射、封面下载（ADR-011）
+   ├─ douban/       防腐层：链接提取、白名单、Rexxar 客户端（不跟随跳转）、字段映射、封面下载（ADR-011）；用户标记列表与 mapInterest（ADR-014）
    └─ hooks.ts      ShelfHooks.onShelfChanged → 路由层适配 createDeployHookHooks（ADR-012）
                                                                  GET /covers/{yyyy}/{mm}/{file} ← R2 covers/
 ```
@@ -35,7 +37,7 @@ shelf · ShelfService（新领域，src/domains/shelf/）
 
 | Domain / 模块 | 变更 | 新增 / 变更接口 |
 |---------------|------|----------------|
-| `shelf`（新增） | 条目增删改、隐藏、读者端只读列表、豆瓣识别、封面存取 | `ShelfService.list(type)`、`get(id)`、`create(input, coverFile?)`、`update(id, input, coverChange)`、`setHidden(id, hidden)`、`remove(id)`、`listPublic()`、`recognize(text, excludeId?)`；`ShelfRepo`、`CoverStore`、`DoubanClient`（接口注入，测试替身） |
+| `shelf`（新增） | 条目增删改、隐藏、读者端只读列表、豆瓣识别、封面存取 | `ShelfService.list(type)`、`get(id)`、`create(input, coverFile?)`、`update(id, input, coverChange)`、`setHidden(id, hidden)`、`remove(id)`、`listPublic()`、`recognize(text, excludeId?)`、`importState(uid?)`、`importPage(uid, kind, status, mode, start, head?)`、`finishImport(changed)`（US-04）；`ImportStateRepo`（D1 `shelf_import_state`）；`ShelfRepo`、`CoverStore`、`DoubanClient`（接口注入，测试替身） |
 | `auth` | 无 | 沿用 middleware：`/admin/**` 页面 302、`/api/admin/**` 401 / Origin 403 |
 | `reader` 模块 | 增量 | `readerData()` 新增 `virtual:shelf-data`；新纯函数 `src/lib/reader/shelf.ts`（分组、排序、计数文案、状态动词） |
 | `rebuild` | 无改动，复用 | `createDeployHookHooks` 适配 `ShelfHooks` |
@@ -82,6 +84,28 @@ POST /api/admin/shelf/recognize { text, excludeId? }
 保存时封面以文件随表单提交（同 US-01），保存接口不接受外部 URL（ADR-011 §3）
 ```
 
+### US-04 豆瓣批量导入（ADR-014）
+
+```
+打开：GET /api/admin/shelf/import/state[?uid=] → { uid, steps[6]: { kind, status, watermark, syncedAt } }
+        → 有任一 syncedAt：主按钮"同步新标记"（mode=incremental），否则只有"全量导入"（mode=full）
+DoubanImportDialog（前端驱动，顺序 movie·done → movie·doing → book·done → book·doing → game·done → game·doing）
+  每类循环：POST /api/admin/shelf/import { uid, kind, status, mode, start, head? }（第 2 页起带回第 1 页的 head）
+  → ShelfService.importPage（25 秒总时限，外部并发 ≤ 5）
+     1. isValidDoubanUid / kind / status / start 校验 → 400 VALIDATION_FAILED（不发外部请求）
+     2. DoubanClient.fetchInterests(count=20) → 404 DOUBAN_USER_NOT_FOUND / 403 DOUBAN_FORBIDDEN / 其余 502 FETCH_FAILED
+     2b. ImportStateRepo.touch(uid, kind, status)（attempted_at）；mode=incremental 且有 watermark → 只保留 create_time >= watermark 的标记，出现更早的标记 → reached = true
+     3. 过滤 status ∉ {done, doing}；ShelfRepo.findByDoubanIds(本页 ID)
+     4. 每条：书 → fetchBookTags；游戏 → fetchSubject(game)（开发商）；失败按缺失处理
+        mapInterest → normalizeEntryInput；新条目且非游戏 → 下载封面 → CoverStore.put
+        新 → insert；已有 → 合并覆盖（hidden / 封面不动）→ update；单条异常记 failed[]
+     5. nextStart = reached || start+20 >= total ? null : start+20
+        nextStart = null → ImportStateRepo.complete(uid, kind, status, head)（watermark = head ?? 原值，synced_at = now）
+     6. 200 { total, head, nextStart, created, updated, coverFailed, failed }
+  nextStart 为 null → 下一步骤；停止 / 出错 → 结束
+  结束：POST /api/admin/shelf/import/finish { changed } → changed > 0 时 hooks.onShelfChanged() 一次
+```
+
 ### US-03 读者页
 
 ```
@@ -104,6 +128,7 @@ POST /api/admin/shelf/recognize { text, excludeId? }
 | `/media` | `src/pages/media/index.astro`（`prerender = true`） | Astro 组件；仅 `MediaTypeTabs client:load` | 新增 |
 | `/media/:type` | `src/pages/media/[type].astro`（`getStaticPaths` 6 类） | 同上 | 新增 |
 | `/covers/*` | `src/pages/covers/[...key].ts` | R2 读取 | 新增 |
+| API（US-04） | `src/pages/api/admin/shelf/import.ts`、`import/finish.ts`、`import/state.ts` | — | 新增 |
 | API | `src/pages/api/admin/shelf/entries/index.ts`、`entries/[id].ts`、`entries/[id]/hide.ts`、`entries/[id]/unhide.ts`、`recognize.ts`；`src/pages/api/shelf.ts` | — | 新增 |
 
 ### 4.2 组件 / 模块
@@ -112,12 +137,13 @@ POST /api/admin/shelf/recognize { text, excludeId? }
 |------------|------|------|
 | `AdminHeader` | `src/components/admin/AdminHeader.tsx` | 修改：导航"书影音"（`library` 图标）、`current="media"`、手机站点名 18px、图标间距 0 |
 | `MediaTypeTabs` | `src/components/reader/MediaTypeTabs.tsx` | 新增：React 岛（`client:load`），内部渲染 vendor `GooeyNav`（`src/components/vendor/react-bits/GooeyNav.tsx`）；`hrefFor` 由页面算好的 `items`（`label`、`href`）传入（函数不能跨岛序列化）；读者页与后台列表页共用（[gooey-media-tabs](../../../../backlog/gooey-media-tabs.md)，原为 `.astro` 零 JS） |
-| `MediaHeader`、`MediaList`、`MediaCard`、`MediaRow` | `src/components/reader/*.astro` | 新增（先行稿组件首次实现）；封面失败占位用内联 `onerror` 切换类名 |
-| `MediaPosterWall`、`MediaPoster`、`MediaTimeHeading`、`MediaTimeToggle` | `src/components/reader/*.tsx` | 新增：电影、剧集、游戏满宽海报墙（游戏砖块按 `posterAspect` 保持封面原比例、`MediaPoster` 游戏模式悬停显示 `PlatformBadge` 不显示名称、背面加平台，ADR-013）；电影、剧集 React 岛（`client:load`）；内部渲染 vendor `Masonry`（加 `renderTile`、hugeicons 换 lucide、导出 caption 样式）、`FlipCard`、`GradualBlur`（`src/components/vendor/react-bits/`）；分段用纯函数 `groupByTime`（reader module-spec §2），在浏览器按当天日期计算；"按时间"按钮经 `createPortal` 挂到页面槽位，选择存 `localStorage`；服务端输出不分段静态网格兜底，`BaseLayout` 内联脚本加 `<html data-js>`（[media-poster-wall](../../../../backlog/media-poster-wall.md)） |
+| `MediaHeader`、`MediaList` | `src/components/reader/*.astro` | 新增（先行稿组件首次实现）；`MediaCard`、`MediaRow` 已实现后于 2026-10-23 废弃删除（所有分类改为海报墙，[media-wall-all-types](../../../../backlog/media-wall-all-types.md)） |
+| `MediaPosterWall`、`MediaPoster`、`MediaTimeHeading`、`MediaTimeToggle`、`MediaTimeBasis`、`PlatformBadge`、`YearBadge` | `src/components/reader/*.tsx` | 新增：所有分类的满宽海报墙（2026-10-23 起书、漫画、桌游也用，砖块比例见 `posterAspect`）；电影、剧集、游戏满宽海报墙（游戏砖块按 `posterAspect` 保持封面原比例、`MediaPoster` 游戏模式悬停显示 `PlatformBadge` 不显示名称、背面加平台，ADR-013）；电影、剧集 React 岛（`client:load`）；内部渲染 vendor `Masonry`（加 `renderTile`、hugeicons 换 lucide、导出 caption 样式）、`FlipCard`、`GradualBlur`（`src/components/vendor/react-bits/`）；分段用纯函数 `groupByTime`（reader module-spec §2），在浏览器按当天日期计算；"按时间"按钮经 `createPortal` 挂到页面槽位，选择存 `localStorage`；服务端输出不分段静态网格兜底，`BaseLayout` 内联脚本加 `<html data-js>`（[media-poster-wall](../../../../backlog/media-poster-wall.md)） |
 | `MediaEntryList` | `src/components/admin/media/MediaEntryList.tsx` | 新增：行列表 + 隐藏 / 删除状态、`ConfirmDialog`、`Toast` |
 | `MediaEntryRow` | `src/components/admin/media/MediaEntryRow.tsx` | 新增（components.md）；手机 ⋯ 用已有 `Menu` |
 | `MediaEntryForm` | `src/components/admin/media/MediaEntryForm.tsx` | 新增（页面区块）：表单状态、校验、提交、离开确认 |
 | `RecognizeBox` | `src/components/admin/media/RecognizeBox.tsx` | 新增 |
+| `DoubanImportDialog` | `src/components/admin/media/DoubanImportDialog.tsx` | 新增（US-04）：打开时读同步状态、ID 输入、"同步新标记" / "全量导入"、逐页调用导入接口、进度 / 停止 / 汇总 / 失败列表、结束调用 finish；`MediaEntryList` 标题行旁的"从豆瓣导入"按钮打开，`onFinished` 后 `location.reload()` 刷新 SSR 列表；弹窗外壳参照 `ConfirmDialog` 的焦点管理（不改 `ConfirmDialog`） |
 | `StarRating` | `src/components/ui/StarRating.tsx` | 新增（通用输入，放 ui/） |
 | 封面区 | `MediaEntryForm` 内复用 `src/components/admin/editor/CoverField.tsx` | **评估复用**：现有 CoverField 是 96×96 方形 + 立即上传到 `/api/admin/images`；书影音需要 2:3、保存时随表单提交。改为给 CoverField 加 `aspect` 与"只选文件不上传"模式会侵入写文章页，故新建轻量 `ShelfCoverField`（`src/components/admin/media/ShelfCoverField.tsx`），沿用 CoverField 的样式类与拖放交互写法 |
 | 已有复用 | `PageHeader`、`Button`、`IconButton`、`Field`、`SegmentedItem`（文章列表筛选所用）、`ConfirmDialog`、`Toast`、`EmptyState`、`Menu` | 不改 |
@@ -130,7 +156,8 @@ POST /api/admin/shelf/recognize { text, excludeId? }
 ```
 admin/media/index.astro
 ├── AdminHeader(current="media")
-├── PageHeader（书影音 + 计数 + 新增条目）
+├── PageHeader（书影音 + 计数 + 从豆瓣导入 + 新增条目）
+├── DoubanImportDialog                         ← client:load（US-04，由"从豆瓣导入"打开）
 ├── MediaTypeTabs(items, value)               ← client:load（href=/admin/media?type=）
 └── MediaEntryList(entries, type)            ← client:load
     ├── MediaEntryRow ×N（编辑链接 / 隐藏 / 删除；手机 ⋯ Menu）
@@ -152,7 +179,7 @@ media/index.astro · [type].astro（ReaderLayout）
 ├── SiteHeader(current="media")
 ├── MediaHeader
 ├── MediaTypeTabs(items, value)               ← client:load（href=/media、/media/{type}）
-├── MediaList → MediaCard ×N（book / comic）| MediaPosterWall（movie / series / game，client:load）→ [MediaTimeHeading + GradualBlur] → Masonry → MediaPoster(FlipCard) ×N；MediaTimeToggle → 页面槽位 | MediaRow ×N（boardgame）| EmptyState
+├── MediaList → MediaPosterWall（全部分类，client:load）→ [MediaTimeHeading + GradualBlur] → Masonry → MediaPoster(FlipCard) ×N；MediaTimeToggle → 页面槽位 | EmptyState
 ├── 来源说明
 └── BackLink、SiteFooter
 ```
@@ -162,6 +189,8 @@ media/index.astro · [type].astro（ReaderLayout）
 ## 5. 数据模型概要（详见 design-domain）
 
 `shelf_entries`：`id`、`type`、`title`、`creator`、`year`、`status`、`rating`、`marked_on`、`comment`、`cover_key`、`platform`、`cover_url`、`cover_width`、`cover_height`（迁移 0005，游戏专用）、`douban_id`（部分唯一索引 `WHERE douban_id IS NOT NULL`）、`douban_url`、`hidden`、`created_at`、`updated_at`、审计列。索引 `(type, hidden)`。
+
+`shelf_import_state`（迁移 0006，US-04 增量同步）：主键 (`uid`, `kind`, `status`)，`watermark`、`synced_at`、`attempted_at`、审计列。
 
 ## 6. 跨 Feature 影响
 
@@ -174,6 +203,8 @@ media/index.astro · [type].astro（ReaderLayout）
 | F-002 博客首页与阅读 | 构建（`readerData` 插件） | 新增 `virtual:shelf-data` 与一个构建请求；接口 404 时回退空数组（首次部署兼容） | 修改插件；README 首次部署步骤不变 |
 | F-002 | 读者外壳 | `SiteNav current="media"` 已预留；`/media` 由 404 变为真实页面 | `test:build` 增加 `/media` 产物检查；flows.md 已更新 |
 | F-002 | 404 | `/media/book`、未知分类命中站点 404 | 无改动 |
+| F-005 自身（游戏平台任务 12–14） | 依赖 | 导入写入游戏 `platform`，依赖迁移 0005 与平台字段（Sprint 9 任务 12 `add-game-platform-api`，未实现） | 导入任务排在任务 12–14 之后 |
+| F-006 媒体存储清理 | 共享资源（R2） | 导入新增的封面同样在 `covers/` 前缀下，由 shelf 管理 | 无 |
 | F-004 互动与发现（未开始） | 搜索 / RSS | Pagefind 若索引全部读者页，会包含 `/media`——F-004 设计时决定是否排除 | 记入 F-004 Backlog 备注 |
 
 ## 7. 外部依赖与 TODO
@@ -188,6 +219,7 @@ media/index.astro · [type].astro（ReaderLayout）
 
 | ADR | 决策 |
 |-----|------|
+| [ADR-014](adr/ADR-014-douban-bulk-import.md) | 豆瓣批量导入：前端逐页驱动，每页 20 条（子请求 ≤ 41）；全量 + 按水位增量（`shelf_import_state`，一类完整结束才前移水位）；按豆瓣 ID 覆盖（hidden、封面不动）；整次只在 finish 时重建一次；游戏不下载封面 |
 | [ADR-011](adr/ADR-011-shelf-domain-douban-recognition.md) | 新领域 `shelf`；豆瓣识别为 `shelf/douban/` 防腐层（Rexxar + 白名单 + 逐跳校验）；**封面在识别时下载并以 data URL 返回**，保存接口不接受外部 URL |
 | [ADR-012](adr/ADR-012-shelf-reader-build-and-covers.md) | 公开 `GET /api/shelf` + `virtual:shelf-data`；路径路由预渲染；封面经 `/covers/*` 读取、key 不可变 |
 | [ADR-013](adr/ADR-013-game-cover-igdb-link.md) | 游戏新增平台字段；游戏封面直接引用 images.igdb.com 大图（规范化为 t_1080p，保存时只向该主机读取宽高），是 ADR-011 §3"不接受外部 URL"与 ADR-012"封面为站内路径"的受限例外 |
@@ -210,5 +242,8 @@ ADR-011 §3 把封面下载从"保存时"移到"识别时"，以下文档已同�
 |------|------|----------|------|
 | 2026-10-21 | 1.0 | 初始版本 | miraclehifi |
 | 2026-10-22 | 1.1 | `MediaTypeTabs` 改为 React 岛（GooeyNav），读者页不再零 JS（[gooey-media-tabs](../../../../backlog/gooey-media-tabs.md)） | miraclehifi |
+| 2026-10-23 | 1.4 | 所有分类统一为海报墙，`MediaCard`、`MediaRow` 废弃；"按时间"可选发行年份（[media-wall-all-types](../../../../backlog/media-wall-all-types.md)、[media-time-basis](../../../../backlog/media-time-basis.md)） | miraclehifi |
 | 2026-10-23 | 1.3 | 游戏改为海报墙：平台字段、IGDB 外链封面与原比例砖块（[ADR-013](adr/ADR-013-game-cover-igdb-link.md)、[game-case-shelf](../../../../backlog/game-case-shelf.md)） | miraclehifi |
 | 2026-10-22 | 1.2 | 电影、剧集改为满宽海报墙岛 `MediaPosterWall`（Masonry + FlipCard + GradualBlur），可按时间分段（[media-poster-wall](../../../../backlog/media-poster-wall.md)） | miraclehifi |
+| 2026-10-23 | 1.4 | US-04 豆瓣批量导入：导入 / 结束接口、`DoubanImportDialog`、数据流（[ADR-014](adr/ADR-014-douban-bulk-import.md)、[douban-bulk-import](../../../../backlog/douban-bulk-import.md)） | miraclehifi |
+| 2026-10-23 | 1.5 | US-04 增量同步：`shelf_import_state`（迁移 0006）、状态接口、`mode` / `head`（ADR-014 §1.1） | miraclehifi |

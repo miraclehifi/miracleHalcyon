@@ -21,7 +21,7 @@
 |---------|------|------|----------|
 | F-001 | 文章写作 | in_progress | 增量 media-upload-experience：Sprint 6 实现完成，待 code-review（主体 validation done，Sprint 5 补齐 P0） |
 | F-002 | 博客首页与阅读 | in_progress | validation done（待发布确认，发布跟随 F-001） |
-| F-005 | 书影音 | in_progress | 设计完成（shelf 领域、ADR-011 / 012 / 013）；Sprint 9 实现 11 / 14（后台录入与豆瓣识别、读者页 /media 与电影 / 剧集海报墙）；2026-10-23 插入任务 12–14 游戏海报墙（平台、IGDB 封面）待实现 |
+| F-005 | 书影音 | in_progress | 设计完成（shelf 领域、ADR-011 / 012 / 013）；Sprint 9 实现 11 / 16（后台录入与豆瓣识别、读者页 /media 与电影 / 剧集海报墙）；2026-10-23 插入任务 12–14 游戏海报墙（平台、IGDB 封面）待实现 |
 | F-006 | 媒体存储清理 | in_progress | implementation done（Sprint 7，4 / 4）；待全量 E2E 后 code-review |
 
 ## 队列

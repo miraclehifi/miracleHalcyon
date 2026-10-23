@@ -9,6 +9,8 @@
 | US-01 manage-entries | 重建钩子 | `createDeployHookHooks` 适配 `ShelfHooks` | — |
 | US-02 douban-recognize | `shelf`（`douban/` 防腐层） | `recognize`、`extractDoubanLink`、`parseSubjectUrl`、`mapSubject`、`DoubanClient`；`create` 的豆瓣去重（§2、§5） | `POST /api/admin/shelf/recognize` |
 | US-02 douban-recognize | `auth` | middleware 会话 + Origin | — |
+| US-04 douban-import | `shelf`（`douban/` 防腐层） | `importState`、`importPage`、`finishImport`、`ImportStateRepo`、`DoubanClient.fetchInterests`、`isValidDoubanUid`、`mapInterest`、`ShelfRepo.findByDoubanIds`（ADR-014） | `GET /api/admin/shelf/import/state`、`POST /api/admin/shelf/import`、`POST /api/admin/shelf/import/finish` |
+| US-04 douban-import | `auth`、重建钩子 | middleware 会话 + Origin；finish 时 `onShelfChanged` 一次 | — |
 | US-03 media-page | `shelf` | `listPublic`、`CoverStore.get`（§4） | `GET /api/shelf`、`GET /covers/*` |
 | US-03 media-page | `reader` 模块 | `virtual:shelf-data`、`src/lib/reader/shelf.ts`（含游戏 `posterAspect`）、`shelf-time.ts`（[module-spec](../../frontend/modules/reader/module-spec.md) §1.3、§2） | — |
 

@@ -8,7 +8,7 @@
  *    点击、拖动、悬停处理；砖块容器（定位、入场、role="listitem"）不变。此时没有内置 <img>，砖块不等图片加载、直接入场
  *    （图片淡入由砖块内容自己处理）
  * 2. @hugeicons/* 换成 lucide-react 的 ArrowLeft / ArrowRight / ArrowUpRight / X（不新增依赖；灯箱代码保留）
- * 3. 导出 CAPTION、TITLE 样式常量（MediaPoster 的悬停片名复用）
+ * 3. （已撤回：原为 MediaPoster 悬停片名导出 CAPTION、TITLE，2026-10-23 去掉悬停片名后恢复为模块内常量）
  * 4. 根节点透传 data-* 属性（MediaPosterWall 用 data-poster-segment 标记分段）
  * 5. 灯箱关闭 effect 的清理函数改为语句体（类型检查：原表达式体返回值不是 void）
  */
@@ -140,9 +140,9 @@ const MEDIA =
 const PARALLAX = 'absolute inset-0 block';
 const IMAGE =
   'pointer-events-none block h-full w-full object-cover opacity-0 select-none [-webkit-user-drag:none] [transition:opacity_0.5s_ease,transform_0.8s_cubic-bezier(0.2,0.8,0.2,1)] data-[loaded]:opacity-100 group-data-[hover=zoom]/masonry:group-hover/item:[transform:scale(1.07)]';
-export const CAPTION =
+const CAPTION =
   'pointer-events-none absolute right-0 bottom-0 left-0 flex flex-col gap-0.5 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0.02)_15%,rgba(0,0,0,0.08)_30%,rgba(0,0,0,0.18)_45%,rgba(0,0,0,0.3)_60%,rgba(0,0,0,0.42)_75%,rgba(0,0,0,0.5)_88%,rgba(0,0,0,0.54)_100%)] px-3.5 pt-10 pb-3 text-white [transition:opacity_0.35s_ease,transform_0.5s_cubic-bezier(0.2,0.8,0.2,1)] data-[mode=hover]:[transform:translateY(6px)] data-[mode=hover]:opacity-0 data-[mode=hover]:group-hover/item:[transform:none] data-[mode=hover]:group-hover/item:opacity-100 data-[mode=hover]:group-focus-visible/card:[transform:none] data-[mode=hover]:group-focus-visible/card:opacity-100';
-export const TITLE = 'text-sm leading-[1.3] font-semibold tracking-[-0.01em]';
+const TITLE = 'text-sm leading-[1.3] font-semibold tracking-[-0.01em]';
 const TEXT = 'text-xs leading-[1.4] opacity-80';
 const GHOST = 'pointer-events-none absolute top-0 left-0';
 const BOX = 'fixed inset-0 z-[1000]';

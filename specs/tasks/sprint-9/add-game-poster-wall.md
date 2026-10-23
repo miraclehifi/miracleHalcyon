@@ -13,12 +13,12 @@
 - **改动意图**:
   - `shelf.ts` 新增 `posterAspect(type, cover)`；`shelf-time.ts` `groupByTime` 对游戏用"在玩"、量词"款"
   - 新建 `PlatformBadge.tsx`（高 22 胶囊，Simple Icons 官方路径内联 SVG：PlayStation / Nintendo Switch / Steam；`aria-label="平台：…"`）
-  - `MediaPoster` 加游戏模式：正面不渲染名称浮层与底部渐变，悬停 / 聚焦时左下角淡入 `PlatformBadge`（`hover: none` 时不显示，`aria-hidden`）；背面在名称下方渲染 `PlatformBadge`；`<img>` 带 `width` / `height`、`object-fit: contain`；翻面控件 `aria-label="《名称》，PS5"`
+  - `MediaPoster` 加游戏模式：正面不渲染名称浮层与底部渐变，悬停 / 聚焦时左上角淡入 `PlatformBadge`（`hover: none` 时不显示，`aria-hidden`）；背面不显示平台；`<img>` 带 `width` / `height`、`object-fit: contain`；翻面控件 `aria-label="《名称》，PS5，2024"`（悬停年份徽标与"按发行年份"分段见任务 15）
   - `MediaPosterWall`：砖块高 = 列宽 ÷ `posterAspect`；静态网格用 `style="aspect-ratio: …"`；封面加载失败保持砖块尺寸切换占位
   - `MediaList`：`game` 改为 `<MediaPosterWall client:load>`，页面满宽同电影；来源说明游戏页加"封面来自 IGDB"
   - 构建夹具 `reader-fixture.shelf.json`：游戏改为 5 条 IGDB 条目、桌游 2 条、漫画清空（[US-03-tests](../../test/features/F-005-书影音/acceptance/media-shelf/US-03-tests.md)"测试数据"）；E2E 夹具图片 `tests/fixtures/igdb/`
 - **影响范围**: `/media/game` 产物多一个岛、主体满宽；电影、剧集海报墙共用组件（电影模式行为不变）；桌游仍为 `MediaRow`；构建夹具调整波及 TC-US03-03、05、06、10、11、16、17
-- **不变量**: 电影、剧集正面仍浮出片名、无徽标；不请求豆瓣域名；站外图片只允许 images.igdb.com 且只在游戏页；不新增 npm 依赖
+- **不变量**: 电影、剧集正面不浮出片名（任务 18 已去掉）、无徽标；不请求豆瓣域名；站外图片只允许 images.igdb.com 且只在游戏页；不新增 npm 依赖
 - **不在本任务**: 接口字段（任务 12）；后台表单（任务 13）
 
 ## 产品需求来源

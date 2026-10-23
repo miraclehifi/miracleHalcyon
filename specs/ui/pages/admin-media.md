@@ -2,7 +2,7 @@
 
 **路由**: 列表 `/admin/media?type={分类}`（缺省 `book`）；新增 `/admin/media/new?type={分类}`；编辑 `/admin/media/:id`
 **状态**: draft
-**关联**: F-005 · US-01、US-02 · [Backlog](../../backlog/media-douban-sync.md)
+**关联**: F-005 · US-01、US-02、US-04 · [Backlog](../../backlog/media-douban-sync.md)
 
 ## 页面用途
 
@@ -16,6 +16,7 @@
 | 直接访问（未登录 → `/admin/login?next=原路径`） | 列表行"编辑" / 手机点行 → `/admin/media/:id` |
 | 表单"← 书影音" / "取消" / 保存成功 | `/admin/media?type=条目分类` |
 | 识别到重复条目 → "去编辑" | `/admin/media/:id`（已有条目） |
+| 列表"从豆瓣导入" | 本页弹窗 `DoubanImportDialog`，关闭后留在列表 |
 
 ---
 
@@ -25,7 +26,7 @@
 
 ```
 ┌ AdminHeader  miracleHalcyon 后台  文章  书影音  存储        查看博客  登出 ┐
-          书影音                                           [新增条目]   ← PageHeader
+          书影音                              [从豆瓣导入] [新增条目]   ← PageHeader
           12 本 · 在读 2 · 已隐藏 1　读者页：/media
           [书] 漫画  电影  剧集  游戏  桌游                              ← MediaTypeTabs
           ────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@
 | 区域 | 内容 |
 |------|------|
 | 顶栏 | `AdminHeader`，导航"文章 / 书影音 / 存储"，当前项"书影音" |
-| 标题行 | `PageHeader`：衬线大标题"书影音"；说明行 12px `ink-faint`：计数（同读者页计数文案，另加"· 已隐藏 N"，N = 0 不显示）+ 读者页地址；右侧 `Button/Primary`"新增条目" |
+| 标题行 | `PageHeader`：衬线大标题"书影音"；说明行 12px `ink-faint`：计数（同读者页计数文案，另加"· 已隐藏 N"，N = 0 不显示）+ 读者页地址；右侧 `Button/Outline`"从豆瓣导入" + `Button/Primary`"新增条目"（间距 8） |
 | 分类 | 复用读者端 `MediaTypeTabs`（GooeyNav 岛，链接到 `?type=`，服务端渲染当前分类，动画后跳转） |
 | 列表 | `MediaEntryRow`，排序同读者页（进行中在前、标记日期倒序、同日创建时间倒序）；隐藏条目也在其中 |
 | 底部说明 | 12px `ink-faint` |
@@ -71,6 +72,41 @@
 |------|------|
 | 空分类 | `EmptyState`：图标按分类（同读者页），标题"还没有{分类}条目"，副文"粘贴豆瓣链接，几秒录好一条"，按钮"新增条目" |
 | 列表加载 | 服务端渲染，无客户端加载态 |
+
+### 从豆瓣导入（`DoubanImportDialog`，设计稿 11i，US-04）
+
+模态弹窗，从列表页标题行"从豆瓣导入"打开。
+
+```
+┌ ⤓ 从豆瓣导入                                  ✕ ┐
+  导入你在豆瓣标记过的影视、书、游戏（看过 / 在看，不含想看），
+  连同评分、日期和短评。已录入过的条目会用豆瓣数据更新。
+  豆瓣用户 ID
+  [189806038                                    ]
+  豆瓣个人主页 douban.com/people/ID/ 中的 ID
+  ⟲ 上次同步：2026-10-23 21:30 · 之后只拉新标记          ← 同步过才显示
+  影视 · 看过                              120 / 614   ← 进行中（增量："已同步 3 条"）
+  ██████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+  ✓ 导入完成：新增 812、更新 185、失败 2、封面失败 3   ← 完成
+  ┌ 豆瓣 26816519：解析不出条目信息 ┐
+                       [关闭] [全量导入] [同步新标记]   ← 首次只有 [关闭] [全量导入]
+└─────────────────────────────────────────────────┘
+```
+
+| 状态 | 表现 |
+|------|------|
+| 首次（无同步记录） | 打开时请求同步状态接口；ID 为空（或为最近一次导入用过但还没完整同步过的 ID）；只有 `Button/Primary`"全量导入"；不显示"上次同步" |
+| 已同步过 | ID 带出服务端记录的 ID；"上次同步：yyyy-MM-dd HH:mm · 之后只拉新标记"（`history` 图标，12px `ink-faint`，取 6 类同步时间的最大值，本地时区）；主按钮 `Button/Primary`"同步新标记"（增量），次要 `Button/Outline`"全量导入" |
+| 输入校验 | 空或格式不对（`^[A-Za-z0-9_.-]{1,64}$`）时两个导入按钮禁用，格式不对时字段下方 `danger`"用户 ID 只能包含字母、数字、下划线、点和短横线"；改成另一个合法 ID 后 300ms 重新查询该 ID 的同步状态，按钮随之切换 |
+| 状态接口失败 | 按"首次"显示，不阻断全量导入 |
+| 进行中 | 输入框禁用；主按钮变"停止"，隐藏"关闭"、"全量导入"与 ✕，Esc 与点遮罩不关闭；进度区显示当前步骤（影视·看过 → 影视·在看 → 书·读过 → 书·在读 → 游戏·玩过 → 游戏·在玩）；全量（或该类无水位）显示"已处理 / 总数"、进度条按当前步骤计算；增量显示"已同步 N 条"、进度条按步骤序号（第 k / 6 步）计算；说明行"同步新标记：每类从最新往旧翻，到上次同步的位置即停" |
+| 停止中 | 点"停止"后按钮显示 `loader-circle`"正在停止…"，当前页返回后进入完成态（前缀"已停止："） |
+| 完成 | 汇总行（全量"导入完成："，增量"同步完成："）；重新拉取同步状态，"上次同步"更新；有失败时下方失败列表（"豆瓣 {ID}：{原因}"，最多显示 50 条，超出"另有 N 条"）；主按钮"再次同步"（有同步记录时）或"全量导入"；关闭后列表刷新 |
+| 错误 | `Alert/Error`：找不到用户 / 未公开或需登录 / 豆瓣暂时无法访问（后者若已导入部分条目，同时显示汇总）；按钮回到打开时的样子 |
+
+- 结束（完成、停止、中途出错）且有写入时，前端调用一次"结束"接口触发重建，并 `Toast/Success`"读者页将在重建后更新"
+- 手机：弹窗左右 16px 全宽、按钮全宽各占一半；无单独设计稿
+- 可访问性：`role="dialog"` `aria-labelledby` 指向标题；打开时焦点到 ID 输入框；关闭后焦点回到"从豆瓣导入"按钮；错误用 `role="alert"`
 
 ---
 
@@ -184,17 +220,20 @@
 | `MediaTypeTabs` | 已有（读者端） | 后台复用，`href` 指向 `?type=` |
 | `MediaEntryRow` · `/Mobile` | **新增** | `entry`、`onHide`、`onDelete` |
 | `RecognizeBox` | **新增** | `onRecognized(result)`、`excludeId?` |
+| `DoubanImportDialog` | **新增**（US-04） | `open`、`onClose`、`onFinished(changed)` |
 | `StarRating` | **新增** | `value`（1–5 / null）、`onChange` |
 | `MediaEntryForm` | 页面区块（单处使用） | 表单主体，组合以上组件；封面区复用 `CoverField` 的交互（尺寸改 2:3） |
 
 ## 设计稿
 
-[admin.pen](../admin.pen)「页面区」`10 书影音条目 /admin/media?type=book`、`10m 书影音条目（移动）`、`11 录入条目 /admin/media/new（识别后）`、`11m 录入条目（移动）`、`11g 录入条目（游戏：平台 + IGDB 封面链接）`、`11b 书影音后台状态`（识别中、识别失败、重复条目、删除确认与封面未识别、空分类、输入框悬停光晕、`StarRating` 各分值）；组件区"业务区块" Row 7 `MediaEntryRow` · `/Mobile`、`RecognizeBox`、`StarRating`；`AdminHeader` / `/Mobile` 新增"书影音"。
+[admin.pen](../admin.pen)「页面区」`10 书影音条目 /admin/media?type=book`、`10m 书影音条目（移动）`、`11 录入条目 /admin/media/new（识别后）`、`11m 录入条目（移动）`、`11g 录入条目（游戏：平台 + IGDB 封面链接）`、`11i 从豆瓣导入`（弹窗：首次 / 已同步过 / 进行中 / 完成 / 错误）、`11b 书影音后台状态`（识别中、识别失败、重复条目、删除确认与封面未识别、空分类、输入框悬停光晕、`StarRating` 各分值）；组件区"业务区块" Row 7 `MediaEntryRow` · `/Mobile`、`RecognizeBox`、`StarRating`，Row 8 `DoubanImportDialog`；`AdminHeader` / `/Mobile` 新增"书影音"。
 
 ## 变更历史
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-10-23 | 导入弹窗加"同步新标记"（增量）与"上次同步"，ID 改存服务端；11i 增加"首次"状态 | miraclehifi |
+| 2026-10-23 | 列表页加"从豆瓣导入"与 `DoubanImportDialog`，新增设计稿 11i（[douban-bulk-import](../../backlog/douban-bulk-import.md)） | miraclehifi |
 | 2026-10-23 | 游戏条目加"平台"下拉与"封面链接（IGDB）"，不上传封面；识别为游戏时不取豆瓣封面；新增设计稿 11g（[game-case-shelf](../../backlog/game-case-shelf.md)） | miraclehifi |
 | 2026-10-22 | 星级改为累计点亮前 N 颗（[rating-face-stars](../../backlog/rating-face-stars.md)） | miraclehifi |
 | 2026-10-22 | `StarRating`（原 `RatingInput`）去掉"清除"，再点当前星取消评分（[rating-face-stars](../../backlog/rating-face-stars.md)） | miraclehifi |

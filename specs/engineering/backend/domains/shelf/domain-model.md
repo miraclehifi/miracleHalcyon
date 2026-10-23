@@ -79,7 +79,9 @@ interface DoubanClient {
   fetchSubject(ref: SubjectRef, signal: AbortSignal): Promise<unknown>;                       // Rexxar JSON
   fetchBookTags(id: string, signal: AbortSignal): Promise<string[]>;                         // book/{id}/tags；失败抛错，调用方按空数组处理
   fetchCover(url: string, signal: AbortSignal): Promise<Uint8Array>;                          // 只允许 isDoubanImageHost
+  fetchInterests(q: InterestQuery, signal: AbortSignal): Promise<unknown>;                   // US-04，用户标记列表一页
 }
+type InterestQuery = { uid: string; kind: 'movie' | 'book' | 'game'; status: 'done' | 'doing'; start: number; count: number };
 ```
 
 | 项 | 规则 |
@@ -88,6 +90,7 @@ interface DoubanClient {
 | 请求头 | `Referer: https://m.douban.com/`；`User-Agent` 为常见移动端 UA；封面请求 `Referer: https://m.douban.com/` |
 | 失败 | 所有请求 `redirect: 'manual'`；非 2xx（含 3xx）、网络错误、超时 → `DoubanFetchError`；返回体非 JSON → `DoubanParseError` |
 | 封面大小 | 读取时累计字节数，超过 5,242,880 立即中止 → `DoubanFetchError` |
+| 标记列表（US-04） | `https://m.douban.com/rexxar/api/v2/user/{uid}/interests?type={kind}&status={status}&start={start}&count={count}`，`uid` 调用前必须通过 `isValidDoubanUid`（`encodeURIComponent` 后放入路径）；404 → `DoubanUserNotFoundError`；403 或 JSON 中 `code` 为 1000 / `msg` 含 `need_login` → `DoubanForbiddenError`；其余同上 |
 
 ### 2.3 字段映射（spike 验证，夹具见 `tests/fixtures/douban/README.md`）
 
@@ -101,6 +104,32 @@ interface DoubanClient {
 
 `missing` 取 `creator`、`year`、`cover` 中为空的项（`type`、`title` 不会缺：无标题即 `PARSE_FAILED`）。
 
+### 2.4 标记映射（US-04，`import.ts`，纯函数；spike 2026-10-23，ADR-014 §3）
+
+| 函数 | 规则 |
+|------|------|
+| `isValidDoubanUid(uid)` | `^[A-Za-z0-9_.-]{1,64}$` 且不为 `.` / `..`；前端导入 |
+| `IMPORT_STEPS` | `[movie·done, movie·doing, book·done, book·doing, game·done, game·doing]`；`IMPORT_PAGE_SIZE = 20` |
+| `isDoubanTimestamp(s)` | `^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`（水位 / `head` / `create_time` 格式；同格式字符串按字典序比较即时间先后） |
+| `parseInterestPage(json)` | 取 `total`（非负整数，否则 `DoubanParseError`）与 `interests[]`；`interests` 缺失视为空数组 |
+| `mapInterest(kind, interest, extra)` | 输入一条标记与补充数据（`extra.tags`：书的标签，`extra.game`：游戏详情 JSON，均可缺）→ `{ doubanId, fields: ImportedFields, coverUrl? }`，或 `{ skip: true }`（`status` 不是 `done` / `doing`），或抛 `ImportItemError(doubanId, 'PARSE_FAILED')`（无 `subject.id` 或无标题） |
+
+`ImportedFields` 映射（条目字段复用 §2.3 的作者去国籍、导演连接、桌游 / 漫画推断，入口改为标记 JSON）：
+
+| 字段 | 规则 |
+|------|------|
+| doubanId / douban.url | `subject.id`（1–12 位数字，否则 `PARSE_FAILED`）；`canonicalDoubanUrl(kind, id)` |
+| type | 影视：`subject.type === 'tv'` → `series`，否则 `movie`；书：`extra.tags` 含"漫画" → `comic`，否则 `book`；游戏：`subject.genres` 某项含"桌游" → `boardgame`，否则 `game` |
+| title | `subject.title`；超过 200 字符截断 |
+| creator | 书 `subject.author[]`、影视 `subject.directors[].name`、游戏 `extra.game.developers[]`；规则同 §2.3；超过 200 截断；取不到 → 缺失（`undefined`，不是 `null`，见 §4 合并） |
+| year | 影视 `subject.year`；书 `subject.pubdate[0]` 开头 4 位；游戏 `subject.release_date` 开头 4 位；不在 1000–9999 → 缺失 |
+| status | `done` → `completed`；`doing` → `in_progress` |
+| rating | `interest.rating.value` 为 1–5 整数 → 该值；否则 `null`（有值，表示未评分） |
+| markedOn | `interest.create_time` 前 10 位（`yyyy-MM-dd`，豆瓣为北京时间，原样取日期）；非法日期 → `PARSE_FAILED` |
+| comment | `interest.comment` 规范同 `normalizeEntryInput`，空串 → `null`；超过 1000 码点截断 |
+| platform | 仅 `type = game`：`interest.platforms[]` 按 `abbreviation`（大小写不敏感）映射 `PS5`→`ps5`、`PS4`→`ps4`、`NS`→`switch`、`NS 2`/`NS2`→`switch2`、`PC`→`steam`，取第一个能映射的；都不能 → 缺失 |
+| coverUrl | 非游戏：`subject.cover_url` \|\| `subject.pic.large`；游戏不取 |
+
 ## 3. 仓储与存储接口
 
 ```ts
@@ -108,6 +137,7 @@ interface ShelfRepo {
   listByType(type: ShelfType): Promise<ShelfEntry[]>;          // 含隐藏
   listVisible(): Promise<ShelfEntry[]>;                         // hidden = 0，ORDER BY id DESC
   get(id: number): Promise<ShelfEntry | null>;
+  findByDoubanIds(ids: string[]): Promise<Map<string, ShelfEntry>>;  // US-04：本页批量查询（≤ 20 个）
   findByDoubanId(doubanId: string): Promise<{ id: number; title: string; type: ShelfType; status: ShelfStatus; markedOn: string } | null>;
   insert(e: NewEntry): Promise<ShelfEntry>;                    // 唯一冲突 → DuplicateDoubanError
   update(id: number, e: EntryData): Promise<ShelfEntry | null>;
@@ -119,6 +149,13 @@ interface CoverStore {
   get(key: CoverKey): Promise<{ body: ReadableStream; contentType: string; size: number } | null>;
   delete(key: CoverKey): Promise<void>;                         // 不存在不报错
 }
+interface ImportStateRepo {                                     // US-04 增量同步（D1 shelf_import_state，ADR-014 §1.1）
+  get(uid: string): Promise<ImportStepState[]>;                  // 按 IMPORT_STEPS 顺序补齐 6 项，没有的行 watermark / syncedAt 为 null
+  lastUid(): Promise<string | null>;                             // attempted_at 最新的 uid
+  touch(uid: string, kind: ImportKind, status: ImportStatus, now: string): Promise<void>;          // upsert attempted_at
+  complete(uid: string, kind: ImportKind, status: ImportStatus, head: string | null, now: string): Promise<void>; // watermark = COALESCE(head, watermark)，synced_at = now
+}
+type ImportStepState = { kind: ImportKind; status: ImportStatus; watermark: string | null; syncedAt: string | null };
 interface ShelfHooks { onShelfChanged(): Promise<void> }        // 默认 noop；路由层适配 Deploy Hook
 interface IgdbImageClient {                                      // 待实现（ADR-013 §3）；路由层用全局 fetch 实现
   readSize(url: IgdbCoverUrl, signal: AbortSignal): Promise<{ width: number; height: number }>;
@@ -139,6 +176,9 @@ interface IgdbImageClient {                                      // 待实现（
 | `remove(id)` | `repo.delete` → 删封面（失败只记日志）→ 钩子 | 404 |
 | `listPublic()` | `repo.listVisible()` 映射为 `ShelfPublicEntry`（不含 id、doubanId、hidden、时间戳）；游戏的 `cover` 取 `coverUrl`，并带 `platform`、`coverWidth`、`coverHeight` | — |
 | `recognize(text, excludeId?)` | 见 §5 | 400 / 422 |
+| `importState(uid?)` | `uid` 缺省 → `stateRepo.lastUid()`（为 `null` 时 6 项全空）；有 `uid` 须通过 `isValidDoubanUid`；返回 `{ uid, steps }` | 400 |
+| `importPage(uid, kind, status, mode, start, head?)` | 见 §5.1；**不**触发钩子 | 400 / 403 / 404 / 502 |
+| `finishImport(changed)` | `changed` 为非负整数；`> 0` 时 `hooks.onShelfChanged()` 一次 | 400 |
 
 `CoverUpload = { bytes: Uint8Array; declaredType?: string }`；以文件头判定类型，`declaredType` 不参与判定。
 
@@ -163,6 +203,40 @@ return { fields: { ...fields, coverData, doubanUrl: canonicalDoubanUrl(ref.kind,
 
 识别不写 D1、不写 R2。超时在任何一步发生都归为 `FETCH_FAILED`。
 
+### 5.1 导入一页（`importPage`，US-04，ADR-014）
+
+```
+校验 isValidDoubanUid(uid)、kind ∈ movie/book/game、status ∈ done/doing、mode ∈ full/incremental、start 为 0–100000 的整数且为 20 的倍数、
+     start > 0 时 head 必须为 null 或 isDoubanTimestamp（start = 0 时忽略请求里的 head）→ 否则 VALIDATION_FAILED（不发外部请求）
+stateRepo.touch(uid, kind, status, now)
+watermark = mode === 'incremental' ? stateRepo.get(uid) 中该类的 watermark : null
+signal = AbortSignal.timeout(25000)；外部请求经并发上限 5 的队列
+page = parseInterestPage(client.fetchInterests({uid, kind, status, start, count: 20}))
+        → DoubanUserNotFoundError: DOUBAN_USER_NOT_FOUND；DoubanForbiddenError: DOUBAN_FORBIDDEN；其余 / 超时: FETCH_FAILED
+head = start === 0 ? (page.interests[0]?.create_time ?? null) : 请求的 head
+reached = false
+if watermark：page.interests 中 create_time < watermark（字典序）的项被丢弃，出现任一则 reached = true
+            （create_time 缺失或格式非法的项按单条 PARSE_FAILED 处理，不影响截断判断）
+items = 剩余项中 status ∈ {done, doing} 的项
+existing = repo.findByDoubanIds(items 的 subject.id)
+对每项（并发，单项异常只进 failed[]）：
+  extra：book → fetchBookTags（失败 → []）；game → fetchSubject(game)（失败 → 缺失）
+  m = mapInterest(...)；skip → 不计数
+  if 已有 e：
+     data = merge(e, m.fields)：m.fields 中非 undefined 的字段覆盖；hidden、coverKey、coverUrl/宽高、createdAt 不动；
+            type 由游戏变非游戏 → platform/coverUrl/宽高置空；由非游戏变游戏 → platform 缺失时 ps5，旧 coverKey 在更新后删除
+     normalizeEntryInput(data) → repo.update → updated++
+  else：
+     游戏：platform 缺失 → ps5，无封面
+     非游戏：coverUrl 合法（isSafeUrl + isDoubanImageHost）→ fetchCover → detectCoverType → CoverStore.put(newCoverKey)；任何失败 → coverFailed++，无封面
+     normalizeEntryInput → repo.insert（DuplicateDoubanError：并发时视为已有，转 update 一次）→ created++；insert 失败删除刚写的封面
+nextStart = reached || start + 20 >= page.total ? null : start + 20
+nextStart === null → stateRepo.complete(uid, kind, status, head, now)       // 只有一类完整结束才前移水位
+返回 { total: page.total, head, nextStart, created, updated, coverFailed, failed }
+```
+
+超时发生在列表请求前后：列表未取到 → `FETCH_FAILED`；单项处理中超时 → 该项进 `failed`（`FETCH_FAILED`），已写入的保留。
+
 ## 6. 读者端视图模型（`src/lib/reader/shelf.ts`，reader 模块增量）
 
 | 函数 | 规则 |
@@ -171,7 +245,7 @@ return { fields: { ...fields, coverData, doubanUrl: canonicalDoubanUrl(ref.kind,
 | `shelfPath(type)` | `book` → `/media`；其余 `/media/{type}` |
 | `markedMonth(markedOn)` | 截取 `yyyy-MM` |
 | `emptyIcon(type)` | book `book-open`、comic `book-image`、movie `film`、series `tv`、game `gamepad-2`、boardgame `dices` |
-| `posterAspect(type, cover)` | movie / series → `"2 / 3"`；game：`cover.width` 与 `cover.height` 都为正整数 → `"{w} / {h}"`，否则 `"3 / 4"`（待实现，ADR-013 §4） |
+| `posterAspect(type, cover)` | book / comic / movie / series → `"2 / 3"`；boardgame → `"1 / 1"`；game：`cover.width` 与 `cover.height` 都为正整数 → `"{w} / {h}"`，否则 `"3 / 4"`（待实现，ADR-013 §4） |
 
 ## 7. 服务的需求（Domain → US）
 
@@ -180,6 +254,7 @@ return { fields: { ...fields, coverData, doubanUrl: canonicalDoubanUrl(ref.kind,
 | US-01 manage-entries | `list`、`get`、`create`、`update`、`setHidden`、`remove`、`CoverStore`、`ShelfHooks`、`IgdbImageClient`；`normalizeIgdbCoverUrl`、`readImageSize`、`platformLabel`；`normalizeEntryInput`、`sortEntries`、`statusLabel`、`creatorLabel`、`countLabel` |
 | US-02 douban-recognize | `recognize`、`douban/*`、`DoubanClient`；`create` 的豆瓣去重 |
 | US-03 media-page | `listPublic`、`GET /covers/*`（`CoverStore.get`）；reader `shelf.ts` |
+| US-04 douban-import | `importState`、`importPage`（全量 / 增量）、`finishImport`、`ImportStateRepo`、`isDoubanTimestamp`、`DoubanClient.fetchInterests`、`isValidDoubanUid`、`IMPORT_STEPS`、`parseInterestPage`、`mapInterest`、`ShelfRepo.findByDoubanIds`、`CoverStore.put` |
 
 ## 8. 单元测试规格
 
@@ -202,3 +277,9 @@ return { fields: { ...fields, coverData, doubanUrl: canonicalDoubanUrl(ref.kind,
 | SHELF-UT-15 | `ShelfService.recognize` 游戏 | 游戏夹具；桌游夹具 | 游戏 `missing` 含 `cover` 且替身无封面请求；桌游照常下载 | TC-US02-23 |
 
 集成测试（workers 池，真实 D1 / R2）覆盖仓储 SQL、唯一索引冲突、`/covers/*` 读取与各 API 路由，见验收用例 `type: api` / `security`。
+| SHELF-UT-16 | `isValidDoubanUid` | TC-US04-10 输入表 | 与表一致 | TC-US04-10 |
+| SHELF-UT-17 | `mapInterest` / `parseInterestPage` | `interests-*` 夹具每条；TC-US04-02 / 03 决策表；`status: mark`；无标题；`create_time` 非法；`rating: null`；`comment: ""`；1,200 字短评；`total` 缺失 | 字段与 TC 一致；`mark` → skip；无标题 / 非法日期 → `PARSE_FAILED`；评分 `null`；短评 `null` / 截断到 1000 码点；`total` 缺失 → `DoubanParseError` | TC-US04-01–05 |
+| SHELF-UT-18 | `ShelfService.importPage`（替身 client / repo / store / hooks） | 新增与覆盖混合页；已有条目隐藏 + 封面；游戏详情失败；封面 418；insert 唯一冲突；19 条 / total 45 分页；404 / 403 / 挂起；非法参数 | 计数与 TC-US04-06–08 一致；钩子 0 次；非法参数时 client 无调用；挂起在 25s 内 `FETCH_FAILED`（假计时器）；外部请求 ≤ 41、并发 ≤ 5 | TC-US04-04–11、13 |
+| SHELF-UT-20 | `importPage` 增量与水位（替身 stateRepo） | TC-US04-18–21 场景；`start > 0` 缺 `head`；`head` 非法；`create_time` 非法的项 | 截断位置、同一秒、`complete` 只在 `nextStart = null` 时调用且参数为第 1 页 `head`；无水位按全量；后两者 400 / 单条 `PARSE_FAILED` | TC-US04-18–21 |
+| SHELF-UT-21 | `importState` | 无记录；`lastUid`；指定 uid；非法 uid | TC-US04-22 | TC-US04-22 |
+| SHELF-UT-19 | `ShelfService.finishImport` | `changed` 0 / 3 / -1 / 1.5 | 钩子 0 / 1 次；后两者 `VALIDATION_FAILED` | TC-US04-09 |

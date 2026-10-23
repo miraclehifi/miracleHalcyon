@@ -35,27 +35,28 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 | TC-US03-02 | SC-SHELF-02, SC-SHELF-13 | 分类切换与直接访问分类地址 | P0 | e2e |
 | TC-US03-03 | SC-SHELF-03, SC-SHELF-10, SC-SHELF-12 | 页头数量、量词与进行中数（等价类） | P0 | build |
 | TC-US03-04 | SC-SHELF-04 | 排序与进行中标记 | P0 | build |
-| TC-US03-05 | SC-SHELF-05 | 书 / 漫画卡片内容 | P0 | build |
-| TC-US03-06 | SC-SHELF-06, SC-SHELF-07 | 列表行（桌游）内容与无评分对齐 | P1 | build |
+| TC-US03-05 | SC-SHELF-05 | 书海报：正面、背面内容 | P0 | build |
+| TC-US03-06 | SC-SHELF-06, SC-SHELF-07 | 桌游 1:1 海报与无评分背面 | P1 | build |
 | TC-US03-07 | SC-SHELF-08, SC-SHELF-09 | 豆瓣外链与不可点击条目 | P0 | build |
 | TC-US03-08 | SC-SHELF-10 | 隐藏条目不进产物 | P0 | build |
 | TC-US03-09 | SC-SHELF-14 | 未知分类回退 | P1 | e2e |
 | TC-US03-10 | SC-SHELF-16 | 不请求豆瓣域名，外链图片只有 IGDB | P0 | e2e |
-| TC-US03-11 | SC-SHELF-17 | 静态预渲染、只有分类导航与海报墙岛 | P0 | build |
+| TC-US03-11 | SC-SHELF-17 | 静态预渲染、每页只有分类导航与海报墙岛 | P0 | build |
 | TC-US03-12 | SC-SHELF-18 | 重建后可见（写后触发构建） | P1 | e2e |
 | TC-US03-13 | SC-SHELF-05 | 错误猜测：HTML 转义、超长标题、多行短评 | P1 | build |
 | TC-US03-14 | SC-SHELF-01 | 性能：LCP < 2.5s | P2 | performance |
 | TC-US03-15 | SC-SHELF-11 | 封面缺失 / 加载失败占位 | P1 | ui-interaction |
 | TC-US03-16 | SC-SHELF-12 | 空分类空状态 | P1 | ui-interaction |
-| TC-US03-17 | SC-SHELF-15 | 手机 390px 布局与标签横滑 | P1 | ui-interaction |
+| TC-US03-17 | SC-SHELF-15 | 手机 390px：海报墙 2 列、无横向滚动 | P1 | ui-interaction |
 | TC-US03-18 | SC-SHELF-02 | 分类标签键盘操作与可访问性 | P2 | ui-interaction |
-| TC-US03-19 | SC-SHELF-19 | 海报墙悬停片名与翻面看详情 | P1 | ui-interaction |
+| TC-US03-19 | SC-SHELF-19 | 海报墙悬停无片名浮层与翻面看详情 | P1 | ui-interaction |
 | TC-US03-20 | SC-SHELF-20 | 海报墙按时间分段开关 | P1 | ui-interaction |
 | TC-US03-21 | SC-SHELF-21 | 游戏海报墙产物：IGDB 地址、原比例、平台、背面不含开发商 | P0 | build |
 | TC-US03-22 | SC-SHELF-21 | 游戏海报：原比例不裁切、悬停只显示平台、翻面看详情 | P1 | ui-interaction |
 | TC-US03-23 | SC-SHELF-22 | 游戏无封面 / 加载失败占位 | P1 | ui-interaction |
+| TC-US03-24 | SC-SHELF-23 | 按时间：切换标记时间 / 发行年份 | P1 | ui-interaction |
 
-**覆盖目标**：需求覆盖 100%（AC1–AC14）、行为覆盖 100%（SC-SHELF-01 – 22）。
+**覆盖目标**：需求覆盖 100%（AC1–AC14）、行为覆盖 100%（SC-SHELF-01 – 23）。
 
 ---
 
@@ -111,8 +112,11 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 | SC-SHELF-05 | P0 | build |
 
 **预期结果：**
-- "原则"卡片：封面 `<img>` 指向站内 R2 路径、标题、"瑞·达利欧"、4 颗实心星（`aria-label="评分 4 / 5"`）、短评"值得反复读"、底部"读过 · 2026-10"与"豆瓣 ↗"
-- "三体"卡片：底部为"在读"标记，无日期，无星级
+- `/media` 主体为满宽布局（与电影页同一容器类，无 896px 居中容器）；有一个 `MediaPosterWall` 岛，静态网格每块 `aspect-ratio: 2 / 3`
+- "原则"：封面 `<img>` 指向站内 R2 路径；背面含"原则"、4 颗实心星（`aria-label="评分 4 / 5"`）、短评"值得反复读"、"读过 · 2026-10-01"与豆瓣链接；整页不含"瑞·达利欧"
+- "三体"：背面底部为"在读"标记，无日期，无星级
+- 产物中不再出现 `MediaCard` 的结构（无 `data-media-card`）（2026-10-23 [media-wall-all-types](../../../../../backlog/media-wall-all-types.md) 改口径）
+
 
 ### TC-US03-06: 列表行内容与无评分对齐
 
@@ -120,7 +124,8 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 |--------|----------|------|
 | SC-SHELF-06, SC-SHELF-07 | P1 | build + e2e |
 
-**预期结果：** 桌游分类中"卡坦岛"行含封面、标题、开发商、星级（5 颗星元素且全部点亮，`aria-label="评分 5 / 5"`）、`2026-06`；"无评桌游"行无星级元素但保留评分列占位；e2e 中两行的年月列左边缘 x 坐标相同（±1px）（只有桌游用 `MediaRow`；电影、剧集、游戏为海报墙，见 TC-US03-19、21。2026-10-22 由电影改为游戏，2026-10-23 [game-case-shelf](../../../../../backlog/game-case-shelf.md) 由游戏改为桌游）
+**预期结果：** `/media/boardgame` 为海报墙，静态网格每块 `aspect-ratio: 1 / 1`；"卡坦岛"背面含名称、5 颗星（全部点亮，`aria-label="评分 5 / 5"`）、"玩过 · 2026-06-01"，不含"Klaus Teuber"；"无评桌游"背面无星级元素；e2e 中两张海报的 `boundingBox` 宽高相同且宽 = 高（±1px）；产物不再出现 `MediaRow` 结构（无 `data-media-row`）（2026-10-23 [media-wall-all-types](../../../../../backlog/media-wall-all-types.md) 改口径）
+
 
 ### TC-US03-07: 豆瓣外链与不可点击条目
 
@@ -129,9 +134,9 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 | SC-SHELF-08, SC-SHELF-09 | P0 | build |
 
 **预期结果：**
-- "原则"由 `<a href="https://book.douban.com/subject/…/" target="_blank" rel="noopener noreferrer">` 包裹，含"豆瓣 ↗"
-- "手记"不在任何 `<a>` 内，不含"豆瓣 ↗"，无 `cursor: pointer`
-- 产物中所有指向豆瓣的 `<a>` 都带 `rel="noopener noreferrer"`
+- "原则"海报背面旁有"豆瓣 ↗"`<a href="https://book.douban.com/subject/…/" target="_blank" rel="noopener noreferrer">`（翻面控件的兄弟节点）；海报本身不是链接
+- "手记"无"豆瓣 ↗"链接
+- 产物中所有指向豆瓣的 `<a>` 都带 `rel="noopener noreferrer"`（2026-10-23 [media-wall-all-types](../../../../../backlog/media-wall-all-types.md) 改口径：书由卡片整卡链接改为海报背面链接）
 
 ### TC-US03-08: 隐藏条目不进产物
 
@@ -167,7 +172,7 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 |--------|----------|------|
 | SC-SHELF-17 | P0 | build |
 
-**预期结果：** 产物中存在 `/media` 与 5 个 `/media/{type}` 的静态 HTML，包含全部显示中条目的标题；每页都有分类导航岛（`MediaTypeTabs`，`client="load"`），其服务端输出含分类 `<a href>` 且当前项 `aria-current="page"`（无 JS 可用）；电影、剧集、游戏页另有且仅有一个海报墙岛（`MediaPosterWall`，`client="load"`），其服务端输出为 `[data-poster-static]` 静态网格，含该分类全部显示中条目的标题、短评、`yyyy-MM-dd` 标记日期与豆瓣链接（不含导演）；书、漫画、桌游页不出现其他岛；只允许封面失败占位的内联 `onerror`（2026-10-22 [gooey-media-tabs](../../../../../backlog/gooey-media-tabs.md)、[media-poster-wall](../../../../../backlog/media-poster-wall.md)，原为"不引用 React 运行时 chunk"）
+**预期结果：** 产物中存在 `/media` 与 5 个 `/media/{type}` 的静态 HTML，**每个分类页**都有且仅有一个海报墙岛；包含全部显示中条目的标题；每页都有分类导航岛（`MediaTypeTabs`，`client="load"`），其服务端输出含分类 `<a href>` 且当前项 `aria-current="page"`（无 JS 可用）；海报墙岛（`MediaPosterWall`，`client="load"`），其服务端输出为 `[data-poster-static]` 静态网格，含该分类全部显示中条目的标题、短评、`yyyy-MM-dd` 标记日期与豆瓣链接（不含导演）；除这两个岛外不出现其他岛（2026-10-23 起所有分类都是海报墙）；只允许封面失败占位的内联 `onerror`（2026-10-22 [gooey-media-tabs](../../../../../backlog/gooey-media-tabs.md)、[media-poster-wall](../../../../../backlog/media-poster-wall.md)，原为"不引用 React 运行时 chunk"）
 
 ### TC-US03-12: 重建后可见
 
@@ -185,7 +190,8 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 |--------|----------|------|
 | SC-SHELF-05 | P1 | build |
 
-**预期结果：** 标题 `<b>` 以文本出现（产物含 `&lt;b&gt;`）；200 字标题在卡片中最多 2 行省略、不撑破布局；多行短评保留换行，超过 4 行省略
+**预期结果：** 标题 `<b>` 以文本出现（产物含 `&lt;b&gt;`）；200 字标题在背面最多 2 行省略，不撑破海报；多行短评在背面保留换行，超出剩余高度省略（2026-10-23 [media-wall-all-types](../../../../../backlog/media-wall-all-types.md) 改口径）
+
 
 ### TC-US03-14: 性能：LCP < 2.5s
 
@@ -207,7 +213,7 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 |--------|----------|------|
 | SC-SHELF-11 | P1 | ui-interaction |
 
-**预期结果：** "手记"（无封面）与"无名片"（封面 404）显示 `surface-sunken` 底与 `image-off` 图标，尺寸与正常封面相同；行 / 卡片高度与其他条目一致
+**预期结果：** "手记"（无封面）与"无名片"（封面 404）显示 `surface-sunken` 底与 `image-off` 图标与名称，海报尺寸与同分类其他海报相同（书、电影 2:3）
 
 **playwright_hint：** `const ph = page.getByRole('img', { name: '图片不可用' }).first(); await expect(ph).toBeVisible(); expect((await ph.boundingBox()).width).toBe((await normalCover.boundingBox()).width)`
 
@@ -227,9 +233,10 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 |--------|----------|------|
 | SC-SHELF-15 | P1 | ui-interaction |
 
-**预期结果：** `document.documentElement.scrollWidth <= 390`；分类标签容器 `scrollWidth > clientWidth` 且可横向滚动，点"桌游"前自动或手动滚动可见；列表行（桌游）为封面 44×66 在左、右侧两行；书卡片单列；游戏海报墙 2 列
+**预期结果：** `/media`、`/media/boardgame`、`/media/game` 下 `document.documentElement.scrollWidth <= 390`；海报墙 2 列（同一行两张海报 `y` 相同、`x` 不同）；书海报宽高比 2:3、桌游 1:1（±1%）；分类标签放不下时换行（不横向滚动）；"按时间"在 `MediaHeader` 内（2026-10-23 [media-wall-all-types](../../../../../backlog/media-wall-all-types.md) 改口径）
 
 **playwright_hint：** `await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)`
+
 
 ### TC-US03-18: 分类标签键盘操作与可访问性
 
@@ -241,7 +248,7 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 
 **playwright_hint：** `await expect(page.getByRole('link', { name: '书' })).toHaveAttribute('aria-current', 'page')`
 
-### TC-US03-19: 海报墙悬停片名与翻面看详情
+### TC-US03-19: 海报墙悬停无片名浮层与翻面看详情
 
 | covers | Priority | type |
 |--------|----------|------|
@@ -251,7 +258,7 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 
 **步骤：** 1. 指针移到"肖申克的救赎"海报上　2. 点它　3. 点"豆瓣 ↗"　4. 点"无名片"海报　5. 按 Esc　6. Tab 聚焦"肖申克的救赎"，按 Enter
 
-**预期结果：** 初始：`[data-poster-wall]` 内 2 张海报，翻面控件 `aria-pressed="false"`，正面无"在看"徽标，"豆瓣 ↗"不可聚焦；1：海报底部片名浮层可见，文字为"肖申克的救赎"，不含"弗兰克·德拉邦特"；2：`aria-pressed="true"`，背面可见"肖申克的救赎"、`评分 5 / 5`、"看过 · 2026-08-20"，背面不含"弗兰克·德拉邦特"，"豆瓣 ↗"可见可聚焦；3：新标签页打开豆瓣地址（`target="_blank"`），海报不翻回；4："无名片"翻开（背面无星级），"肖申克的救赎"自动翻回；5：两张都 `aria-pressed="false"`；6："肖申克的救赎"翻开，片名浮层可见（键盘聚焦）。另：`emulateMedia({ reducedMotion: 'reduce' })` 下点击后背面立即可见（无翻转动画）；`emulateMedia({ colorScheme: 'dark' })` 下背面底色为 `rgb(39, 39, 42)`
+**预期结果：** 初始：`[data-poster-wall]` 内 2 张海报，翻面控件 `aria-pressed="false"`，正面无"在看"徽标，"豆瓣 ↗"不可聚焦；1：正面无片名浮层（无 `[data-poster-caption]`），不含"弗兰克·德拉邦特"；2：`aria-pressed="true"`，背面可见"肖申克的救赎"、`评分 5 / 5`、"看过 · 2026-08-20"，背面不含"弗兰克·德拉邦特"，"豆瓣 ↗"可见可聚焦；3：新标签页打开豆瓣地址（`target="_blank"`），海报不翻回；4："无名片"翻开（背面无星级），"肖申克的救赎"自动翻回；5：两张都 `aria-pressed="false"`；6："肖申克的救赎"翻开（键盘聚焦）。另：`emulateMedia({ reducedMotion: 'reduce' })` 下点击后背面立即可见（无翻转动画）；`emulateMedia({ colorScheme: 'dark' })` 下背面底色为 `rgb(39, 39, 42)`
 
 **playwright_hint：** `const card = page.getByRole('button', { name: '《肖申克的救赎》' }); await card.hover(); await card.click(); await expect(card).toHaveAttribute('aria-pressed', 'true')`
 
@@ -277,8 +284,8 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 
 **预期结果：** `/media/game` 有一个 `MediaPosterWall` 岛，`[data-poster-static]` 静态网格含 5 个游戏（顺序：塞尔达传说：王国之泪（在玩）、黑神话：悟空、断链游戏、博德之门 3、某款老游戏）；
 - "黑神话：悟空"`<img src>` = `https://images.igdb.com/igdb/image/upload/t_1080p/co8h3y.jpg`，砖块 `style` 含 `aspect-ratio: 810 / 1080`，`<img>` 带 `width="810" height="1080"`、`object-fit: contain`；"博德之门 3"为 `600 / 900`；"某款老游戏"无 `<img>`、砖块 `aspect-ratio: 3 / 4`
-- 每张海报含平台徽标文本与 `aria-label`：`平台：PS5` / `平台：Switch` / `平台：Steam` / `平台：PS4` / `平台：Switch 2`
-- 背面含"黑神话：悟空"、`评分 4 / 5`、"玩过 · 2025-08-20"、豆瓣链接；整页不含"Game Science"
+- 每张海报正面含（悬停时显示的）平台徽标与年份徽标："黑神话：悟空"年份 `2024`，"某款老游戏"若无年份则无年份徽标；平台徽标文本与 `aria-label`：`平台：PS5` / `平台：Switch` / `平台：Steam` / `平台：PS4` / `平台：Switch 2`
+- 背面含"黑神话：悟空"、`评分 4 / 5`、"玩过 · 2025-08-20"、豆瓣链接，背面不含平台徽标；整页不含"Game Science"
 - 海报正面不含游戏名浮层元素（`data-poster-caption` 不存在）
 - 页头"5 款 · 在玩 1"
 
@@ -292,7 +299,7 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 
 **步骤：** 1. 量每张有封面的海报　2. 指针移到"黑神话：悟空"　3. 指针移到"博德之门 3"　4. 点"黑神话：悟空"　5. 视口 390×844 重开　6. 点"按时间"
 
-**预期结果：** 1："黑神话：悟空"砖块宽高比 = 810/1080、"博德之门 3" = 600/900（各 ±1%），图片 `naturalWidth / naturalHeight` 与砖块宽高比一致（未裁切）；2：左下角平台徽标可见、文字"PS5"，页面上没有可见的"黑神话：悟空"浮层文字（徽标外）；3：徽标文字"Steam"；4：翻到背面，可见"黑神话：悟空"、PS5 徽标、`评分 4 / 5`、"玩过 · 2025-08-20"、"豆瓣 ↗"，不含"Game Science"；5：2 列，正面不显示徽标（`hover: none`），翻面后背面有平台；6：出现"在玩"段（meta "1 款"）
+**预期结果：** 1："黑神话：悟空"砖块宽高比 = 810/1080、"博德之门 3" = 600/900（各 ±1%），图片 `naturalWidth / naturalHeight` 与砖块宽高比一致（未裁切）；2：左上角平台徽标可见、文字"PS5"，右下角年份徽标"2024"，页面上没有可见的"黑神话：悟空"浮层文字；3：平台徽标"Steam"、年份"2023"；4：翻到背面，可见"黑神话：悟空"、`评分 4 / 5`、"玩过 · 2025-08-20"、"豆瓣 ↗"，不含"Game Science"，不含平台徽标；5：2 列，正面不显示平台与年份（`hover: none`），背面也无平台；6：出现"在玩"段（meta "1 款"）
 
 **playwright_hint：** `const card = page.getByRole('button', { name: '《黑神话：悟空》' }); await card.hover(); await expect(card.getByLabel('平台：PS5')).toBeVisible()`
 
@@ -303,6 +310,20 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 | SC-SHELF-22 | P1 | ui-interaction |
 
 **预期结果：** "某款老游戏"砖块宽高比 3:4，"断链游戏"（IGDB 返回 404）宽高比 810:1080，两者都显示 `role="img"` `aria-label="图片不可用"` 占位与游戏名；图片失败前后砖块尺寸不变（`boundingBox` 相同）；悬停显示平台徽标（PS4 / Switch 2），可翻面
+
+### TC-US03-24: 按时间：切换标记时间 / 发行年份
+
+| covers | Priority | type |
+|--------|----------|------|
+| SC-SHELF-23 | P1 | ui-interaction |
+
+**前置条件：** 夹具游戏年份：黑神话：悟空 2024、塞尔达传说：王国之泪 2023（在玩）、博德之门 3 2023、断链游戏 2023、某款老游戏 无年份；清空 `localStorage`，`waitForHydration`
+
+**步骤：** 1. 打开 `/media/game`，点"按时间"　2. 选"发售年份"　3. 刷新　4. 打开电影页　5. 关闭"按时间"　6. `localStorage` 预置旧值 `"1"` 后刷新
+
+**预期结果：** 1：按钮右侧出现 `role="radiogroup"`，选项"玩过时间"（选中）、"发售年份"；分段同标记时间（有"在玩"段）；2：`h2` 依次为"2024"（meta "1 款"）、"2023"（"3 款"，王国之泪在段内第一）、"未知年份"（"1 款"），无"在玩"段；`localStorage['media:by-time'] === 'release'`；3：仍按发售年份；4：电影页同样按年份分段，选项文案为"看过时间 / 上映年份"，"上映年份"选中；5：恢复不分段，依据切换消失，值为 `"0"`；6：按标记时间分段（兼容旧值）
+
+**playwright_hint：** `await page.getByRole('button', { name: '按时间' }).click(); await page.getByRole('radio', { name: '发售年份' }).click(); await expect(page.getByRole('heading', { level: 2 })).toHaveText(['2024', '2023', '未知年份'])`
 
 ---
 
@@ -324,4 +345,5 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 | AC12 海报墙悬停与翻面 | SC-SHELF-19 | TC-11, 19 |
 | AC13 按时间分段 | SC-SHELF-20 | TC-20, 22 |
 | AC14 游戏海报墙 | SC-SHELF-21, 22 | TC-21, 22, 23 |
+| AC13 发行年份分段 | SC-SHELF-23 | TC-24 |
 | 约束：预渲染 / 零豆瓣请求 / 未知分类 | SC-SHELF-14, 16, 17 | TC-09, 10, 11 |

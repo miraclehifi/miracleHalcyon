@@ -20,6 +20,9 @@
 | POST | `/api/admin/shelf/entries/:id/hide` | 会话 | `setHidden(true)` | US-01 |
 | POST | `/api/admin/shelf/entries/:id/unhide` | 会话 | `setHidden(false)` | US-01 |
 | POST | `/api/admin/shelf/recognize` | 会话 | `recognize` | US-02 |
+| GET | `/api/admin/shelf/import/state` | 会话 | `importState` | US-04 |
+| POST | `/api/admin/shelf/import` | 会话 | `importPage` | US-04 |
+| POST | `/api/admin/shelf/import/finish` | 会话 | `finishImport` | US-04 |
 | GET | `/api/shelf` | 公开 | `listPublic` | US-03（构建） |
 | GET | `/covers/{yyyy}/{mm}/{file}` | 公开 | `CoverStore.get` | US-01、US-03 |
 
@@ -175,6 +178,80 @@ multipart：`fields`（同上，全量）+ 可选 `cover` 文件 + 可选 `cover
 
 总耗时 ≤ 8 秒；无持久化副作用。
 
+### POST /api/admin/shelf/import（US-04，ADR-014）
+
+请求 `application/json`：
+
+```json
+{ "uid": "189806038", "kind": "movie", "status": "done", "mode": "incremental", "start": 0 }
+```
+
+| 字段 | 规则 |
+|------|------|
+| uid | 必需，`isValidDoubanUid` |
+| kind | `movie` / `book` / `game`（豆瓣大类：`movie` 含剧集，`book` 含漫画，`game` 含桌游） |
+| status | `done` / `doing`（豆瓣标记状态，不是条目 `status`） |
+| mode | `full`（翻到 `total`）/ `incremental`（该类有水位时只处理 `create_time >= watermark` 的标记，遇更早的即结束本类；无水位时同 `full`） |
+| start | 整数，0–100,000，20 的倍数 |
+| head | `start > 0` 时必需：第 1 页响应的 `head` 原样带回（`null` 或 `yyyy-MM-dd HH:mm:ss`）；`start = 0` 时忽略 |
+
+任一不满足 → 400 `VALIDATION_FAILED`（`fields` 列出字段名），不发外部请求。
+
+成功 200：
+
+```json
+{
+  "total": 614,
+  "head": "2026-10-18 08:25:08",
+  "nextStart": 20,
+  "created": 15,
+  "updated": 3,
+  "coverFailed": 1,
+  "failed": [{ "doubanId": "26816519", "title": null, "reason": "PARSE_FAILED" }]
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| total | 豆瓣该类该状态的标记总数（含想看过滤前的失效条目），用于进度 |
+| head | 本类第 1 页第一条标记的 `create_time`（第 1 页由服务端取，后续页回显请求值）；豆瓣该类为空时 `null` |
+| nextStart | 下一页的 `start`；`null` 表示本类已完整同步（全量翻完或增量到达水位），服务端同时把水位写为 `head`、`syncedAt` 写为当前时间 |
+| created / updated | 本页新增 / 覆盖的条目数 |
+| coverFailed | 本页新条目中封面下载失败的数量 |
+| failed[] | `doubanId`（字符串，可能为 `null`：标记缺 `subject.id`）、`title`（字符串或 `null`）、`reason` ∈ `PARSE_FAILED` / `FETCH_FAILED` / `WRITE_FAILED` |
+
+失败：
+
+| HTTP | code | message（界面直接展示） |
+|------|------|------------------------|
+| 404 | `DOUBAN_USER_NOT_FOUND` | 豆瓣上找不到这个用户 |
+| 403 | `DOUBAN_FORBIDDEN` | 豆瓣标记未公开或需要登录，无法导入 |
+| 502 | `FETCH_FAILED` | 豆瓣暂时无法访问，已导入的条目已保存，可稍后重新导入 |
+
+总耗时 ≤ 25 秒；不触发重建。
+
+### GET /api/admin/shelf/import/state（US-04）
+
+查询参数 `uid` 可选（须通过 `isValidDoubanUid`，否则 400 `VALIDATION_FAILED`）；缺省时取最近一次导入请求用的 ID。
+
+200：
+
+```json
+{
+  "uid": "189806038",
+  "steps": [
+    { "kind": "movie", "status": "done", "watermark": "2026-10-18 08:25:08", "syncedAt": "2026-10-23T13:30:00.000Z" },
+    { "kind": "movie", "status": "doing", "watermark": null, "syncedAt": null }
+  ]
+}
+```
+
+`steps` 固定 6 项，按 `IMPORT_STEPS` 顺序；从没导入过时 `uid: null`、6 项全空。`watermark` 为豆瓣时间原文（北京时间）；`syncedAt` 为 ISO 8601 UTC。
+
+### POST /api/admin/shelf/import/finish（US-04）
+
+请求 `{ "changed": 18 }`（非负整数，否则 400 `VALIDATION_FAILED`）。`changed > 0` 时触发一次重建。204。
+
 ### GET /api/shelf（已实现，Sprint 9 任务 7：`src/pages/api/shelf.ts`）
 
 200：`{ "items": ShelfPublicEntry[] }`，只含 `hidden = 0`，按 `id` 降序；`Cache-Control: no-store`（只在构建时读取）。
@@ -197,4 +274,5 @@ multipart：`fields`（同上，全量）+ 可选 `cover` 文件 + 可选 `cover
 | `NOT_FOUND` | 404 | 条目不存在 |
 | `DUPLICATE_DOUBAN_ID` | 409 | 去重 |
 | `NOT_DOUBAN_LINK` / `NOT_SUBJECT_LINK` / `FETCH_FAILED` / `PARSE_FAILED` | 422 | 识别 |
+| `DOUBAN_USER_NOT_FOUND` / `DOUBAN_FORBIDDEN` / `FETCH_FAILED` | 404 / 403 / 502 | 导入（同名 `FETCH_FAILED` 在导入接口为 502） |
 | `UNAUTHORIZED` / `FORBIDDEN_ORIGIN` | 401 / 403 | middleware（沿用） |

@@ -51,13 +51,26 @@ afterEach(() => {
 
 // [UT-16][SC-SHELF-19][SC-SHELF-20]
 describe("MediaPosterWall", () => {
-  it("挂载后换成 Masonry 墙；正面不渲染状态徽标；背面不含导演", async () => {
+  it("挂载后换成 Masonry 墙；正面不渲染状态徽标与名称浮层；背面不含导演", async () => {
     await renderWall([entry("进行中的片", { status: "in_progress" })]);
     expect(document.querySelector("[data-poster-wall]")).not.toBeNull();
     expect(document.querySelector("[data-poster-static]")).toBeNull();
     const face = poster("进行中的片");
     expect(face.querySelector("[data-poster-front]")!.textContent).not.toContain("在看");
+    expect(face.querySelector("[data-poster-caption]")).toBeNull(); // poster-no-hover-title：正面无名称浮层
     expect(face.textContent).not.toContain("某导演");
+  });
+
+  // [poster-back-filtered-cover]
+  it("背面底层铺镜像、灰度的封面（aria-hidden）；无封面或加载失败时不渲染", async () => {
+    await renderWall([entry("有封面"), entry("没封面", { cover: null })]);
+    const layer = poster("有封面").querySelector<HTMLImageElement>("[data-poster-back] img[data-poster-back-cover]")!;
+    expect([layer.getAttribute("src"), layer.getAttribute("alt"), layer.getAttribute("aria-hidden")]).toEqual(["/covers/2026/08/shawshank2ab.jpg", "", "true"]);
+    expect(layer.className).toMatch(/-scale-x-100/);
+    expect(layer.className).toMatch(/grayscale/);
+    expect(poster("没封面").querySelector("[data-poster-back-cover]")).toBeNull();
+    fireEvent.error(layer);
+    expect(poster("有封面").querySelector("[data-poster-back-cover]")).toBeNull();
   });
 
   it("同一时间只翻开一张；Esc 翻回", async () => {

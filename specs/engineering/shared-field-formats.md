@@ -20,6 +20,9 @@
 | 书影音分类 | 枚举 | `book`、`comic`、`movie`、`series`、`game`、`boardgame` | F-005；显示名：书 / 漫画 / 电影 / 剧集 / 游戏 / 桌游 |
 | 书影音状态 | 枚举 | `completed`、`in_progress` | F-005；显示动词按分类：读过 / 在读（书、漫画）、看过 / 在看（电影、剧集）、玩过 / 在玩（游戏、桌游） |
 | 书影音条目 ID | 十进制整数的字符串 | `"7"` | 同文章 ID |
+| 豆瓣用户 ID | `^[A-Za-z0-9_.-]{1,64}$`，不为 `.` / `..` | `"189806038"`、`"ahbei"` | US-04 导入；存 D1 `shelf_import_state` |
+| 豆瓣同步水位 `watermark` | 豆瓣 `create_time` 原文 `yyyy-MM-dd HH:mm:ss`（北京时间，不换算；同格式字符串可直接比较大小） | `"2026-10-18 08:25:08"` | US-04 增量同步 |
+| 豆瓣标记日期 → `markedOn` | `create_time`（`yyyy-MM-dd HH:mm:ss`，北京时间）取前 10 位 | `"2026-10-18"` | US-04；不做时区换算 |
 | 游戏平台 | 枚举 | `ps5`、`ps4`、`switch`、`switch2`、`steam` | F-005（ADR-013）；显示名 PS5 / PS4 / Switch / Switch 2 / Steam；只用于游戏 |
 | IGDB 封面地址 | URL | `https://images.igdb.com/igdb/image/upload/t_1080p/co8h3y.jpg` | F-005（ADR-013）；只存规范形式（`t_1080p`、`.jpg`） |
 | 豆瓣条目 ID | 纯数字字符串 | `"1292052"` | 取自 `/subject/{id}/`；无豆瓣链接时为 `null` |

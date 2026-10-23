@@ -136,7 +136,7 @@ test("[TC-US03-18] 分类标签键盘操作与可访问性", async ({ page }) =>
 });
 
 // [TC-US03-19][SC-SHELF-19] 海报墙：悬停片名、点击翻面、豆瓣新标签、只翻一张、Esc、键盘 Enter
-test("[TC-US03-19] 海报墙悬停片名与翻面看详情", async ({ page, context }) => {
+test("[TC-US03-19] 海报墙悬停无片名浮层与翻面看详情", async ({ page, context }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/media/movie");
   await waitForHydration(page);
@@ -147,11 +147,9 @@ test("[TC-US03-19] 海报墙悬停片名与翻面看详情", async ({ page, cont
   await expect(link).toHaveAttribute("tabindex", "-1");
   await expect(poster(page, "肖申克的救赎").locator("[data-poster-front]")).not.toContainText("在看");
 
-  // 1 悬停：片名浮层
+  // 1 悬停：无片名浮层（poster-no-hover-title）
   await shawshank.hover();
-  const caption = poster(page, "肖申克的救赎").locator("[data-poster-caption]");
-  await expect(caption).toHaveCSS("opacity", "1");
-  await expect(caption).toHaveText("肖申克的救赎");
+  await expect(poster(page, "肖申克的救赎").locator("[data-poster-caption]")).toHaveCount(0);
   // 2 点击翻面：背面详情，无导演
   await shawshank.click();
   await expect(shawshank).toHaveAttribute("aria-pressed", "true");
@@ -176,12 +174,11 @@ test("[TC-US03-19] 海报墙悬停片名与翻面看详情", async ({ page, cont
   // 5 Esc
   await page.keyboard.press("Escape");
   await expect(nameless).toHaveAttribute("aria-pressed", "false");
-  // 6 键盘聚焦显示片名，Enter 翻面
+  // 6 键盘聚焦，Enter 翻面
   // 上一次交互是键盘（Esc），程序聚焦同样命中 :focus-visible（WebKit 的 Tab 默认不经过 tabindex 元素，不用 Tab 走）
   await page.mouse.move(0, 0);
   await shawshank.focus();
   await expect(shawshank).toBeFocused();
-  await expect(caption).toHaveCSS("opacity", "1");
   await page.keyboard.press("Enter");
   await expect(shawshank).toHaveAttribute("aria-pressed", "true");
 });

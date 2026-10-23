@@ -1,5 +1,5 @@
 // MediaPoster/Front · /Hover · /Back（components.md、"海报墙参数"）：电影、剧集海报，底层 vendor FlipCard。
-// 正面只有封面（不显示状态徽标），悬停 / 键盘聚焦时底部浮出片名（Masonry caption 样式）；点击、Enter、空格翻到背面：
+// 正面只有封面（不显示状态徽标、悬停不浮出片名，poster-no-hover-title）；点击、Enter、空格翻到背面：
 // 片名、评分、短评、"看过 · yyyy-MM-dd"（进行中为"在看"徽标），不显示导演。"豆瓣 ↗"是 FlipCard 的兄弟节点
 // （FlipCard 根是 role="button"，里面不能嵌链接），覆盖在背面右下角，只在翻开时可点、可聚焦。
 // still：服务端 / 水合前的静态网格，只渲染正面，背面详情留在 HTML 中（hidden），无 JS 时"豆瓣 ↗"由全局样式常显
@@ -9,7 +9,6 @@ import { statusLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
 import { useTokenColor } from "../../lib/dom/theme";
 import { StarRating } from "../ui/StarRating";
 import FlipCard from "../vendor/react-bits/FlipCard";
-import { CAPTION, TITLE } from "../vendor/react-bits/Masonry";
 
 export interface MediaPosterProps {
   entry: ShelfPublicEntry;
@@ -35,26 +34,44 @@ function Front({ entry }: { entry: ShelfPublicEntry }) {
           </span>
         </div>
       ) : (
-        <>
-          <img src={entry.cover!} alt="" loading="lazy" decoding="async" draggable={false} className="block h-full w-full object-cover" onError={() => setBroken(true)} />
-          <span
-            data-poster-caption
-            data-mode="hover"
-            aria-hidden="true"
-            className={`${CAPTION} group-focus-visible:[transform:none]! group-focus-visible:opacity-100! motion-reduce:[transform:none]!`}
-          >
-            <span className={TITLE}>{entry.title}</span>
-          </span>
-        </>
+        <img src={entry.cover!} alt="" loading="lazy" decoding="async" draggable={false} className="block h-full w-full object-cover" onError={() => setBroken(true)} />
       )}
     </div>
+  );
+}
+
+// 背面底层（poster-back-filtered-cover，同 FlipCard 官网示例）：同一张封面水平镜像、灰度、30% 不透明，
+// 叠 flip-surface 渐变让标题区与日期区更白、中段透出画面
+function BackCover({ src }: { src: string }) {
+  const [broken, setBroken] = useState(false);
+  if (broken) return null;
+  return (
+    <>
+      <img
+        data-poster-back-cover
+        src={src}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        className="absolute inset-0 h-full w-full -scale-x-100 object-cover opacity-30 grayscale"
+        onError={() => setBroken(true)}
+      />
+      <span aria-hidden="true" className="absolute inset-0 bg-linear-to-b from-flip-surface/60 via-flip-surface/0 via-35% to-flip-surface/90" />
+    </>
   );
 }
 
 function Back({ entry, compact }: { entry: ShelfPublicEntry; compact: boolean }) {
   const status = statusLabel(entry.type, entry.status);
   return (
-    <div data-poster-back className={`flex h-full flex-col gap-2 text-left ${compact ? "p-3" : "p-4"}`}>
+    <div data-poster-back className={`relative isolate flex h-full flex-col gap-2 text-left ${compact ? "p-3" : "p-4"}`}>
+      {entry.cover && (
+        <div className="absolute inset-0 -z-10">
+          <BackCover src={entry.cover} />
+        </div>
+      )}
       <p className="line-clamp-2 text-[15px] leading-[1.4] font-semibold">{entry.title}</p>
       <StarRating value={entry.rating} size="sm" readOnly />
       <p className="min-h-0 flex-1 overflow-hidden text-meta leading-[1.6] whitespace-pre-line text-ink-muted">{entry.comment}</p>
