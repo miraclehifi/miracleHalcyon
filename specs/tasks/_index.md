@@ -14,6 +14,6 @@
 | [Sprint 6](sprint-6/_index.md) | completed（待 code-review） | 图片上传体验升级 | F-001 增量：浏览器端压缩、上传进度卡片（失败重试 / 移除、已中断）、读者页不渲染上传占位、实况照片开关（默认关）与"仅转为静态图"、图片菜单实况项（[media-upload-experience](../backlog/media-upload-experience.md)） | 9 |
 | [Sprint 7](sprint-7/_index.md) | in_progress | 媒体存储清理 | F-006：后台 `/admin/storage` 未引用图片 / 实况视频检测与一键清理（检测接口、清理接口、存储页、清理流程；与 Sprint 6 并行，文件不重叠） | 4 |
 | [Sprint 8](sprint-8/_index.md) | completed（已发布） | Afilmory 外链照片 | F-001 增量 US-13：照片信息接口、外链照片渲染、缩略图 → 主图加载、粘贴分享代码、外链实况、灯箱主图（[afilmory-photo-embed](../backlog/afilmory-photo-embed.md)） | 6 |
-| [Sprint 9](sprint-9/_index.md) | in_progress（11 / 16；2026-10-23 插入游戏海报墙任务 12–14、按发行年份分段任务 15、统一海报墙任务 16） | 书影音 | F-005：豆瓣 Rexxar spike、条目接口（迁移 0004、封面 `/covers/*`）、识别接口、后台列表与录入表单、识别框、读者构建数据与 `/media` 页面（[media-douban-sync](../backlog/media-douban-sync.md)）；插入：强调色改蓝、电影 / 剧集海报墙（[media-poster-wall](../backlog/media-poster-wall.md)） | 10 |
+| [Sprint 9](sprint-9/_index.md) | in_progress（18 / 20；2026-10-23 插入游戏海报墙任务 12–14、按发行年份分段任务 15、统一海报墙任务 16、豆瓣批量导入任务 19–20） | 书影音 | F-005：豆瓣 Rexxar spike、条目接口（迁移 0004、封面 `/covers/*`）、识别接口、后台列表与录入表单、识别框、读者构建数据与 `/media` 页面（[media-douban-sync](../backlog/media-douban-sync.md)）；插入：强调色改蓝、电影 / 剧集海报墙（[media-poster-wall](../backlog/media-poster-wall.md)） | 10 |
 
 规划方式：迭代递进（2026-10-13 作者选择）——只详细拆当前 Sprint，下一个 Sprint 在上一个完成后基于最新设计拆分。

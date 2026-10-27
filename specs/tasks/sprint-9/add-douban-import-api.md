@@ -1,7 +1,7 @@
 # add-douban-import-api: 豆瓣批量导入与增量同步接口（数据 + 领域 + 接口）
 
 **Sprint**: Sprint 9
-**序号**: 15
+**序号**: 19
 **状态**: pending
 **类别**: API
 **架构层级**: 数据 + 领域 + 接口（`src/db/migrations/`、`src/domains/shelf/`、`src/domains/shelf/douban/`、`src/pages/api/admin/shelf/import*`）
@@ -21,7 +21,7 @@
   - 夹具 `tests/fixtures/douban/interests-*.json`：由 `scripts/spike/douban-rexxar.py` 增加 `interests` 子命令录制（作者账号 189806038，每份裁剪 ≤ 5 条，补构造的 `status: mark`、无标题、`total: 45` 分页样本，以及增量用的 `interests-movie-done-incr`、`interests-movie-done-doing2done`，类别过滤用的 `interests-movie-done-mixed`、`interests-book-done-manga`），README 登记来源
 - **影响范围**: 新增三个接口与一张表；`map.ts` 若抽取共用函数，`recognize` 的映射结果不能变（原有 `douban-map`、`douban-fixtures`、`recognize` 测试回归）
 - **不变量**: 外发主机仍只有 `m.douban.com` 与 `*.doubanio.com`，全部 `redirect: 'manual'`；游戏不下载豆瓣封面；已有条目的 `hidden`、封面不动；导入接口不触发重建
-- **不在本任务**: 前端弹窗（任务 16）
+- **不在本任务**: 前端弹窗（任务 20）
 
 ## 产品需求来源
 
@@ -67,5 +67,5 @@
 
 | 文档 | 更新内容 |
 |------|---------|
-| shelf api-contract | 导入接口标注已实现（任务 15） |
+| shelf api-contract | 导入接口标注已实现（任务 19） |
 | [sprint-9/_index.md](_index.md) | 状态 → completed |
