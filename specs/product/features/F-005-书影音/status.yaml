@@ -17,7 +17,7 @@ phases:
   implementation: done   # 2026-10-27 任务 20 add-douban-import-dialog 完成，Sprint 9 共 20 个任务全部实现；任务 19 add-douban-import-api 完成（迁移 0006、三个导入接口）；任务 12 add-game-platform-api（迁移 0005、IGDB 封面）、13 add-game-form-fields 完成；2026-10-22 Sprint 9 任务 1–11 全部完成；2026-10-23 插入任务 12–14、15–16 待实现（顺序 12 → 15 → 16）
   code_review: in_progress   # 2026-10-23 任务 1–11 审查完成（MUST-FIX 4 项已修复，CONCERN 记入 backlog shelf-review-followups）；任务 12–16 实现后补审
   validation: pending
-current_phase: code_review
+current_phase: code_review   # 2026-10-27 作者要求跳过全量回归 / code-review / verify 直接发布：版本 6eef9a32（提交 43dda53），先执行生产迁移 0005、0006；线上冒烟通过。code-review（任务 12–20）与 verify 仍待补
 blockers: []
 notes: "后台手动录入 + 豆瓣分享链接识别填表；/media 分类展示。Domain 需避开已有 media（图片）命名"
 has_ui_changes: true
