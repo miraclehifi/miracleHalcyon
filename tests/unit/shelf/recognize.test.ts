@@ -126,3 +126,24 @@ describe("recognize", () => {
     await expect(service.recognize("x".repeat(10001))).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
   });
 });
+
+// SHELF-UT-15：游戏不下载豆瓣封面（ADR-013 §5）；桌游照常
+describe("recognize 游戏", () => {
+  // [TC-US02-23][SC-RECOG-20]
+  it("游戏缺封面且无封面请求；桌游下载封面", async () => {
+    const { service, calls } = setup({
+      fetchSubject: vi.fn(async (ref) => {
+        calls.push(`subject:${ref.kind}/${ref.id}`);
+        return load(ref.id === "10757298" ? "game-board" : "game-video");
+      }),
+    });
+    const game = await service.recognize("https://www.douban.com/game/10734307/");
+    const gameCalls = [...calls];
+    const board = await service.recognize("https://www.douban.com/game/10757298/");
+    expect({
+      game: [game.fields?.type, game.fields?.coverData, game.missing?.filter((m) => m === "cover").length],
+      gameCalls,
+      board: [board.fields?.type, board.fields?.coverData?.startsWith("data:image/jpeg;base64,")],
+    }).toEqual({ game: ["game", null, 1], gameCalls: ["subject:game/10734307"], board: ["boardgame", true] });
+  });
+});

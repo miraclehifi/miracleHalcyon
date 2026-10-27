@@ -3,18 +3,18 @@
 **US ID**: US-04
 **Story**: [story.md](../../../../../product/features/F-005-书影音/stories/media-shelf/US-04-douban-import/story.md)
 **Behaviors**: [behaviors.md](../../../../../product/features/F-005-书影音/stories/media-shelf/US-04-douban-import/behaviors.md)
-**最后更新**: 2026-10-23
-**Version Tag**: v1.1
+**最后更新**: 2026-10-27
+**Version Tag**: v1.2
 
 > 验收规格（非可执行代码）。占位接口，**接口路径、字段与错误码以 design-domain API 契约为准**：
-> - 同步状态：`GET /api/admin/shelf/import/state[?uid=]` → `{uid, steps: [{kind, status, watermark, syncedAt}]}`（不带 `uid` 时取最近一次导入用的 ID）
-> - 导入一页：`POST /api/admin/shelf/import`，请求 `{uid, kind: movie|book|game, status: done|doing, mode: full|incremental, start, head?}`
+> - 同步状态：`GET /api/admin/shelf/import/state[?uid=]` → `{uid, categories: [{type, status, watermark, syncedAt}]}`（6 类别 × 2 状态 = 12 项；不带 `uid` 时取最近一次导入用的 ID）
+> - 导入一页：`POST /api/admin/shelf/import`，请求 `{uid, kind: movie|book|game, status: done|doing, types: [勾选的本站分类，须属于该 kind], mode: full|incremental, start, head?}`
 >   - 成功：`{total, head, nextStart, created, updated, coverFailed, failed: [{doubanId, title, reason}]}`；`nextStart` 为 `null` 表示该类别该状态已同步完（全量翻完或增量到达水位），此时服务端前移水位
 >   - 失败：`error.code` ∈ `VALIDATION_FAILED` / `DOUBAN_USER_NOT_FOUND` / `DOUBAN_FORBIDDEN` / `FETCH_FAILED`（以 [api-contract](../../../../../engineering/backend/domains/shelf/api-contract.md) 为准，design-domain 已对齐）
 > - 结束：`POST /api/admin/shelf/import/finish`，请求 `{changed}`；`changed > 0` 时触发一次 Deploy Hook
 >
 > **豆瓣数据来源打桩**：同 US-02，workers 测试替换 `fetch`，按 URL 返回 `tests/fixtures/douban/` 下的录制响应；本 US 新增 `interests-*` 夹具（2026-10-23 spike 录制自作者公开账号，裁剪为每份 ≤ 5 条）。E2E 中导入接口用 `page.route` 打桩。
-> 未特别注明的 TC：Version Tag v1.0、Automation Feasibility ✅、Change History "2026-10-23 v1.0 初始创建"。TC-US04-18–23 为 v1.1（2026-10-23 增量同步）；TC-US04-14 于 v1.1 改为从服务端带出 ID。
+> 未特别注明的 TC：Version Tag v1.0、Automation Feasibility ✅、Change History "2026-10-23 v1.0 初始创建"。TC-US04-18–23 为 v1.1（2026-10-23 增量同步）；TC-US04-14 于 v1.1 改为从服务端带出 ID。TC-US04-24–26 为 v1.2（2026-10-27 类别选择）；TC-US04-14、18、19、20、22、23 于 v1.2 按"类别 × 状态"水位改写。
 
 ## 测试数据
 
@@ -39,7 +39,9 @@
 | 名称 | 内容 |
 |------|------|
 | `existing-hidden` | 豆瓣 ID 与夹具电影相同；状态进行中、评分空、`hidden: true`、有 R2 封面 |
-| `state-synced` | `shelf_import_state`：uid `189806038` 6 行，`watermark` 各不相同、`synced_at` 2026-10-23T13:30:00Z |
+| `state-synced` | `shelf_import_state`：uid `189806038` 12 行（6 类别 × 2 状态），`watermark` 各不相同、`synced_at` 2026-10-23T13:30:00Z |
+| `interests-movie-done-mixed` | 影视看过第一页：12 部电影（type=movie）、8 部剧集（type=tv），total 20 | TC-24 |
+| `interests-book-done-manga` | 书读过第一页：3 本标签含"漫画"、17 本普通书，其中 1 本 tags 请求打桩为失败 | TC-24 |
 | `existing-game` | 豆瓣 ID 与夹具游戏相同；开发商"Sucker Punch"、IGDB 封面、平台 ps4 |
 
 **清理**：workers 测试按文件隔离 D1 / R2；E2E 导入接口打桩，不写真实数据。
@@ -73,8 +75,11 @@
 | TC-US04-21 | SC-IMPORT-26 | 在看改看过 | P1 | api |
 | TC-US04-22 | SC-IMPORT-27, SC-IMPORT-01 | 同步状态接口与换 ID | P0 | api |
 | TC-US04-23 | SC-IMPORT-01, SC-IMPORT-12, SC-IMPORT-22 | 面板增量模式：按钮、进度、汇总 | P0 | ui-interaction |
+| TC-US04-24 | SC-IMPORT-28, SC-IMPORT-30 | 按类别过滤写入（决策表） | P0 | api |
+| TC-US04-25 | SC-IMPORT-29, SC-IMPORT-24, SC-IMPORT-25 | 类别 × 状态水位：截断点取较早水位、只前移勾选类别 | P0 | api |
+| TC-US04-26 | SC-IMPORT-01, SC-IMPORT-02, SC-IMPORT-28 | 面板类别勾选：默认全选、各类上次同步、至少一个、只请求勾选大类 | P0 | ui-interaction |
 
-**覆盖目标**：需求覆盖 100%（AC1–AC12）、行为覆盖 100%（SC-IMPORT-01 – 27）。
+**覆盖目标**：需求覆盖 100%（AC1–AC13）、行为覆盖 100%（SC-IMPORT-01 – 30）。
 
 ---
 
@@ -257,7 +262,7 @@
 
 **前置：** 写入 `state-synced`（影视·看过水位 `2026-10-18 08:25:08`）；本站已有水位上那条已有标记对应的条目
 
-**步骤：** `{mode: "incremental", kind: "movie", status: "done", start: 0}`，夹具 `interests-movie-done-incr`
+**步骤：** `{mode: "incremental", kind: "movie", status: "done", types: ["movie", "series"], start: 0}`，夹具 `interests-movie-done-incr`（电影·看过、剧集·看过水位都为 `2026-10-18 08:25:08`）
 
 | 标记时间 | 期望 |
 |---------|------|
@@ -307,6 +312,37 @@
 
 **预期结果：** 增量同步后该条目 `status: completed`、`markedOn` 为新日期；`updated` 计 1；不新增条目
 
+### TC-US04-24: 按类别过滤写入（决策表）
+
+| covers | Priority | type |
+|--------|----------|------|
+| SC-IMPORT-28, SC-IMPORT-30 | P0 | api |
+
+| 请求 `kind` / `types` | 夹具 | 期望 |
+|----------------------|------|------|
+| movie / `[movie]` | `interests-movie-done-mixed` | `created: 12`；8 部剧集不写入、不请求其封面、不计 `failed`；本站已有的同豆瓣 ID 剧集条目字段与 `updatedAt` 不变 |
+| movie / `[series]` | 同上 | `created: 8`，电影不写入 |
+| movie / `[movie, series]` | 同上 | `created: 20` |
+| book / `[comic]` | `interests-book-done-manga` | 仍请求每本书的 tags；`created: 3`（漫画）；普通书与 tags 失败的那本（按书处理）都不写入、不下载封面 |
+| book / `[book]` | 同上 | `created: 17`（含 tags 失败那本） |
+| movie / `[book]`、`[]`、`[music]`、重复项 `[movie, movie]` | — | 400 `VALIDATION_FAILED`，不发外部请求 |
+
+### TC-US04-25: 类别 × 状态水位
+
+| covers | Priority | type |
+|--------|----------|------|
+| SC-IMPORT-29, SC-IMPORT-24, SC-IMPORT-25 | P0 | api |
+
+| 起始水位（看过） | 请求 `types` / `mode` | 期望截断与结果 |
+|------------------|----------------------|---------------|
+| 电影 W1、剧集无 | `[movie]` / incremental | 按 W1 截断；结束后只有电影·看过前移为 `head`，剧集·看过仍为空 |
+| 电影 W1、剧集无 | `[movie, series]` / incremental | 剧集无水位 → 不截断，翻到 `total`；结束后两项都为 `head` |
+| 电影 W1、剧集 W2（W2 晚于 W1） | `[movie, series]` / incremental | 按较早的 W1 截断；结束后两项都为 `head` |
+| 电影 W1、剧集 W2 | `[series]` / incremental | 按 W2 截断；电影·看过不变 |
+| 电影 W1 | `[movie]` / full | 翻到 `total`；电影·看过前移 |
+
+**预期结果（另）：** 未勾选类别的 `attempted_at` 不更新；状态接口返回的 12 项与上表一致
+
 ### TC-US04-22: 同步状态接口与换 ID
 
 | covers | Priority | type |
@@ -315,10 +351,10 @@
 
 | 场景 | 请求 | 期望 |
 |------|------|------|
-| 无任何记录 | `GET …/state` | `{uid: null, steps: 6 项 watermark / syncedAt 均为 null}` |
-| `state-synced` | `GET …/state` | `uid: "189806038"`，6 项按 IMPORT_STEPS 顺序，`syncedAt` 为 ISO 8601 UTC |
-| `state-synced`，随后以 `ahbei` 导入过一页 | `GET …/state` | `uid: "ahbei"`（最近一次导入用的 ID），6 项水位为空 |
-| 同上 | `GET …/state?uid=189806038` | 原 6 项水位仍在 |
+| 无任何记录 | `GET …/state` | `{uid: null, categories: 12 项 watermark / syncedAt 均为 null}` |
+| `state-synced` | `GET …/state` | `uid: "189806038"`，`categories` 12 项按 电影、剧集、书、漫画、游戏、桌游 × 看过、在看 顺序，`syncedAt` 为 ISO 8601 UTC |
+| `state-synced`，随后以 `ahbei` 导入过一页 | `GET …/state` | `uid: "ahbei"`（最近一次导入用的 ID），12 项水位为空 |
+| 同上 | `GET …/state?uid=189806038` | 原 12 项水位仍在 |
 | `uid` 不合法 | `GET …/state?uid=a/b` | 400 `VALIDATION_FAILED` |
 | 未登录 | `GET …/state` | 401 |
 
@@ -332,9 +368,9 @@
 |--------|----------|------|
 | SC-IMPORT-01, SC-IMPORT-02 | P1 | ui-interaction |
 
-**步骤：** `page.route` 打桩状态接口返回 `{uid: "189806038", steps: [6 个都为 null]}` → 打开 `/admin/media` → 点"从豆瓣导入"；清空输入；输入 `abc/../x`
+**步骤：** `page.route` 打桩状态接口返回 `{uid: "189806038", categories: [12 项都为 null]}` → 打开 `/admin/media` → 点"从豆瓣导入"；清空输入；输入 `abc/../x`
 
-**预期结果：** 输入框带出 `189806038`；只有"全量导入"按钮；清空后按钮禁用；非法 ID 显示格式提示且按钮禁用
+**预期结果：** 输入框带出 `189806038`；6 个类别都勾上、都显示"未同步"；只有"全量导入"按钮；清空后按钮禁用；非法 ID 显示格式提示且按钮禁用
 
 **Change History：** 2026-10-23 v1.0 初始创建；2026-10-23 v1.1 ID 改为由状态接口带出（原 localStorage）
 
@@ -385,11 +421,27 @@
 |--------|----------|------|
 | SC-IMPORT-01, SC-IMPORT-12, SC-IMPORT-22 | P0 | ui-interaction |
 
-**步骤：** 状态接口打桩为 6 类都有水位（`syncedAt` 2026-10-23T13:30:00Z）；导入接口打桩：每类第 1 页即 `nextStart: null`，影视·看过 `created: 3`；点"同步新标记"
+**步骤：** 状态接口打桩为 12 项都有水位（`syncedAt` 2026-10-23T13:30:00Z）；导入接口打桩：每类第 1 页即 `nextStart: null`，影视·看过 `created: 3`；点"同步新标记"
 
-**预期结果：** 打开面板显示"上次同步：2026-10-23 21:30"（按浏览器本地时区，测试固定 Asia/Shanghai）；主按钮"同步新标记"、次要"全量导入"；每个请求 `mode: "incremental"`、`start: 0`；进度显示"影视 · 看过 已同步 3 条"；结束显示"同步完成：新增 3、更新 0、失败 0、封面失败 0"；之后状态接口重新拉取，"上次同步"更新；`finish` 调用 1 次。点"全量导入"时请求 `mode: "full"`
+**预期结果：** 每个类别旁显示"10-23 21:30"（按浏览器本地时区，测试固定 Asia/Shanghai；一个类别取其看过、在看两项中较早的同步时间，任一为空显示"未同步"）；主按钮"同步新标记"、次要"全量导入"；每个请求 `mode: "incremental"`、`start: 0`；进度显示"影视 · 看过 已同步 3 条"；结束显示"同步完成：新增 3、更新 0、失败 0、封面失败 0"；之后状态接口重新拉取，各类别同步时间更新；`finish` 调用 1 次。点"全量导入"时请求 `mode: "full"`
 
 **playwright_hint：** `await page.getByRole('button', { name: '同步新标记' }).click(); await expect(page.getByText('同步完成：新增 3')).toBeVisible(); expect(importBodies.every(b => b.mode === 'incremental')).toBe(true)`
+
+### TC-US04-26: 面板类别勾选
+
+| covers | Priority | type |
+|--------|----------|------|
+| SC-IMPORT-01, SC-IMPORT-02, SC-IMPORT-28 | P0 | ui-interaction |
+
+**步骤：** 状态接口打桩：电影两项 `syncedAt` 2026-10-23T13:30:00Z，漫画两项 2026-10-20T01:05:00Z，其余为空；打开面板；取消勾选除"电影"外的 5 项，点"同步新标记"；再全部取消勾选；关闭后重新打开
+
+**预期结果：**
+- 6 个勾选项（电影、剧集 / 书、漫画 / 游戏、桌游 两两一行）默认全勾；电影旁"10-23 21:30"、漫画旁"10-20 09:05"、其余"未同步"
+- 只勾电影时：导入请求只有 `kind: movie`、`types: ["movie"]` 的两步，没有 book / game 请求
+- 全部取消勾选：类别下方"至少选择一个类别"，两个导入按钮禁用
+- 重新打开：6 项又全部勾上（勾选不保存）
+
+**playwright_hint：** `await page.getByRole('checkbox', { name: /剧集/ }).uncheck(); expect(importBodies.every(b => b.kind === 'movie' && b.types.join() === 'movie')).toBe(true); await expect(page.getByText('至少选择一个类别')).toBeVisible()`
 
 ---
 
@@ -408,5 +460,6 @@
 | AC9 | BH-17、18、20 | TC-10、11、17 |
 | AC10 | BH-15 | TC-16 |
 | AC11 | BH-22、23、24、26 | TC-18、19、21、23 |
-| AC12 | BH-25、27 | TC-20、22 |
+| AC12 | BH-25、27、29 | TC-20、22、25 |
+| AC13 | BH-28、30、02 | TC-24、26 |
 | 安全 | BH-20、21 | TC-10、12 |

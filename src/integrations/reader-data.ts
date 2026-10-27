@@ -3,7 +3,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
-import { isCoverKey, isDateOnly, isDoubanUrl, isShelfStatus, isShelfType, type ShelfPublicEntry } from "../domains/shelf/entry";
+import { isCoverKey, isDateOnly, isDoubanUrl, isShelfPlatform, isShelfStatus, isShelfType, normalizeIgdbCoverUrl, type ShelfPublicEntry } from "../domains/shelf/entry";
 import { sortPublished } from "../lib/reader/sort";
 import type { ReaderData, ReaderPost } from "../lib/reader/types";
 
@@ -69,6 +69,9 @@ export interface ShelfData {
 const nullOr = (value: unknown, check: (v: never) => boolean) => value === null || check(value as never);
 const isRating = (v: number) => Number.isInteger(v) && v >= 1 && v <= 5;
 const isYear = (v: number) => Number.isInteger(v);
+const isCoverSize = (v: number) => Number.isInteger(v) && v >= 1 && v <= 20000;
+// 站内封面 /covers/…，或游戏的规范 IGDB 地址（ADR-013 §4）
+const isCover = (v: string) => typeof v === "string" && ((v.startsWith("/") && isCoverKey(v.slice(1))) || normalizeIgdbCoverUrl(v) === v);
 
 function isShelfEntry(value: unknown): value is ShelfPublicEntry {
   const e = value as Record<string, unknown>;
@@ -84,22 +87,29 @@ function isShelfEntry(value: unknown): value is ShelfPublicEntry {
     nullOr(e.rating, (v) => typeof v === "number" && isRating(v)) &&
     isDateOnly(e.markedOn) &&
     nullOr(e.comment, (v) => typeof v === "string") &&
-    nullOr(e.cover, (v: string) => typeof v === "string" && v.startsWith("/") && isCoverKey(v.slice(1))) &&
-    nullOr(e.doubanUrl, (v: string) => typeof v === "string" && isDoubanUrl(v))
+    nullOr(e.cover, isCover) &&
+    nullOr(e.doubanUrl, (v: string) => typeof v === "string" && isDoubanUrl(v)) &&
+    nullOr(e.platform, isShelfPlatform) &&
+    nullOr(e.coverWidth, (v) => typeof v === "number" && isCoverSize(v)) &&
+    nullOr(e.coverHeight, (v) => typeof v === "number" && isCoverSize(v))
   );
 }
+
+// 迁移 0005 之前的数据（含旧夹具）没有平台与宽高：补 null
+const withGameFields = (e: Record<string, unknown>) => ({ ...e, platform: e.platform ?? null, coverWidth: e.coverWidth ?? null, coverHeight: e.coverHeight ?? null });
 
 // 校验书影音条目；顺序保持接口输出（id 降序），分组排序交给 groupShelf
 export function parseShelfData(raw: unknown, source: string): ShelfData {
   const entries = (raw as { entries?: unknown })?.entries;
   if (!Array.isArray(entries)) throw new ReaderDataError(`书影音数据 ${source} 缺少 entries 数组`);
-  for (const e of entries) {
+  const filled = entries.map((e) => (typeof e === "object" && e !== null ? withGameFields(e as Record<string, unknown>) : e));
+  for (const e of filled) {
     if (!isShelfEntry(e)) {
       const title = (e as { title?: unknown })?.title;
       throw new ReaderDataError(`书影音数据 ${source} 中的条目字段不合法：${typeof title === "string" && title.trim() !== "" ? title : "（无标题）"}`);
     }
   }
-  return { entries: entries as ShelfPublicEntry[] };
+  return { entries: filled as ShelfPublicEntry[] };
 }
 
 class HttpStatusError extends ReaderDataError {

@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 9
 **序号**: 12
-**状态**: pending
+**状态**: completed（2026-10-27）
 **类别**: API
 **架构层级**: 数据 + 领域 + 接口（`src/db/migrations/`、`src/domains/shelf/`、`src/pages/api/admin/shelf/`、`src/pages/api/shelf.ts`）
 **所属 Feature**: [F-005 书影音](../../product/features/F-005-书影音/feature-scope.md)
@@ -39,9 +39,19 @@
 
 ## DoD（完成定义）
 
-- [ ] 测试清单全部由红变绿；影响范围：`tests/integration/shelf/*`、`tests/unit/shelf/*` 原有用例通过
-- [ ] `ddl-changes.md` 有 0005 条目（⏳ 待执行，注明必须先于代码部署）
-- [ ] `npm run lint`、`npm run check` 通过
+- [x] 测试清单全部由红变绿；影响范围：`tests/integration/shelf/*`、`tests/unit/shelf/*` 原有用例通过
+- [x] `ddl-changes.md` 有 0005 条目（⏳ 待执行，注明必须先于代码部署）
+- [x] `npm run lint`、`npm run check` 通过
+
+## 实现记录（2026-10-27）
+
+- 测试：`tests/unit/shelf/igdb.test.ts`（31，含 `IgdbImageClient` 读取上限 / 跳转 / 非图片）、`service.test.ts` + 5（SHELF-UT-14）、`recognize.test.ts` + 1（SHELF-UT-15）、`tests/integration/shelf/game-entry.test.ts`（4，TC-US01-26–28）、`migration.test.ts` + 1（0005）；夹具 `tests/fixtures/igdb/`（逐字节构造的图片头，见 README）
+- **偏离 data-model**：D1 限制 GLOB / LIKE 模式 ≤ 50 字符，`cover_url` 的 CHECK 改为 `instr(…, 'https://images.igdb.com/igdb/image/upload/t_1080p/') = 1 AND substr(cover_url, -4) = '.jpg' AND length BETWEEN 55 AND 120`（含义不变），data-model 已同步
+- `normalizeIgdbCoverUrl` 在 URL 解析前拒绝含 `..` 或 `\` 的原文（`new URL` 会消去 `../`、把 `\` 当 `/`，否则 TC-US01-27 #4 路径穿越会被"修正"后通过）
+- `IgdbImageClient` 每读一块就尝试解析，读到宽高立即取消；宽或高超过 20,000 视为失败（data-model 列上限）
+- 读取失败与 8 秒超时都在服务层归为 `COVER_LINK_UNREACHABLE`；游戏带上传封面为 `GameCoverUploadError`（400 `BAD_REQUEST`"游戏封面请粘贴 IGDB 图片链接，不接受上传文件"）
+- 影响范围补改：`reader-data.ts` 的构建数据校验原先只认 `/covers/` 封面，存入游戏 IGDB 封面后重建会失败——改为接受规范 IGDB 地址、校验 `platform` / 宽高，旧数据缺字段补 `null`（`tests/unit/reader/shelf.test.ts` + 2）；`entries-api` 全字段用例的游戏补 `platform`（游戏平台改为必填）；`public-api`、读者端两个单元测试夹具补新字段
+- 本地 D1 已执行 0005
 
 ## 依赖
 

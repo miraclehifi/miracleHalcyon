@@ -39,6 +39,9 @@ describe("公开书影音列表", () => {
         comment: "好",
         cover: expect.stringMatching(/^\/covers\/\d{4}\/\d{2}\/[a-z2-7]{12}\.jpg$/),
         doubanUrl: "https://movie.douban.com/subject/1292052/",
+        platform: null,
+        coverWidth: null,
+        coverHeight: null,
       },
     });
   });

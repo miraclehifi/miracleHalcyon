@@ -2,8 +2,9 @@
 // 手机去掉卡片、底部固定操作栏。前端只拦标题空白与年份位数（不发请求、聚焦第一个出错字段）；保存为 multipart（字段 + 封面）。
 // 成功后整页回列表并带跨页提示；有未保存改动时离开要确认（beforeunload / "取消" / "← 书影音" / 识别重复时"去编辑"）。
 // 识别（任务 6）：只填条目字段，被填入的输入框高亮 1.5 秒；缺失的作者 / 年份标警告直到修改；识别封面以 data: 预览、保存时转为文件
+// 游戏（ADR-013，设计稿 11g）：平台下拉 + IGDB 封面链接，不上传封面；两组值切换分类时保留，只提交当前分类适用的那组
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { creatorLabel, SHELF_TYPES, statusLabel, TYPE_LABELS, type ShelfType } from "../../../domains/shelf/entry";
+import { creatorLabel, platformLabel, SHELF_PLATFORMS, SHELF_TYPES, statusLabel, TYPE_LABELS, type ShelfPlatform, type ShelfType } from "../../../domains/shelf/entry";
 import { setFlash } from "../../../lib/admin/flash";
 import { applyRecognized, dataUrlToFile, type FilledField, type MissingField, type RecognizedFields } from "../../../lib/admin/recognize";
 import { createEntry, deleteEntry, ShelfApiError, updateEntry, type CoverChange, type ShelfEntryView } from "../../../lib/admin/shelf-client";
@@ -15,6 +16,7 @@ import { ICONS } from "../../ui/icons";
 import { SegmentedControl } from "../../ui/SegmentedControl";
 import { StarRating } from "../../ui/StarRating";
 import { ToastProvider, useToast } from "../../ui/Toast";
+import { IgdbCoverField } from "./IgdbCoverField";
 import { RecognizeBox } from "./RecognizeBox";
 import { ShelfCoverField } from "./ShelfCoverField";
 
@@ -128,11 +130,13 @@ function FormContent({ mode, initial: given, defaultType = "book", entry, listHr
     setSaving(true);
     try {
       const fields = toEntryFields(form);
-      const saved = mode === "edit" && entry ? await updateEntry(entry.id, fields, cover) : await createEntry(fields, cover);
+      const coverChange = form.type === "game" ? undefined : cover; // 游戏不接受上传封面
+      const saved = mode === "edit" && entry ? await updateEntry(entry.id, fields, coverChange) : await createEntry(fields, coverChange);
       setFlash({ tone: "success", message: "已保存，读者页将在重建后更新" });
       go(listOf(listHref, saved.type));
     } catch (error) {
       setSaving(false);
+      if (error instanceof ShelfApiError && error.code === "COVER_LINK_UNREACHABLE") return showErrors({ coverUrl: FORM_MESSAGES.coverLinkUnreachable });
       if (error instanceof ShelfApiError && error.status === 400) {
         if (error.code === "COVER_TYPE_INVALID" || error.code === "COVER_TOO_LARGE") return showErrors({ cover: FORM_MESSAGES.cover });
         const fields = ((error.body as { error?: { fields?: string[] } } | null)?.error?.fields ?? []) as string[];
@@ -141,6 +145,7 @@ function FormContent({ mode, initial: given, defaultType = "book", entry, listHr
           for (const field of fields) {
             if (field === "title") next.title = FORM_MESSAGES.title;
             else if (field === "year") next.year = FORM_MESSAGES.year;
+            else if (field === "coverUrl") next.coverUrl = FORM_MESSAGES.coverUrl;
             else if (field === "creator" || field === "markedOn" || field === "comment") next[field] = FORM_MESSAGES.invalid;
           }
           // 出错字段在表单上没有对应控件（如 doubanUrl、rating）时，用服务端说明提示，不能毫无反馈
@@ -221,6 +226,9 @@ function FormContent({ mode, initial: given, defaultType = "book", entry, listHr
             <SectionTitle>条目信息</SectionTitle>
           </span>
           <div className="flex gap-6 max-md:flex-col max-md:gap-5">
+            {form.type === "game" ? (
+              <IgdbCoverField url={form.coverUrl} />
+            ) : (
             <ShelfCoverField
               preview={preview}
               fromDouban={coverFromDouban}
@@ -238,6 +246,7 @@ function FormContent({ mode, initial: given, defaultType = "book", entry, listHr
                 setPreview(null);
               }}
             />
+            )}
             <div className="flex min-w-0 flex-1 flex-col gap-4">
               <div className="flex gap-4 max-md:flex-col">
                 <div className="w-[140px] shrink-0 max-md:w-full">
@@ -263,12 +272,30 @@ function FormContent({ mode, initial: given, defaultType = "book", entry, listHr
                     <input value={form.creator} maxLength={200} onChange={(e) => set("creator", e.target.value)} />
                   </Field>
                 </div>
+                {form.type === "game" && (
+                  <div className="w-[140px] shrink-0 max-md:w-full">
+                    <Field label="平台">
+                      <select value={form.platform} aria-required="true" onChange={(e) => set("platform", e.target.value as ShelfPlatform)}>
+                        {SHELF_PLATFORMS.map((platform) => (
+                          <option key={platform} value={platform}>
+                            {platformLabel(platform)}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                  </div>
+                )}
                 <div className="w-[140px] shrink-0 max-md:w-full">
                   <Field label="年份" error={errors.year} warning={warn.has("year") ? MISSING_HINT : undefined} highlight={highlight.has("year")}>
                     <input value={form.year} inputMode="numeric" placeholder="如 2018" onChange={(e) => set("year", e.target.value)} />
                   </Field>
                 </div>
               </div>
+              {form.type === "game" && (
+                <Field label="封面链接（IGDB）" hint="保存时换成 t_1080p 大图并读取宽高" error={errors.coverUrl}>
+                  <input type="url" value={form.coverUrl} placeholder="粘贴 igdb.com 游戏页封面的图片地址" onChange={(e) => set("coverUrl", e.target.value)} />
+                </Field>
+              )}
               {form.doubanUrl && (
                 <div className="flex flex-col gap-2">
                   <span className="text-meta font-medium text-ink">豆瓣链接</span>

@@ -19,7 +19,8 @@ export interface MediaEntryRowProps {
 const ImageOff = ICONS["image-off"];
 const EyeOff = ICONS["eye-off"];
 
-function Cover({ src, className }: { src: string | null; className: string }) {
+// 游戏封面为 IGDB 外链：按原比例放进框里，不裁切（contain）
+function Cover({ src, contain = false, className }: { src: string | null; contain?: boolean; className: string }) {
   const [failed, setFailed] = useState(false);
   if (!src || failed)
     return (
@@ -27,7 +28,7 @@ function Cover({ src, className }: { src: string | null; className: string }) {
         <ImageOff size={14} aria-hidden="true" />
       </span>
     );
-  return <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} className={`shrink-0 rounded-[3px] object-cover ${className}`} />;
+  return <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} className={`shrink-0 rounded-[3px] ${contain ? "object-contain" : "object-cover"} ${className}`} />;
 }
 
 function Badges({ entry }: { entry: ShelfEntryView }) {
@@ -59,7 +60,7 @@ export function MediaEntryRow({ entry, busy = false, onToggleHidden, onDelete }:
     <li className="border-b border-line" data-entry-id={entry.id}>
       {/* 桌面 */}
       <div className="flex items-center gap-4 px-2 py-2.5 max-md:hidden">
-        <Cover src={entry.cover} className="h-12 w-8" />
+        <Cover src={entry.cover} contain={entry.type === "game"} className="h-12 w-8" />
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <a href={editHref} className={`${titleClass} hover:underline`}>
             {entry.title}
@@ -92,7 +93,7 @@ export function MediaEntryRow({ entry, busy = false, onToggleHidden, onDelete }:
 
       {/* 手机 */}
       <div className="relative flex items-center gap-3 py-2.5 md:hidden">
-        <Cover src={entry.cover} className="h-[60px] w-10" />
+        <Cover src={entry.cover} contain={entry.type === "game"} className="h-[60px] w-10" />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex min-w-0 items-center gap-1.5">
             <a href={editHref} className={`${titleClass} after:absolute after:inset-0`}>

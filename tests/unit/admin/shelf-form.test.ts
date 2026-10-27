@@ -7,7 +7,7 @@ describe("formDefaults（UT-08）", () => {
   // [SC-MANAGE-04] 分类取入口分类、状态已完成、日期今天，其余为空
   it("电影入口、今天 2026-10-21", () => {
     expect(formDefaults("movie", "2026-10-21")).toEqual({
-      type: "movie", title: "", creator: "", year: "", status: "completed", rating: null, markedOn: "2026-10-21", comment: "", doubanUrl: null, doubanId: null,
+      type: "movie", title: "", creator: "", year: "", status: "completed", rating: null, markedOn: "2026-10-21", comment: "", doubanUrl: null, doubanId: null, platform: "ps5", coverUrl: "",
     });
   });
 });
@@ -43,10 +43,10 @@ describe("formFromEntry", () => {
   it("条目回填", () => {
     const entry: ShelfEntryView = {
       id: "7", type: "series", title: "请回答1988", creator: null, year: 2015, status: "in_progress", rating: null, markedOn: "2026-09-01",
-      comment: null, cover: null, doubanUrl: null, doubanId: null, hidden: false, createdAt: "", updatedAt: "",
+      comment: null, cover: null, platform: null, coverUrl: null, coverWidth: null, coverHeight: null, doubanUrl: null, doubanId: null, hidden: false, createdAt: "", updatedAt: "",
     };
     expect(formFromEntry(entry)).toEqual({
-      type: "series", title: "请回答1988", creator: "", year: "2015", status: "in_progress", rating: null, markedOn: "2026-09-01", comment: "", doubanUrl: null, doubanId: null,
+      type: "series", title: "请回答1988", creator: "", year: "2015", status: "in_progress", rating: null, markedOn: "2026-09-01", comment: "", doubanUrl: null, doubanId: null, platform: "ps5", coverUrl: "",
     });
   });
 });

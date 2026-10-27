@@ -107,3 +107,74 @@ describe("MediaEntryForm", () => {
     expect(screen.queryByText("未识别，请手动填写")).toBeNull();
   });
 });
+
+// UT-19：游戏字段（admin-media.md"游戏专属""切换分类"，ADR-013）
+describe("MediaEntryForm 游戏字段（UT-19）", () => {
+  const IGDB = "https://images.igdb.com/igdb/image/upload/t_cover_big/co8h3y.webp";
+  const renderGame = () => render(<MediaEntryForm mode="new" initial={formDefaults("game", "2026-10-21")} listHref="/admin/media" />);
+  const sentFields = () => JSON.parse((fetchMock.mock.calls[0][1].body as FormData).get("fields") as string);
+  const sentCover = () => (fetchMock.mock.calls[0][1].body as FormData).get("cover");
+  const link = () => screen.getByLabelText<HTMLInputElement>("封面链接（IGDB）");
+
+  // [SC-MANAGE-23] 平台下拉默认 PS5、选项顺序；封面链接输入；无上传按钮
+  it("游戏：平台与封面链接，无上传", () => {
+    renderGame();
+    const platform = screen.getByLabelText("平台") as unknown as { value: string; options: ArrayLike<{ textContent: string | null }> };
+    expect([platform.value, Array.from(platform.options, (o) => o.textContent)]).toEqual(["ps5", ["PS5", "PS4", "Switch", "Switch 2", "Steam"]]);
+    expect([link().type, screen.queryByRole("button", { name: "上传" })]).toEqual(["url", null]);
+  });
+
+  // [SC-MANAGE-25] 切到书：平台与链接隐藏、上传恢复；切回游戏：值保留
+  it("切换分类保留两组值", () => {
+    renderGame();
+    fireEvent.change(screen.getByLabelText("平台"), { target: { value: "switch" } });
+    fireEvent.change(link(), { target: { value: IGDB } });
+    fireEvent.change(screen.getByLabelText("分类"), { target: { value: "book" } });
+    expect([screen.queryByLabelText("平台"), screen.queryByLabelText("封面链接（IGDB）"), screen.getByRole("button", { name: "上传" }) !== null]).toEqual([null, null, true]);
+    fireEvent.change(screen.getByLabelText("分类"), { target: { value: "game" } });
+    expect([(screen.getByLabelText("平台") as unknown as { value: string }).value, link().value]).toEqual(["switch", IGDB]);
+  });
+
+  // [SC-MANAGE-24] 前端校验链接：格式不对不发请求；空串通过
+  it("链接格式校验", async () => {
+    renderGame();
+    fireEvent.change(screen.getByLabelText("标题"), { target: { value: "塞尔达" } });
+    fireEvent.change(link(), { target: { value: "https://example.com/a.jpg" } });
+    save();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByText("请粘贴 images.igdb.com 的封面图片地址")).toBeTruthy();
+    expect(document.activeElement).toBe(link());
+    fireEvent.change(link(), { target: { value: "" } });
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ id: "1", type: "game" }), { status: 201 }));
+    vi.stubGlobal("location", { assign: vi.fn() });
+    await act(async () => save());
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  // [SC-MANAGE-23][SC-MANAGE-25] 只提交当前分类适用的字段；游戏不带封面文件
+  it("提交字段", async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ id: "1", type: "game" }), { status: 201 }));
+    vi.stubGlobal("location", { assign: vi.fn() });
+    renderGame();
+    fireEvent.change(screen.getByLabelText("标题"), { target: { value: "塞尔达" } });
+    fireEvent.change(link(), { target: { value: IGDB } });
+    await act(async () => save());
+    expect([sentFields().platform, sentFields().coverUrl, sentCover()]).toEqual(["ps5", IGDB, null]);
+    cleanup();
+    fetchMock.mockClear();
+    renderNew("book");
+    fireEvent.change(screen.getByLabelText("标题"), { target: { value: "原则" } });
+    await act(async () => save());
+    expect(["platform" in sentFields(), "coverUrl" in sentFields()]).toEqual([false, false]);
+  });
+
+  // [SC-MANAGE-24] 422 COVER_LINK_UNREACHABLE：链接字段报错并聚焦，内容保留
+  it("链接打不开", async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ error: { code: "COVER_LINK_UNREACHABLE", message: "封面链接打不开，请检查后重试" } }), { status: 422 }));
+    renderGame();
+    fireEvent.change(screen.getByLabelText("标题"), { target: { value: "塞尔达" } });
+    fireEvent.change(link(), { target: { value: IGDB } });
+    await act(async () => save());
+    expect([screen.getByText("封面链接打不开，请检查后重试") !== null, document.activeElement === link(), link().value]).toEqual([true, true, IGDB]);
+  });
+});

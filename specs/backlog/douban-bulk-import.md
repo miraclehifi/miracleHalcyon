@@ -14,6 +14,7 @@
 后台填写作者的豆瓣用户 ID，首次"全量导入"把该用户在豆瓣上标记的影视、书、游戏批量导入书影音条目，包括状态、评分、标记日期、短评。之后点"同步新标记"只拉上次同步之后新标记的条目（增量），不再翻全部历史。
 
 > 2026-10-23 作者补充："全量更新一次后，接下来只更新增量数据"。
+> 2026-10-27 作者补充："导入模块增加可以根据类别导入"——弹窗里勾选要导入的类别，只导勾选的。
 
 > 推翻 [media-douban-sync](media-douban-sync.md) 2026-10-19 的决定"不做全量导入、个人标记页抓取"。单条链接识别保留不变；F-005 [feature-scope](../product/features/F-005-书影音/feature-scope.md) 的 Out of Scope 需同步修改。
 
@@ -41,8 +42,10 @@
 
 **验收条件**:
 - [ ] 后台书影音页有"从豆瓣导入"入口：填写豆瓣用户 ID（`douban.com/people/{id}/` 中的 id）；ID 保存在服务端，下次（换设备也一样）默认带出
+- [ ] 类别选择：勾选项为本站 6 个分类 书 / 漫画 / 电影 / 剧集 / 游戏 / 桌游，默认全选；至少选一个；只写入勾选类别的条目，未勾选类别的标记跳过（不计失败、不下载封面、不改本站已有条目）
 - [ ] 两种方式："全量导入"（翻完全部标记）与"同步新标记"（增量）；该 ID 完成过全量导入后，默认按钮为"同步新标记"，并显示上次同步时间
 - [ ] 增量：每类从最新标记往旧翻，遇到早于上次同步水位的标记即停止；只处理水位之后（含同一秒）的标记
+- [ ] 水位按 本站分类 × 标记状态 记录（如 电影·看过、剧集·看过）；只勾选电影时剧集的水位不动，之后再勾选剧集，剧集按全量补齐
 - [ ] 水位只在某一类完整同步结束（全量翻完或增量到达水位）后才前移；中断、停止、出错时不前移，下次增量会重新覆盖这段
 - [ ] 某类还没有水位（从没完整同步过，或换了 ID）时，"同步新标记"对该类按全量处理
 - [ ] 导入范围：影视（按 `is_tv` 分到电影 / 剧）、书（含漫画判定）、游戏（含桌游判定），分类映射规则与单条识别一致
@@ -58,7 +61,7 @@
 
 ## 排期
 
-Sprint 9 任务 15 [add-douban-import-api](../tasks/sprint-9/add-douban-import-api.md)、16 [add-douban-import-dialog](../tasks/sprint-9/add-douban-import-dialog.md)（依赖任务 12 游戏平台字段）。设计：US-04、[ADR-014](../engineering/features/F-005-书影音/architecture/adr/ADR-014-douban-bulk-import.md)、admin.pen 11i。
+6 个类别一次全部支持，不分阶段（作者 2026-10-27）：Sprint 9 任务 12（游戏平台字段）→ 15 [add-douban-import-api](../tasks/sprint-9/add-douban-import-api.md)（全部类别的导入与增量同步接口）→ 16 [add-douban-import-dialog](../tasks/sprint-9/add-douban-import-dialog.md)（弹窗，6 个类别勾选）。设计：US-04、[ADR-014](../engineering/features/F-005-书影音/architecture/adr/ADR-014-douban-bulk-import.md)、admin.pen 11i。
 
 ## 影响分析
 

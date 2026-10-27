@@ -11,6 +11,8 @@ export interface EntryFields {
   rating?: number | null;
   markedOn?: string;
   comment?: string | null;
+  platform?: string; // 游戏必填（ADR-013）
+  coverUrl?: string | null;
 }
 
 export function shelfApi(request: APIRequestContext, baseURL: string) {

@@ -16,6 +16,9 @@ const entry = (title: string, extra: Partial<ShelfPublicEntry> = {}): ShelfPubli
   comment: "短评",
   cover: "/covers/2026/08/shawshank2ab.jpg",
   doubanUrl: "https://movie.douban.com/subject/1292052/",
+  platform: null,
+  coverWidth: null,
+  coverHeight: null,
   ...extra,
 });
 const ENTRIES = [entry("肖申克的救赎"), entry("无名片", { rating: null, doubanUrl: null, creator: null, markedOn: "2026-07-01" })];

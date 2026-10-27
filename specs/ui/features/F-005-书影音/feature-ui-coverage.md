@@ -47,6 +47,7 @@
 | US-04 | AC2、AC7 进度与汇总 | 弹窗进度区、汇总与失败列表 | `DoubanImportDialog`（11i 进行中 / 完成） |
 | US-04 | AC3–AC6 导入字段与覆盖 | 无界面（导入后体现在列表） | `MediaEntryRow` |
 | US-04 | AC8–AC10 重试、错误、停止 | 弹窗错误提示、"停止" | `DoubanImportDialog`（11i 错误 / 进行中）、`Alert/Error` |
+| US-04 | AC13 按类别导入 | 弹窗"导入类别"6 个勾选项 | `DoubanImportDialog`（11i） |
 | US-04 | AC11、AC12 同步新标记（增量） | 弹窗"上次同步"、"同步新标记" / "全量导入"按钮、增量进度 | `DoubanImportDialog`（11i 首次 / 已同步过 / 进行中 / 完成） |
 
 ## 覆盖结论

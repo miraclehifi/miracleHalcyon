@@ -24,7 +24,9 @@ describe("提示文案（UT-10）", () => {
     expect(filledText(["type", "title", "creator", "year"], "movie")).toBe("已识别：分类、标题、导演、年份");
     expect(missingTexts(["year"], "book")).toEqual(["未识别：年份，请手动填写"]);
     expect(missingTexts(["cover"], "book")).toEqual(["未识别：封面，可手动上传"]);
-    expect(missingTexts(["creator", "year", "cover"], "game")).toEqual(["未识别：开发商、年份，请手动填写", "未识别：封面，可手动上传"]);
+    // [TC-US02-23][SC-RECOG-20] 游戏不取豆瓣封面：提示粘贴 IGDB 链接；桌游照旧
+    expect(missingTexts(["creator", "year", "cover"], "game")).toEqual(["未识别：开发商、年份，请手动填写", "未识别：封面，游戏封面请粘贴 IGDB 图片链接"]);
+    expect(missingTexts(["cover"], "boardgame")).toEqual(["未识别：封面，可手动上传"]);
     expect(["NOT_DOUBAN_LINK", "NOT_SUBJECT_LINK", "FETCH_FAILED", "PARSE_FAILED", "UNKNOWN"].map(errorText)).toEqual([
       "不是豆瓣链接", "不是豆瓣条目链接，请粘贴书 / 电影 / 游戏条目的分享链接", "链接打不开", "解析不出条目信息", "识别失败，请稍后重试",
     ]);

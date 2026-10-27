@@ -1,5 +1,5 @@
 // shelf 仓储（shelf domain-model §3、data-model）：D1 shelf_entries
-import type { EntryData, ShelfStatus, ShelfType } from "./entry";
+import type { EntryData, ShelfPlatform, ShelfStatus, ShelfType } from "./entry";
 import { DuplicateDoubanError } from "./errors";
 
 export interface ShelfEntry extends EntryData {
@@ -45,11 +45,15 @@ interface Row {
   douban_id: string | null;
   douban_url: string | null;
   hidden: number;
+  platform: ShelfPlatform | null;
+  cover_url: string | null;
+  cover_width: number | null;
+  cover_height: number | null;
   created_at: string;
   updated_at: string;
 }
 
-const COLUMNS = "id, type, title, creator, year, status, rating, marked_on, comment, cover_key, douban_id, douban_url, hidden, created_at, updated_at";
+const COLUMNS = "id, type, title, creator, year, status, rating, marked_on, comment, cover_key, douban_id, douban_url, hidden, platform, cover_url, cover_width, cover_height, created_at, updated_at";
 
 const toEntry = (row: Row): ShelfEntry => ({
   id: row.id,
@@ -64,13 +68,17 @@ const toEntry = (row: Row): ShelfEntry => ({
   coverKey: row.cover_key,
   douban: row.douban_id && row.douban_url ? { id: row.douban_id, url: row.douban_url } : null,
   hidden: row.hidden === 1,
+  platform: row.platform,
+  coverUrl: row.cover_url,
+  coverWidth: row.cover_width,
+  coverHeight: row.cover_height,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
 
 const isDoubanConflict = (error: unknown) => /UNIQUE constraint failed: shelf_entries\.douban_id/.test(String((error as Error)?.message ?? error));
 
-const values = (d: EntryRowInput) => [d.type, d.title, d.creator, d.year, d.status, d.rating, d.markedOn, d.comment, d.coverKey, d.douban?.id ?? null, d.douban?.url ?? null];
+const values = (d: EntryRowInput) => [d.type, d.title, d.creator, d.year, d.status, d.rating, d.markedOn, d.comment, d.coverKey, d.douban?.id ?? null, d.douban?.url ?? null, d.platform, d.coverUrl, d.coverWidth, d.coverHeight];
 
 export class D1ShelfRepo implements ShelfRepo {
   constructor(private readonly db: D1Database) {}
@@ -101,8 +109,8 @@ export class D1ShelfRepo implements ShelfRepo {
     try {
       const row = await this.db
         .prepare(
-          `INSERT INTO shelf_entries (type, title, creator, year, status, rating, marked_on, comment, cover_key, douban_id, douban_url, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING ${COLUMNS}`,
+          `INSERT INTO shelf_entries (type, title, creator, year, status, rating, marked_on, comment, cover_key, douban_id, douban_url, platform, cover_url, cover_width, cover_height, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING ${COLUMNS}`,
         )
         .bind(...values(data), data.now, data.now)
         .first<Row>();
@@ -117,7 +125,7 @@ export class D1ShelfRepo implements ShelfRepo {
     try {
       const row = await this.db
         .prepare(
-          `UPDATE shelf_entries SET type = ?, title = ?, creator = ?, year = ?, status = ?, rating = ?, marked_on = ?, comment = ?, cover_key = ?, douban_id = ?, douban_url = ?, updated_at = ?
+          `UPDATE shelf_entries SET type = ?, title = ?, creator = ?, year = ?, status = ?, rating = ?, marked_on = ?, comment = ?, cover_key = ?, douban_id = ?, douban_url = ?, platform = ?, cover_url = ?, cover_width = ?, cover_height = ?, updated_at = ?
            WHERE id = ? RETURNING ${COLUMNS}`,
         )
         .bind(...values(data), data.now, id)

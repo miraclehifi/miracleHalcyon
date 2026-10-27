@@ -29,7 +29,7 @@ describe("MediaEntryList 标题区", () => {
 
 const entry: ShelfEntryView = {
   id: "7", type: "book", title: "原则", creator: null, year: null, status: "completed", rating: null, markedOn: "2026-10-01",
-  comment: null, cover: null, doubanUrl: null, doubanId: null, hidden: false,
+  comment: null, cover: null, platform: null, coverUrl: null, coverWidth: null, coverHeight: null, doubanUrl: null, doubanId: null, hidden: false,
   createdAt: "2026-10-21T06:30:00.000Z", updatedAt: "2026-10-21T06:30:00.000Z",
 };
 

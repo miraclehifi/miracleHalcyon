@@ -76,3 +76,26 @@ describe("groupShelf / shelfPath / emptyIcon", () => {
     expect(SHELF_TYPES.map(emptyIcon)).toEqual(["book-open", "book-image", "film", "tv", "gamepad-2", "dices"]);
   });
 });
+
+// 构建数据校验接受游戏的 IGDB 封面与平台、宽高（ADR-013 §4）；旧数据缺新字段时补 null
+describe("parseShelfData 游戏字段", () => {
+  const IGDB = "https://images.igdb.com/igdb/image/upload/t_1080p/co8h3y.jpg";
+  const base = { type: "game", title: "塞尔达", creator: null, year: null, status: "completed", rating: null, markedOn: "2026-05-01", comment: null, doubanUrl: null };
+  const parse = (entry: Record<string, unknown>) => parseShelfData({ entries: [entry] }, "t").entries[0];
+
+  it("IGDB 封面、平台与宽高；缺字段补 null", () => {
+    expect(parse({ ...base, cover: IGDB, platform: "switch2", coverWidth: 810, coverHeight: 1080 })).toMatchObject({ cover: IGDB, platform: "switch2", coverWidth: 810, coverHeight: 1080 });
+    expect(parse({ ...base, cover: null })).toMatchObject({ platform: null, coverWidth: null, coverHeight: null });
+  });
+
+  it("非规范外链、非法平台、非法宽高 → 报错", () => {
+    for (const bad of [
+      { cover: "https://example.com/a.jpg" },
+      { cover: "https://images.igdb.com/igdb/image/upload/t_720p/co8h3y.png" },
+      { cover: null, platform: "xbox" },
+      { cover: IGDB, coverWidth: 0, coverHeight: 1080 },
+    ]) {
+      expect(() => parse({ ...base, ...bad })).toThrow(/条目字段不合法/);
+    }
+  });
+});

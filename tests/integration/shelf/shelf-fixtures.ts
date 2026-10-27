@@ -1,6 +1,7 @@
 // 书影音集成测试共用：路由调用、multipart 构造、钩子计数（workers：每个测试文件存储隔离）
 import type { APIContext } from "astro";
 import { env } from "cloudflare:workers";
+import type { ShelfRouteDeps } from "../../../src/lib/api/shelf-http";
 import { createShelfHideHandler } from "../../../src/pages/api/admin/shelf/entries/[id]/hide";
 import { createShelfEntryItemHandlers } from "../../../src/pages/api/admin/shelf/entries/[id]";
 import { createShelfEntriesHandlers } from "../../../src/pages/api/admin/shelf/entries/index";
@@ -12,9 +13,10 @@ export const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0
 export const WEBP = new Uint8Array([0x52, 0x49, 0x46, 0x46, 4, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]);
 export const MIN = { type: "book", title: "原则", status: "completed", markedOn: "2026-10-01" };
 
-export function makeShelf() {
+// extra：注入 fetch（IGDB / 豆瓣替身）与超时时间
+export function makeShelf(extra: Partial<ShelfRouteDeps> = {}) {
   const hookCalls = { n: 0 };
-  const deps = { db: env.DB, bucket: env.MEDIA, now: () => NOW, hooksFor: () => ({ onShelfChanged: async () => void hookCalls.n++ }) };
+  const deps: ShelfRouteDeps = { db: env.DB, bucket: env.MEDIA, now: () => NOW, hooksFor: () => ({ onShelfChanged: async () => void hookCalls.n++ }), ...extra };
   const entries = createShelfEntriesHandlers(deps);
   const item = createShelfEntryItemHandlers(deps);
   const hide = createShelfHideHandler({ ...deps, hidden: true });

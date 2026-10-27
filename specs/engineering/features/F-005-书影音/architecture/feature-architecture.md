@@ -87,20 +87,21 @@ POST /api/admin/shelf/recognize { text, excludeId? }
 ### US-04 豆瓣批量导入（ADR-014）
 
 ```
-打开：GET /api/admin/shelf/import/state[?uid=] → { uid, steps[6]: { kind, status, watermark, syncedAt } }
-        → 有任一 syncedAt：主按钮"同步新标记"（mode=incremental），否则只有"全量导入"（mode=full）
+打开：GET /api/admin/shelf/import/state[?uid=] → { uid, categories[12]: { type, status, watermark, syncedAt } }
+        → 6 个类别勾选（默认全选）；有任一 syncedAt：主按钮"同步新标记"（mode=incremental），否则只有"全量导入"（mode=full）
 DoubanImportDialog（前端驱动，顺序 movie·done → movie·doing → book·done → book·doing → game·done → game·doing）
-  每类循环：POST /api/admin/shelf/import { uid, kind, status, mode, start, head? }（第 2 页起带回第 1 页的 head）
+  只对含勾选类别的大类，每步循环：POST /api/admin/shelf/import { uid, kind, status, types, mode, start, head? }（第 2 页起带回第 1 页的 head）
   → ShelfService.importPage（25 秒总时限，外部并发 ≤ 5）
      1. isValidDoubanUid / kind / status / start 校验 → 400 VALIDATION_FAILED（不发外部请求）
      2. DoubanClient.fetchInterests(count=20) → 404 DOUBAN_USER_NOT_FOUND / 403 DOUBAN_FORBIDDEN / 其余 502 FETCH_FAILED
-     2b. ImportStateRepo.touch(uid, kind, status)（attempted_at）；mode=incremental 且有 watermark → 只保留 create_time >= watermark 的标记，出现更早的标记 → reached = true
+     2b. ImportStateRepo.touch(uid, types, status)（attempted_at）；mode=incremental 且 types 各类别都有水位 → 截断点 = 其中最早者，只保留 create_time >= 截断点的标记，出现更早的 → reached = true
      3. 过滤 status ∉ {done, doing}；ShelfRepo.findByDoubanIds(本页 ID)
      4. 每条：书 → fetchBookTags；游戏 → fetchSubject(game)（开发商）；失败按缺失处理
         mapInterest → normalizeEntryInput；新条目且非游戏 → 下载封面 → CoverStore.put
         新 → insert；已有 → 合并覆盖（hidden / 封面不动）→ update；单条异常记 failed[]
      5. nextStart = reached || start+20 >= total ? null : start+20
-        nextStart = null → ImportStateRepo.complete(uid, kind, status, head)（watermark = head ?? 原值，synced_at = now）
+        nextStart = null → ImportStateRepo.complete(uid, types, status, head)（各类别 watermark = head ?? 原值，synced_at = now）
+     4'. mapInterest 后分类 ∉ types → 跳过（不写入、不下载封面、不计数）
      6. 200 { total, head, nextStart, created, updated, coverFailed, failed }
   nextStart 为 null → 下一步骤；停止 / 出错 → 结束
   结束：POST /api/admin/shelf/import/finish { changed } → changed > 0 时 hooks.onShelfChanged() 一次
@@ -190,7 +191,7 @@ media/index.astro · [type].astro（ReaderLayout）
 
 `shelf_entries`：`id`、`type`、`title`、`creator`、`year`、`status`、`rating`、`marked_on`、`comment`、`cover_key`、`platform`、`cover_url`、`cover_width`、`cover_height`（迁移 0005，游戏专用）、`douban_id`（部分唯一索引 `WHERE douban_id IS NOT NULL`）、`douban_url`、`hidden`、`created_at`、`updated_at`、审计列。索引 `(type, hidden)`。
 
-`shelf_import_state`（迁移 0006，US-04 增量同步）：主键 (`uid`, `kind`, `status`)，`watermark`、`synced_at`、`attempted_at`、审计列。
+`shelf_import_state`（迁移 0006，US-04 增量同步）：主键 (`uid`, `type`, `status`)（`type` 为本站分类），`watermark`、`synced_at`、`attempted_at`、审计列。
 
 ## 6. 跨 Feature 影响
 
@@ -247,3 +248,4 @@ ADR-011 §3 把封面下载从"保存时"移到"识别时"，以下文档已同�
 | 2026-10-22 | 1.2 | 电影、剧集改为满宽海报墙岛 `MediaPosterWall`（Masonry + FlipCard + GradualBlur），可按时间分段（[media-poster-wall](../../../../backlog/media-poster-wall.md)） | miraclehifi |
 | 2026-10-23 | 1.4 | US-04 豆瓣批量导入：导入 / 结束接口、`DoubanImportDialog`、数据流（[ADR-014](adr/ADR-014-douban-bulk-import.md)、[douban-bulk-import](../../../../backlog/douban-bulk-import.md)） | miraclehifi |
 | 2026-10-23 | 1.5 | US-04 增量同步：`shelf_import_state`（迁移 0006）、状态接口、`mode` / `head`（ADR-014 §1.1） | miraclehifi |
+| 2026-10-27 | 1.6 | US-04 按类别导入：请求带 `types`，水位按 类别 × 状态，截断取勾选类别中最早水位（ADR-014 §1.1） | miraclehifi |

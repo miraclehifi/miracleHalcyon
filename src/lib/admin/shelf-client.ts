@@ -1,5 +1,5 @@
 // 书影音后台接口（shelf api-contract）：条目隐藏 / 删除（任务 4）、新增 / 编辑（任务 5，multipart）、识别（任务 6）。失败抛 ShelfApiError
-import type { ShelfStatus, ShelfType } from "../../domains/shelf/entry";
+import type { ShelfPlatform, ShelfStatus, ShelfType } from "../../domains/shelf/entry";
 import type { RecognizeResponse } from "./recognize";
 
 export interface ShelfEntryView {
@@ -12,7 +12,11 @@ export interface ShelfEntryView {
   rating: number | null;
   markedOn: string;
   comment: string | null;
-  cover: string | null;
+  cover: string | null; // 游戏为 IGDB 地址，其他为站内 /covers/ 路径
+  platform: ShelfPlatform | null;
+  coverUrl: string | null;
+  coverWidth: number | null;
+  coverHeight: number | null;
   doubanUrl: string | null;
   doubanId: string | null;
   hidden: boolean;

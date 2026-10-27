@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 9
 **序号**: 13
-**状态**: pending
+**状态**: completed（2026-10-27）
 **类别**: FRONTEND
 **架构层级**: 表现层（admin：`src/components/admin/media/`、`src/lib/admin/shelf-client.ts`）
 **所属 Feature**: [F-005 书影音](../../product/features/F-005-书影音/feature-scope.md)
@@ -37,8 +37,18 @@
 
 ## DoD（完成定义）
 
-- [ ] 页面与 admin.pen 11g 一致；手机宽度下字段顺序为 开发商 → 平台 → 年份 → 封面链接
-- [ ] 测试清单全部由红变绿；影响范围：`tests/e2e/admin-media-*.spec.ts`、`tests/unit/admin/media-entry-form.test.tsx`、`tests/unit/admin/recognize-box.test.tsx` 原有用例 chromium 通过，本任务 E2E 补跑 webkit（若 WebKit 图片请求不经 `page.route`，预览比例断言只在 chromium 跑并注明）
+- [x] 页面与 admin.pen 11g 一致；手机宽度下字段顺序为 开发商 → 平台 → 年份 → 封面链接（1440 / 390 截图对照 admin-media.md"游戏专属"文字规格；未在 Pencil 中逐像素对照）
+- [x] 测试清单全部由红变绿；影响范围：`tests/e2e/admin-media-*.spec.ts`、`tests/unit/admin/media-entry-form.test.tsx`、`tests/unit/admin/recognize-box.test.tsx` 原有用例 chromium 通过，本任务 E2E 补跑 webkit（若 WebKit 图片请求不经 `page.route`，预览比例断言只在 chromium 跑并注明）
+
+## 实现记录（2026-10-27）
+
+- 新建 `IgdbCoverField`（左栏只预览：300ms 后 `normalizeIgdbCoverUrl`，宽 128 `object-contain`，无链接 / 不合规 / 加载失败为 3:4 虚线框）；平台下拉与"封面链接（IGDB）"在 `MediaEntryForm` 字段区
+- `shelf-form`：`EntryForm` 加 `platform`（默认 `ps5`）、`coverUrl`；`validateForm` 只在游戏且非空时校验链接；`toEntryFields` 只在游戏时带 `platform`、`coverUrl`；游戏保存不带封面文件
+- `recognize.missingTexts`：游戏缺封面 → "未识别：封面，游戏封面请粘贴 IGDB 图片链接"
+- `MediaEntryRow`：游戏缩略图 `object-contain`（补单元用例 1 项）
+- 测试：UT-19 5 项、UT-10 改游戏文案；`shelf-form`、列表 / 行测试夹具补新字段；TC-US01-29 E2E 在实现之后补写，**没有先跑出红色**，chromium / webkit 各 1 / 1（WebKit 下图片也经 `page.route`，比例断言仍只在 chromium 跑）
+- 影响范围补改：`admin-media-list.spec.ts` TC-US01-23 通过接口建游戏未带 `platform`，任务 12 后 400 → 补 `platform`，E2E 辅助 `EntryFields` 加 `platform` / `coverUrl`
+- E2E 环境：`SITE_ORIGIN` 固定 `http://localhost:4321`，其他端口的 preview 登录会 403；当时 4321 被一个已损坏的 `astro dev`（500，Vite 预构建缓存失效）占用，经作者同意停掉后在 4321 起 preview 测试，结束后停掉
 
 ## 依赖
 

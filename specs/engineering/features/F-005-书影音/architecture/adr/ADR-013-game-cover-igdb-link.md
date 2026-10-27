@@ -1,7 +1,7 @@
 # ADR-013: 游戏封面用 IGDB 外链与平台字段
 
 ## 状态
-Accepted（2026-10-23，F-005 增量 [game-case-shelf](../../../../../backlog/game-case-shelf.md)；作者指示"所有图片都用 images.igdb.com"，其余为 AI 设计，按作者偏好文档阶段不逐项确认）
+Accepted（2026-10-23，F-005 增量 [game-case-shelf](../../../../../backlog/game-case-shelf.md)；作者指示"所有图片都用 images.igdb.com"，其余为 AI 设计，按作者偏好文档阶段不逐项确认）；§1–§3、§5 与 §4 的接口部分已实现（Sprint 9 任务 12，2026-10-27），读者页部分见任务 14
 
 ## 背景
 - 游戏分类改为与电影相同的海报墙，但作者要求封面**保持原图比例、不裁切**，悬停显示平台（PS5 / PS4 / Switch / Switch 2 / Steam）

@@ -1,8 +1,8 @@
 # shelf 数据模型
 
-**最后更新**: 2026-10-23
+**最后更新**: 2026-10-27
 **状态**: self-checked
-**迁移**: `src/db/migrations/0004_shelf_entries.sql`（已实现，Sprint 9 任务 2；线上待执行，见 ddl-changes）；`0005_shelf_game_platform_cover.sql`（待实现，[ADR-013](../../../features/F-005-书影音/architecture/adr/ADR-013-game-cover-igdb-link.md)）
+**迁移**: `src/db/migrations/0004_shelf_entries.sql`（已实现，Sprint 9 任务 2；线上待执行，见 ddl-changes）；`0005_shelf_game_platform_cover.sql`（已实现，Sprint 9 任务 12；线上待执行，[ADR-013](../../../features/F-005-书影音/architecture/adr/ADR-013-game-cover-igdb-link.md)）
 **存储**: Cloudflare D1（SQLite）+ R2（绑定 `MEDIA`，前缀 `covers/`）
 
 > 审计列的 SQLite 写法说明见 [auth/data-model.md](../auth/data-model.md) 开头。
@@ -44,14 +44,14 @@ END;
 
 `length()` 在 SQLite 中按字符计数，与领域"码点"口径一致（BMP 外字符如 emoji 计 1）。日期合法性（如 2 月 29 日）由领域校验，CHECK 只兜底格式。
 
-### 迁移 0005：游戏平台与 IGDB 封面（待实现）
+### 迁移 0005：游戏平台与 IGDB 封面
 
 ```sql
 ALTER TABLE shelf_entries ADD COLUMN platform TEXT
   CHECK (platform IS NULL OR platform IN ('ps5','ps4','switch','switch2','steam'));                       -- 游戏平台
 ALTER TABLE shelf_entries ADD COLUMN cover_url TEXT
-  CHECK (cover_url IS NULL OR (cover_url GLOB 'https://images.igdb.com/igdb/image/upload/t_1080p/*.jpg'
-                               AND length(cover_url) <= 120));                                              -- 游戏封面 IGDB 大图地址
+  CHECK (cover_url IS NULL OR (instr(cover_url, 'https://images.igdb.com/igdb/image/upload/t_1080p/') = 1
+                               AND substr(cover_url, -4) = '.jpg' AND length(cover_url) BETWEEN 55 AND 120)); -- 游戏封面 IGDB 大图地址
 ALTER TABLE shelf_entries ADD COLUMN cover_width INTEGER
   CHECK (cover_width IS NULL OR cover_width BETWEEN 1 AND 20000);                                           -- 封面宽（px）
 ALTER TABLE shelf_entries ADD COLUMN cover_height INTEGER
@@ -60,6 +60,7 @@ ALTER TABLE shelf_entries ADD COLUMN cover_height INTEGER
 UPDATE shelf_entries SET platform = 'ps5', cover_key = NULL WHERE type = 'game';
 ```
 
+- `cover_url` 不用 `GLOB`：D1 限制 GLOB / LIKE 模式不超过 50 字符（超出报"LIKE or GLOB pattern too complex"），改为 `instr` 判前缀、`substr` 判后缀
 - SQLite `ALTER TABLE ADD COLUMN` 只能加单列 CHECK，跨列约束（游戏 ⇔ 有平台、`cover_url` 只属于游戏、`cover_url` 与宽高同空同非空、游戏无 `cover_key`）由领域 `normalizeEntryInput` 与服务保证（domain-model 不变量 6–8）；如需库级兜底，改为重建表（与 0002 同法），本次不做
 - `UPDATE` 给已有游戏补平台；游戏原 R2 封面 key 置空——线上 0004 尚未执行无数据，本地开发数据的孤儿对象可忽略
 - 只加可空列，旧行其他字段不变；必须先于代码部署
@@ -84,14 +85,14 @@ UPDATE shelf_entries SET platform = 'ps5', cover_key = NULL WHERE type = 'game';
 -- F-005 书影音：豆瓣导入同步水位（ADR-014 §1.1）
 CREATE TABLE shelf_import_state (
   uid            TEXT NOT NULL CHECK (length(uid) BETWEEN 1 AND 64 AND uid NOT GLOB '*[^A-Za-z0-9_.-]*'), -- 豆瓣用户 ID
-  kind           TEXT NOT NULL CHECK (kind IN ('movie','book','game')),                                   -- 豆瓣大类
+  type           TEXT NOT NULL CHECK (type IN ('book','comic','movie','series','game','boardgame')),      -- 本站分类（导入按类别记水位）
   status         TEXT NOT NULL CHECK (status IN ('done','doing')),                                        -- 豆瓣标记状态
   watermark      TEXT CHECK (watermark IS NULL OR watermark GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]'), -- 已完整同步到的最新标记时间（豆瓣 create_time 原文）
   synced_at      TEXT,                                                                                    -- 最近一次完整同步完成时间 ISO 8601 UTC
   attempted_at   TEXT NOT NULL,                                                                           -- 最近一次导入请求时间 ISO 8601 UTC
   db_create_time TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')), -- 数据创建时间（数据库专用，禁止用于业务）
   db_update_time TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')), -- 数据修改时间（数据库专用，禁止用于业务）
-  PRIMARY KEY (uid, kind, status)
+  PRIMARY KEY (uid, type, status)
 ) STRICT;
 
 CREATE INDEX idx_shelf_import_state_attempted ON shelf_import_state (attempted_at);
@@ -99,16 +100,16 @@ CREATE INDEX idx_shelf_import_state_attempted ON shelf_import_state (attempted_a
 CREATE TRIGGER trg_shelf_import_state_db_update_time AFTER UPDATE ON shelf_import_state
 BEGIN
   UPDATE shelf_import_state SET db_update_time = strftime('%Y-%m-%d %H:%M:%f', 'now')
-  WHERE uid = NEW.uid AND kind = NEW.kind AND status = NEW.status;
+  WHERE uid = NEW.uid AND type = NEW.type AND status = NEW.status;
 END;
 ```
 
 | 用途 | 语句 |
 |------|------|
-| `get` | `SELECT kind, status, watermark, synced_at FROM shelf_import_state WHERE uid = ?1` |
+| `get` | `SELECT type, status, watermark, synced_at FROM shelf_import_state WHERE uid = ?1` |
 | `lastUid` | `SELECT uid FROM shelf_import_state ORDER BY attempted_at DESC LIMIT 1` |
-| `touch` | `INSERT INTO shelf_import_state (uid, kind, status, attempted_at) VALUES (?1, ?2, ?3, ?4) ON CONFLICT (uid, kind, status) DO UPDATE SET attempted_at = excluded.attempted_at` |
-| `complete` | `UPDATE shelf_import_state SET watermark = COALESCE(?4, watermark), synced_at = ?5 WHERE uid = ?1 AND kind = ?2 AND status = ?3`（`touch` 已保证行存在） |
+| `touch` | 对 `types` 每个类别（D1 `batch`）：`INSERT INTO shelf_import_state (uid, type, status, attempted_at) VALUES (?1, ?2, ?3, ?4) ON CONFLICT (uid, type, status) DO UPDATE SET attempted_at = excluded.attempted_at` |
+| `complete` | 对 `types` 每个类别（D1 `batch`）：`UPDATE shelf_import_state SET watermark = COALESCE(?4, watermark), synced_at = ?5 WHERE uid = ?1 AND type = ?2 AND status = ?3`（`touch` 已保证行存在） |
 
 - 不与 `shelf_entries` 关联；删除条目不影响水位。只新建表，不改旧表；必须先于代码部署
 
@@ -130,4 +131,5 @@ END;
 | 2026-10-21 | 1.0 | 初始版本（F-005） | miraclehifi |
 | 2026-10-22 | 1.1 | 去掉'动画'分类、'剧'改名'剧集'（[drop-anime-type](../../../../backlog/drop-anime-type.md)） | miraclehifi |
 | 2026-10-23 | 1.2 | 迁移 0005：`platform`、`cover_url`、`cover_width`、`cover_height`（[game-case-shelf](../../../../backlog/game-case-shelf.md)） | miraclehifi |
+| 2026-10-27 | 1.4 | 迁移 0005 实现：`cover_url` CHECK 由 GLOB 改为 instr / substr（D1 模式长度上限） | miraclehifi |
 | 2026-10-23 | 1.3 | US-04 导入：`findByDoubanIds` 查询；迁移 0006 `shelf_import_state`（增量同步水位，ADR-014 §1.1） | miraclehifi |

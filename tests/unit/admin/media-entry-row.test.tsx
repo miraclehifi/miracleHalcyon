@@ -6,7 +6,7 @@ import type { ShelfEntryView } from "../../../src/lib/admin/shelf-client";
 // MediaEntryRow（components.md、admin-media.md §一）
 const entry = (patch: Partial<ShelfEntryView> = {}): ShelfEntryView => ({
   id: "7", type: "book", title: "原则", creator: "瑞·达利欧", year: 2018, status: "completed", rating: 4, markedOn: "2026-10-01",
-  comment: null, cover: "/covers/2026/10/aaaaaaaaaaaa.jpg", doubanUrl: null, doubanId: null, hidden: false,
+  comment: null, cover: "/covers/2026/10/aaaaaaaaaaaa.jpg", platform: null, coverUrl: null, coverWidth: null, coverHeight: null, doubanUrl: null, doubanId: null, hidden: false,
   createdAt: "2026-10-21T06:30:00.000Z", updatedAt: "2026-10-21T06:30:00.000Z", ...patch,
 });
 
@@ -72,5 +72,15 @@ describe("MediaEntryRow", () => {
     expect([...menu.querySelectorAll('[role="menuitem"]')].map((b) => b.textContent)).toEqual(["编辑", "隐藏", "删除"]);
     fireEvent.click(screen.getByRole("menuitem", { name: "隐藏" }));
     expect(onToggleHidden).toHaveBeenCalledTimes(1);
+  });
+});
+
+// [TC-US01-26][SC-MANAGE-23] 游戏缩略图为 IGDB 外链：按原比例放进框里，不裁切（admin-media.md §一"封面"）
+describe("MediaEntryRow 游戏封面", () => {
+  it("object-contain", () => {
+    const igdb = "https://images.igdb.com/igdb/image/upload/t_1080p/co8h3y.jpg";
+    setup({ type: "game", platform: "ps5", cover: igdb, coverUrl: igdb, coverWidth: 810, coverHeight: 1080 });
+    const imgs = [...document.querySelectorAll("img")];
+    expect(imgs.length > 0 && imgs.every((img) => img.getAttribute("src") === igdb && img.classList.contains("object-contain") && !img.classList.contains("object-cover"))).toBe(true);
   });
 });

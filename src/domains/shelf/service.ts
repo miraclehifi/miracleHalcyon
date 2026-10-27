@@ -3,9 +3,12 @@ import type { CoverStore } from "./cover-store";
 import type { DoubanClient } from "./douban/client";
 import { extractDoubanLink, isDoubanImageHost, isSafeUrl } from "./douban/link";
 import { mapSubject, type MissingField } from "./douban/map";
-import { canonicalDoubanUrl, COVER_MAX_BYTES, detectCoverType, isShelfType, newCoverKey, normalizeEntryInput, sortEntries, type EntryData, type ShelfType } from "./entry";
-import { CoverTooLargeError, CoverTypeError, DoubanParseError, DuplicateDoubanError, EntryNotFoundError, RecognizeError, ShelfValidationError } from "./errors";
+import { canonicalDoubanUrl, COVER_MAX_BYTES, detectCoverType, isShelfType, newCoverKey, normalizeEntryInput, sortEntries, type EntryData, type ImageSize, type ShelfType } from "./entry";
+import {
+  CoverLinkUnreachableError, CoverTooLargeError, CoverTypeError, DoubanParseError, DuplicateDoubanError, EntryNotFoundError, GameCoverUploadError, RecognizeError, ShelfValidationError,
+} from "./errors";
 import { noopShelfHooks, type ShelfHooks } from "./hooks";
+import type { IgdbImageClient } from "./igdb";
 import type { DoubanMatch, ShelfEntry, ShelfRepo } from "./repo";
 
 export interface CoverUpload {
@@ -19,13 +22,16 @@ export interface ShelfServiceDeps {
   store: CoverStore;
   hooks?: ShelfHooks;
   douban?: DoubanClient;
+  igdb?: IgdbImageClient;
   recognizeTimeoutMs?: number;
+  igdbTimeoutMs?: number;
   now?: () => Date;
   log?: (event: string, detail: Record<string, unknown>) => void;
 }
 
 export const RECOGNIZE_TIMEOUT_MS = 8000; // Feature NFR：单次识别总耗时
 export const RECOGNIZE_TEXT_MAX = 10_000;
+export const IGDB_TIMEOUT_MS = 8000; // ADR-013 §3：保存时读取 IGDB 封面宽高
 
 export interface RecognizedFields {
   type: ShelfType;
@@ -49,7 +55,39 @@ function toBase64(bytes: Uint8Array): string {
 
 const defaultLog = (event: string, detail: Record<string, unknown>) => console.error(event, detail);
 
-export function createShelfService({ repo, store, hooks = noopShelfHooks, douban, recognizeTimeoutMs = RECOGNIZE_TIMEOUT_MS, now = () => new Date(), log = defaultLog }: ShelfServiceDeps) {
+export function createShelfService({
+  repo, store, hooks = noopShelfHooks, douban, igdb, recognizeTimeoutMs = RECOGNIZE_TIMEOUT_MS, igdbTimeoutMs = IGDB_TIMEOUT_MS, now = () => new Date(), log = defaultLog,
+}: ShelfServiceDeps) {
+  // 读取 IGDB 封面宽高：任何失败（含超时）都归为 COVER_LINK_UNREACHABLE
+  async function readCoverSize(url: string): Promise<ImageSize> {
+    if (!igdb) throw new CoverLinkUnreachableError();
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        controller.abort();
+        reject(new CoverLinkUnreachableError());
+      }, igdbTimeoutMs);
+    });
+    try {
+      return await Promise.race([igdb.readSize(url, controller.signal), deadline]);
+    } catch {
+      throw new CoverLinkUnreachableError();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // 游戏封面只认 IGDB 链接（ADR-013）：链接与旧值相同沿用旧宽高，否则读取；非游戏 normalizeEntryInput 已置空
+  async function withGameCover(data: EntryData, upload: boolean, old?: ShelfEntry): Promise<EntryData> {
+    if (data.type !== "game") return data;
+    if (upload) throw new GameCoverUploadError();
+    if (!data.coverUrl) return data;
+    if (old && old.coverUrl === data.coverUrl) return { ...data, coverWidth: old.coverWidth, coverHeight: old.coverHeight };
+    const size = await readCoverSize(data.coverUrl);
+    return { ...data, coverWidth: size.width, coverHeight: size.height };
+  }
+
   async function putCover(cover: CoverUpload): Promise<string> {
     if (cover.bytes.byteLength > COVER_MAX_BYTES) throw new CoverTooLargeError();
     const mime = detectCoverType(cover.bytes);
@@ -105,11 +143,13 @@ export function createShelfService({ repo, store, hooks = noopShelfHooks, douban
     listPublic: (): Promise<ShelfEntry[]> => repo.listVisible(),
 
     async create(raw: unknown, cover?: CoverUpload): Promise<ShelfEntry> {
-      const data = normalizeEntryInput(raw);
-      if (data.douban) {
-        const existing = await repo.findByDoubanId(data.douban.id);
+      const parsed = normalizeEntryInput(raw);
+      if (parsed.type === "game" && cover) throw new GameCoverUploadError();
+      if (parsed.douban) {
+        const existing = await repo.findByDoubanId(parsed.douban.id);
         if (existing) throw new DuplicateDoubanError({ id: existing.id, title: existing.title });
       }
+      const data = await withGameCover(parsed, Boolean(cover));
       const coverKey = cover ? await putCover(cover) : null;
       let entry: ShelfEntry;
       try {
@@ -122,13 +162,13 @@ export function createShelfService({ repo, store, hooks = noopShelfHooks, douban
       return entry;
     },
 
-    // 豆瓣字段只能保持原值或清除（不变量 2）；新封面先写入，更新成功后删除旧对象
+    // 豆瓣字段只能保持原值或清除（不变量 2）；新封面先写入，更新成功后删除旧对象；游戏没有上传封面（不变量 6、8）
     async update(id: number, raw: unknown, coverChange: CoverChange): Promise<ShelfEntry> {
       const old = await mustGet(id);
       const parsed = normalizeEntryInput(raw);
-      const data: EntryData = { ...parsed, douban: parsed.douban === null ? null : old.douban };
+      const data = await withGameCover({ ...parsed, douban: parsed.douban === null ? null : old.douban }, typeof coverChange === "object", old);
       const newKey = typeof coverChange === "object" ? await putCover(coverChange) : null;
-      const coverKey = coverChange === "keep" ? old.coverKey : newKey;
+      const coverKey = data.type === "game" ? null : coverChange === "keep" ? old.coverKey : newKey;
       let entry: ShelfEntry | null;
       try {
         entry = await repo.update(id, { ...data, coverKey, now: now().toISOString() });
@@ -140,7 +180,7 @@ export function createShelfService({ repo, store, hooks = noopShelfHooks, douban
         await dropCover(newKey);
         throw new EntryNotFoundError(id);
       }
-      if (coverChange !== "keep" && old.coverKey !== coverKey) await dropCover(old.coverKey);
+      if (old.coverKey !== coverKey) await dropCover(old.coverKey);
       await hooks.onShelfChanged();
       return entry;
     },
@@ -200,7 +240,9 @@ export function createShelfService({ repo, store, hooks = noopShelfHooks, douban
         }
         const missing = [...mapped.missing];
         let coverData: string | null = null;
-        if (mapped.coverUrl) {
+        if (mapped.fields.type === "game") {
+          if (!missing.includes("cover")) missing.push("cover"); // 游戏封面用 IGDB 链接，不取豆瓣封面（ADR-013 §5）
+        } else if (mapped.coverUrl) {
           coverData = await downloadCover(mapped.coverUrl, within, controller.signal);
           if (coverData === null) missing.push("cover");
         }

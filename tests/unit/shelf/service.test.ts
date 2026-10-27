@@ -1,6 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CoverStore } from "../../../src/domains/shelf/cover-store";
-import { CoverTooLargeError, CoverTypeError, DuplicateDoubanError, EntryNotFoundError } from "../../../src/domains/shelf/errors";
+import type { ImageSize } from "../../../src/domains/shelf/entry";
+import {
+  CoverTooLargeError, CoverTypeError, DuplicateDoubanError, EntryNotFoundError, IgdbImageError, ShelfValidationError,
+} from "../../../src/domains/shelf/errors";
+import type { IgdbImageClient } from "../../../src/domains/shelf/igdb";
 import type { ShelfEntry, ShelfRepo } from "../../../src/domains/shelf/repo";
 import { createShelfService } from "../../../src/domains/shelf/service";
 
@@ -60,13 +64,27 @@ function fakeStore(): CoverStore & { objects: Map<string, string> } {
   };
 }
 
+// IGDB 替身：按图片 ID 返回宽高；coslow1 挂起、nope000 失败
+function fakeIgdb(): IgdbImageClient & { readSize: ReturnType<typeof vi.fn> } {
+  const sizes: Record<string, ImageSize> = { co8h3y: { width: 810, height: 1080 }, co5vmg: { width: 811, height: 1080 } };
+  return {
+    readSize: vi.fn(async (url: string) => {
+      const id = /\/([a-z0-9]+)\.jpg$/.exec(url)![1];
+      if (id === "coslow1") return new Promise<ImageSize>(() => {});
+      if (!sizes[id]) throw new IgdbImageError("404");
+      return sizes[id];
+    }),
+  };
+}
+
 function setup(overrides: Partial<{ repo: ShelfRepo; store: CoverStore }> = {}) {
   const repo = fakeRepo();
   const store = fakeStore();
+  const igdb = fakeIgdb();
   const hooks = { onShelfChanged: vi.fn(async () => {}) };
   const log = vi.fn();
-  const service = createShelfService({ repo: overrides.repo ?? repo, store: overrides.store ?? store, hooks, log, now: () => NOW });
-  return { repo, store, hooks, log, service };
+  const service = createShelfService({ repo: overrides.repo ?? repo, store: overrides.store ?? store, igdb, hooks, log, now: () => NOW });
+  return { repo, store, igdb, hooks, log, service };
 }
 
 describe("ShelfService 写操作（SHELF-UT-10）", () => {
@@ -152,3 +170,93 @@ describe("ShelfService 写操作（SHELF-UT-10）", () => {
     expect(hooks.onShelfChanged).toHaveBeenCalledTimes(5);
   });
 });
+
+// SHELF-UT-14：游戏写操作（替身 repo / store / igdb；ADR-013）
+const GAME = { type: "game", title: "塞尔达传说", status: "completed", markedOn: "2026-05-01", platform: "ps5" };
+const igdbUrl = (size: string, id: string, ext: string) => `https://images.igdb.com/igdb/image/upload/${size}/${id}.${ext}`;
+const T1080 = (id: string) => igdbUrl("t_1080p", id, "jpg");
+const failure = (p: Promise<unknown>) => p.then(() => "ok", (e) => (e instanceof ShelfValidationError ? `400:${e.fields.join(",")}` : e?.code ?? String(e)));
+
+afterEach(() => vi.useRealTimers());
+
+describe("ShelfService 游戏写操作（SHELF-UT-14）", () => {
+  // [TC-US01-26][SC-MANAGE-23] #1–3：链接规范化、读取宽高、无封面
+  it("新增：规范化链接并读取宽高", async () => {
+    const { service, igdb, hooks } = setup();
+    const a = await service.create({ ...GAME, coverUrl: igdbUrl("t_cover_big", "co8h3y", "webp") });
+    const b = await service.create({ ...GAME, coverUrl: igdbUrl("t_720p", "co5vmg", "png") });
+    const c = await service.create({ ...GAME, coverUrl: null });
+    expect([a, b, c].map((e) => [e.platform, e.coverUrl, e.coverWidth, e.coverHeight, e.coverKey])).toEqual([
+      ["ps5", T1080("co8h3y"), 810, 1080, null],
+      ["ps5", T1080("co5vmg"), 811, 1080, null],
+      ["ps5", null, null, null, null],
+    ]);
+    expect([igdb.readSize.mock.calls.map((call) => call[0]), hooks.onShelfChanged.mock.calls.length]).toEqual([[T1080("co8h3y"), T1080("co5vmg")], 3]);
+  });
+
+  // [TC-US01-26][SC-MANAGE-23] #4–6、#8：平台必填与合法；非游戏忽略平台与链接；游戏不接受上传
+  it("校验与非游戏忽略", async () => {
+    const { service, igdb, repo, store } = setup();
+    const noPlatform = { ...GAME, platform: undefined };
+    const results = [
+      await failure(service.create(noPlatform)),
+      await failure(service.create({ ...GAME, platform: "xbox" })),
+      await failure(service.create({ ...GAME, coverUrl: "https://example.com/a.jpg" })),
+      await failure(service.create(GAME, { bytes: JPG })),
+    ];
+    const book = await service.create({ ...BASE, platform: "ps5", coverUrl: T1080("co8h3y") });
+    expect({ results, book: [book.platform, book.coverUrl, book.coverWidth], igdb: igdb.readSize.mock.calls.length, rows: repo.rows.size, objects: store.objects.size }).toEqual({
+      results: ["400:platform", "400:platform", "400:coverUrl", "BAD_REQUEST"],
+      book: [null, null, null],
+      igdb: 0,
+      rows: 1,
+      objects: 0,
+    });
+  });
+
+  // [TC-US01-27][SC-MANAGE-24] #5、#7：读取失败 / 挂起 → COVER_LINK_UNREACHABLE，不写库
+  it("读取宽高失败与超时", async () => {
+    vi.useFakeTimers();
+    const { service, repo } = setup();
+    const notFound = failure(service.create({ ...GAME, coverUrl: T1080("nope000") }));
+    const slow = failure(service.create({ ...GAME, coverUrl: T1080("coslow1") }));
+    await vi.advanceTimersByTimeAsync(8000);
+    expect([await notFound, await slow, repo.rows.size]).toEqual(["COVER_LINK_UNREACHABLE", "COVER_LINK_UNREACHABLE", 0]);
+  });
+
+  // [TC-US01-26][SC-MANAGE-23] #7：编辑时链接规范化后不变 → 不再请求，宽高保持；换链接才请求
+  it("编辑：链接不变不请求", async () => {
+    const { service, igdb } = setup();
+    const entry = await service.create({ ...GAME, coverUrl: T1080("co8h3y") });
+    const same = await service.update(entry.id, { ...GAME, title: "改", coverUrl: igdbUrl("t_cover_big", "co8h3y", "png") }, "keep");
+    const calls = igdb.readSize.mock.calls.length;
+    const changed = await service.update(entry.id, { ...GAME, coverUrl: T1080("co5vmg") }, "keep");
+    expect([calls, [same.coverWidth, same.title], [changed.coverWidth, igdb.readSize.mock.calls.length]]).toEqual([1, [810, "改"], [811, 2]]);
+    expect(await failure(service.update(entry.id, GAME, { bytes: JPG }))).toBe("BAD_REQUEST");
+  });
+
+  // [TC-US01-28][SC-MANAGE-25] 切换分类：书（有 R2 封面）→ 游戏删旧对象；游戏 → 桌游清空平台与链接；游戏去掉链接
+  it("切换分类", async () => {
+    const { service, store } = setup();
+    const book = await service.create(BASE, { bytes: JPG });
+    const oldKey = book.coverKey!;
+    const toGame = await service.update(book.id, { ...GAME, platform: "switch", coverUrl: null }, "keep");
+    const book2 = await service.create(BASE, { bytes: JPG });
+    const toGameWithCover = await service.update(book2.id, { ...GAME, coverUrl: T1080("co8h3y") }, "keep");
+    const toBoard = await service.update(toGameWithCover.id, { ...GAME, type: "boardgame", platform: "switch", coverUrl: T1080("co8h3y") }, "keep");
+    const game = await service.create({ ...GAME, coverUrl: T1080("co8h3y") });
+    const noCover = await service.update(game.id, { ...GAME, coverUrl: null }, "keep");
+    expect({
+      toGame: [toGame.coverKey, toGame.platform, store.objects.has(oldKey)],
+      toGameWithCover: [toGameWithCover.coverKey, toGameWithCover.coverUrl, store.objects.has(book2.coverKey!)],
+      toBoard: [toBoard.platform, toBoard.coverUrl, toBoard.coverWidth, toBoard.coverHeight],
+      noCover: [noCover.coverUrl, noCover.coverWidth, noCover.coverHeight],
+    }).toEqual({
+      toGame: [null, "switch", false],
+      toGameWithCover: [null, T1080("co8h3y"), false],
+      toBoard: [null, null, null, null],
+      noCover: [null, null, null],
+    });
+  });
+});
+

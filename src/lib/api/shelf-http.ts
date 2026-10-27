@@ -3,8 +3,11 @@ import type { APIContext } from "astro";
 import { R2CoverStore } from "../../domains/shelf/cover-store";
 import { createDoubanClient } from "../../domains/shelf/douban/client";
 import { coverUrl, type ShelfPublicEntry } from "../../domains/shelf/entry";
-import { CoverTooLargeError, CoverTypeError, DuplicateDoubanError, EntryNotFoundError, RecognizeError, ShelfValidationError, type RecognizeCode } from "../../domains/shelf/errors";
+import {
+  CoverLinkUnreachableError, CoverTooLargeError, CoverTypeError, DuplicateDoubanError, EntryNotFoundError, GameCoverUploadError, RecognizeError, ShelfValidationError, type RecognizeCode,
+} from "../../domains/shelf/errors";
 import { noopShelfHooks, type ShelfHooks } from "../../domains/shelf/hooks";
+import { createIgdbImageClient } from "../../domains/shelf/igdb";
 import { D1ShelfRepo, type ShelfEntry } from "../../domains/shelf/repo";
 import { createShelfService, type CoverChange, type CoverUpload } from "../../domains/shelf/service";
 import { jsonError } from "./errors";
@@ -16,17 +19,20 @@ export interface ShelfRouteDeps {
   bucket: R2Bucket;
   now?: () => Date;
   hooksFor?: (context: APIContext) => ShelfHooks;
-  fetch?: typeof fetch; // 识别时请求豆瓣；测试注入替身
+  fetch?: typeof fetch; // 识别时请求豆瓣、保存游戏时读取 IGDB 封面；测试注入替身
   recognizeTimeoutMs?: number;
+  igdbTimeoutMs?: number;
 }
 
-export function shelfServiceFor({ db, bucket, now, hooksFor = () => noopShelfHooks, fetch: fetchImpl, recognizeTimeoutMs }: ShelfRouteDeps, context: APIContext) {
+export function shelfServiceFor({ db, bucket, now, hooksFor = () => noopShelfHooks, fetch: fetchImpl, recognizeTimeoutMs, igdbTimeoutMs }: ShelfRouteDeps, context: APIContext) {
   return createShelfService({
     repo: new D1ShelfRepo(db),
     store: new R2CoverStore(bucket),
     hooks: hooksFor(context),
     douban: createDoubanClient(fetchImpl),
+    igdb: createIgdbImageClient(fetchImpl),
     recognizeTimeoutMs,
+    igdbTimeoutMs,
     now,
   });
 }
@@ -45,6 +51,8 @@ const FIELD_MESSAGES: Record<string, string> = {
   markedOn: "标记日期格式不正确",
   comment: "短评不能超过 1000 字",
   doubanUrl: "豆瓣链接不正确",
+  platform: "请选择平台",
+  coverUrl: "封面链接须为 images.igdb.com 的图片地址",
   text: "请粘贴豆瓣分享链接或分享文字（不超过 10,000 字）",
 };
 
@@ -111,7 +119,11 @@ export function entryView(entry: ShelfEntry) {
     rating: entry.rating,
     markedOn: entry.markedOn,
     comment: entry.comment,
-    cover: coverUrl(entry.coverKey),
+    cover: entry.type === "game" ? entry.coverUrl : coverUrl(entry.coverKey), // 游戏为 IGDB 地址（ADR-013 §4）
+    platform: entry.platform,
+    coverUrl: entry.coverUrl,
+    coverWidth: entry.coverWidth,
+    coverHeight: entry.coverHeight,
     doubanUrl: entry.douban?.url ?? null,
     doubanId: entry.douban?.id ?? null,
     hidden: entry.hidden,
@@ -123,8 +135,8 @@ export function entryView(entry: ShelfEntry) {
 export type ShelfEntryView = ReturnType<typeof entryView>;
 
 export function publicEntryView(entry: ShelfEntry): ShelfPublicEntry {
-  const { type, title, creator, year, status, rating, markedOn, comment, cover, doubanUrl } = entryView(entry);
-  return { type, title, creator, year, status, rating, markedOn, comment, cover, doubanUrl };
+  const { type, title, creator, year, status, rating, markedOn, comment, cover, doubanUrl, platform, coverWidth, coverHeight } = entryView(entry);
+  return { type, title, creator, year, status, rating, markedOn, comment, cover, doubanUrl, platform, coverWidth, coverHeight };
 }
 
 export function shelfErrorResponse(error: unknown): Response {
@@ -133,6 +145,8 @@ export function shelfErrorResponse(error: unknown): Response {
     return Response.json({ error: { code: error.code, message, fields: error.fields } }, { status: 400 });
   }
   if (error instanceof BadRequestError) return jsonError(400, error.code, error.message);
+  if (error instanceof GameCoverUploadError) return jsonError(400, error.code, "游戏封面请粘贴 IGDB 图片链接，不接受上传文件");
+  if (error instanceof CoverLinkUnreachableError) return jsonError(422, error.code, "封面链接打不开，请检查后重试");
   if (error instanceof RecognizeError) return jsonError(422, error.code, RECOGNIZE_MESSAGES[error.code]);
   if (error instanceof CoverTypeError) return jsonError(400, error.code, "封面只支持 jpg / png / webp");
   if (error instanceof CoverTooLargeError) return jsonError(400, error.code, "封面不能超过 5 MB");

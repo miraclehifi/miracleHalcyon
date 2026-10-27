@@ -13,6 +13,9 @@ const movie = (title: string, markedOn: string, status: ShelfPublicEntry["status
   comment: null,
   cover: null,
   doubanUrl: null,
+  platform: null,
+  coverWidth: null,
+  coverHeight: null,
 });
 
 const summary = (groups: ReturnType<typeof groupByTime>) => groups.map((g) => [g.label, g.meta, g.entries.map((e) => e.title)]);

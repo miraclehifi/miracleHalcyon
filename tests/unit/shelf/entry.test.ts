@@ -28,7 +28,9 @@ const fieldsOf = (raw: unknown) => {
 describe("normalizeEntryInput（SHELF-UT-01）", () => {
   // [TC-US01-03][SC-MANAGE-05] 最小字段：可空字段为 null
   it("最小字段通过，可空字段为 null", () => {
-    expect(normalizeEntryInput(MIN)).toEqual({ ...MIN, creator: null, year: null, rating: null, comment: null, douban: null });
+    expect(normalizeEntryInput(MIN)).toEqual({
+      ...MIN, creator: null, year: null, rating: null, comment: null, douban: null, platform: null, coverUrl: null, coverWidth: null, coverHeight: null,
+    });
   });
 
   // [TC-US01-04][SC-MANAGE-07][SC-MANAGE-08] 等价类与边界值

@@ -31,6 +31,20 @@ export class CoverTooLargeError extends Error {
   readonly code = "COVER_TOO_LARGE";
 }
 
+// 游戏封面只认 IGDB 链接，不接受上传文件（ADR-013 §5）
+export class GameCoverUploadError extends Error {
+  readonly code = "BAD_REQUEST";
+}
+
+// IgdbImageClient 内部错误：由服务翻译为 CoverLinkUnreachableError
+export class IgdbImageError extends Error {
+  readonly name = "IgdbImageError";
+}
+
+export class CoverLinkUnreachableError extends Error {
+  readonly code = "COVER_LINK_UNREACHABLE";
+}
+
 // 豆瓣防腐层（shelf/douban/）内部错误：由 recognize 翻译为 RecognizeError
 export class DoubanFetchError extends Error {
   readonly name = "DoubanFetchError";

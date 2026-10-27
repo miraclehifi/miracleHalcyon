@@ -9,13 +9,13 @@ describe("书影音条目接口", () => {
   // [TC-US01-03][SC-MANAGE-05][SC-MANAGE-06] 最小字段与全字段往返；响应字段齐全
   it("新增：最小字段与全字段", async () => {
     const min = await shelf.create(MIN);
-    const full = await shelf.create({ type: "game", title: "塞尔达传说", creator: "任天堂", year: 2023, status: "completed", rating: 5, markedOn: "2026-05-01", comment: "神作" });
+    const full = await shelf.create({ type: "game", platform: "switch", title: "塞尔达传说", creator: "任天堂", year: 2023, status: "completed", rating: 5, markedOn: "2026-05-01", comment: "神作" });
     const read = await shelf.get(full.body.id);
     expect({ status: [min.status, full.status], min: min.body, read: read.body }).toEqual({
       status: [201, 201],
       min: {
         id: expect.stringMatching(/^\d+$/), ...MIN, creator: null, year: null, rating: null, comment: null, cover: null,
-        doubanUrl: null, doubanId: null, hidden: false, createdAt: NOW.toISOString(), updatedAt: NOW.toISOString(),
+        platform: null, coverUrl: null, coverWidth: null, coverHeight: null, doubanUrl: null, doubanId: null, hidden: false, createdAt: NOW.toISOString(), updatedAt: NOW.toISOString(),
       },
       read: expect.objectContaining({ type: "game", title: "塞尔达传说", creator: "任天堂", year: 2023, rating: 5, markedOn: "2026-05-01", comment: "神作" }),
     });

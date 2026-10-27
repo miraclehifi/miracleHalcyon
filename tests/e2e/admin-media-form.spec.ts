@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { login } from "./support/admin";
 import { waitForHydration } from "./support/hydration";
 import { PREFIX, shelfApi } from "./support/shelf";
@@ -200,4 +201,62 @@ test("[SC-MANAGE-19] 有改动时取消先确认", async ({ page }) => {
   await page.getByRole("button", { name: "取消" }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "放弃" }).click();
   await expect(page).toHaveURL(/\/admin\/media\?type=book$/);
+});
+
+// 游戏：平台下拉与 IGDB 封面链接（admin-media.md"游戏专属"，ADR-013）。images.igdb.com 由 page.route 冒充（co8h3y → 810×1080 夹具，其余 404）
+const IGDB_JPG = readFileSync("tests/fixtures/igdb/co8h3y-810x1080.jpg");
+
+test("[TC-US01-29][SC-MANAGE-23][SC-MANAGE-24][SC-MANAGE-25] 游戏表单：平台、封面链接预览比例、切换分类、错误提示", async ({ page, browserName }) => {
+  await page.route("https://images.igdb.com/**", (route) =>
+    /\/co8h3y\.jpg$/.test(route.request().url()) ? route.fulfill({ contentType: "image/jpeg", body: IGDB_JPG }) : route.fulfill({ status: 404 }),
+  );
+  await login(page);
+  await openNew(page, "game");
+
+  // 1：平台下拉默认 PS5、选项顺序；封面区无"上传"，有链接输入
+  const platform = page.getByLabel("平台");
+  await expect(platform).toHaveValue("ps5");
+  await expect(platform.locator("option")).toHaveText(["PS5", "PS4", "Switch", "Switch 2", "Steam"]);
+  await expect(page.getByRole("button", { name: "上传" })).toHaveCount(0);
+  const link = page.getByLabel("封面链接（IGDB）");
+
+  // 2：粘贴链接 → 预览按原图比例（WebKit 的图片请求不经 page.route，比例只在 chromium 断言）
+  await link.fill("https://images.igdb.com/igdb/image/upload/t_cover_big/co8h3y.webp");
+  const preview = page.getByRole("img", { name: "封面预览" });
+  await expect(preview).toHaveAttribute("src", "https://images.igdb.com/igdb/image/upload/t_1080p/co8h3y.jpg");
+  if (browserName === "chromium") {
+    await expect.poll(() => preview.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(810);
+    const box = await preview.boundingBox();
+    expect(Math.abs(box!.width / box!.height - 810 / 1080)).toBeLessThan(0.01 * (810 / 1080));
+    await expect(preview).toHaveCSS("object-fit", "contain");
+  }
+
+  // 3：改为书 → 平台与链接消失、"上传"恢复；改回游戏 → 值保留
+  await page.getByLabel("分类").selectOption("book");
+  await expect(platform).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "上传" })).toBeVisible();
+  await page.getByLabel("分类").selectOption("game");
+  await expect(platform).toHaveValue("ps5");
+  await expect(link).toHaveValue("https://images.igdb.com/igdb/image/upload/t_cover_big/co8h3y.webp");
+
+  // 4：链接格式不对 → 不发请求，字段下提示
+  let saves = 0;
+  await page.route("**/api/admin/shelf/entries", async (route) => {
+    saves++;
+    await route.fulfill({ status: 422, contentType: "application/json", body: JSON.stringify({ error: { code: "COVER_LINK_UNREACHABLE", message: "封面链接打不开，请检查后重试" } }) });
+  });
+  await page.getByLabel("标题").fill(`${PREFIX} 塞尔达`);
+  await link.fill("https://example.com/a.jpg");
+  await saveButton(page).click();
+  await expect(page.getByText("请粘贴 images.igdb.com 的封面图片地址")).toBeVisible();
+  await expect(link).toBeFocused();
+  expect(saves).toBe(0);
+
+  // 5：保存接口 422 → 链接下提示"打不开"，表单内容保留
+  await link.fill("https://images.igdb.com/igdb/image/upload/t_1080p/nope000.jpg");
+  await saveButton(page).click();
+  await expect(page.getByText("封面链接打不开，请检查后重试")).toBeVisible();
+  await expect(link).toBeFocused();
+  await expect(page.getByLabel("标题")).toHaveValue(`${PREFIX} 塞尔达`);
+  expect(saves).toBe(1);
 });

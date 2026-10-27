@@ -30,6 +30,15 @@ export function countLabel(type: ShelfType, total: number, inProgress: number): 
   return inProgress > 0 ? `${base} · ${statusLabel(type, "in_progress")} ${inProgress}` : base;
 }
 
+// 游戏平台（ADR-013 §1）：游戏必填，其他分类为 null；图标为 Simple Icons 路径名
+export const SHELF_PLATFORMS = ["ps5", "ps4", "switch", "switch2", "steam"] as const;
+export type ShelfPlatform = (typeof SHELF_PLATFORMS)[number];
+export const isShelfPlatform = (value: unknown): value is ShelfPlatform => SHELF_PLATFORMS.includes(value as ShelfPlatform);
+const PLATFORM_LABELS: Record<ShelfPlatform, string> = { ps5: "PS5", ps4: "PS4", switch: "Switch", switch2: "Switch 2", steam: "Steam" };
+const PLATFORM_ICONS: Record<ShelfPlatform, string> = { ps5: "playstation", ps4: "playstation", switch: "nintendoswitch", switch2: "nintendoswitch", steam: "steam" };
+export const platformLabel = (platform: ShelfPlatform) => PLATFORM_LABELS[platform];
+export const platformIcon = (platform: ShelfPlatform) => PLATFORM_ICONS[platform];
+
 export const TITLE_MAX = 200;
 export const CREATOR_MAX = 200;
 export const COMMENT_MAX = 1000;
@@ -45,6 +54,10 @@ export interface EntryData {
   markedOn: string;
   comment: string | null;
   douban: { id: string; url: string } | null;
+  platform: ShelfPlatform | null;
+  coverUrl: string | null; // 仅游戏：IGDB 规范大图地址
+  coverWidth: number | null; // 与 coverUrl 同时有或同时无；normalizeEntryInput 不填，由服务读取
+  coverHeight: number | null;
 }
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -91,8 +104,100 @@ export function normalizeEntryInput(raw: unknown): EntryData {
   if (!isDateOnly(body.markedOn)) invalid.add("markedOn");
   const comment = optionalText(body.comment, COMMENT_MAX, "comment", invalid, true);
   const douban = parseDoubanRef(body.doubanId, body.doubanUrl, invalid);
+  const isGame = body.type === "game";
+  if (isGame && !isShelfPlatform(body.platform)) invalid.add("platform");
+  const coverUrl = isGame ? parseIgdbCoverUrl(body.coverUrl, invalid) : null;
   if (invalid.size > 0) throw new ShelfValidationError(ENTRY_FIELDS.filter((field) => invalid.has(field)));
-  return { type: body.type as ShelfType, title, creator, year, status: body.status as ShelfStatus, rating, markedOn: body.markedOn as string, comment, douban };
+  return {
+    type: body.type as ShelfType, title, creator, year, status: body.status as ShelfStatus, rating, markedOn: body.markedOn as string, comment, douban,
+    platform: isGame ? (body.platform as ShelfPlatform) : null, coverUrl, coverWidth: null, coverHeight: null,
+  };
+}
+
+function parseIgdbCoverUrl(value: unknown, invalid: Set<string>): string | null {
+  if (value === null || value === undefined || value === "") return null;
+  const url = normalizeIgdbCoverUrl(value);
+  if (url === null) invalid.add("coverUrl");
+  return url;
+}
+
+// IGDB 封面链接规范化（ADR-013 §2）：只认 images.igdb.com 的图片地址，一律改写为 t_1080p jpg；不符返回 null
+export const IGDB_URL_MAX = 2000;
+const IGDB_PATH = /^\/igdb\/image\/upload\/t_[a-z0-9_]{1,32}\/([a-z0-9]{1,32})\.(jpg|jpeg|png|webp)$/;
+export const igdbCoverUrl = (imageId: string) => `https://images.igdb.com/igdb/image/upload/t_1080p/${imageId}.jpg`;
+
+export function normalizeIgdbCoverUrl(input: unknown): string | null {
+  if (typeof input !== "string") return null;
+  const text = input.trim();
+  // URL 解析会消去 ../ 并把 \ 当作 /，先在原文上拒绝，保证路径与输入一致
+  if (text === "" || text.length > IGDB_URL_MAX || text.includes("..") || text.includes("\\")) return null;
+  let url: URL;
+  try {
+    url = new URL(text);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+  if (url.hostname !== "images.igdb.com" || url.username || url.password || url.port) return null;
+  const match = IGDB_PATH.exec(url.pathname);
+  return match ? igdbCoverUrl(match[1]) : null;
+}
+
+export interface ImageSize {
+  width: number;
+  height: number;
+}
+
+const u16be = (b: Uint8Array, i: number) => (b[i] << 8) | b[i + 1];
+const u32be = (b: Uint8Array, i: number) => ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0;
+const u16le = (b: Uint8Array, i: number) => b[i] | (b[i + 1] << 8);
+const u24le = (b: Uint8Array, i: number) => b[i] | (b[i + 1] << 8) | (b[i + 2] << 16);
+const sized = (width: number, height: number): ImageSize | null => (width > 0 && height > 0 ? { width, height } : null);
+
+// 由文件头解析宽高（jpeg / png / webp）；数据不足或格式不认返回 null
+export function readImageSize(bytes: Uint8Array): ImageSize | null {
+  const type = detectCoverType(bytes);
+  if (type === "image/png") return bytes.length >= 24 && u32be(bytes, 12) === 0x49484452 ? sized(u32be(bytes, 16), u32be(bytes, 20)) : null;
+  if (type === "image/jpeg") return readJpegSize(bytes);
+  if (type === "image/webp") return readWebpSize(bytes);
+  return null;
+}
+
+// SOF0–3、5–7、9–11、13–15（排除 DHT C4、JPG C8、DAC CC）
+const isSof = (marker: number) => marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
+
+function readJpegSize(b: Uint8Array): ImageSize | null {
+  let i = 2;
+  while (i < b.length) {
+    if (b[i] !== 0xff) return null;
+    while (b[i] === 0xff) i++; // 段间填充字节
+    if (i >= b.length) return null;
+    const marker = b[i];
+    if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+      i++;
+      continue;
+    }
+    if (marker === 0xd9 || marker === 0xda) return null; // 图像结束 / 扫描开始前没有 SOF
+    if (i + 2 >= b.length) return null;
+    const length = u16be(b, i + 1);
+    if (length < 2) return null;
+    if (isSof(marker)) return i + 7 < b.length ? sized(u16be(b, i + 6), u16be(b, i + 4)) : null;
+    i += 1 + length;
+  }
+  return null;
+}
+
+function readWebpSize(b: Uint8Array): ImageSize | null {
+  if (b.length < 30) return null;
+  const chunk = String.fromCharCode(b[12], b[13], b[14], b[15]);
+  if (chunk === "VP8 ") return b[23] === 0x9d && b[24] === 0x01 && b[25] === 0x2a ? sized(u16le(b, 26) & 0x3fff, u16le(b, 28) & 0x3fff) : null;
+  if (chunk === "VP8L") {
+    if (b[20] !== 0x2f) return null;
+    const bits = (b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24)) >>> 0;
+    return sized((bits & 0x3fff) + 1, ((bits >>> 14) & 0x3fff) + 1);
+  }
+  if (chunk === "VP8X") return sized(u24le(b, 24) + 1, u24le(b, 27) + 1);
+  return null;
 }
 
 // 公开条目（api-contract ShelfPublicEntry）：读者页构建数据，不含 id、豆瓣 ID、隐藏标记与时间戳
@@ -105,13 +210,16 @@ export interface ShelfPublicEntry {
   rating: number | null;
   markedOn: string;
   comment: string | null;
-  cover: string | null;
+  cover: string | null; // 游戏为 IGDB 地址，其他为站内 /covers/ 路径
   doubanUrl: string | null;
+  platform: ShelfPlatform | null;
+  coverWidth: number | null;
+  coverHeight: number | null;
 }
 
 export const isDoubanUrl = (value: string) => doubanKindOfUrl(value) !== null;
 
-export const ENTRY_FIELDS =["type", "title", "creator", "year", "status", "rating", "markedOn", "comment", "doubanUrl"];
+export const ENTRY_FIELDS = ["type", "title", "creator", "year", "status", "rating", "markedOn", "comment", "doubanUrl", "platform", "coverUrl"];
 
 function parseDoubanRef(id: unknown, url: unknown, invalid: Set<string>): EntryData["douban"] {
   const noId = id === null || id === undefined || id === "";

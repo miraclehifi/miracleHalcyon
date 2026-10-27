@@ -54,7 +54,8 @@ export function filledText(filled: FilledField[], type: ShelfType): string {
 export function missingTexts(missing: MissingField[], type: ShelfType): string[] {
   const texts = missing.filter((field) => field !== "cover");
   const lines = texts.length > 0 ? [`未识别：${texts.map((field) => fieldName(field, type)).join("、")}，请手动填写`] : [];
-  if (missing.includes("cover")) lines.push("未识别：封面，可手动上传");
+  // 游戏封面用 IGDB 链接（ADR-013 §5），识别不取豆瓣封面
+  if (missing.includes("cover")) lines.push(type === "game" ? "未识别：封面，游戏封面请粘贴 IGDB 图片链接" : "未识别：封面，可手动上传");
   return lines;
 }
 

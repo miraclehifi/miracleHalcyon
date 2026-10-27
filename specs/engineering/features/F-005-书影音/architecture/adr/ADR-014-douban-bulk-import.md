@@ -6,6 +6,7 @@ Accepted（2026-10-23，F-005 增量 [douban-bulk-import](../../../../../backlog
 ## 背景
 - 作者要按豆瓣用户 ID 导入影视、书、游戏的已完成 / 进行中标记（实测约 1,050 条），可重复同步；相同豆瓣 ID 用豆瓣数据覆盖
 - 作者补充（2026-10-23）：全量导入一次后，之后只同步增量
+- 作者补充（2026-10-27）：可按类别导入（本站 6 个分类勾选，默认全选），6 个类别一次全部支持
 - spike：6 类标记列表都按 `create_time` 严格倒序
 - spike（Backlog"spike 结论"）：Rexxar `user/{uid}/interests` 不登录可读；每页最多 50 条，单页可能少返回；书的漫画判定要额外请求 `book/{id}/tags`，游戏开发商要请求 `game/{id}`
 - Workers 单次调用外部子请求数有限（免费版 50），且每条非游戏条目还要下载封面存 R2；一次请求导完上千条不可行
@@ -14,17 +15,20 @@ Accepted（2026-10-23，F-005 增量 [douban-bulk-import](../../../../../backlog
 ## 决策
 
 ### 1. 前端逐页驱动，服务端只记同步水位
-- `POST /api/admin/shelf/import` 一次只处理一页：请求 `{uid, kind, status, start}`，服务端向豆瓣请求 `count = 20` 的一页，写库后返回 `{total, nextStart, created, updated, coverFailed, failed[]}`
-- 导入顺序（影视→书→游戏，各自 done→doing）、进度、停止都在前端 `DoubanImportDialog` 里；服务端不存进行中的任务，只存每类的同步水位（§1.1）
+- `POST /api/admin/shelf/import` 一次只处理一页：请求 `{uid, kind, status, types, mode, start, head?}`，服务端向豆瓣请求 `count = 20` 的一页，写库后返回 `{total, nextStart, created, updated, coverFailed, failed[]}`
+- 导入顺序（影视→书→游戏，各自 done→doing；只有勾了至少一个类别的大类才有这两步）、进度、停止都在前端 `DoubanImportDialog` 里；服务端不存进行中的任务，只存每类的同步水位（§1.1）
 - 中途中断后重新导入，没完成的类别从头开始；靠"按豆瓣 ID 覆盖"保证幂等（BH-14），不做页级断点
 - 每页外部请求 ≤ 1（列表）+ 20（书 tags 或游戏详情）+ 20（封面）= 41，低于 50；整页共享 25 秒 `AbortSignal`，外部请求并发上限 5
 
-### 1.1 增量同步：按类记水位
-- 新表 `shelf_import_state`（迁移 0006）：主键（`uid`, `kind`, `status`），列 `watermark`（豆瓣 `create_time` 原文，可空）、`synced_at`（最近一次完整同步时间，可空）、`attempted_at`（最近一次导入请求时间）
-- 请求带 `mode`：`full` 翻到 `total` 为止；`incremental` 且该类有水位时，只处理 `create_time >= watermark` 的标记（含同一秒，重复覆盖无害），本页出现早于水位的标记即结束本类；该类无水位时 `incremental` 等同 `full`
-- `head`：本类第一页第一条标记的 `create_time`。第一页响应返回 `head`，前端在后续页原样带回；服务端在本类结束（`nextStart = null`）的那一页把水位写为 `head`（`head` 为空——豆瓣该类为空——时水位不变）、`synced_at` 写为当前时间
+### 1.1 增量同步：按"类别 × 状态"记水位
+- 新表 `shelf_import_state`（迁移 0006）：主键（`uid`, `type`, `status`），`type` 为本站分类（book / comic / movie / series / game / boardgame），列 `watermark`（豆瓣 `create_time` 原文，可空）、`synced_at`（最近一次完整同步时间，可空）、`attempted_at`（最近一次导入请求时间）
+- 豆瓣标记列表按大类返回，不能按本站分类筛选。一步（大类 × 状态）的截断点 = 本步勾选类别水位中**最早**的那个；勾选类别中任一没有水位 → 不截断（等同 `full`）
+- 请求带 `mode`：`full` 翻到 `total` 为止；`incremental` 时只处理 `create_time >= 截断点` 的标记（含同一秒，重复覆盖无害），本页出现早于截断点的标记即结束本步
+- 请求带 `types`：本步要写入的本站分类（须属于该大类、非空、不重复）；映射后分类不在 `types` 里的标记直接跳过（不写入、不下载封面、不计 `failed`、不改本站已有条目）。书只勾漫画或只勾书时仍要请求每本书的标签来判定
+- `head`：本类第一页第一条标记的 `create_time`。第一页响应返回 `head`，前端在后续页原样带回；服务端在本步结束（`nextStart = null`）的那一页把 `types` 中每个类别的该状态水位写为 `head`（`head` 为空——豆瓣该类为空——时水位不变）、`synced_at` 写为当前时间
 - **水位只在一类完整结束时前移**：停止、出错、关掉页面都不写水位。全量从最新往旧翻，若中断后就前移水位，水位之下会留下没导入的空洞；只在完整结束时前移可避免
-- 每次导入请求更新 `attempted_at`；`GET /api/admin/shelf/import/state` 不带 `uid` 时取 `attempted_at` 最新的 `uid` 作为"上次用的 ID"——用户 ID 因此存服务端，换设备也能带出，不再用浏览器 `localStorage`
+- 未勾选的类别水位、`attempted_at` 都不动；之后勾选它时因无水位按全量补齐
+- 每次导入请求更新 `types` 中各类别的 `attempted_at`；`GET /api/admin/shelf/import/state` 不带 `uid` 时取 `attempted_at` 最新的 `uid` 作为"上次用的 ID"——用户 ID 因此存服务端，换设备也能带出，不再用浏览器 `localStorage`
 - 已知限制：豆瓣修改旧标记的评分 / 短评若不刷新 `create_time`，增量发现不了；删除标记、改为想看，全量和增量都不处理。界面保留"全量导入"作为兜底
 
 ### 2. 重建只触发一次
@@ -51,10 +55,11 @@ Accepted（2026-10-23，F-005 增量 [douban-bulk-import](../../../../../backlog
 - 见 §1.1；不收集、不存储豆瓣密码或 Cookie
 
 ## 后果
-- 正面：只加一张小表（每个 ID 6 行），无队列 / Durable Object；日常增量同步通常 6 个请求、几秒完成；复用识别的白名单与映射；每页可测、可重试；SSRF 面仍只有固定主机 `m.douban.com` 与 `.doubanio.com`
+- 正面：只加一张小表（每个 ID 至多 12 行），无队列 / Durable Object；日常增量同步通常 6 个请求、几秒完成；复用识别的白名单与映射；每页可测、可重试；SSRF 面仍只有固定主机 `m.douban.com` 与 `.doubanio.com`
 - 负面：首次全量导入期间作者需保持页面打开（约 53 页，按单页 3–10 秒估计 3–8 分钟）；关掉页面即停止，没完成的类别下次从头覆盖（只多耗时间，结果相同）
 - 负面：增量依赖豆瓣列表按 `create_time` 倒序；若豆瓣改变排序，增量可能漏标记——"全量导入"可补齐
 - 负面：导入的游戏没有封面，需作者逐条补 IGDB 链接
+- 负面：同一大类两个类别水位不同时按较早的截断，较新的那个类别会重复覆盖一段（无害，只多耗请求）；只勾一个类别时仍要翻这个大类的完整列表
 - 风险：豆瓣对连续请求限流——单页失败即停止并提示稍后重试；接口改版 → `FETCH_FAILED` / 单条 `PARSE_FAILED`
 
 ## 备选方案
@@ -67,4 +72,5 @@ Accepted（2026-10-23，F-005 增量 [douban-bulk-import](../../../../../backlog
 | 增量按"整页都已存在且无变化"截断，不存水位 | 全量中断后会在旧数据处提前截断，留下空洞；判断"无变化"也要逐条比较 |
 | 水位取本站条目的最大标记日期 | `marked_on` 只有日期、作者手动录入的条目会干扰；同样有中断空洞问题 |
 | 水位存浏览器 `localStorage` | 换设备 / 清缓存后丢失；中断判断仍需服务端配合 |
+| 水位按豆瓣大类记（不分本站分类） | 只勾电影时会把剧集一起标记为已同步，之后再勾剧集会漏掉 |
 | 导入时为游戏下载豆瓣封面 | 与 ADR-013（游戏封面只用 IGDB）冲突 |

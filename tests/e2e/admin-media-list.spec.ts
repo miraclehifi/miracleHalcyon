@@ -79,7 +79,7 @@ test("[TC-US01-22][SC-MANAGE-14] 隐藏与取消隐藏：徽标、按钮文案�
 
 test("[TC-US01-23][SC-MANAGE-15][SC-MANAGE-16] 删除确认框：取消 / Esc 不删，确认后行消失", async ({ page, baseURL }) => {
   await login(page);
-  const entry = await shelfApi(page.request, baseURL!).create({ type: "game", title: `${PREFIX} 删除用` });
+  const entry = await shelfApi(page.request, baseURL!).create({ type: "game", platform: "ps5", title: `${PREFIX} 删除用` });
   await page.goto("/admin/media?type=game");
   await waitForHydration(page);
   const target = row(page, entry.title);

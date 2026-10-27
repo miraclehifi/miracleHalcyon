@@ -113,14 +113,14 @@
 | 组 | 请求体 |
 |----|--------|
 | 最小 | `{type: "book", title: "原则", status: "completed", markedOn: "2026-10-01"}` |
-| 全字段 | `{type: "game", title: "塞尔达传说", creator: "任天堂", year: 2023, status: "completed", rating: 5, markedOn: "2026-05-01", comment: "神作"}` + 封面 `coverFile(jpg, 300 KB)` |
+| 全字段 | `{type: "game", platform: "switch", title: "塞尔达传说", creator: "任天堂", year: 2023, status: "completed", rating: 5, markedOn: "2026-05-01", comment: "神作"}`（游戏平台必填、不接受上传封面，见 TC-US01-26；上传封面见 TC-US01-05、07） |
 
 **步骤：** 分别 `POST` 新增；再 `GET` 该条目
 
 **预期结果：**
 - 201；返回 `id`（字符串整数）
 - 最小组：`creator`、`year`、`rating`、`comment`、`cover`、`doubanUrl`、`doubanId` 均为 `null`；`hidden: false`
-- 全字段组：读回各字段与请求一致；`cover` 为站内 R2 路径，R2 中对象存在
+- 全字段组：读回各字段与请求一致
 - 响应含 `createdAt`、`updatedAt`（ISO 8601）
 
 ### TC-US01-04: 字段校验：等价类与边界值
