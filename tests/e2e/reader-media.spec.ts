@@ -282,7 +282,7 @@ const ratio = async (page: Page, title: string) => {
 };
 const hoverLayer = (page: Page, title: string) => poster(page, title).locator("[data-poster-hover]");
 
-// [TC-US03-22][SC-SHELF-21] 游戏海报：原比例不裁切、悬停只显示平台、翻面看详情（年份徽标见任务 15）
+// [TC-US03-22][SC-SHELF-21] 游戏海报：原比例不裁切、悬停显示平台与年份、翻面看详情
 test("[TC-US03-22] 游戏海报：原比例、悬停平台、翻面", async ({ page }) => {
   await routeIgdb(page);
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -300,22 +300,25 @@ test("[TC-US03-22] 游戏海报：原比例、悬停平台、翻面", async ({ p
   expect(await img.evaluate((el: HTMLImageElement) => [el.naturalWidth, el.naturalHeight])).toEqual([810, 1080]);
   await expect(img).toHaveCSS("object-fit", "contain");
 
-  // 2 悬停：左上角平台徽标淡入，无名称浮层
+  // 2 悬停：左上角平台、右下角年份淡入，无名称浮层
   const wukong = card(page, "黑神话：悟空");
   await expect(wukong).toHaveAccessibleName("《黑神话：悟空》，PS5，2024");
   await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("opacity", "0");
   await wukong.hover();
   await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("opacity", "1");
   await expect(hoverLayer(page, "黑神话：悟空").locator("[data-platform-badge]")).toHaveText("PS5");
+  await expect(hoverLayer(page, "黑神话：悟空").locator("[data-year-badge]")).toHaveText("2024");
   // 悬停时 FlipCard 倾斜、放大，不用 boundingBox 量偏移
-  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("left", "10px");
-  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("top", "10px");
+  const corner = (selector: string, sides: string[]) => Promise.all(sides.map((side) => expect(hoverLayer(page, "黑神话：悟空").locator(selector)).toHaveCSS(side, "10px")));
+  await corner("[data-hover-platform]", ["left", "top"]);
+  await corner("[data-hover-year]", ["right", "bottom"]);
   await expect(poster(page, "黑神话：悟空").locator("[data-poster-caption]")).toHaveCount(0);
 
-  // 3 换一张：Steam
+  // 3 换一张：Steam、2023
   await card(page, "博德之门 3").hover();
   await expect(hoverLayer(page, "博德之门 3")).toHaveCSS("opacity", "1");
   await expect(hoverLayer(page, "博德之门 3").locator("[data-platform-badge]")).toHaveText("Steam");
+  await expect(hoverLayer(page, "博德之门 3").locator("[data-year-badge]")).toHaveText("2023");
   await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("opacity", "0");
 
   // 4 翻面：背面有名称、评分、日期、豆瓣，无开发商、无平台
@@ -376,4 +379,66 @@ test("[TC-US03-23] 游戏无封面 / 加载失败占位", async ({ page }) => {
     await card(page, title).click();
     await expect(card(page, title)).toHaveAttribute("aria-pressed", "true");
   }
+});
+
+// [TC-US03-24][SC-SHELF-23] 按时间：依据切换标记时间 / 发行年份，刷新保留，各分类共用，旧值 "1" 兼容
+test("[TC-US03-24] 按时间：切换标记时间 / 发行年份", async ({ page }) => {
+  await routeIgdb(page);
+  await page.clock.setFixedTime(new Date("2026-10-27T10:00:00"));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/media/game");
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await waitForHydration(page);
+  const headings = page.getByRole("heading", { level: 2 });
+  const stored = () => page.evaluate(() => localStorage.getItem("media:by-time"));
+
+  // 1 打开：依据切换出现，默认玩过时间（有"在玩"段）
+  await page.getByRole("button", { name: "按时间" }).click();
+  const basis = page.getByRole("radiogroup", { name: "分段依据" });
+  await expect(basis.getByRole("radio")).toHaveText(["玩过时间", "发售年份"]);
+  await expect(basis.getByRole("radio", { name: "玩过时间" })).toHaveAttribute("aria-checked", "true");
+  await expect(headings.first()).toHaveText("在玩");
+
+  // 2 发售年份：2024 / 2023 / 未知年份，无"在玩"段
+  await basis.getByRole("radio", { name: "发售年份" }).click();
+  await expect(headings).toHaveText(["2024", "2023", "未知年份"]);
+  const meta = page.locator("[data-time-heading]");
+  await expect(meta.nth(0)).toContainText("1 款");
+  await expect(meta.nth(1)).toContainText("3 款");
+  await expect(meta.nth(2)).toContainText("1 款");
+  await expect(page.locator('[data-poster-segment="year-2023"] [data-poster]').first().getByRole("button", { name: /塞尔达传说：王国之泪/ })).toBeAttached();
+  expect(await stored()).toBe("release");
+
+  // 3 刷新保留
+  await page.reload();
+  await waitForHydration(page);
+  await expect(headings).toHaveText(["2024", "2023", "未知年份"]);
+
+  // 4 电影页同样按年份，文案随分类
+  await page.goto("/media/movie");
+  await waitForHydration(page);
+  await expect(page.getByRole("radiogroup", { name: "分段依据" }).getByRole("radio")).toHaveText(["看过时间", "上映年份"]);
+  await expect(page.getByRole("radio", { name: "上映年份" })).toHaveAttribute("aria-checked", "true");
+  await expect(headings).toHaveText(["1994", "未知年份"]);
+
+  // 5 关闭：不分段，依据切换消失
+  await page.getByRole("button", { name: "按时间" }).click();
+  await expect(headings).toHaveCount(0);
+  await expect(page.getByRole("radiogroup", { name: "分段依据" })).toHaveCount(0);
+  expect(await stored()).toBe("0");
+
+  // 6 旧值 "1" → 标记时间
+  await page.evaluate(() => localStorage.setItem("media:by-time", "1"));
+  await page.reload();
+  await waitForHydration(page);
+  await expect(page.getByRole("radio", { name: "看过时间" })).toHaveAttribute("aria-checked", "true");
+  await expect(headings.first()).toHaveText("本年");
+
+  // 手机 390：按钮与依据切换在标题行，放不下时换行，无横向滚动
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  await waitForHydration(page);
+  await expect(page.locator("main header").getByRole("radiogroup", { name: "分段依据" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

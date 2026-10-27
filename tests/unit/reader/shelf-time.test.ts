@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ShelfPublicEntry } from "../../../src/domains/shelf/entry";
-import { groupByTime } from "../../../src/lib/reader/shelf-time";
+import { groupByReleaseYear, groupByTime } from "../../../src/lib/reader/shelf-time";
 
 const movie = (title: string, markedOn: string, status: ShelfPublicEntry["status"] = "completed"): ShelfPublicEntry => ({
   type: "movie",
@@ -72,5 +72,32 @@ describe("groupByTime", () => {
 
   it("每段有稳定 key", () => {
     expect(groupByTime([movie("a", "2024-06-01"), movie("b", "2026-10-05")], "2026-10-22").map((g) => g.key)).toEqual(["this-month", "year-2024"]);
+  });
+});
+
+// [UT-20][SC-SHELF-23] reader module-spec §2 groupByReleaseYear
+describe("groupByReleaseYear", () => {
+  const withYear = (title: string, year: number | null, markedOn: string, status: ShelfPublicEntry["status"] = "completed", type: ShelfPublicEntry["type"] = "game") => ({ ...movie(title, markedOn, status), type, year });
+
+  it("年份倒序、未知年份最后；段内进行中在前、其余标记日期倒序；无“在玩”段；量词随分类", () => {
+    const groups = groupByReleaseYear([
+      withYear("2023 旧", 2023, "2024-02-10"),
+      withYear("2026", 2026, "2026-10-01"),
+      withYear("无年份", null, "2019-03-01"),
+      withYear("2024", 2024, "2025-08-20"),
+      withYear("2023 在玩", 2023, "2026-05-01", "in_progress"),
+    ]);
+    expect(summary(groups)).toEqual([
+      ["2026", "1 款", ["2026"]],
+      ["2024", "1 款", ["2024"]],
+      ["2023", "2 款", ["2023 在玩", "2023 旧"]],
+      ["未知年份", "1 款", ["无年份"]],
+    ]);
+    expect(groups.map((g) => g.key)).toEqual(["year-2026", "year-2024", "year-2023", "unknown"]);
+  });
+
+  it("晚于今年的年份照常成段；电影量词“部”；空输入", () => {
+    expect(summary(groupByReleaseYear([withYear("未来片", 2030, "2026-01-01", "completed", "movie")]))).toEqual([["2030", "1 部", ["未来片"]]]);
+    expect(groupByReleaseYear([])).toEqual([]);
   });
 });

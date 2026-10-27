@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 9
 **序号**: 15
-**状态**: pending
+**状态**: completed（2026-10-27）
 **类别**: FRONTEND
 **架构层级**: 表现层（reader：`src/components/reader/`、`src/lib/reader/`）
 **所属 Feature**: [F-005 书影音](../../product/features/F-005-书影音/feature-scope.md)
@@ -37,8 +37,8 @@
 
 ## DoD（完成定义）
 
-- [ ] 页面与 admin.pen 09d 工具栏、09g、Row 7 一致
-- [ ] 测试清单全部由红变绿；`tests/e2e/reader-media.spec.ts` 全部用例 chromium 通过，本任务 E2E 补跑 webkit
+- [x] 页面与 admin.pen 09d 工具栏、09g、Row 7 一致
+- [x] 测试清单全部由红变绿；`tests/e2e/reader-media.spec.ts` 全部用例 chromium 通过，本任务 E2E 补跑 webkit
 
 ## 依赖
 
@@ -48,6 +48,14 @@
 
 - `src/lib/reader/shelf-time.ts`、`src/components/reader/{MediaPosterWall,MediaPoster,MediaTimeToggle}.tsx`（改）、`src/components/reader/{MediaTimeBasis,YearBadge}.tsx`（新建）
 - `tests/unit/reader/{shelf-time.test.ts,media-poster-wall.test.tsx}`、`tests/e2e/reader-media.spec.ts`（改）
+
+## 实现记录（2026-10-27）
+
+- `MediaPosterWall` 状态为 `mode`（`off` / `marked` / `release`）+ 记住上次依据的 `basis`：关闭再打开"按时间"沿用上次依据；依据切换只在打开时渲染
+- `MediaTimeBasis` 未复用 `SegmentedControl`：规格要求高 30、项内边距 0 10、选中 `bg` 底，与基础分段控件尺寸不同；标记时间文案取 `statusLabel(type, "completed") + "时间"`
+- `MediaPoster` 悬停层改为 `inset-0` 容器，平台（`[data-hover-platform]`，左上 10）与年份（`[data-hover-year]`，右下 10）各自定位
+- 手机端标题行放不下"计数 + 按时间 + 依据切换"（约 430 > 358），`MediaHeader` 右侧与槽内容器允许换行（右对齐），TC-US03-24 断言 390 宽无横向滚动
+- 夹具"断链游戏"年份补为 2023（TC-US03-24 前置条件：2023 段 3 款）
 
 ## 回滚策略
 

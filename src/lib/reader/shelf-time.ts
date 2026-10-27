@@ -37,3 +37,22 @@ export function groupByTime(entries: readonly ShelfPublicEntry[], today: string)
       return { key, label: b.label, meta, entries: b.entries };
     });
 }
+
+// 按发行年份分段（reader-media.md"按发行年份"）：每年一段倒序（含晚于今年的年份），year 为空归最后的"未知年份"；
+// 段内 sortPublic（进行中在前），不单列进行中段
+export function groupByReleaseYear(entries: readonly ShelfPublicEntry[]): TimeGroup[] {
+  const buckets = new Map<number | null, ShelfPublicEntry[]>();
+  for (const entry of sortPublic(entries)) {
+    const year = entry.year ?? null;
+    if (!buckets.has(year)) buckets.set(year, []);
+    buckets.get(year)!.push(entry);
+  }
+  return [...buckets.entries()]
+    .sort(([a], [b]) => (a === null ? 1 : b === null ? -1 : b - a))
+    .map(([year, list]) => ({
+      key: year === null ? "unknown" : `year-${year}`,
+      label: year === null ? "未知年份" : String(year),
+      meta: countLabel(list[0].type, list.length, 0),
+      entries: list,
+    }));
+}

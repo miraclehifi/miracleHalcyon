@@ -3,8 +3,8 @@
 // 片名、评分、短评、"看过 · yyyy-MM-dd"（进行中为"在看"徽标），不显示导演。"豆瓣 ↗"是 FlipCard 的兄弟节点
 // （FlipCard 根是 role="button"，里面不能嵌链接），覆盖在背面右下角，只在翻开时可点、可聚焦。
 // still：服务端 / 水合前的静态网格，只渲染正面，背面详情留在 HTML 中（hidden），无 JS 时"豆瓣 ↗"由全局样式常显
-// 游戏模式（ADR-013）：封面为 IGDB 原比例大图，object-fit: contain 不裁切；悬停 / 键盘聚焦时左上角淡入 PlatformBadge
-// （仅精确指针设备，aria-hidden，平台已写进翻面控件的 aria-label）；背面不显示平台
+// 游戏模式（ADR-013）：封面为 IGDB 原比例大图，object-fit: contain 不裁切；悬停 / 键盘聚焦时左上角淡入 PlatformBadge、
+// 右下角淡入 YearBadge（仅精确指针设备，aria-hidden，平台与年份已写进翻面控件的 aria-label）；背面不显示平台
 import { ImageOff } from "lucide-react";
 import { useState } from "react";
 import { platformLabel, statusLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
@@ -12,6 +12,7 @@ import { useTokenColor } from "../../lib/dom/theme";
 import { StarRating } from "../ui/StarRating";
 import FlipCard from "../vendor/react-bits/FlipCard";
 import { PlatformBadge } from "./PlatformBadge";
+import { YearBadge } from "./YearBadge";
 
 export interface MediaPosterProps {
   entry: ShelfPublicEntry;
@@ -53,9 +54,16 @@ function Front({ entry }: { entry: ShelfPublicEntry }) {
         <div
           data-poster-hover
           aria-hidden="true"
-          className="pointer-events-none absolute top-2.5 left-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-fine:group-has-focus-visible:opacity-100"
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-fine:group-has-focus-visible:opacity-100"
         >
-          <PlatformBadge platform={entry.platform} />
+          <span data-hover-platform className="absolute top-2.5 left-2.5">
+            <PlatformBadge platform={entry.platform} />
+          </span>
+          {entry.year && (
+            <span data-hover-year className="absolute right-2.5 bottom-2.5">
+              <YearBadge year={entry.year} />
+            </span>
+          )}
         </div>
       )}
     </div>

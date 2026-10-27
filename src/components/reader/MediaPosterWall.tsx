@@ -1,14 +1,16 @@
 // MediaPosterWall（components.md"海报墙参数"，reader-media.md"海报墙""按时间分段"）：电影、剧集、游戏满宽海报墙，React 岛（client:load）。
 // 砖块比例按 posterAspect：电影、剧集 2:3，游戏按封面原始比例（无封面 3:4），高 = 列宽 ÷ 比值，封面加载失败时尺寸不变。
 // 服务端 / 水合前渲染 [data-poster-static] 静态网格（Masonry 在服务端量不到宽度）；挂载后换成 vendor Masonry 并播放入场。
-// 受控"当前翻开的海报"（最多一张，跨分段），Esc 翻回；"按时间"开关存 localStorage media:by-time，按钮经 portal 挂到页面槽位
+// 受控"当前翻开的海报"（最多一张，跨分段），Esc 翻回；"按时间"开关与分段依据（标记时间 / 发行年份）存 localStorage media:by-time
+// （"0" / "marked" / "release"，旧值 "1" 视为 marked），按钮与依据切换经 portal 挂到页面槽位
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ShelfPublicEntry } from "../../domains/shelf/entry";
 import { posterAspect } from "../../lib/reader/shelf";
-import { groupByTime } from "../../lib/reader/shelf-time";
+import { groupByReleaseYear, groupByTime } from "../../lib/reader/shelf-time";
 import Masonry, { type MasonryItem } from "../vendor/react-bits/Masonry";
 import { MediaPoster } from "./MediaPoster";
+import { MediaTimeBasis, type TimeBasis } from "./MediaTimeBasis";
 import { MediaTimeHeading } from "./MediaTimeHeading";
 import { MediaTimeToggle } from "./MediaTimeToggle";
 
@@ -21,17 +23,20 @@ const NARROW = 600; // 容器宽 < 600px 时固定 2 列
 const DESKTOP = "(min-width: 768px)";
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-function readByTime(): boolean {
+type TimeMode = "off" | TimeBasis;
+
+function readByTime(): TimeMode {
   try {
-    return localStorage.getItem(BY_TIME_KEY) === "1";
+    const value = localStorage.getItem(BY_TIME_KEY);
+    return value === "1" || value === "marked" ? "marked" : value === "release" ? "release" : "off";
   } catch {
-    return false;
+    return "off";
   }
 }
 
-function writeByTime(value: boolean) {
+function writeByTime(mode: TimeMode) {
   try {
-    localStorage.setItem(BY_TIME_KEY, value ? "1" : "0");
+    localStorage.setItem(BY_TIME_KEY, mode === "off" ? "0" : mode);
   } catch {
     // 只是个人偏好，存不了就算了
   }
@@ -60,15 +65,18 @@ function useToggleSlot(enabled: boolean): Element | null {
 export function MediaPosterWall({ entries }: MediaPosterWallProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [byTime, setByTime] = useState(false);
+  const [mode, setMode] = useState<TimeMode>("off");
+  const [basis, setBasis] = useState<TimeBasis>("marked"); // 关闭再打开时沿用上次的依据
   const [openId, setOpenId] = useState<string | null>(null);
   const [width, setWidth] = useState(0);
   const slot = useToggleSlot(mounted && entries.length > 0);
 
   // 挂载后才读偏好、换成 Masonry：服务端与水合首帧都输出静态网格，避免水合不一致
   useEffect(() => {
+    const stored = readByTime();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 只在挂载时执行一次
-    setByTime(readByTime());
+    setMode(stored);
+    if (stored !== "off") setBasis(stored);
     setMounted(true);
   }, []);
 
@@ -91,11 +99,13 @@ export function MediaPosterWall({ entries }: MediaPosterWallProps) {
   }, [openId]);
 
   const ids = new Map(entries.map((entry, i) => [entry, String(i)]));
-  const changeByTime = (value: boolean) => {
-    setByTime(value);
+  const changeMode = (next: TimeMode) => {
+    setMode(next);
+    if (next !== "off") setBasis(next);
     setOpenId(null);
-    writeByTime(value);
+    writeByTime(next);
   };
+  const byTime = mode !== "off";
 
   if (!mounted) {
     return (
@@ -156,7 +166,7 @@ export function MediaPosterWall({ entries }: MediaPosterWallProps) {
       {width > 0 &&
         (byTime ? (
           <div className="flex flex-col gap-7">
-            {groupByTime(entries, localToday()).map((group) => (
+            {(mode === "release" ? groupByReleaseYear(entries) : groupByTime(entries, localToday())).map((group) => (
               <section key={group.key} className="flex flex-col gap-4">
                 <MediaTimeHeading label={group.label} meta={group.meta} />
                 {wall(group.entries, group.key)}
@@ -166,7 +176,14 @@ export function MediaPosterWall({ entries }: MediaPosterWallProps) {
         ) : (
           wall(entries)
         ))}
-      {slot && createPortal(<MediaTimeToggle pressed={byTime} onChange={changeByTime} />, slot)}
+      {slot &&
+        createPortal(
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <MediaTimeToggle pressed={byTime} onChange={(pressed) => changeMode(pressed ? basis : "off")} />
+            {mode !== "off" && entries.length > 0 && <MediaTimeBasis type={entries[0].type} value={mode} onChange={changeMode} />}
+          </div>,
+          slot,
+        )}
     </div>
   );
 }

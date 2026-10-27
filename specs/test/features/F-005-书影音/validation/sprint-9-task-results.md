@@ -59,3 +59,7 @@
 | 2026-10-27 | 14 add-game-poster-wall | `npm run test:build` | 19 / 19（新增 TC-US03-21；TC-US03-03、05、06、10、11、13、16 按新夹具改口径） |
 | 2026-10-27 | 14 add-game-poster-wall | `npx playwright test tests/e2e/reader-media.spec.ts`（chromium / webkit） | chromium 15 / 15（新增 TC-US03-22 ×2、23；TC-06、10、16、17 改口径；首跑悬停徽标位置用 boundingBox 受倾斜影响失败，改断言计算样式）；webkit 首跑 4 项因页面 / worker 崩溃失败（负载型），`--workers 4` 重跑 14 / 14 + 1 跳过（触屏用例，WebKit 不支持 `isMobile`） |
 | 2026-10-27 | 14 add-game-poster-wall | `npm run lint`、`npm run check`、`git diff package.json` | 0 problems、0 errors、无新依赖 |
+| 2026-10-27 | 15 add-time-basis-release-year | `npx vitest run tests/unit/reader/shelf-time.test.ts tests/unit/reader/media-poster-wall.test.tsx` | 红：UT-20 `groupByReleaseYear` 2 项失败，wall 测试因 `YearBadge` 不存在无法加载；绿：34 / 34（UT-16 依据切换 2 项、存储值改 `marked`；UT-18 `YearBadge`、无年份不渲染）；`tests/unit/reader` 96 / 96 |
+| 2026-10-27 | 15 add-time-basis-release-year | `npm run test:build` | 19 / 19（TC-US03-21 补年份徽标断言） |
+| 2026-10-27 | 15 add-time-basis-release-year | `npx playwright test tests/e2e/reader-media.spec.ts`（chromium / webkit `--workers 4`） | chromium 首跑 15 / 16：TC-US03-24 第 6 步期望值写错（today 2026-10-27 时 8 月归"本年"不是"上个月"），改后 16 / 16；webkit 15 / 15 + 1 跳过 |
+| 2026-10-27 | 15 add-time-basis-release-year | `npm run lint`、`npm run check` | 首跑 1 error（eslint-disable 注释位置随代码移动失效），修正后 0 problems、0 errors |

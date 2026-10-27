@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | scheduled |
+| 状态 | done |
 | 类型 | Enhancement |
 | 优先级 | P2-Medium |
 | 来源 | 作者需求 |
@@ -20,9 +20,9 @@
 
 - [x] 设计稿 [admin.pen](../ui/admin.pen)：组件区 Row 7 `YearBadge`、`MediaTimeBasis`；09d 工具栏加 `MediaTimeBasis`（看过时间）；新增 09g（游戏按发售年份分段）；`MediaPoster/Back` 去掉平台区，游戏悬停示例加年份
 - [x] 规格同步：[reader-media.md](../ui/pages/reader-media.md)、[components.md](../ui/components.md)、US-03 与验收、reader module-spec
-- [ ] "按时间"打开后出现两项切换，默认"看过时间 / 玩过时间"；选择记在浏览器（`localStorage` `media:by-time`：`"0"` 关、`"marked"`、`"release"`；旧值 `"1"` 视为 `"marked"`）
-- [ ] 按发行年份：每年一段、倒序，标题为四位年份，meta"{n} 部 / 款"；没有年份的条目归最后一段"未知年份"；不出现"在看 / 在玩"段，段内进行中在前、其余按标记日期倒序
-- [ ] 游戏悬停：左下平台徽标、右下年份徽标（无年份不显示）；背面不显示平台
+- [x] "按时间"打开后出现两项切换，默认"看过时间 / 玩过时间"；选择记在浏览器（`localStorage` `media:by-time`：`"0"` 关、`"marked"`、`"release"`；旧值 `"1"` 视为 `"marked"`）
+- [x] 按发行年份：每年一段、倒序，标题为四位年份，meta"{n} 部 / 款"；没有年份的条目归最后一段"未知年份"；不出现"在看 / 在玩"段，段内进行中在前、其余按标记日期倒序
+- [x] 游戏悬停：左上平台徽标（2026-10-23 设计改为左上，见 components.md）、右下年份徽标（无年份不显示）；背面不显示平台
 
 ## 影响分析
 

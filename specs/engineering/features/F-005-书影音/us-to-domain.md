@@ -14,6 +14,6 @@
 | US-03 media-page | `shelf` | `listPublic`、`CoverStore.get`（§4） | `GET /api/shelf`、`GET /covers/*` |
 | US-03 media-page | `reader` 模块 | `virtual:shelf-data`、`src/lib/reader/shelf.ts`（含游戏 `posterAspect`）、`shelf-time.ts`（[module-spec](../../frontend/modules/reader/module-spec.md) §1.3、§2） | — |
 
-实现进度：US-01（接口任务 2、列表任务 4、表单任务 5）、US-02（识别接口任务 3、识别框任务 6）、US-03（构建数据任务 7、读者页任务 8、海报墙任务 10）已实现（2026-10-22）；游戏平台与海报墙（[game-case-shelf](../../../backlog/game-case-shelf.md)）：接口任务 12、表单任务 13、读者页任务 14 已实现（2026-10-27）。
+实现进度：US-01（接口任务 2、列表任务 4、表单任务 5）、US-02（识别接口任务 3、识别框任务 6）、US-03（构建数据任务 7、读者页任务 8、海报墙任务 10）已实现（2026-10-22）；游戏平台与海报墙（[game-case-shelf](../../../backlog/game-case-shelf.md)）：接口任务 12、表单任务 13、读者页任务 14 已实现（2026-10-27）；"按时间"发行年份与游戏年份徽标（[media-time-basis](../../../backlog/media-time-basis.md)）任务 15 已实现（2026-10-27）。
 
 反向映射见 [shelf domain-model](../../backend/domains/shelf/domain-model.md) §7"服务的需求"。

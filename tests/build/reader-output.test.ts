@@ -208,7 +208,7 @@ describe("reader-fixture 构建产物", () => {
       expect(items("comic")).toEqual([]);
     });
 
-    // [TC-US03-21][SC-SHELF-21] 游戏海报墙：IGDB 原图、原比例砖块、平台徽标（只在正面）、背面不含开发商（年份徽标见任务 15）
+    // [TC-US03-21][SC-SHELF-21] 游戏海报墙：IGDB 原图、原比例砖块、平台与年份徽标（只在正面）、背面不含开发商
     it("[TC-US03-21] 游戏海报墙产物", () => {
       const game = page("game");
       const order = ["塞尔达传说：王国之泪", "黑神话：悟空", "博德之门 3", "断链游戏", "某款老游戏"];
@@ -226,6 +226,8 @@ describe("reader-fixture 构建产物", () => {
       expect(tile("某款老游戏")).not.toContain("<img");
       const badge = (title: string) => /<span[^>]*data-platform-badge[^>]*>/.exec(tile(title))?.[0].match(/aria-label="([^"]*)"/)?.[1];
       expect(order.map(badge)).toEqual(["平台：Switch", "平台：PS5", "平台：Steam", "平台：Switch 2", "平台：PS4"]);
+      const year = (title: string) => /data-year-badge[^>]*>(\d{4})</.exec(tile(title))?.[1] ?? null;
+      expect(order.map(year)).toEqual(["2023", "2024", "2023", "2023", null]);
       for (const text of ['aria-label="评分 4 / 5"', "玩过 · 2025-08-20", 'href="https://www.douban.com/game/35140012/"']) expect(wukong, text).toContain(text);
       expect(wukong.slice(wukong.indexOf("data-poster-back"))).not.toContain("data-platform-badge");
       expect(game).not.toContain("Game Science");
