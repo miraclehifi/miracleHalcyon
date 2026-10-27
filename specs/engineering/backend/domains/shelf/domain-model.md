@@ -1,7 +1,7 @@
 # shelf 领域模型（书影音）
 
 **最后更新**: 2026-10-27
-**状态**: self-checked（§1、§3、§4 已实现：`src/domains/shelf/{entry,errors,repo,cover-store,hooks,service}.ts`，Sprint 9 任务 2；§2、§5 已实现：`src/domains/shelf/douban/{link,map,client}.ts`、`ShelfService.recognize`，任务 3；游戏平台与 IGDB 封面（§1 platform / coverUrl、§3 `IgdbImageClient`、§4 游戏分支、§5 游戏跳过封面）已实现：`entry.ts`、`igdb.ts`、`service.ts`，任务 12）
+**状态**: self-checked（US-04 导入（§2.2 `fetchInterests`、§2.4、§3 `findByDoubanIds` / `ImportStateRepo`、§4 `importState` / `importPage` / `finishImport`、§5.1）已实现：`douban/import.ts`、`import-state-repo.ts`、`importer.ts`（由 `createShelfService` 并入），任务 19；§1、§3、§4 已实现：`src/domains/shelf/{entry,errors,repo,cover-store,hooks,service}.ts`，Sprint 9 任务 2；§2、§5 已实现：`src/domains/shelf/douban/{link,map,client}.ts`、`ShelfService.recognize`，任务 3；游戏平台与 IGDB 封面（§1 platform / coverUrl、§3 `IgdbImageClient`、§4 游戏分支、§5 游戏跳过封面）已实现：`entry.ts`、`igdb.ts`、`service.ts`，任务 12）
 **来源**: [F-005 feature-architecture](../../../features/F-005-书影音/architecture/feature-architecture.md) · [ADR-011](../../../features/F-005-书影音/architecture/adr/ADR-011-shelf-domain-douban-recognition.md) · [ADR-012](../../../features/F-005-书影音/architecture/adr/ADR-012-shelf-reader-build-and-covers.md) · [ADR-013](../../../features/F-005-书影音/architecture/adr/ADR-013-game-cover-igdb-link.md)
 
 > 命名对照：界面叫"书影音"，路由 `/media`、`/admin/media`，组件 `Media*`；领域、表、接口叫 `shelf`。现有 `media` 领域指图片，与本领域无关。
@@ -151,7 +151,7 @@ interface CoverStore {
   delete(key: CoverKey): Promise<void>;                         // 不存在不报错
 }
 interface ImportStateRepo {                                     // US-04 增量同步（D1 shelf_import_state，ADR-014 §1.1）
-  get(uid: string): Promise<ImportCategoryState[]>;              // 按 SHELF_TYPES × [done, doing] 顺序补齐 12 项，没有的行 watermark / syncedAt 为 null
+  get(uid: string): Promise<ImportCategoryState[]>;              // 按 电影、剧集、书、漫画、游戏、桌游 × [done, doing] 顺序补齐 12 项（KIND_TYPES 顺序，与 api-contract 一致），没有的行 watermark / syncedAt 为 null
   lastUid(): Promise<string | null>;                             // attempted_at 最新的 uid
   touch(uid: string, types: ShelfType[], status: ImportStatus, now: string): Promise<void>;          // 逐类别 upsert attempted_at
   complete(uid: string, types: ShelfType[], status: ImportStatus, head: string | null, now: string): Promise<void>; // 逐类别 watermark = COALESCE(head, watermark)，synced_at = now

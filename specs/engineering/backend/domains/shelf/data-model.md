@@ -87,7 +87,9 @@ CREATE TABLE shelf_import_state (
   uid            TEXT NOT NULL CHECK (length(uid) BETWEEN 1 AND 64 AND uid NOT GLOB '*[^A-Za-z0-9_.-]*'), -- 豆瓣用户 ID
   type           TEXT NOT NULL CHECK (type IN ('book','comic','movie','series','game','boardgame')),      -- 本站分类（导入按类别记水位）
   status         TEXT NOT NULL CHECK (status IN ('done','doing')),                                        -- 豆瓣标记状态
-  watermark      TEXT CHECK (watermark IS NULL OR watermark GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]'), -- 已完整同步到的最新标记时间（豆瓣 create_time 原文）
+  watermark      TEXT CHECK (watermark IS NULL OR (length(watermark) = 19
+                   AND substr(watermark, 1, 10) GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+                   AND substr(watermark, 11) GLOB ' [0-9][0-9]:[0-9][0-9]:[0-9][0-9]')), -- 已完整同步到的最新标记时间（豆瓣 create_time 原文）；D1 GLOB 模式上限 50 字符，分两段
   synced_at      TEXT,                                                                                    -- 最近一次完整同步完成时间 ISO 8601 UTC
   attempted_at   TEXT NOT NULL,                                                                           -- 最近一次导入请求时间 ISO 8601 UTC
   db_create_time TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')), -- 数据创建时间（数据库专用，禁止用于业务）
@@ -107,7 +109,7 @@ END;
 | 用途 | 语句 |
 |------|------|
 | `get` | `SELECT type, status, watermark, synced_at FROM shelf_import_state WHERE uid = ?1` |
-| `lastUid` | `SELECT uid FROM shelf_import_state ORDER BY attempted_at DESC LIMIT 1` |
+| `lastUid` | `SELECT uid FROM shelf_import_state ORDER BY attempted_at DESC, rowid DESC LIMIT 1` |
 | `touch` | 对 `types` 每个类别（D1 `batch`）：`INSERT INTO shelf_import_state (uid, type, status, attempted_at) VALUES (?1, ?2, ?3, ?4) ON CONFLICT (uid, type, status) DO UPDATE SET attempted_at = excluded.attempted_at` |
 | `complete` | 对 `types` 每个类别（D1 `batch`）：`UPDATE shelf_import_state SET watermark = COALESCE(?4, watermark), synced_at = ?5 WHERE uid = ?1 AND type = ?2 AND status = ?3`（`touch` 已保证行存在） |
 
@@ -132,4 +134,5 @@ END;
 | 2026-10-22 | 1.1 | 去掉'动画'分类、'剧'改名'剧集'（[drop-anime-type](../../../../backlog/drop-anime-type.md)） | miraclehifi |
 | 2026-10-23 | 1.2 | 迁移 0005：`platform`、`cover_url`、`cover_width`、`cover_height`（[game-case-shelf](../../../../backlog/game-case-shelf.md)） | miraclehifi |
 | 2026-10-27 | 1.4 | 迁移 0005 实现：`cover_url` CHECK 由 GLOB 改为 instr / substr（D1 模式长度上限） | miraclehifi |
+| 2026-10-27 | 1.5 | 迁移 0006 实现（任务 19）：`watermark` CHECK 拆成日期 / 时间两段 GLOB（D1 模式长度上限）；`lastUid` 同时间按 rowid | miraclehifi |
 | 2026-10-23 | 1.3 | US-04 导入：`findByDoubanIds` 查询；迁移 0006 `shelf_import_state`（增量同步水位，ADR-014 §1.1） | miraclehifi |

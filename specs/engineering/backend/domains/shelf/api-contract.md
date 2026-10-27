@@ -1,7 +1,7 @@
 # shelf API 契约
 
 **最后更新**: 2026-10-27
-**状态**: self-checked（条目、封面端点：Sprint 9 任务 2；识别：任务 3；公开列表：任务 7；游戏 `platform` / `coverUrl` / 宽高、422 `COVER_LINK_UNREACHABLE`：任务 12）
+**状态**: self-checked（条目、封面端点：Sprint 9 任务 2；识别：任务 3；公开列表：任务 7；游戏 `platform` / `coverUrl` / 宽高、422 `COVER_LINK_UNREACHABLE`：任务 12；导入 `import` / `import/state` / `import/finish`：任务 19）
 
 > 通用约定（错误体、401 / 403、字段格式）见 [domains/_index.md](../_index.md) 与 [auth/api-contract.md](../auth/api-contract.md)"通用 401 / 403"；字段格式见 [shared-field-formats](../../../shared-field-formats.md)。
 > 写接口均需会话 + Origin 校验（middleware）；`/api/shelf`、`/covers/*` 公开。
@@ -178,7 +178,7 @@ multipart：`fields`（同上，全量）+ 可选 `cover` 文件 + 可选 `cover
 
 总耗时 ≤ 8 秒；无持久化副作用。
 
-### POST /api/admin/shelf/import（US-04，ADR-014）
+### POST /api/admin/shelf/import（US-04，ADR-014；已实现，任务 19：`src/pages/api/admin/shelf/import.ts`、`import/state.ts`、`import/finish.ts`）
 
 请求 `application/json`：
 
@@ -252,7 +252,7 @@ multipart：`fields`（同上，全量）+ 可选 `cover` 文件 + 可选 `cover
 
 ### POST /api/admin/shelf/import/finish（US-04）
 
-请求 `{ "changed": 18 }`（非负整数，否则 400 `VALIDATION_FAILED`）。`changed > 0` 时触发一次重建。204。
+请求 `{ "changed": 18 }`（非负整数，否则 400 `VALIDATION_FAILED`；请求体不是 JSON → 400 `BAD_REQUEST`）。`changed > 0` 时触发一次重建。204。
 
 ### GET /api/shelf（已实现，Sprint 9 任务 7：`src/pages/api/shelf.ts`）
 

@@ -1,0 +1,85 @@
+{
+  "start": 40,
+  "count": 20,
+  "total": 45,
+  "interests": [
+    {
+      "id": 4829576479,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-05-26 22:01:30",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36846801",
+        "type": "tv",
+        "title": "辐射 第二季",
+        "year": "2025",
+        "pubdate": [
+          "2025-12-16(美国)"
+        ],
+        "directors": [
+          {
+            "name": "弗雷德里克·E·O·托耶"
+          },
+          {
+            "name": "丽兹·弗德兰德"
+          },
+          {
+            "name": "斯蒂芬·威廉姆斯"
+          },
+          {
+            "name": "丽莎·乔伊"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "动作",
+          "科幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2933126743.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2933126743.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36846801/"
+      }
+    },
+    {
+      "id": 4834971176,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-05-09 23:38:10",
+      "comment": "想吃橄榄菜",
+      "platforms": [],
+      "subject": {
+        "id": "37116446",
+        "type": "movie",
+        "title": "给阿嬷的情书",
+        "year": "2026",
+        "pubdate": [
+          "2026-04-30(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "蓝鸿春"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "家庭"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2931851430.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2931851430.jpg"
+        },
+        "url": "https://movie.douban.com/subject/37116446/"
+      }
+    }
+  ]
+}

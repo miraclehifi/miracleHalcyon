@@ -8,6 +8,7 @@ const EXPECTED_SCHEMA = [
   "index:idx_posts_updated",
   "index:idx_sessions_expires_at",
   "index:idx_shelf_entries_type",
+  "index:idx_shelf_import_state_attempted",
   "index:uk_shelf_entries_douban_id",
   "index:uq_posts_pub_slug",
   "index:uq_posts_slug",
@@ -16,11 +17,13 @@ const EXPECTED_SCHEMA = [
   "table:posts",
   "table:sessions",
   "table:shelf_entries",
+  "table:shelf_import_state",
   "trigger:trg_images_db_update_time",
   "trigger:trg_login_attempts_db_update_time",
   "trigger:trg_posts_db_update_time",
   "trigger:trg_sessions_db_update_time",
   "trigger:trg_shelf_entries_db_update_time",
+  "trigger:trg_shelf_import_state_db_update_time",
 ];
 const STALE_TIME = "2000-01-01 00:00:00.000";
 const NOW = "2026-10-13T00:00:00.000Z";
@@ -74,5 +77,22 @@ describe("D1 初始迁移", () => {
       bad: ["CHECK", "CHECK", "CHECK", "CHECK"],
       ok: "ok",
     });
+  });
+
+  // 迁移 0006（shelf data-model"shelf_import_state"，ADR-014 §1.1）：主键 uid × 分类 × 状态；CHECK 拒绝非法 uid / 分类 / 状态 / 水位格式
+  it("0006：豆瓣导入同步水位表", async () => {
+    const insert = (uid: string, type: string, status: string, watermark: string | null) =>
+      env.DB.prepare("INSERT INTO shelf_import_state (uid, type, status, watermark, attempted_at) VALUES (?, ?, ?, ?, ?)").bind(uid, type, status, watermark, NOW).run()
+        .then(() => "ok", (e: Error) => (/CHECK constraint failed/.test(e.message) ? "CHECK" : /UNIQUE|PRIMARY/.test(e.message) ? "UNIQUE" : e.message));
+    expect([
+      await insert("189806038", "movie", "done", "2026-10-18 08:25:08"),
+      await insert("189806038", "movie", "done", null),
+      await insert("a_b.c-d", "comic", "doing", null),
+      await insert("a/b", "movie", "done", null),
+      await insert("x", "music", "done", null),
+      await insert("x", "movie", "mark", null),
+      await insert("x", "movie", "done", "2026-10-18T08:25:08"),
+      await insert("x", "movie", "done", "2026-10-18 08:25"),
+    ]).toEqual(["ok", "UNIQUE", "ok", "CHECK", "CHECK", "CHECK", "CHECK", "CHECK"]);
   });
 });

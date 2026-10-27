@@ -1,0 +1,175 @@
+{
+  "start": 0,
+  "count": 20,
+  "total": 45,
+  "interests": [
+    {
+      "id": 4959669321,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-10-18 08:25:08",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "30513783",
+        "type": "tv",
+        "title": "无职转生：到了异世界就拿出真本事",
+        "year": "2021",
+        "pubdate": [
+          "2021-01-10(日本)"
+        ],
+        "directors": [
+          {
+            "name": "冈本学"
+          }
+        ],
+        "genres": [
+          "动画",
+          "奇幻",
+          "冒险"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2919762107.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2919762107.jpg"
+        },
+        "url": "https://movie.douban.com/subject/30513783/"
+      }
+    },
+    {
+      "id": 4863905281,
+      "status": "done",
+      "rating": null,
+      "create_time": "2026-06-12 01:37:33",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "25786060",
+        "type": "movie",
+        "title": "X战警：天启",
+        "year": "2016",
+        "pubdate": [
+          "2016-06-03(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "布莱恩·辛格"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2352321614.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2352321614.jpg"
+        },
+        "url": "https://movie.douban.com/subject/25786060/"
+      }
+    },
+    {
+      "id": 4863905203,
+      "status": "done",
+      "rating": null,
+      "create_time": "2026-06-12 01:37:22",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "1401524",
+        "type": "movie",
+        "year": "2006",
+        "pubdate": [
+          "2006-09-08(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "布莱特·拉特纳"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2532019363.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2532019363.jpg"
+        },
+        "url": "https://movie.douban.com/subject/1401524/"
+      }
+    },
+    {
+      "id": 4863905197,
+      "status": "mark",
+      "rating": null,
+      "create_time": "2026-06-12 01:37:21",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "1305724",
+        "type": "movie",
+        "title": "X战警2",
+        "year": "2003",
+        "pubdate": [
+          "2003-09-29(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "布莱恩·辛格"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p1349307666.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p1349307666.jpg"
+        },
+        "url": "https://movie.douban.com/subject/1305724/"
+      }
+    },
+    {
+      "id": 4863904833,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-06-12 01:36:24",
+      "comment": "大学时漫威电影课放映的第三部电影，中途大风把窗户吹开了掀起了窗帘，同时影片里也在放映风把汽车掀飞的镜头。让人体验到了一次5D电影。",
+      "platforms": [],
+      "subject": {
+        "id": "25765735",
+        "type": "movie",
+        "title": "金刚狼3：殊死一战",
+        "year": "2017",
+        "pubdate": [
+          "2017-03-03(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "詹姆斯·曼高德"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "动作",
+          "科幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2445529009.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2445529009.jpg"
+        },
+        "url": "https://movie.douban.com/subject/25765735/"
+      }
+    }
+  ]
+}

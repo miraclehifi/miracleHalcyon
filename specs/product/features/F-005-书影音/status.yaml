@@ -14,7 +14,7 @@ phases:
   architecture: done   # 2026-10-23 US-04 ADR-014 豆瓣批量导入（含 §1.1 增量同步水位）；feature-architecture.md、ADR-011、ADR-012、ADR-013（2026-10-23 游戏 IGDB 外链封面）
   domain_design: done   # 2026-10-23 US-04 导入：domain-model §2.4、§5.1，api-contract import / state / finish，data-model findByDoubanIds、迁移 0006 shelf_import_state；domain_model / api_contract / data_model: self-checked（shelf；DDL 迁移 0004；2026-10-23 迁移 0005 平台与 IGDB 封面）
   task_planning: done   # 2026-10-27 豆瓣导入任务 19（6 个类别接口，依赖 12）、20（弹窗）（原编号 15、16，2026-10-27 改号），一次全部支持；self-checked；Sprint 9 共 8 个任务（2026-10-21），2026-10-22 插入任务 9 restyle-blue-accent、任务 10 add-media-poster-wall，2026-10-23 插入任务 12–14（game-case-shelf）、15（media-time-basis）、16（media-wall-all-types）
-  implementation: in_progress   # 2026-10-27 任务 12 add-game-platform-api（迁移 0005、IGDB 封面）、13 add-game-form-fields 完成；2026-10-22 Sprint 9 任务 1–11 全部完成；2026-10-23 插入任务 12–14、15–16 待实现（顺序 12 → 15 → 16）
+  implementation: in_progress   # 2026-10-27 任务 19 add-douban-import-api 完成（迁移 0006、三个导入接口）；任务 12 add-game-platform-api（迁移 0005、IGDB 封面）、13 add-game-form-fields 完成；2026-10-22 Sprint 9 任务 1–11 全部完成；2026-10-23 插入任务 12–14、15–16 待实现（顺序 12 → 15 → 16）
   code_review: in_progress   # 2026-10-23 任务 1–11 审查完成（MUST-FIX 4 项已修复，CONCERN 记入 backlog shelf-review-followups）；任务 12–16 实现后补审
   validation: pending
 current_phase: implementation
@@ -29,9 +29,9 @@ approvals:
   release: false
 checkpoint:
   sprint: sprint-9
-  current_task: add-douban-import-api
-  current_phase: pending   # 2026-10-27 任务 12–14、15 add-time-basis-release-year、16 unify-media-poster-wall 完成；下一个豆瓣导入 19 add-douban-import-api
-  completed_tasks: [spike-douban-rexxar, add-shelf-entry-api, add-douban-recognize-api, restyle-blue-accent, add-admin-media-list, drop-anime-type, add-admin-media-form, add-recognize-box, add-shelf-reader-data, add-media-reader-page, add-media-poster-wall, poster-back-filtered-cover, remove-poster-hover-title, add-game-platform-api, add-game-form-fields, add-game-poster-wall, add-time-basis-release-year, unify-media-poster-wall]
+  current_task: add-douban-import-dialog
+  current_phase: pending   # 2026-10-27 任务 19 完成，下一个 20 add-douban-import-dialog； 2026-10-27 任务 12–14、15 add-time-basis-release-year、16 unify-media-poster-wall 完成；下一个豆瓣导入 19 add-douban-import-api
+  completed_tasks: [spike-douban-rexxar, add-shelf-entry-api, add-douban-recognize-api, restyle-blue-accent, add-admin-media-list, drop-anime-type, add-admin-media-form, add-recognize-box, add-shelf-reader-data, add-media-reader-page, add-media-poster-wall, poster-back-filtered-cover, remove-poster-hover-title, add-game-platform-api, add-game-form-fields, add-game-poster-wall, add-time-basis-release-year, unify-media-poster-wall, add-douban-import-api]
   blocked_tasks: []
   env_info: "Node 24（本机 PATH 上的 node 可能是 18，跑测试前 export PATH=/d/Coding/environment/nvm/v24.21.0:$PATH）+ npm；Vitest 4.1（unit jsdom / workers workerd）；Playwright chromium + webkit；Windows（Bash 反斜杠会被折叠，含转义内容用 Write）"
   test_command: "npx vitest run <文件>（unit jsdom / workers）；E2E npx playwright test <文件> --project chromium；构建 npm run test:build"

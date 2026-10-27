@@ -25,6 +25,7 @@ function setup(client: Partial<DoubanClient> = {}, existing: { id: number; title
       calls.push(`cover:${new URL(url).hostname}`);
       return JPG;
     }),
+    fetchInterests: vi.fn(),
     ...client,
   };
   const repo = {

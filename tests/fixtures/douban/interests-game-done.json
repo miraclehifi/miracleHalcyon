@@ -1,0 +1,145 @@
+{
+  "start": 0,
+  "count": 20,
+  "total": 5,
+  "interests": [
+    {
+      "id": 4966761777,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-10-24 00:57:20",
+      "comment": "在本作革新后，终于领悟了游戏机制和动作要领😄。",
+      "platforms": [
+        {
+          "abbreviation": "PS5"
+        }
+      ],
+      "subject": {
+        "id": "37380017",
+        "type": "game",
+        "title": "仁王3 NIOH 3",
+        "genres": [
+          "角色扮演",
+          "动作"
+        ],
+        "release_date": "2026-02-06",
+        "cover_url": "https://img3.doubanio.com/lpic/s35181818.jpg",
+        "pic": {
+          "large": "https://qnmob3-sign.doubanio.com/lpic/s35181818.jpg?sa_cv=6fca6eefb1212040bf33a6bd8ba78ee1&sa_ct=6ae08772&imageView2/2/q/80/w/600/h/3000/format/jpg"
+        },
+        "url": "https://www.douban.com/game/37380017/"
+      }
+    },
+    {
+      "id": 4819348304,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-06-14 23:30:34",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36721901",
+        "type": "game",
+        "title": "羊蹄山之魂 Ghost of Yōtei",
+        "genres": [
+          "角色扮演",
+          "冒险",
+          "动作"
+        ],
+        "release_date": "2025-10-02",
+        "cover_url": "https://img9.doubanio.com/lpic/s34966804.jpg",
+        "pic": {
+          "large": "https://qnmob3-sign.doubanio.com/lpic/s34966804.jpg?sa_cv=c5eb084beac6f1f60e4afaf3ffb45f15&sa_ct=6ae08772&imageView2/2/q/80/w/600/h/3000/format/jpg"
+        },
+        "url": "https://www.douban.com/game/36721901/"
+      }
+    },
+    {
+      "id": 4851783334,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-05-26 21:03:26",
+      "comment": "",
+      "platforms": [
+        {
+          "abbreviation": "PC"
+        }
+      ],
+      "subject": {
+        "id": "36087617",
+        "type": "game",
+        "title": "赛博朋克 2077：往日之影 Cyberpunk 2077: Phantom Liberty",
+        "genres": [
+          "第一人称射击",
+          "角色扮演",
+          "冒险",
+          "动作"
+        ],
+        "release_date": "2023-09-26",
+        "cover_url": "https://img9.doubanio.com/lpic/s34656585.jpg",
+        "pic": {
+          "large": "https://qnmob3-sign.doubanio.com/lpic/s34656585.jpg?sa_cv=03da0dcfe40298dcf2c4e8f27c8ef0cd&sa_ct=6ae08772&imageView2/2/q/80/w/600/h/3000/format/jpg"
+        },
+        "url": "https://www.douban.com/game/36087617/"
+      }
+    },
+    {
+      "id": 3456786660,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-05-20 02:17:18",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "26436096",
+        "type": "game",
+        "title": "月姬-A piece of blue glass moon- Tsukihime: A piece of blue glass moon",
+        "genres": [
+          "问答/桌游"
+        ],
+        "release_date": "2021-08-26",
+        "cover_url": "https://img9.doubanio.com/lpic/s33950315.jpg",
+        "pic": {
+          "large": "https://qnmob3-sign.doubanio.com/lpic/s33950315.jpg?sa_cv=8cfcc0f56e10ea6623614113ab87440c&sa_ct=6ae08772&imageView2/2/q/80/w/600/h/3000/format/jpg"
+        },
+        "url": "https://www.douban.com/game/26436096/"
+      }
+    },
+    {
+      "id": 4829580780,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-04-28 21:45:16",
+      "comment": "",
+      "platforms": [
+        {
+          "abbreviation": "NS 2"
+        }
+      ],
+      "subject": {
+        "id": "37303074",
+        "type": "game",
+        "title": "马力欧卡丁车世界 マリオカート ワールド",
+        "genres": [
+          "竞速"
+        ],
+        "release_date": "2025-06-05",
+        "cover_url": "https://img3.doubanio.com/lpic/s35119873.jpg",
+        "pic": {
+          "large": "https://qnmob3-sign.doubanio.com/lpic/s35119873.jpg?sa_cv=41c85de109dd831fcf51cc2dec4da1e2&sa_ct=6ae08772&imageView2/2/q/80/w/600/h/3000/format/jpg"
+        },
+        "url": "https://www.douban.com/game/37303074/"
+      }
+    }
+  ]
+}

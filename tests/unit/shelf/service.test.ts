@@ -25,6 +25,7 @@ function fakeRepo(): ShelfRepo & { rows: Map<number, ShelfEntry> } {
       const row = [...rows.values()].find((r) => r.douban?.id === doubanId);
       return row ? { id: row.id, title: row.title, type: row.type, status: row.status, markedOn: row.markedOn } : null;
     },
+    findByDoubanIds: async (ids) => new Map([...rows.values()].filter((r) => r.douban && ids.includes(r.douban.id)).map((r) => [r.douban!.id, r])),
     insert: async (data) => {
       if (data.douban && [...rows.values()].some((r) => r.douban?.id === data.douban!.id)) throw new DuplicateDoubanError(null);
       const row = { ...data, id: ++seq, hidden: false, createdAt: data.now, updatedAt: data.now } as ShelfEntry;

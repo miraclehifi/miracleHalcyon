@@ -1,0 +1,716 @@
+{
+  "start": 0,
+  "count": 20,
+  "total": 20,
+  "interests": [
+    {
+      "id": 4959669321,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-10-18 08:25:08",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "30513783",
+        "type": "tv",
+        "title": "无职转生：到了异世界就拿出真本事",
+        "year": "2021",
+        "pubdate": [
+          "2021-01-10(日本)"
+        ],
+        "directors": [
+          {
+            "name": "冈本学"
+          }
+        ],
+        "genres": [
+          "动画",
+          "奇幻",
+          "冒险"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2919762107.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2919762107.jpg"
+        },
+        "url": "https://movie.douban.com/subject/30513783/"
+      }
+    },
+    {
+      "id": 4953010611,
+      "status": "done",
+      "rating": {
+        "value": 2
+      },
+      "create_time": "2026-09-27 18:26:23",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36146114",
+        "type": "movie",
+        "title": "牢笼鬼魂",
+        "year": "2026",
+        "pubdate": [
+          "2026-02-13(柏林电影节)"
+        ],
+        "directors": [
+          {
+            "name": "乔可·安华"
+          }
+        ],
+        "genres": [
+          "喜剧",
+          "动作",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2929720334.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2929720334.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36146114/"
+      }
+    },
+    {
+      "id": 4917090639,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-09-12 14:35:02",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "37185797",
+        "type": "tv",
+        "title": "百年孤独 第二季",
+        "year": "2026",
+        "pubdate": [
+          "2026-08-05(哥伦比亚)"
+        ],
+        "directors": [
+          {
+            "name": "劳拉·莫拉·奥尔特加"
+          },
+          {
+            "name": "卡洛斯·莫瑞诺"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "历史",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934714935.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934714935.jpg"
+        },
+        "url": "https://movie.douban.com/subject/37185797/"
+      }
+    },
+    {
+      "id": 4919838301,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-08-15 22:40:45",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36808876",
+        "type": "movie",
+        "title": "奥德赛",
+        "year": "2026",
+        "pubdate": [
+          "2026-08-14(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "克里斯托弗·诺兰"
+          }
+        ],
+        "genres": [
+          "动作",
+          "历史",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2933569626.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2933569626.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36808876/"
+      }
+    },
+    {
+      "id": 4913897823,
+      "status": "done",
+      "rating": {
+        "value": 3
+      },
+      "create_time": "2026-08-10 01:24:42",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36767846",
+        "type": "movie",
+        "title": "鬼玩人6：炼狱",
+        "year": "2026",
+        "pubdate": [
+          "2026-07-08(中国台湾)"
+        ],
+        "directors": [
+          {
+            "name": " 塞巴斯蒂安·瓦尼契克"
+          }
+        ],
+        "genres": [
+          "恐怖"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932170733.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932170733.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36767846/"
+      }
+    },
+    {
+      "id": 4766116637,
+      "status": "done",
+      "rating": {
+        "value": 3
+      },
+      "create_time": "2026-08-08 14:23:47",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36367195",
+        "type": "movie",
+        "title": "家弑服务",
+        "year": "2025",
+        "pubdate": [
+          "2026-05-29(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "保罗·费格"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "悬疑",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932673659.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932673659.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36367195/"
+      }
+    },
+    {
+      "id": 4903113755,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-07-29 21:54:34",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36246195",
+        "type": "movie",
+        "title": "蜘蛛侠：崭新之日",
+        "year": "2026",
+        "pubdate": [
+          "2026-07-29(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "德斯汀·丹尼尔·克雷顿"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻",
+          "冒险"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2934276912.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2934276912.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36246195/"
+      }
+    },
+    {
+      "id": 4892005432,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-07-18 13:57:55",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36882191",
+        "type": "movie",
+        "title": "八仙！",
+        "year": "2026",
+        "pubdate": [
+          "2026-07-18(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "牟正洋"
+          }
+        ],
+        "genres": [
+          "喜剧",
+          "动画",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934074566.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934074566.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36882191/"
+      }
+    },
+    {
+      "id": 4886097053,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-07-11 19:10:00",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36752981",
+        "type": "movie",
+        "title": "三国第一部：争洛阳",
+        "year": "2026",
+        "pubdate": [
+          "2026-07-10(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "谢君伟"
+          }
+        ],
+        "genres": [
+          "动画",
+          "历史"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2936473615.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2936473615.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36752981/"
+      }
+    },
+    {
+      "id": 4761086939,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-07-09 01:56:09",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "35341071",
+        "type": "tv",
+        "title": "七王国的骑士 第一季",
+        "year": "2026",
+        "pubdate": [
+          "2026-01-18(美国)"
+        ],
+        "directors": [
+          {
+            "name": "欧文·哈里斯"
+          },
+          {
+            "name": "萨拉·阿迪纳·史密斯"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "动作",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2927626110.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2927626110.jpg"
+        },
+        "url": "https://movie.douban.com/subject/35341071/"
+      }
+    },
+    {
+      "id": 4851797062,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-07-04 14:14:25",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "37450627",
+        "type": "movie",
+        "title": "痴迷",
+        "year": "2025",
+        "pubdate": [
+          "2026-07-24(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "库里·巴克"
+          }
+        ],
+        "genres": [
+          "恐怖",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934049524.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934049524.jpg"
+        },
+        "url": "https://movie.douban.com/subject/37450627/"
+      }
+    },
+    {
+      "id": 4871806741,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-06-22 11:26:07",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "37071123",
+        "type": "tv",
+        "title": "铁拳教育",
+        "year": "2026",
+        "pubdate": [
+          "2026-06-05(韩国)"
+        ],
+        "directors": [
+          {
+            "name": "洪忠灿"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "动作"
+        ],
+        "release_date": null,
+        "cover_url": "https://img2.doubanio.com/view/photo/m_ratio_poster/public/p2933103931.jpg",
+        "pic": {
+          "large": "https://img2.doubanio.com/view/photo/m_ratio_poster/public/p2933103931.jpg"
+        },
+        "url": "https://movie.douban.com/subject/37071123/"
+      }
+    },
+    {
+      "id": 4863905281,
+      "status": "done",
+      "rating": null,
+      "create_time": "2026-06-12 01:37:33",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "25786060",
+        "type": "movie",
+        "title": "X战警：天启",
+        "year": "2016",
+        "pubdate": [
+          "2016-06-03(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "布莱恩·辛格"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2352321614.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2352321614.jpg"
+        },
+        "url": "https://movie.douban.com/subject/25786060/"
+      }
+    },
+    {
+      "id": 2490121940,
+      "status": "done",
+      "rating": null,
+      "create_time": "2026-06-12 01:37:31",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "10485647",
+        "type": "movie",
+        "title": "X战警：逆转未来",
+        "year": "2014",
+        "pubdate": [
+          "2014-05-23(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "布莱恩·辛格"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "动作",
+          "科幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2209721954.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2209721954.jpg"
+        },
+        "url": "https://movie.douban.com/subject/10485647/"
+      }
+    },
+    {
+      "id": 4863905203,
+      "status": "done",
+      "rating": null,
+      "create_time": "2026-06-12 01:37:22",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "1401524",
+        "type": "movie",
+        "title": "X战警3：背水一战",
+        "year": "2006",
+        "pubdate": [
+          "2006-09-08(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "布莱特·拉特纳"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2532019363.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2532019363.jpg"
+        },
+        "url": "https://movie.douban.com/subject/1401524/"
+      }
+    },
+    {
+      "id": 4863905197,
+      "status": "done",
+      "rating": null,
+      "create_time": "2026-06-12 01:37:21",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "1305724",
+        "type": "movie",
+        "title": "X战警2",
+        "year": "2003",
+        "pubdate": [
+          "2003-09-29(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "布莱恩·辛格"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p1349307666.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p1349307666.jpg"
+        },
+        "url": "https://movie.douban.com/subject/1305724/"
+      }
+    },
+    {
+      "id": 4814546196,
+      "status": "done",
+      "rating": {
+        "value": 3
+      },
+      "create_time": "2026-06-09 17:14:43",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36343491",
+        "type": "tv",
+        "title": "黑袍纠察队 第五季",
+        "year": "2026",
+        "pubdate": [
+          "2026-04-08(美国)"
+        ],
+        "directors": [
+          {
+            "name": "菲利浦·斯格里西亚"
+          },
+          {
+            "name": "莎娜·斯坦"
+          },
+          {
+            "name": "卡伦·卡薇欧拉"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "喜剧",
+          "动作"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2930448310.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2930448310.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36343491/"
+      }
+    },
+    {
+      "id": 4854710635,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-05-30 21:35:54",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "3026988",
+        "type": "tv",
+        "title": "尘埃落定",
+        "year": "2003",
+        "pubdate": [
+          "2003-01-06(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "阎建钢"
+          }
+        ],
+        "genres": [
+          "剧情"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2886289413.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2886289413.jpg"
+        },
+        "url": "https://movie.douban.com/subject/3026988/"
+      }
+    },
+    {
+      "id": 4829576479,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-05-26 22:01:30",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36846801",
+        "type": "tv",
+        "title": "辐射 第二季",
+        "year": "2025",
+        "pubdate": [
+          "2025-12-16(美国)"
+        ],
+        "directors": [
+          {
+            "name": "弗雷德里克·E·O·托耶"
+          },
+          {
+            "name": "丽兹·弗德兰德"
+          },
+          {
+            "name": "斯蒂芬·威廉姆斯"
+          },
+          {
+            "name": "丽莎·乔伊"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "动作",
+          "科幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2933126743.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2933126743.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36846801/"
+      }
+    },
+    {
+      "id": 4411738858,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-04-01 00:35:04",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36464284",
+        "type": "tv",
+        "title": "命运/奇异赝品",
+        "year": "2024",
+        "pubdate": [
+          "2024-11-23(美国·第1话)"
+        ],
+        "directors": [
+          {
+            "name": "榎户骏"
+          },
+          {
+            "name": "坂詰嵩仁"
+          }
+        ],
+        "genres": [
+          "动作",
+          "动画",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2926891106.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2926891106.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36464284/"
+      }
+    }
+  ]
+}

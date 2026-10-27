@@ -4,10 +4,12 @@ import { R2CoverStore } from "../../domains/shelf/cover-store";
 import { createDoubanClient } from "../../domains/shelf/douban/client";
 import { coverUrl, type ShelfPublicEntry } from "../../domains/shelf/entry";
 import {
-  CoverLinkUnreachableError, CoverTooLargeError, CoverTypeError, DuplicateDoubanError, EntryNotFoundError, GameCoverUploadError, RecognizeError, ShelfValidationError, type RecognizeCode,
+  CoverLinkUnreachableError, CoverTooLargeError, CoverTypeError, DuplicateDoubanError, EntryNotFoundError, GameCoverUploadError, ImportError, RecognizeError, ShelfValidationError,
+  type ImportCode, type RecognizeCode,
 } from "../../domains/shelf/errors";
 import { noopShelfHooks, type ShelfHooks } from "../../domains/shelf/hooks";
 import { createIgdbImageClient } from "../../domains/shelf/igdb";
+import { D1ImportStateRepo } from "../../domains/shelf/import-state-repo";
 import { D1ShelfRepo, type ShelfEntry } from "../../domains/shelf/repo";
 import { createShelfService, type CoverChange, type CoverUpload } from "../../domains/shelf/service";
 import { jsonError } from "./errors";
@@ -19,20 +21,23 @@ export interface ShelfRouteDeps {
   bucket: R2Bucket;
   now?: () => Date;
   hooksFor?: (context: APIContext) => ShelfHooks;
-  fetch?: typeof fetch; // 识别时请求豆瓣、保存游戏时读取 IGDB 封面；测试注入替身
+  fetch?: typeof fetch; // 识别 / 导入时请求豆瓣、保存游戏时读取 IGDB 封面；测试注入替身
   recognizeTimeoutMs?: number;
   igdbTimeoutMs?: number;
+  importTimeoutMs?: number;
 }
 
-export function shelfServiceFor({ db, bucket, now, hooksFor = () => noopShelfHooks, fetch: fetchImpl, recognizeTimeoutMs, igdbTimeoutMs }: ShelfRouteDeps, context: APIContext) {
+export function shelfServiceFor({ db, bucket, now, hooksFor = () => noopShelfHooks, fetch: fetchImpl, recognizeTimeoutMs, igdbTimeoutMs, importTimeoutMs }: ShelfRouteDeps, context: APIContext) {
   return createShelfService({
     repo: new D1ShelfRepo(db),
     store: new R2CoverStore(bucket),
     hooks: hooksFor(context),
     douban: createDoubanClient(fetchImpl),
     igdb: createIgdbImageClient(fetchImpl),
+    stateRepo: new D1ImportStateRepo(db),
     recognizeTimeoutMs,
     igdbTimeoutMs,
+    importTimeoutMs,
     now,
   });
 }
@@ -54,6 +59,19 @@ const FIELD_MESSAGES: Record<string, string> = {
   platform: "请选择平台",
   coverUrl: "封面链接须为 images.igdb.com 的图片地址",
   text: "请粘贴豆瓣分享链接或分享文字（不超过 10,000 字）",
+  uid: "豆瓣用户 ID 只能包含字母、数字、下划线、点和连字符（不超过 64 个字符）",
+  kind: "豆瓣分类不正确",
+  types: "导入类别不正确",
+  mode: "导入方式不正确",
+  start: "分页位置不正确",
+  head: "同步起点格式不正确",
+  changed: "变更数不正确",
+};
+
+const IMPORT_MESSAGES: Record<ImportCode, [number, string]> = {
+  DOUBAN_USER_NOT_FOUND: [404, "豆瓣上找不到这个用户"],
+  DOUBAN_FORBIDDEN: [403, "豆瓣标记未公开或需要登录，无法导入"],
+  FETCH_FAILED: [502, "豆瓣暂时无法访问，已导入的条目已保存，可稍后重新导入"],
 };
 
 const RECOGNIZE_MESSAGES: Record<RecognizeCode, string> = {
@@ -80,6 +98,16 @@ export async function exceedsBodyLimit(request: Request, max: number): Promise<b
   if (Number(request.headers.get("Content-Length") ?? 0) <= max) return false;
   await request.arrayBuffer().catch(() => undefined);
   return true;
+}
+
+// JSON 请求体：超限或不是 JSON → BAD_REQUEST
+export async function readJsonBody(request: Request, max: number): Promise<unknown> {
+  if (await exceedsBodyLimit(request, max)) throw new BadRequestError("请求内容过大");
+  try {
+    return JSON.parse(await request.text());
+  } catch {
+    throw new BadRequestError("请求内容不是有效的 JSON");
+  }
 }
 
 // multipart：fields（JSON）+ 可选 cover 文件 + 可选 coverAction（keep / remove）
@@ -148,6 +176,7 @@ export function shelfErrorResponse(error: unknown): Response {
   if (error instanceof GameCoverUploadError) return jsonError(400, error.code, "游戏封面请粘贴 IGDB 图片链接，不接受上传文件");
   if (error instanceof CoverLinkUnreachableError) return jsonError(422, error.code, "封面链接打不开，请检查后重试");
   if (error instanceof RecognizeError) return jsonError(422, error.code, RECOGNIZE_MESSAGES[error.code]);
+  if (error instanceof ImportError) return jsonError(IMPORT_MESSAGES[error.code][0], error.code, IMPORT_MESSAGES[error.code][1]);
   if (error instanceof CoverTypeError) return jsonError(400, error.code, "封面只支持 jpg / png / webp");
   if (error instanceof CoverTooLargeError) return jsonError(400, error.code, "封面不能超过 5 MB");
   if (error instanceof EntryNotFoundError) return jsonError(404, error.code, "条目不存在或已被删除");

@@ -25,6 +25,7 @@ export interface ShelfRepo {
   listVisible(): Promise<ShelfEntry[]>; // hidden = 0，id 降序
   get(id: number): Promise<ShelfEntry | null>;
   findByDoubanId(doubanId: string): Promise<DoubanMatch | null>;
+  findByDoubanIds(doubanIds: string[]): Promise<Map<string, ShelfEntry>>; // US-04：导入一页批量查询（≤ 20 个）
   insert(data: EntryRowInput): Promise<ShelfEntry>; // 豆瓣 ID 冲突 → DuplicateDoubanError
   update(id: number, data: EntryRowInput): Promise<ShelfEntry | null>;
   setHidden(id: number, hidden: boolean, now: Date): Promise<{ entry: ShelfEntry; changed: boolean } | null>;
@@ -103,6 +104,13 @@ export class D1ShelfRepo implements ShelfRepo {
       .prepare("SELECT id, title, type, status, marked_on AS markedOn FROM shelf_entries WHERE douban_id = ?")
       .bind(doubanId)
       .first<DoubanMatch>();
+  }
+
+  async findByDoubanIds(doubanIds: string[]): Promise<Map<string, ShelfEntry>> {
+    if (doubanIds.length === 0) return new Map();
+    const marks = doubanIds.map(() => "?").join(", ");
+    const { results } = await this.db.prepare(`SELECT ${COLUMNS} FROM shelf_entries WHERE douban_id IN (${marks})`).bind(...doubanIds).all<Row>();
+    return new Map(results.map((row) => [row.douban_id!, toEntry(row)]));
   }
 
   async insert(data: EntryRowInput): Promise<ShelfEntry> {

@@ -12,34 +12,36 @@ export interface MappedSubject {
 
 type Json = Record<string, unknown>;
 
-const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : []);
-const names = (value: unknown): string[] =>
+// 以下取值规则识别（mapSubject）与导入（douban/import.ts mapInterest）共用
+export const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : []);
+export const names = (value: unknown): string[] =>
   Array.isArray(value) ? value.map((v) => (v && typeof v === "object" ? (v as Json).name : undefined)).filter((v): v is string => typeof v === "string") : [];
 const NATIONALITY = /^[[［(（][^\]］)）]{1,8}[\]］)）]\s*/;
-const joinNames = (list: string[]) => {
+export const joinNames = (list: string[]) => {
   const cleaned = list.map((n) => n.replace(NATIONALITY, "").trim()).filter(Boolean);
   return cleaned.length > 0 ? cleaned.join("、") : null;
 };
-const yearOf = (value: unknown): number | null => {
+export const yearOf = (value: unknown): number | null => {
   const match = typeof value === "string" ? /^(\d{4})/.exec(value.trim()) : null;
   return match ? Number(match[1]) : null;
 };
+export const isComic = (bookTags: string[]) => bookTags.some((t) => t === "漫画");
+export const isBoardGame = (genres: unknown) => strings(genres).some((g) => g.includes("桌游"));
 
 function inferType(kind: DoubanKind, json: Json, bookTags: string[]): ShelfType {
-  const genres = strings(json.genres);
-  if (kind === "book") return bookTags.some((t) => t === "漫画") ? "comic" : "book";
-  if (kind === "game") return genres.some((g) => g.includes("桌游")) ? "boardgame" : "game";
+  if (kind === "book") return isComic(bookTags) ? "comic" : "book";
+  if (kind === "game") return isBoardGame(json.genres) ? "boardgame" : "game";
   if (json.is_tv === true) return "series"; // 动画剧集也归剧集（drop-anime-type）
   return "movie";
 }
 
-function creatorOf(kind: DoubanKind, json: Json): string | null {
+export function creatorOf(kind: DoubanKind, json: Json): string | null {
   if (kind === "book") return joinNames(strings(json.author));
   if (kind === "game") return joinNames(strings(json.developers));
   return joinNames(names(json.directors));
 }
 
-function yearFor(kind: DoubanKind, json: Json): number | null {
+export function yearFor(kind: DoubanKind, json: Json): number | null {
   if (kind === "book") return yearOf(strings(json.pubdate)[0]);
   if (kind === "game") return yearOf(json.release_date);
   return yearOf(json.year);

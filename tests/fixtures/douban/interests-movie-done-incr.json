@@ -1,0 +1,218 @@
+{
+  "start": 0,
+  "count": 20,
+  "total": 614,
+  "interests": [
+    {
+      "id": 4953010611,
+      "status": "done",
+      "rating": {
+        "value": 2
+      },
+      "create_time": "2026-10-25 21:10:00",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36146114",
+        "type": "movie",
+        "title": "牢笼鬼魂",
+        "year": "2026",
+        "pubdate": [
+          "2026-02-13(柏林电影节)"
+        ],
+        "directors": [
+          {
+            "name": "乔可·安华"
+          }
+        ],
+        "genres": [
+          "喜剧",
+          "动作",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2929720334.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2929720334.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36146114/"
+      }
+    },
+    {
+      "id": 4917090639,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-10-22 19:30:00",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "37185797",
+        "type": "tv",
+        "title": "百年孤独 第二季",
+        "year": "2026",
+        "pubdate": [
+          "2026-08-05(哥伦比亚)"
+        ],
+        "directors": [
+          {
+            "name": "劳拉·莫拉·奥尔特加"
+          },
+          {
+            "name": "卡洛斯·莫瑞诺"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "历史",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934714935.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2934714935.jpg"
+        },
+        "url": "https://movie.douban.com/subject/37185797/"
+      }
+    },
+    {
+      "id": 4919838301,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-10-20 08:00:00",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36808876",
+        "type": "movie",
+        "title": "奥德赛",
+        "year": "2026",
+        "pubdate": [
+          "2026-08-14(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "克里斯托弗·诺兰"
+          }
+        ],
+        "genres": [
+          "动作",
+          "历史",
+          "奇幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2933569626.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/photo/m_ratio_poster/public/p2933569626.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36808876/"
+      }
+    },
+    {
+      "id": 4959669321,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2026-10-18 08:25:08",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "30513783",
+        "type": "tv",
+        "title": "无职转生：到了异世界就拿出真本事",
+        "year": "2021",
+        "pubdate": [
+          "2021-01-10(日本)"
+        ],
+        "directors": [
+          {
+            "name": "冈本学"
+          }
+        ],
+        "genres": [
+          "动画",
+          "奇幻",
+          "冒险"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2919762107.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2919762107.jpg"
+        },
+        "url": "https://movie.douban.com/subject/30513783/"
+      }
+    },
+    {
+      "id": 4913897823,
+      "status": "done",
+      "rating": {
+        "value": 3
+      },
+      "create_time": "2026-10-18 08:25:08",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36767846",
+        "type": "movie",
+        "title": "鬼玩人6：炼狱",
+        "year": "2026",
+        "pubdate": [
+          "2026-07-08(中国台湾)"
+        ],
+        "directors": [
+          {
+            "name": " 塞巴斯蒂安·瓦尼契克"
+          }
+        ],
+        "genres": [
+          "恐怖"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932170733.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932170733.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36767846/"
+      }
+    },
+    {
+      "id": 4766116637,
+      "status": "done",
+      "rating": {
+        "value": 3
+      },
+      "create_time": "2026-08-08 14:23:47",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36367195",
+        "type": "movie",
+        "title": "家弑服务",
+        "year": "2025",
+        "pubdate": [
+          "2026-05-29(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "保罗·费格"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "悬疑",
+          "惊悚"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932673659.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2932673659.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36367195/"
+      }
+    }
+  ]
+}

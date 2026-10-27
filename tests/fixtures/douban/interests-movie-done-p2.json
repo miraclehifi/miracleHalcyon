@@ -1,0 +1,108 @@
+{
+  "start": 20,
+  "count": 20,
+  "total": 45,
+  "interests": [
+    {
+      "id": 4863905111,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-06-12 01:37:08",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "1295250",
+        "type": "movie",
+        "title": "X战警",
+        "year": "2000",
+        "pubdate": [
+          "2000-07-14(美国)"
+        ],
+        "directors": [
+          {
+            "name": "布莱恩·辛格"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2446530060.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2446530060.jpg"
+        },
+        "url": "https://movie.douban.com/subject/1295250/"
+      }
+    },
+    {
+      "id": 4863903332,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-06-12 01:32:50",
+      "comment": "小时候和表弟用亲戚的MP5看的，冬天时看到金刚狼光着身子在雪地里跑，感到一阵凄惨。",
+      "platforms": [],
+      "subject": {
+        "id": "1792928",
+        "type": "movie",
+        "title": "金刚狼",
+        "year": "2009",
+        "pubdate": [
+          "2009-05-03(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "加文·胡德"
+          }
+        ],
+        "genres": [
+          "动作",
+          "科幻"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2063167557.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2063167557.jpg"
+        },
+        "url": "https://movie.douban.com/subject/1792928/"
+      }
+    },
+    {
+      "id": 4854710635,
+      "status": "done",
+      "rating": {
+        "value": 4
+      },
+      "create_time": "2026-05-30 21:35:54",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "3026988",
+        "type": "tv",
+        "title": "尘埃落定",
+        "year": "2003",
+        "pubdate": [
+          "2003-01-06(中国大陆)"
+        ],
+        "directors": [
+          {
+            "name": "阎建钢"
+          }
+        ],
+        "genres": [
+          "剧情"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2886289413.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2886289413.jpg"
+        },
+        "url": "https://movie.douban.com/subject/3026988/"
+      }
+    }
+  ]
+}

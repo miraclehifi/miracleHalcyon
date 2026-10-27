@@ -1,0 +1,40 @@
+{
+  "start": 0,
+  "count": 20,
+  "total": 1,
+  "interests": [
+    {
+      "id": 4927734823,
+      "status": "doing",
+      "rating": null,
+      "create_time": "2026-08-23 23:22:13",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36189165",
+        "type": "tv",
+        "title": "死神 千年血战篇 -祸进谭-",
+        "year": "2026",
+        "pubdate": [
+          "2026-07-25(日本)"
+        ],
+        "directors": [
+          {
+            "name": "田口智久"
+          }
+        ],
+        "genres": [
+          "剧情",
+          "动作",
+          "动画"
+        ],
+        "release_date": null,
+        "cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2928282027.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2928282027.jpg"
+        },
+        "url": "https://movie.douban.com/subject/36189165/"
+      }
+    }
+  ]
+}

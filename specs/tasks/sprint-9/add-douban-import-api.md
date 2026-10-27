@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 9
 **序号**: 19
-**状态**: pending
+**状态**: completed（2026-10-27）
 **类别**: API
 **架构层级**: 数据 + 领域 + 接口（`src/db/migrations/`、`src/domains/shelf/`、`src/domains/shelf/douban/`、`src/pages/api/admin/shelf/import*`）
 **所属 Feature**: [F-005 书影音](../../product/features/F-005-书影音/feature-scope.md)
@@ -42,10 +42,10 @@
 
 ## DoD（完成定义）
 
-- [ ] 测试清单全部由红变绿；影响范围：`tests/unit/shelf/*`、`tests/integration/shelf/*` 原有用例通过
-- [ ] 用作者真实账号手工调一次本地接口（`npm run dev:local`，登录后 `POST /api/admin/shelf/import` 影视·看过第 1 页），核对 20 条映射结果；再调一次 `mode: incremental` 确认第 1 页即到达水位，记入 validation
-- [ ] `ddl-changes.md` 有 0006 条目（⏳ 待执行，注明必须先于代码部署）；`tests/integration/migration.test.ts` 补 0006（表与 CHECK）
-- [ ] `npm run lint`、`npm run check` 通过
+- [x] 测试清单全部由红变绿；影响范围：`tests/unit/shelf/*`、`tests/integration/shelf/*` 原有用例通过
+- [x] 用作者真实账号手工调一次本地接口（`npm run dev:local`，登录后 `POST /api/admin/shelf/import` 影视·看过第 1 页），核对 20 条映射结果；再调一次 `mode: incremental` 确认第 1 页即到达水位，记入 validation
+- [x] `ddl-changes.md` 有 0006 条目（⏳ 待执行，注明必须先于代码部署）；`tests/integration/migration.test.ts` 补 0006（表与 CHECK）
+- [x] `npm run lint`、`npm run check` 通过
 
 ## 依赖
 

@@ -9,6 +9,8 @@ import {
 } from "./errors";
 import { noopShelfHooks, type ShelfHooks } from "./hooks";
 import type { IgdbImageClient } from "./igdb";
+import type { ImportStateRepo } from "./import-state-repo";
+import { createShelfImporter } from "./importer";
 import type { DoubanMatch, ShelfEntry, ShelfRepo } from "./repo";
 
 export interface CoverUpload {
@@ -23,7 +25,9 @@ export interface ShelfServiceDeps {
   hooks?: ShelfHooks;
   douban?: DoubanClient;
   igdb?: IgdbImageClient;
+  stateRepo?: ImportStateRepo; // US-04 导入同步水位
   recognizeTimeoutMs?: number;
+  importTimeoutMs?: number;
   igdbTimeoutMs?: number;
   now?: () => Date;
   log?: (event: string, detail: Record<string, unknown>) => void;
@@ -56,7 +60,7 @@ function toBase64(bytes: Uint8Array): string {
 const defaultLog = (event: string, detail: Record<string, unknown>) => console.error(event, detail);
 
 export function createShelfService({
-  repo, store, hooks = noopShelfHooks, douban, igdb, recognizeTimeoutMs = RECOGNIZE_TIMEOUT_MS, igdbTimeoutMs = IGDB_TIMEOUT_MS, now = () => new Date(), log = defaultLog,
+  repo, store, hooks = noopShelfHooks, douban, igdb, stateRepo, recognizeTimeoutMs = RECOGNIZE_TIMEOUT_MS, importTimeoutMs, igdbTimeoutMs = IGDB_TIMEOUT_MS, now = () => new Date(), log = defaultLog,
 }: ShelfServiceDeps) {
   // 读取 IGDB 封面宽高：任何失败（含超时）都归为 COVER_LINK_UNREACHABLE
   async function readCoverSize(url: string): Promise<ImageSize> {
@@ -132,6 +136,9 @@ export function createShelfService({
   }
 
   return {
+    // US-04 豆瓣批量导入：importState、importPage、finishImport（importer.ts）
+    ...createShelfImporter({ repo, store, hooks, douban, stateRepo, timeoutMs: importTimeoutMs, now, log }),
+
     async list(type: unknown): Promise<ShelfEntry[]> {
       if (!isShelfType(type)) throw new ShelfValidationError(["type"]);
       return sortEntries(await repo.listByType(type));

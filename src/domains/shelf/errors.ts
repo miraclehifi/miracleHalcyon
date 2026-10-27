@@ -54,7 +54,36 @@ export class DoubanParseError extends Error {
   readonly name = "DoubanParseError";
 }
 
-export type RecognizeCode = "NOT_DOUBAN_LINK" | "NOT_SUBJECT_LINK" | "FETCH_FAILED" | "PARSE_FAILED";
+// 标记列表（US-04）：用户不存在 / 标记未公开或需要登录；由 importPage 翻译为 ImportError
+export class DoubanUserNotFoundError extends Error {
+  readonly name = "DoubanUserNotFoundError";
+}
+
+export class DoubanForbiddenError extends Error {
+  readonly name = "DoubanForbiddenError";
+}
+
+export type ImportCode = "DOUBAN_USER_NOT_FOUND" | "DOUBAN_FORBIDDEN" | "FETCH_FAILED";
+
+// 导入一页整体失败（api-contract"导入"：404 / 403 / 502）
+export class ImportError extends Error {
+  constructor(readonly code: ImportCode) {
+    super(code);
+    this.name = "ImportError";
+  }
+}
+
+export type ImportItemReason = "PARSE_FAILED" | "FETCH_FAILED" | "WRITE_FAILED";
+
+// 导入单条失败：进 failed[]，不中断整页
+export class ImportItemError extends Error {
+  constructor(readonly doubanId: string | null, readonly reason: ImportItemReason, readonly title: string | null = null) {
+    super(reason);
+    this.name = "ImportItemError";
+  }
+}
+
+export type RecognizeCode ="NOT_DOUBAN_LINK" | "NOT_SUBJECT_LINK" | "FETCH_FAILED" | "PARSE_FAILED";
 
 export class RecognizeError extends Error {
   constructor(readonly code: RecognizeCode) {

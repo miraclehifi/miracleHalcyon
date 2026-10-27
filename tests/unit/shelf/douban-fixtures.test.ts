@@ -12,10 +12,17 @@ describe("豆瓣夹具（spike-douban-rexxar）", () => {
     }
   });
 
-  it.each(jsonFiles.filter((f) => !f.endsWith("-tags.json") && f !== "no-title.json"))("%s 可解析且有标题", (file) => {
+  it.each(jsonFiles.filter((f) => !f.endsWith("-tags.json") && !f.startsWith("interests-") && f !== "no-title.json"))("%s 可解析且有标题", (file) => {
     const data = JSON.parse(readFileSync(dir + file, "utf8"));
     expect(typeof data.title).toBe("string");
     expect(data.title.length).toBeGreaterThan(0);
+  });
+
+  // 导入夹具（US-04）：标记列表一页，按标记时间倒序
+  it.each(jsonFiles.filter((f) => f.startsWith("interests-")))("%s 是倒序的标记列表", (file) => {
+    const data = JSON.parse(readFileSync(dir + file, "utf8"));
+    const times = data.interests.map((i: { create_time: string }) => i.create_time);
+    expect([Number.isInteger(data.total), times.length > 0, times.join() === [...times].sort().reverse().join()]).toEqual([true, true, true]);
   });
 
   it("封面样本是 JPEG", () => {

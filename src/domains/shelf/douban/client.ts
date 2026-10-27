@@ -1,12 +1,22 @@
 // 豆瓣 Rexxar 客户端（shelf domain-model §2.2，ADR-011）：只请求白名单主机，不跟随跳转（3xx 视为失败），封面读取有大小上限
 import { COVER_MAX_BYTES } from "../entry";
-import { DoubanFetchError, DoubanParseError } from "../errors";
+import { DoubanFetchError, DoubanForbiddenError, DoubanParseError, DoubanUserNotFoundError } from "../errors";
+import { isValidDoubanUid, type ImportKind, type ImportStatus } from "./import";
 import { isDoubanImageHost, isSafeUrl, type SubjectRef } from "./link";
+
+export interface InterestQuery {
+  uid: string;
+  kind: ImportKind;
+  status: ImportStatus;
+  start: number;
+  count: number;
+}
 
 export interface DoubanClient {
   fetchSubject(ref: SubjectRef, signal: AbortSignal): Promise<unknown>;
   fetchBookTags(id: string, signal: AbortSignal): Promise<string[]>;
   fetchCover(url: string, signal: AbortSignal): Promise<Uint8Array>;
+  fetchInterests(query: InterestQuery, signal: AbortSignal): Promise<unknown>; // US-04：用户标记列表一页
 }
 
 export const REXXAR_ORIGIN = "https://m.douban.com/rexxar/api/v2/";
@@ -37,7 +47,41 @@ export function createDoubanClient(fetchImpl: typeof fetch = fetch): DoubanClien
     }
   }
 
+  // 标记列表：404 用户不存在；403 或返回体要求登录（code 1000 / need_login）→ 无权限；其余同 get
+  async function fetchInterests({ uid, kind, status, start, count }: InterestQuery, signal: AbortSignal): Promise<unknown> {
+    if (!isValidDoubanUid(uid)) throw new DoubanUserNotFoundError("用户 ID 不合法");
+    const query = new URLSearchParams({ type: kind, status, start: String(start), count: String(count) });
+    const url = `${REXXAR_ORIGIN}user/${encodeURIComponent(uid)}/interests?${query}`;
+    let response: Response;
+    try {
+      response = await fetchImpl(url, { headers: HEADERS, redirect: "manual", signal });
+    } catch (error) {
+      throw new DoubanFetchError((error as Error)?.name ?? "network");
+    }
+    let text: string;
+    try {
+      text = await response.text();
+    } catch (error) {
+      throw new DoubanFetchError((error as Error)?.name ?? "network");
+    }
+    let json: unknown = undefined;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      // 非 JSON：2xx → 解析失败，其余按状态码
+    }
+    const body = json && typeof json === "object" ? (json as { code?: unknown; msg?: unknown }) : {};
+    const needLogin = body.code === 1000 || (typeof body.msg === "string" && body.msg.includes("need_login"));
+    if (response.status === 404) throw new DoubanUserNotFoundError("404");
+    if (response.status === 403 || needLogin) throw new DoubanForbiddenError(String(response.status));
+    if (response.status < 200 || response.status >= 300) throw new DoubanFetchError(String(response.status));
+    if (json === undefined) throw new DoubanParseError("返回内容不是 JSON");
+    return json;
+  }
+
   return {
+    fetchInterests,
+
     fetchSubject: (ref, signal) => getJson(`${ref.kind}/${ref.id}`, signal),
 
     async fetchBookTags(id, signal) {

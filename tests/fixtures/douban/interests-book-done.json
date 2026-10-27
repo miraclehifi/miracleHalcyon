@@ -1,0 +1,113 @@
+{
+  "start": 0,
+  "count": 20,
+  "total": 4,
+  "interests": [
+    {
+      "id": 3135314946,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2025-08-08 14:50:53",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "10594787",
+        "type": "book",
+        "title": "霍乱时期的爱情",
+        "pubdate": [
+          "2012-9-1"
+        ],
+        "author": [
+          "[哥伦比亚] 加西亚·马尔克斯"
+        ],
+        "cover_url": "https://img3.doubanio.com/view/subject/l/public/s11284102.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/subject/l/public/s11284102.jpg"
+        },
+        "url": "https://book.douban.com/subject/10594787/"
+      }
+    },
+    {
+      "id": 4147864094,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2024-04-04 11:53:40",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36667314",
+        "type": "book",
+        "title": "日月同错  千年篇",
+        "pubdate": [
+          "2024-1"
+        ],
+        "author": [
+          "第年秒"
+        ],
+        "cover_url": "https://img2.doubanio.com/view/subject/l/public/s34716731.jpg",
+        "pic": {
+          "large": "https://img2.doubanio.com/view/subject/l/public/s34716731.jpg"
+        },
+        "url": "https://book.douban.com/subject/36667314/"
+      }
+    },
+    {
+      "id": 4115955422,
+      "status": "done",
+      "rating": {
+        "value": 5
+      },
+      "create_time": "2024-03-05 09:49:56",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "36484713",
+        "type": "book",
+        "title": "降り積もれ孤独な死よ (6)",
+        "pubdate": [
+          "2023-9-22"
+        ],
+        "author": [
+          "原作：井龍一",
+          "作画：伊藤翔太"
+        ],
+        "cover_url": "https://img3.doubanio.com/view/subject/l/public/s34645482.jpg",
+        "pic": {
+          "large": "https://img3.doubanio.com/view/subject/l/public/s34645482.jpg"
+        },
+        "url": "https://book.douban.com/subject/36484713/"
+      }
+    },
+    {
+      "id": 3813343837,
+      "status": "done",
+      "rating": {
+        "value": 3
+      },
+      "create_time": "2023-06-08 10:32:49",
+      "comment": "",
+      "platforms": [],
+      "subject": {
+        "id": "35053236",
+        "type": "book",
+        "title": "Re:从零开始的异世界生活.13（附赠特典封面一张，系列销量已突破550万册）",
+        "pubdate": [],
+        "author": [
+          "[日]长月达平",
+          "天闻角川出品 著",
+          "[日]大塚真一郎 绘",
+          "温玥 译"
+        ],
+        "cover_url": "https://img9.doubanio.com/view/subject/l/public/s33701016.jpg",
+        "pic": {
+          "large": "https://img9.doubanio.com/view/subject/l/public/s33701016.jpg"
+        },
+        "url": "https://book.douban.com/subject/35053236/"
+      }
+    }
+  ]
+}
