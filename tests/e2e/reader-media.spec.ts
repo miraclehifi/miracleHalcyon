@@ -1,7 +1,19 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { waitForHydration } from "./support/hydration";
 
-// 书影音读者页（reader-media.md，US-03）。数据：reader-fixture.shelf.json（US-03 测试数据表），封面由 e2e:seed 写入本地 R2
+// 书影音读者页（reader-media.md，US-03）。数据：reader-fixture.shelf.json（US-03 测试数据表），封面由 e2e:seed 写入本地 R2；
+// 游戏封面是 images.igdb.com 外链，由 routeIgdb 冒充（co8h3y / co5vmg / cobg300 返回夹具图片，其余 404），不出网
+const IGDB_FIXTURES: Record<string, Buffer> = {
+  co8h3y: readFileSync("tests/fixtures/igdb/co8h3y-810x1080.jpg"),
+  co5vmg: readFileSync("tests/fixtures/igdb/co5vmg-811x1080.jpg"),
+  cobg300: readFileSync("tests/fixtures/igdb/cobg300-600x900.jpg"),
+};
+const routeIgdb = (page: Page) =>
+  page.route("https://images.igdb.com/**", (route) => {
+    const body = IGDB_FIXTURES[/\/(\w+)\.jpg$/.exec(route.request().url())?.[1] ?? ""];
+    return body ? route.fulfill({ contentType: "image/jpeg", body }) : route.fulfill({ status: 404 });
+  });
 const tabs = (page: Page) => page.getByRole("navigation", { name: "书影音分类" });
 const card = (page: Page, title: string) => page.getByRole("button", { name: `《${title}》` });
 const poster = (page: Page, title: string) => page.locator("[data-poster-wall] [data-poster]").filter({ has: card(page, title) });
@@ -35,14 +47,14 @@ test("[TC-US03-02] 分类切换与直接访问分类地址", async ({ page }) =>
   await expect(page.locator("[data-poster-wall] [data-poster]")).toHaveCount(3);
 });
 
-// [TC-US03-06][SC-SHELF-06][SC-SHELF-07] 有评分与无评分两行的年月列左缘对齐
+// [TC-US03-06][SC-SHELF-06][SC-SHELF-07] 桌游：有评分与无评分两行的年月列左缘对齐（桌游改海报墙见任务 16）
 test("[TC-US03-06] 列表行无评分时年月列对齐", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/media/game");
-  await expect(item(page, "旷野之息").getByRole("img", { name: "评分 5 / 5" })).toBeVisible();
-  await expect(item(page, "无评游戏").getByRole("img", { name: /评分/ })).toHaveCount(0);
+  await page.goto("/media/boardgame");
+  await expect(item(page, "卡坦岛").getByRole("img", { name: "评分 5 / 5" })).toBeVisible();
+  await expect(item(page, "无评桌游").getByRole("img", { name: /评分/ })).toHaveCount(0);
   const x = async (title: string) => (await item(page, title).locator("[data-media-date]").boundingBox())!.x;
-  expect(Math.abs((await x("旷野之息")) - (await x("无评游戏")))).toBeLessThanOrEqual(1);
+  expect(Math.abs((await x("卡坦岛")) - (await x("无评桌游")))).toBeLessThanOrEqual(1);
 });
 
 // [TC-US03-09][SC-SHELF-14] 未知分类、已去掉的分类、/media/book 都是 404
@@ -53,16 +65,22 @@ test("[TC-US03-09] 未知分类回退 404", async ({ page }) => {
   }
 });
 
-// [TC-US03-10][SC-SHELF-16] 切换全部分类、滚到底，不请求豆瓣域名
+// [TC-US03-10][SC-SHELF-16] 切换全部分类、滚到底，不请求豆瓣域名；站外图片只有游戏页的 images.igdb.com
 test("[TC-US03-10] 不请求豆瓣域名", async ({ page }) => {
-  const hosts: string[] = [];
-  page.on("request", (request) => hosts.push(new URL(request.url()).hostname));
-  for (const path of ["/media", "/media/comic", "/media/movie", "/media/series", "/media/game", "/media/boardgame"]) {
+  await routeIgdb(page);
+  const external: string[] = [];
+  let path = "";
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (!["localhost", "127.0.0.1"].includes(url.hostname)) external.push(`${path} ${url.hostname} ${request.resourceType()}`);
+  });
+  for (path of ["/media", "/media/comic", "/media/movie", "/media/series", "/media/game", "/media/boardgame"]) {
     await page.goto(path);
     await page.mouse.wheel(0, 10_000);
     await page.waitForLoadState("networkidle");
   }
-  expect(hosts.filter((host) => /(^|\.)(douban\.com|doubanio\.com)$/.test(host))).toEqual([]);
+  expect(external.filter((line) => /(^|[ .])(douban\.com|doubanio\.com) /.test(line))).toEqual([]);
+  expect(new Set(external)).toEqual(new Set(["/media/game images.igdb.com image"]));
 });
 
 // [TC-US03-15][SC-SHELF-11] 无封面与封面 404 显示占位，尺寸与正常封面相同
@@ -91,19 +109,20 @@ test("[TC-US03-15] 封面缺失 / 加载失败占位", async ({ page }) => {
   await expect.poll(async () => JSON.stringify(await size(broken)) === JSON.stringify(await size(poster(page, "肖申克的救赎")))).toBe(true);
 });
 
-// [TC-US03-16][SC-SHELF-12] 空分类空状态
+// [TC-US03-16][SC-SHELF-12] 空分类空状态（夹具中漫画为空）
 test("[TC-US03-16] 空分类空状态", async ({ page }) => {
   await page.goto("/media");
   await waitForHydration(page);
-  await tabs(page).getByRole("link", { name: "桌游" }).click();
-  await page.waitForURL(/\/media\/boardgame$/);
-  await expect(page.getByText("还没有记录桌游")).toBeVisible();
-  await expect(page.locator("[data-media-count]")).toHaveText("0 款");
+  await tabs(page).getByRole("link", { name: "漫画" }).click();
+  await page.waitForURL(/\/media\/comic$/);
+  await expect(page.getByText("还没有记录漫画")).toBeVisible();
+  await expect(page.locator("[data-media-count]")).toHaveText("0 本");
   await expect(page.locator("li[data-media-item]")).toHaveCount(0);
 });
 
-// [TC-US03-17][SC-SHELF-15] 手机 390：无横向滚动；分类标签换行全部可见（GooeyNav 不横滑）；行封面 44×66；书卡片单列
+// [TC-US03-17][SC-SHELF-15] 手机 390：无横向滚动；分类标签换行全部可见（GooeyNav 不横滑）；行封面 44×66；书卡片单列；游戏海报墙 2 列
 test("[TC-US03-17] 手机 390px 布局", async ({ page }) => {
+  await routeIgdb(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/media");
   // 水合后 GooeyNav 画布（外扩 72px）才出现，量宽要等它
@@ -114,13 +133,25 @@ test("[TC-US03-17] 手机 390px 布局", async ({ page }) => {
   expect(second.y).toBeGreaterThan(first.y + first.height - 1);
   await expect(tabs(page).getByRole("link", { name: "桌游" })).toBeInViewport();
 
-  await page.goto("/media/game");
+  await page.goto("/media/boardgame");
   await waitForHydration(page);
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  const cover = (await item(page, "旷野之息").locator("img").boundingBox())!;
+  const cover = (await item(page, "卡坦岛").locator("img").boundingBox())!;
   expect([Math.round(cover.width), Math.round(cover.height)]).toEqual([44, 66]);
+
+  await page.goto("/media/game");
+  await waitForHydration(page);
+  await expect.poll(() => columnsOfFirstRow(page)).toBe(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
+
+// 海报墙第一排有几张（入场动画结束后 y 相同）
+const columnsOfFirstRow = (page: Page) =>
+  page.locator("[data-poster-wall] [data-poster]").evaluateAll((els) => {
+    const ys = els.map((el) => Math.round(el.getBoundingClientRect().y));
+    return ys.filter((y) => y === Math.min(...ys)).length;
+  });
 
 // [TC-US03-18][SC-SHELF-02] 分类导航是链接：Tab 可聚焦、Enter 跳转
 test("[TC-US03-18] 分类标签键盘操作与可访问性", async ({ page }) => {
@@ -242,4 +273,107 @@ test("[TC-US03-20] 海报墙按时间分段开关", async ({ page }) => {
   const [a, b] = await boxes();
   expect(b.x).toBeGreaterThan(a.x);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+// 游戏海报（TC-US03-22、23）：砖块宽高比、平台徽标浮层的不透明度
+const ratio = async (page: Page, title: string) => {
+  const box = (await poster(page, title).boundingBox())!;
+  return box.width / box.height;
+};
+const hoverLayer = (page: Page, title: string) => poster(page, title).locator("[data-poster-hover]");
+
+// [TC-US03-22][SC-SHELF-21] 游戏海报：原比例不裁切、悬停只显示平台、翻面看详情（年份徽标见任务 15）
+test("[TC-US03-22] 游戏海报：原比例、悬停平台、翻面", async ({ page }) => {
+  await routeIgdb(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/media/game");
+  await page.evaluate(() => localStorage.clear());
+  await waitForHydration(page);
+  await expect(page.locator("[data-poster-wall] [data-poster]")).toHaveCount(5);
+  await expect.poll(() => columnsOfFirstRow(page)).toBe(5);
+
+  // 1 砖块宽高比 = 封面原始比例（±1%），图片按原比例完整显示
+  expect(Math.abs((await ratio(page, "黑神话：悟空")) / (810 / 1080) - 1)).toBeLessThan(0.01);
+  expect(Math.abs((await ratio(page, "博德之门 3")) / (600 / 900) - 1)).toBeLessThan(0.01);
+  const img = poster(page, "黑神话：悟空").locator("[data-poster-front] img");
+  await expect(img).toHaveJSProperty("complete", true);
+  expect(await img.evaluate((el: HTMLImageElement) => [el.naturalWidth, el.naturalHeight])).toEqual([810, 1080]);
+  await expect(img).toHaveCSS("object-fit", "contain");
+
+  // 2 悬停：左上角平台徽标淡入，无名称浮层
+  const wukong = card(page, "黑神话：悟空");
+  await expect(wukong).toHaveAccessibleName("《黑神话：悟空》，PS5，2024");
+  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("opacity", "0");
+  await wukong.hover();
+  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("opacity", "1");
+  await expect(hoverLayer(page, "黑神话：悟空").locator("[data-platform-badge]")).toHaveText("PS5");
+  // 悬停时 FlipCard 倾斜、放大，不用 boundingBox 量偏移
+  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("left", "10px");
+  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("top", "10px");
+  await expect(poster(page, "黑神话：悟空").locator("[data-poster-caption]")).toHaveCount(0);
+
+  // 3 换一张：Steam
+  await card(page, "博德之门 3").hover();
+  await expect(hoverLayer(page, "博德之门 3")).toHaveCSS("opacity", "1");
+  await expect(hoverLayer(page, "博德之门 3").locator("[data-platform-badge]")).toHaveText("Steam");
+  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("opacity", "0");
+
+  // 4 翻面：背面有名称、评分、日期、豆瓣，无开发商、无平台
+  await wukong.click();
+  await expect(wukong).toHaveAttribute("aria-pressed", "true");
+  const back = poster(page, "黑神话：悟空").locator("[data-poster-back]");
+  await expect(back).toContainText("黑神话：悟空");
+  await expect(back).toContainText("玩过 · 2025-08-20");
+  await expect(back.getByRole("img", { name: "评分 4 / 5" })).toBeAttached();
+  await expect(back.locator("[data-platform-badge]")).toHaveCount(0);
+  await expect(poster(page, "黑神话：悟空").locator("a[data-douban-link]")).toBeVisible();
+  await expect(page.locator("main")).not.toContainText("Game Science");
+
+  // 6 按时间：在玩段
+  await page.clock.setFixedTime(new Date("2026-10-27T10:00:00"));
+  await page.getByRole("button", { name: "按时间" }).click();
+  await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText("在玩");
+  await expect(page.locator("[data-time-heading]").first()).toContainText("1 款");
+  await expect(page.locator('[data-poster-segment="in-progress"]').getByRole("button", { name: /塞尔达传说：王国之泪/ })).toBeAttached();
+});
+
+// [TC-US03-22][SC-SHELF-21] 触屏（hover: none）：2 列，悬停不出平台
+test("[TC-US03-22] 游戏海报：触屏不显示平台", async ({ browser, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright WebKit（Windows）不支持 isMobile 模拟");
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  await routeIgdb(page);
+  await page.goto("/media/game");
+  await waitForHydration(page);
+  await expect.poll(() => columnsOfFirstRow(page)).toBe(2);
+  await card(page, "黑神话：悟空").hover();
+  await page.waitForTimeout(300);
+  await expect(hoverLayer(page, "黑神话：悟空")).toHaveCSS("opacity", "0");
+  await card(page, "黑神话：悟空").tap();
+  await expect(card(page, "黑神话：悟空")).toHaveAttribute("aria-pressed", "true");
+  await expect(poster(page, "黑神话：悟空").locator("[data-poster-back] [data-platform-badge]")).toHaveCount(0);
+  await context.close();
+});
+
+// [TC-US03-23][SC-SHELF-22] 无封面 3:4、IGDB 404 保持原比例；都显示占位与游戏名，悬停仍有平台、可翻面
+test("[TC-US03-23] 游戏无封面 / 加载失败占位", async ({ page }) => {
+  await routeIgdb(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/media/game");
+  await waitForHydration(page);
+  await expect.poll(() => columnsOfFirstRow(page)).toBe(5);
+  for (const [title, expected, platform] of [
+    ["某款老游戏", 3 / 4, "PS4"],
+    ["断链游戏", 810 / 1080, "Switch 2"],
+  ] as const) {
+    const placeholder = poster(page, title).getByRole("img", { name: "图片不可用" });
+    await expect(placeholder).toBeVisible();
+    await expect(placeholder).toContainText(title);
+    expect(Math.abs((await ratio(page, title)) / expected - 1), title).toBeLessThan(0.01);
+    await card(page, title).hover();
+    await expect(hoverLayer(page, title)).toHaveCSS("opacity", "1");
+    await expect(hoverLayer(page, title).locator("[data-platform-badge]")).toHaveText(platform);
+    await card(page, title).click();
+    await expect(card(page, title)).toHaveAttribute("aria-pressed", "true");
+  }
 });

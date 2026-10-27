@@ -55,3 +55,7 @@
 | 2026-10-27 | 13 add-game-form-fields | `npx playwright test tests/e2e/admin-media-form.spec.ts -g TC-US01-29`（chromium / webkit） | 1 / 1、1 / 1（实现后补写，未先跑红） |
 | 2026-10-27 | 13 add-game-form-fields（影响范围：admin / reader 书影音 E2E） | `npx playwright test admin-media reader-media --project chromium` | 首跑 21 / 22：TC-US01-23 建游戏未带 `platform`（任务 12 契约变更）→ 补字段后 22 / 22；reader-media 12 / 12 |
 | 2026-10-27 | 13 add-game-form-fields | `npm run lint`、`npm run check` | 0 problems、0 errors |
+| 2026-10-27 | 14 add-game-poster-wall | `npx vitest run tests/unit/reader/shelf.test.ts tests/unit/reader/shelf-time.test.ts tests/unit/reader/media-poster-wall.test.tsx` | 红：UT-17 `posterAspect` 2 项、UT-15 游戏"在玩"1 项失败，UT-18 文件因 `PlatformBadge` 不存在无法加载；绿：29 / 29（含 UT-18 PlatformBadge 5 平台、游戏模式 4 项、电影模式无徽标） |
+| 2026-10-27 | 14 add-game-poster-wall | `npm run test:build` | 19 / 19（新增 TC-US03-21；TC-US03-03、05、06、10、11、13、16 按新夹具改口径） |
+| 2026-10-27 | 14 add-game-poster-wall | `npx playwright test tests/e2e/reader-media.spec.ts`（chromium / webkit） | chromium 15 / 15（新增 TC-US03-22 ×2、23；TC-06、10、16、17 改口径；首跑悬停徽标位置用 boundingBox 受倾斜影响失败，改断言计算样式）；webkit 首跑 4 项因页面 / worker 崩溃失败（负载型），`--workers 4` 重跑 14 / 14 + 1 跳过（触屏用例，WebKit 不支持 `isMobile`） |
+| 2026-10-27 | 14 add-game-poster-wall | `npm run lint`、`npm run check`、`git diff package.json` | 0 problems、0 errors、无新依赖 |

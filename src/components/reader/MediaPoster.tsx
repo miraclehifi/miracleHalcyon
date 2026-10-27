@@ -3,12 +3,15 @@
 // 片名、评分、短评、"看过 · yyyy-MM-dd"（进行中为"在看"徽标），不显示导演。"豆瓣 ↗"是 FlipCard 的兄弟节点
 // （FlipCard 根是 role="button"，里面不能嵌链接），覆盖在背面右下角，只在翻开时可点、可聚焦。
 // still：服务端 / 水合前的静态网格，只渲染正面，背面详情留在 HTML 中（hidden），无 JS 时"豆瓣 ↗"由全局样式常显
+// 游戏模式（ADR-013）：封面为 IGDB 原比例大图，object-fit: contain 不裁切；悬停 / 键盘聚焦时左上角淡入 PlatformBadge
+// （仅精确指针设备，aria-hidden，平台已写进翻面控件的 aria-label）；背面不显示平台
 import { ImageOff } from "lucide-react";
 import { useState } from "react";
-import { statusLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
+import { platformLabel, statusLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
 import { useTokenColor } from "../../lib/dom/theme";
 import { StarRating } from "../ui/StarRating";
 import FlipCard from "../vendor/react-bits/FlipCard";
+import { PlatformBadge } from "./PlatformBadge";
 
 export interface MediaPosterProps {
   entry: ShelfPublicEntry;
@@ -34,10 +37,37 @@ function Front({ entry }: { entry: ShelfPublicEntry }) {
           </span>
         </div>
       ) : (
-        <img src={entry.cover!} alt="" loading="lazy" decoding="async" draggable={false} className="block h-full w-full object-cover" onError={() => setBroken(true)} />
+        <img
+          src={entry.cover!}
+          alt=""
+          width={entry.coverWidth ?? undefined}
+          height={entry.coverHeight ?? undefined}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          className={`block h-full w-full ${entry.type === "game" ? "object-contain" : "object-cover"}`}
+          onError={() => setBroken(true)}
+        />
+      )}
+      {entry.platform && (
+        <div
+          data-poster-hover
+          aria-hidden="true"
+          className="pointer-events-none absolute top-2.5 left-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-fine:group-has-focus-visible:opacity-100"
+        >
+          <PlatformBadge platform={entry.platform} />
+        </div>
       )}
     </div>
   );
+}
+
+// 翻面控件名：游戏带平台与发售年份，"《黑神话：悟空》，PS5，2024"
+function controlLabel(entry: ShelfPublicEntry): string {
+  const parts = [`《${entry.title}》`];
+  if (entry.type === "game" && entry.platform) parts.push(platformLabel(entry.platform));
+  if (entry.type === "game" && entry.year) parts.push(String(entry.year));
+  return parts.join("，");
 }
 
 // 背面底层（poster-back-filtered-cover，同 FlipCard 官网示例）：同一张封面水平镜像、灰度、30% 不透明，
@@ -92,7 +122,7 @@ export function MediaPoster({ entry, flipped = false, onFlipChange, width = 200,
   const compact = width < COMPACT_WIDTH;
   const linkOpen = still || flipped;
   return (
-    <div data-poster className="relative h-full w-full">
+    <div data-poster className="group relative h-full w-full">
       {still ? (
         <div className="relative h-full w-full">
           <Front entry={entry} />
@@ -125,7 +155,7 @@ export function MediaPoster({ entry, flipped = false, onFlipChange, width = 200,
           shadow
           shadowColor="#000000"
           shadowOpacity={0.25}
-          ariaLabel={`《${entry.title}》`}
+          ariaLabel={controlLabel(entry)}
         />
       )}
       {entry.doubanUrl && (

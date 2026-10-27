@@ -12,5 +12,6 @@
 | `vp8x-1200x1600.webp` | 扩展 WebP（`VP8X` 块） | 1200×1600 |
 
 | `co8h3y-810x1080.jpg` | 可解码的完整 JPEG（纯色，sharp 生成）：E2E 用 `page.route` 冒充 `images.igdb.com/…/co8h3y.jpg`，验证预览按原比例显示 | 810×1080 |
+| `co5vmg-811x1080.jpg`、`cobg300-600x900.jpg` | 同上，读者页游戏海报墙 E2E（`reader-media.spec.ts` 的 `routeIgdb`）冒充"塞尔达传说：王国之泪""博德之门 3"的封面；2026-10-27 生成 | 811×1080、600×900 |
 
 截断数据、svg 文本、gif 由测试代码按需构造。

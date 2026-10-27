@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 9
 **序号**: 14
-**状态**: pending
+**状态**: completed（2026-10-27）
 **类别**: FRONTEND
 **架构层级**: 表现层（reader：`src/components/reader/`、`src/lib/reader/`）
 **所属 Feature**: [F-005 书影音](../../product/features/F-005-书影音/feature-scope.md)
@@ -40,9 +40,9 @@
 
 ## DoD（完成定义）
 
-- [ ] 页面与 admin.pen 09f、Row 7 一致：1440 宽 6 列、390 宽 2 列；砖块宽高比与大图一致（±1%），不裁切；五种平台徽标正确；翻面背面有平台、无开发商
-- [ ] 测试清单全部由红变绿；影响范围：`tests/build/reader-output.test.ts` 原有用例、`tests/e2e/reader-media.spec.ts` 电影 / 剧集用例（TC-US03-19、20）chromium 通过，本任务 E2E 补跑 webkit
-- [ ] 未引入新依赖（`git diff package.json` 为空）
+- [x] 页面与 admin.pen 09f、Row 7 一致：1440 宽 6 列、390 宽 2 列；砖块宽高比与大图一致（±1%），不裁切；五种平台徽标正确；翻面背面有平台、无开发商
+- [x] 测试清单全部由红变绿；影响范围：`tests/build/reader-output.test.ts` 原有用例、`tests/e2e/reader-media.spec.ts` 电影 / 剧集用例（TC-US03-19、20）chromium 通过，本任务 E2E 补跑 webkit
+- [x] 未引入新依赖（`git diff package.json` 为空）
 
 ## 依赖
 
@@ -53,6 +53,14 @@
 - `src/components/reader/PlatformBadge.tsx`（新建）、`MediaPoster.tsx`、`MediaPosterWall.tsx`、`MediaList.astro`、`MediaPage.astro`（改）
 - `src/lib/reader/{shelf,shelf-time,types}.ts`（改）
 - `tests/unit/reader/{shelf,shelf-time}.test.ts`、`tests/unit/reader/media-poster-wall.test.tsx`、`tests/build/reader-output.test.ts`、`tests/e2e/reader-media.spec.ts`、`tests/fixtures/reader/reader-fixture.shelf.json`（改）、`tests/fixtures/igdb/*`（与任务 12 共用）
+
+## 实现记录（2026-10-27）
+
+- `posterAspect(type, cover)` 与 `isPosterType(type)`（movie / series / game）在 `shelf.ts`；`groupByTime` 进行中段标签改用 `statusLabel`（游戏"在玩"、书"在读"）
+- `PlatformBadge.tsx` 内联 Simple Icons 官方路径（playstation / nintendoswitch / steam，取自 jsdelivr `simple-icons@latest`），`role="img"` + `aria-label`
+- `MediaPoster`：根节点加 `group`；平台浮层 `[data-poster-hover]` 用 `group-hover`（Tailwind 4 的 hover 变体自带 `@media (hover: hover)`）与 `pointer-fine:group-has-focus-visible` 淡入；翻面控件名 `《名称》，PS5，2024`（年份徽标在任务 15）
+- 夹具：漫画清空后，原"超长标题 + 多行短评"漫画条目无处安放（其他分类条数已定），多行短评移到"无评桌游"，TC-US03-13 暂只测转义，超长标题与多行短评在任务 16（全部海报墙）补回
+- E2E 新增 IGDB 夹具 `co5vmg-811x1080.jpg`、`cobg300-600x900.jpg`（sharp 纯色图）；悬停时 FlipCard 倾斜放大，徽标位置改断言计算样式 `left` / `top` = 10px；触屏用例在 WebKit 跳过（Windows 版不支持 `isMobile`）
 
 ## 回滚策略
 

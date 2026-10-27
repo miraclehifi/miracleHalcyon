@@ -23,7 +23,7 @@
 
 Seed 中标题含 `<b>` 的条目 1 条（book，读过 · 2026-01-01），用于转义检查。
 
-E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/` 下对应尺寸的夹具图片（`conope0` 返回 404），不访问外网。2026-10-23 起游戏由列表行改为海报墙，原游戏夹具移到桌游、漫画改为空分类（[game-case-shelf](../../../../../backlog/game-case-shelf.md)）。
+E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/` 下对应尺寸的夹具图片（`conope0` 返回 404），不访问外网。2026-10-23 起游戏由列表行改为海报墙，原游戏夹具移到桌游、漫画改为空分类（[game-case-shelf](../../../../../backlog/game-case-shelf.md)）。原漫画中的"超长标题 + 多行短评"条目随之移除，多行短评暂放"无评桌游"；TC-US03-13 的超长标题部分待任务 16（所有分类海报墙）补回夹具（2026-10-27 任务 14）。
 
 ---
 
@@ -282,7 +282,7 @@ E2E 中 `page.route("https://images.igdb.com/**")` 返回 `tests/fixtures/igdb/`
 |--------|----------|------|
 | SC-SHELF-21 | P0 | build |
 
-**预期结果：** `/media/game` 有一个 `MediaPosterWall` 岛，`[data-poster-static]` 静态网格含 5 个游戏（顺序：塞尔达传说：王国之泪（在玩）、黑神话：悟空、断链游戏、博德之门 3、某款老游戏）；
+**预期结果：** `/media/game` 有一个 `MediaPosterWall` 岛，`[data-poster-static]` 静态网格含 5 个游戏（顺序：塞尔达传说：王国之泪（在玩）、黑神话：悟空、博德之门 3、断链游戏、某款老游戏——按标记日期倒序，2026-10-27 按测试数据表日期更正）；
 - "黑神话：悟空"`<img src>` = `https://images.igdb.com/igdb/image/upload/t_1080p/co8h3y.jpg`，砖块 `style` 含 `aspect-ratio: 810 / 1080`，`<img>` 带 `width="810" height="1080"`、`object-fit: contain`；"博德之门 3"为 `600 / 900`；"某款老游戏"无 `<img>`、砖块 `aspect-ratio: 3 / 4`
 - 每张海报正面含（悬停时显示的）平台徽标与年份徽标："黑神话：悟空"年份 `2024`，"某款老游戏"若无年份则无年份徽标；平台徽标文本与 `aria-label`：`平台：PS5` / `平台：Switch` / `平台：Steam` / `平台：PS4` / `平台：Switch 2`
 - 背面含"黑神话：悟空"、`评分 4 / 5`、"玩过 · 2025-08-20"、豆瓣链接，背面不含平台徽标；整页不含"Game Science"

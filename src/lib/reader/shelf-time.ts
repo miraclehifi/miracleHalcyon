@@ -1,5 +1,5 @@
 // 海报墙按时间分段（reader module-spec §2 groupByTime，reader-media.md"按时间分段"）：纯函数，日期按字符串拆分，不依赖时区
-import { countLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
+import { countLabel, statusLabel, type ShelfPublicEntry } from "../../domains/shelf/entry";
 import { sortPublic } from "./shelf";
 
 export interface TimeGroup {
@@ -22,7 +22,7 @@ export function groupByTime(entries: readonly ShelfPublicEntry[], today: string)
   };
   for (const entry of sortPublic(entries)) {
     const d = parts(entry.markedOn);
-    if (entry.status === "in_progress") put("in-progress", "在看", 0, entry);
+    if (entry.status === "in_progress") put("in-progress", statusLabel(entry.type, "in_progress"), 0, entry); // 在看 / 在玩 / 在读
     else if (entry.markedOn > today || (d.y === now.y && d.m === now.m)) put("this-month", "本月", 1, entry, { month: now.m });
     else if (d.y === prev.y && d.m === prev.m) put("last-month", "上个月", 2, entry, { month: prev.m });
     else if (d.y === now.y) put("this-year", "本年", 3, entry, { year: now.y });

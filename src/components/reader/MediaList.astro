@@ -1,10 +1,10 @@
 ---
-// MediaList（components.md，reader-media.md"MediaList"）：书、漫画用 MediaCard 网格；电影、剧集用 MediaPosterWall 岛；
-// 游戏、桌游用 MediaRow 列表；空分类显示 EmptyState（无按钮，图标按分类；电影、剧集空分类不挂海报墙，也就没有"按时间"按钮）
+// MediaList（components.md，reader-media.md"MediaList"）：书、漫画用 MediaCard 网格；电影、剧集、游戏用 MediaPosterWall 岛；
+// 桌游用 MediaRow 列表；空分类显示 EmptyState（无按钮，图标按分类；海报墙分类为空时不挂岛，也就没有"按时间"按钮）
 import { EmptyState } from "../ui/EmptyState";
 import type { IconName } from "../ui/icons";
 import { TYPE_LABELS, type ShelfPublicEntry, type ShelfType } from "../../domains/shelf/entry";
-import { emptyIcon } from "../../lib/reader/shelf";
+import { emptyIcon, isPosterType } from "../../lib/reader/shelf";
 import MediaCard from "./MediaCard.astro";
 import { MediaPosterWall } from "./MediaPosterWall";
 import MediaRow from "./MediaRow.astro";
@@ -15,8 +15,8 @@ interface Props {
 }
 const { type, entries } = Astro.props;
 const cards = type === "book" || type === "comic";
-const posters = type === "movie" || type === "series";
-// 海报墙不显示导演：岛的 props 会序列化进 HTML，先去掉
+const posters = isPosterType(type);
+// 海报墙不显示导演 / 开发商：岛的 props 会序列化进 HTML，先去掉
 const posterEntries = posters ? entries.map((entry) => ({ ...entry, creator: null })) : [];
 ---
 

@@ -1,9 +1,11 @@
-// MediaPosterWall（components.md"海报墙参数"，reader-media.md"海报墙""按时间分段"）：电影、剧集满宽海报墙，React 岛（client:load）。
+// MediaPosterWall（components.md"海报墙参数"，reader-media.md"海报墙""按时间分段"）：电影、剧集、游戏满宽海报墙，React 岛（client:load）。
+// 砖块比例按 posterAspect：电影、剧集 2:3，游戏按封面原始比例（无封面 3:4），高 = 列宽 ÷ 比值，封面加载失败时尺寸不变。
 // 服务端 / 水合前渲染 [data-poster-static] 静态网格（Masonry 在服务端量不到宽度）；挂载后换成 vendor Masonry 并播放入场。
 // 受控"当前翻开的海报"（最多一张，跨分段），Esc 翻回；"按时间"开关存 localStorage media:by-time，按钮经 portal 挂到页面槽位
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ShelfPublicEntry } from "../../domains/shelf/entry";
+import { posterAspect } from "../../lib/reader/shelf";
 import { groupByTime } from "../../lib/reader/shelf-time";
 import Masonry, { type MasonryItem } from "../vendor/react-bits/Masonry";
 import { MediaPoster } from "./MediaPoster";
@@ -34,6 +36,9 @@ function writeByTime(value: boolean) {
     // 只是个人偏好，存不了就算了
   }
 }
+
+const aspectOf = (entry: ShelfPublicEntry) => posterAspect(entry.type, entry.cover ? { width: entry.coverWidth, height: entry.coverHeight } : null);
+const ratioOf = (entry: ShelfPublicEntry) => aspectOf(entry).split(" / ").map(Number) as [number, number];
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const localToday = (now = new Date()) => `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
@@ -96,7 +101,7 @@ export function MediaPosterWall({ entries }: MediaPosterWallProps) {
     return (
       <ul data-poster-static className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 max-[600px]:grid-cols-2">
         {entries.map((entry) => (
-          <li key={ids.get(entry)} data-poster-title={entry.title} className="aspect-[2/3]">
+          <li key={ids.get(entry)} data-poster-title={entry.title} style={{ aspectRatio: aspectOf(entry) }}>
             <MediaPoster entry={entry} still />
           </li>
         ))}
@@ -105,7 +110,10 @@ export function MediaPosterWall({ entries }: MediaPosterWallProps) {
   }
 
   const wall = (list: ShelfPublicEntry[], segment?: string) => {
-    const items: MasonryItem[] = list.map((entry) => ({ id: ids.get(entry)!, img: entry.cover ?? "", width: 2, height: 3, title: entry.title }));
+    const items: MasonryItem[] = list.map((entry) => {
+      const [width, height] = ratioOf(entry);
+      return { id: ids.get(entry)!, img: entry.cover ?? "", width, height, title: entry.title };
+    });
     const byId = new Map(list.map((entry) => [ids.get(entry)!, entry]));
     return (
       <Masonry

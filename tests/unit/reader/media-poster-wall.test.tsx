@@ -1,7 +1,9 @@
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ShelfPublicEntry } from "../../../src/domains/shelf/entry";
+import { renderToString } from "react-dom/server";
 import { MediaPosterWall } from "../../../src/components/reader/MediaPosterWall";
+import { PlatformBadge } from "../../../src/components/reader/PlatformBadge";
 
 // MediaPosterWall / MediaPoster（components.md"海报墙参数"，UT-16）。jsdom 量不到宽度：打桩 getBoundingClientRect 让 Masonry 排出砖块；
 // 无 IntersectionObserver 时 Masonry 直接入场
@@ -111,6 +113,11 @@ describe("MediaPosterWall", () => {
     vi.useRealTimers();
   });
 
+  it("电影模式不渲染平台徽标", async () => {
+    await renderWall();
+    expect(poster("肖申克的救赎").querySelector("[data-platform-badge]")).toBeNull();
+  });
+
   it("按钮挂到桌面槽；localStorage 读到 1 时默认分段，抛错时按关闭", async () => {
     const desktop = (query: string) => ({ matches: query === "(min-width: 768px)", media: query, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList;
     vi.spyOn(window, "matchMedia").mockImplementation(desktop);
@@ -124,5 +131,66 @@ describe("MediaPosterWall", () => {
     });
     await renderWall();
     expect(toggle().getAttribute("aria-pressed")).toBe("false");
+  });
+});
+
+// [UT-18][SC-SHELF-21][SC-SHELF-22] 游戏海报与 PlatformBadge（年份徽标见任务 15）
+describe("PlatformBadge", () => {
+  it("5 种平台的文字、aria-label 与标志", () => {
+    const platforms = ["ps5", "ps4", "switch", "switch2", "steam"] as const;
+    const badges = platforms.map((platform) => {
+      const { container } = render(<PlatformBadge platform={platform} />);
+      const badge = container.querySelector<HTMLElement>("[data-platform-badge]")!;
+      return [badge.textContent, badge.getAttribute("aria-label"), badge.querySelector("svg")!.getAttribute("data-icon")];
+    });
+    expect(badges).toEqual([
+      ["PS5", "平台：PS5", "playstation"],
+      ["PS4", "平台：PS4", "playstation"],
+      ["Switch", "平台：Switch", "nintendoswitch"],
+      ["Switch 2", "平台：Switch 2", "nintendoswitch"],
+      ["Steam", "平台：Steam", "steam"],
+    ]);
+  });
+});
+
+describe("MediaPoster 游戏模式", () => {
+  const IGDB = "https://images.igdb.com/igdb/image/upload/t_1080p/co8h3y.jpg";
+  const game = (title: string, extra: Partial<ShelfPublicEntry> = {}) =>
+    entry(title, { type: "game", creator: "Game Science", year: 2024, platform: "ps5", cover: IGDB, coverWidth: 810, coverHeight: 1080, ...extra });
+
+  it("正面无名称浮层，左上角平台徽标默认隐藏（aria-hidden）；背面无平台、无开发商；翻面控件 aria-label 含平台与年份", async () => {
+    await renderWall([game("黑神话：悟空")]);
+    const control = screen.getByRole("button", { name: "《黑神话：悟空》，PS5，2024" });
+    const face = control.closest("[data-poster]") as HTMLElement;
+    expect(face.querySelector("[data-poster-caption]")).toBeNull();
+    const hover = face.querySelector<HTMLElement>("[data-poster-hover]")!;
+    expect(hover.getAttribute("aria-hidden")).toBe("true");
+    expect(hover.className).toMatch(/opacity-0/);
+    expect(hover.querySelector("[data-platform-badge]")!.textContent).toBe("PS5");
+    expect(face.querySelector("[data-poster-back] [data-platform-badge]")).toBeNull();
+    expect(face.textContent).not.toContain("Game Science");
+  });
+
+  it("<img> 不裁切（object-contain）且带 width / height", async () => {
+    await renderWall([game("黑神话：悟空")]);
+    const img = document.querySelector<HTMLImageElement>("[data-poster-front] img")!;
+    expect([img.getAttribute("width"), img.getAttribute("height")]).toEqual(["810", "1080"]);
+    expect(img.className).toMatch(/object-contain/);
+    expect(img.className).not.toMatch(/object-cover/);
+  });
+
+  it("无年份时 aria-label 只含平台；无封面时占位显示游戏名，平台徽标仍在", async () => {
+    await renderWall([game("某款老游戏", { year: null, platform: "ps4", cover: null, coverWidth: null, coverHeight: null })]);
+    const face = screen.getByRole("button", { name: "《某款老游戏》，PS4" }).closest("[data-poster]") as HTMLElement;
+    expect(within(face).getByRole("img", { name: "图片不可用" }).textContent).toContain("某款老游戏");
+    expect(face.querySelector("[data-poster-hover] [data-platform-badge]")!.textContent).toBe("PS4");
+  });
+
+  it("静态网格：砖块按封面比例（aspect-ratio），无封面 3 / 4", () => {
+    const container = mountSlots();
+    const html = renderToString(<MediaPosterWall entries={[game("黑神话：悟空"), game("老游戏", { cover: null, coverWidth: null, coverHeight: null })]} />);
+    container.innerHTML = html;
+    const tiles = [...container.querySelectorAll<HTMLElement>("[data-poster-static] > li")];
+    expect(tiles.map((li) => li.style.aspectRatio)).toEqual(["810 / 1080", "3 / 4"]);
   });
 });

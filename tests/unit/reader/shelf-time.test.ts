@@ -62,6 +62,14 @@ describe("groupByTime", () => {
     expect(summary(groupByTime([movie("闰日", "2028-02-29")], "2028-03-01"))).toEqual([["上个月", "2 月 · 1 部", ["闰日"]]]);
   });
 
+  it("游戏：进行中段为“在玩”，量词“款”", () => {
+    const game = (title: string, markedOn: string, status: ShelfPublicEntry["status"] = "completed") => ({ ...movie(title, markedOn, status), type: "game" as const });
+    expect(summary(groupByTime([game("在玩", "2026-05-01", "in_progress"), game("本月", "2026-10-05")], "2026-10-22"))).toEqual([
+      ["在玩", "1 款", ["在玩"]],
+      ["本月", "10 月 · 1 款", ["本月"]],
+    ]);
+  });
+
   it("每段有稳定 key", () => {
     expect(groupByTime([movie("a", "2024-06-01"), movie("b", "2026-10-05")], "2026-10-22").map((g) => g.key)).toEqual(["this-month", "year-2024"]);
   });

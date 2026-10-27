@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { countLabel, SHELF_TYPES, sortEntries, statusLabel } from "../../../src/domains/shelf/entry";
 import { parseShelfData } from "../../../src/integrations/reader-data";
-import { emptyIcon, groupShelf, markedMonth, shelfPath } from "../../../src/lib/reader/shelf";
+import { emptyIcon, groupShelf, markedMonth, posterAspect, shelfPath } from "../../../src/lib/reader/shelf";
 
 const { entries } = parseShelfData(JSON.parse(readFileSync("tests/fixtures/reader/reader-fixture.shelf.json", "utf8")), "reader-fixture");
 
@@ -55,11 +55,13 @@ describe("groupShelf / shelfPath / emptyIcon", () => {
   const titles = (type: keyof typeof groups) => groups[type].map((e) => e.title);
 
   it("按分类分组，组内进行中在前、日期倒序；空分类为空数组", () => {
-    expect({ series: titles("series"), book: titles("book"), movie: titles("movie"), boardgame: titles("boardgame") }).toEqual({
+    expect({ series: titles("series"), book: titles("book"), movie: titles("movie"), game: titles("game"), boardgame: titles("boardgame"), comic: titles("comic") }).toEqual({
       series: ["B", "C", "A"],
       book: ["三体", "原则", "手记", "<b>粗体</b>"],
       movie: ["肖申克的救赎", "无名片"],
-      boardgame: [],
+      game: ["塞尔达传说：王国之泪", "黑神话：悟空", "博德之门 3", "断链游戏", "某款老游戏"],
+      boardgame: ["卡坦岛", "无评桌游"],
+      comic: [],
     });
   });
 
@@ -74,6 +76,19 @@ describe("groupShelf / shelfPath / emptyIcon", () => {
   it("分类地址与空状态图标", () => {
     expect(SHELF_TYPES.map(shelfPath)).toEqual(["/media", "/media/comic", "/media/movie", "/media/series", "/media/game", "/media/boardgame"]);
     expect(SHELF_TYPES.map(emptyIcon)).toEqual(["book-open", "book-image", "film", "tv", "gamepad-2", "dices"]);
+  });
+});
+
+// [UT-17][SC-SHELF-21][SC-SHELF-22] 海报砖块宽高比（reader module-spec posterAspect）
+describe("posterAspect", () => {
+  const size = { width: 810, height: 1080 };
+  it("书、漫画、电影、剧集 2 / 3（不看封面宽高）；桌游 1 / 1", () => {
+    expect((["book", "comic", "movie", "series", "boardgame"] as const).map((type) => posterAspect(type, size))).toEqual(["2 / 3", "2 / 3", "2 / 3", "2 / 3", "1 / 1"]);
+  });
+  it("游戏按封面原始宽高；无封面、宽高缺失或为 0 → 3 / 4", () => {
+    expect(posterAspect("game", size)).toBe("810 / 1080");
+    expect(posterAspect("game", { width: 600, height: 900 })).toBe("600 / 900");
+    expect([posterAspect("game", null), posterAspect("game", { width: null, height: 1080 }), posterAspect("game", { width: 0, height: 1080 }), posterAspect("game", { width: 810, height: 0 })]).toEqual(["3 / 4", "3 / 4", "3 / 4", "3 / 4"]);
   });
 });
 

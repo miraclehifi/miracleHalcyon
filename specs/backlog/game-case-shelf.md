@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | scheduled |
+| 状态 | done |
 | 类型 | Task |
 | 优先级 | P2-Medium |
 | 来源 | 作者需求 |
@@ -23,11 +23,11 @@
 - [x] [components.md](../ui/components.md)：登记 `PlatformBadge`；`MediaPoster` 补游戏砖块比例与悬停规则；`MediaRow` / `MediaList` 使用范围
 - [x] 作者确认设计稿（2026-10-23 "开始写文档"）
 - [x] [reader-media.md](../ui/pages/reader-media.md)、[admin-media.md](../ui/pages/admin-media.md)、US-01 / 02 / 03 与验收、F-005 架构（[ADR-013](../engineering/features/F-005-书影音/architecture/adr/ADR-013-game-cover-igdb-link.md)）、shelf 领域文档按本条更新；09c 改为桌游示例，新增 11g（后台游戏表单）与"游戏卡片翻面交互"
-- [ ] 版式同电影海报墙：满宽、列宽 200 自动（1440 宽 6 列）、间距 16；"按时间"切换、翻面看详情同电影
-- [ ] 砖块比例与 IGDB 大图实际宽高比完全一致（高 = 列宽 × 图高 ÷ 图宽），封面完整显示不裁切（`object-fit: contain` 兜底）；无封面按 3:4
-- [ ] 悬停 / 键盘聚焦：不浮出游戏名，左上角淡入平台徽标；触屏设备无悬停（平台不显示）；`prefers-reduced-motion` 时无位移
-- [ ] 条目新增平台字段（`ps5` / `ps4` / `switch` / `switch2` / `steam`，默认 `ps5`），后台录入表单加选择项
-- [ ] 录入保存时服务端读取 IGDB 图片的宽高（只读图片头）存入条目，供 Masonry 计算砖块高度；图片加载失败显示无封面占位
+- [x] 版式同电影海报墙：满宽、列宽 200 自动（1440 宽 6 列）、间距 16；"按时间"切换、翻面看详情同电影
+- [x] 砖块比例与 IGDB 大图实际宽高比完全一致（高 = 列宽 × 图高 ÷ 图宽），封面完整显示不裁切（`object-fit: contain` 兜底）；无封面按 3:4
+- [x] 悬停 / 键盘聚焦：不浮出游戏名，左上角淡入平台徽标；触屏设备无悬停（平台不显示）；`prefers-reduced-motion` 时无位移
+- [x] 条目新增平台字段（`ps5` / `ps4` / `switch` / `switch2` / `steam`，默认 `ps5`），后台录入表单加选择项
+- [x] 录入保存时服务端读取 IGDB 图片的宽高（只读图片头）存入条目，供 Masonry 计算砖块高度；图片加载失败显示无封面占位
 
 ## 影响分析
 
