@@ -69,7 +69,7 @@ describe("外发请求范围与数量", () => {
   it("单页 ≤ 41 个外部请求", async () => {
     const { fetchImpl, requests } = fakeDouban({ "book·done·0": FIXTURES.bookDoneManga });
     const res = await makeImport(fetchImpl).page(req({ kind: "book", types: ["book", "comic"] }));
-    expect([res.body?.created, requests.length <= 41, requests.every((r) => WHITELIST(r.url) && r.redirect === "manual")]).toEqual([20, true, true]);
+    expect([res.body?.created, requests.length <= 41, requests.every((r) => WHITELIST(r.url) && r.redirect === "manual")]).toEqual([19, true, true]); // tags 失败那本进 failed
     expect(requests[0].url).toBe(`https://m.douban.com/rexxar/api/v2/user/${UID}/interests?type=book&status=done&start=0&count=20`);
   });
 

@@ -17,7 +17,8 @@ const UID = "189806038";
 const W = "2026-10-18 08:25:08";
 const load = (name: string) => JSON.parse(readFileSync(`tests/fixtures/douban/${name}.json`, "utf8"));
 const MANGA = ["36484713", "36265242", "36145936"];
-const TAGS_FAIL = "35929511"; // 标签请求失败 → 按书处理
+const TAGS_FAIL = "35929511"; // 标签请求失败 → 单条 FETCH_FAILED（不按书写入，免得漫画被写成书）
+const TAGS_FAILED = [{ doubanId: TAGS_FAIL, title: "降り積もれ孤独な死よ (3)", reason: "FETCH_FAILED" }];
 
 type Row = ShelfEntry;
 
@@ -259,7 +260,7 @@ describe("importPage（SHELF-UT-18）", () => {
   it("外部请求数与并发上限", async () => {
     const { service, douban } = setup({ pages: { "book·done·0": load("interests-book-done-manga") }, client: { delayMs: 2 } });
     const result = await service.importPage(req({ kind: "book", types: ["book", "comic"] }));
-    expect([result.created, douban.calls.length, douban.maxInFlight() <= 5]).toEqual([20, 41, true]);
+    expect([result.created, result.failed, douban.calls.length, douban.maxInFlight() <= 5]).toEqual([19, TAGS_FAILED, 40, true]);
   });
 
   // [TC-US04-10][SC-IMPORT-20] 非法参数：400，不发外部请求、不写状态
@@ -335,6 +336,14 @@ describe("类别过滤与类别水位（SHELF-UT-22）", () => {
     expect([result.created, result.updated, result.failed.length, douban.calls.filter((c) => c.startsWith("cover:")).length]).toEqual([created, 0, 0, created]);
   });
 
+  // tags 失败不按书覆盖：已有漫画条目保持不变
+  it("tags 失败时已有漫画不被改成书", async () => {
+    const existing = { type: "comic", title: "本站标题", douban: { id: TAGS_FAIL, url: `https://book.douban.com/subject/${TAGS_FAIL}/` } } as Partial<Row>;
+    const { service, repo } = setup({ pages: { "book·done·0": load("interests-book-done-manga") }, seed: [existing] });
+    const result = await service.importPage(req({ kind: "book", types: ["book", "comic"] }));
+    expect([result.failed, byDouban(repo, TAGS_FAIL)?.type, byDouban(repo, TAGS_FAIL)?.title]).toEqual([TAGS_FAILED, "comic", "本站标题"]);
+  });
+
   it("已有的未勾选类别条目不变", async () => {
     const existing = { type: "series", title: "本站标题", douban: { id: "30513783", url: "https://movie.douban.com/subject/30513783/" } } as Partial<Row>;
     const { service, repo } = setup({ pages: { "movie·done·0": load("interests-movie-done-mixed") }, seed: [existing] });
@@ -343,11 +352,11 @@ describe("类别过滤与类别水位（SHELF-UT-22）", () => {
   });
 
   it.each([
-    [["comic"], 3, 3], [["book"], 17, 17],
-  ])("书 %j：仍请求每本 tags；created %d", async (types, created, covers) => {
+    [["comic"], 3, 3], [["book"], 16, 16],
+  ])("书 %j：仍请求每本 tags；created %d；tags 失败那本进 failed", async (types, created, covers) => {
     const { service, douban } = setup({ pages: { "book·done·0": load("interests-book-done-manga") } });
     const result = await service.importPage(req({ kind: "book", types }));
-    expect([result.created, douban.calls.filter((c) => c.startsWith("tags:")).length, douban.calls.filter((c) => c.startsWith("cover:")).length]).toEqual([created, 20, covers]);
+    expect([result.created, result.failed, douban.calls.filter((c) => c.startsWith("tags:")).length, douban.calls.filter((c) => c.startsWith("cover:")).length]).toEqual([created, TAGS_FAILED, 20, covers]);
   });
 
   // [TC-US04-25][SC-IMPORT-29] 截断点取勾选类别中最早的水位；touch / complete 只动 types

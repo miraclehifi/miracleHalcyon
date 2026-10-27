@@ -31,6 +31,6 @@
 | `interests-movie-done-incr.json` | 构造标记时间：3 条晚于 `2026-10-18 08:25:08`、2 条恰为该时间、1 条更早；`total: 614` | TC-US04-18、25 |
 | `interests-movie-done-doing2done.json` | 构造：在看剧集 36189165 以看过标记（`2026-10-26 20:00:00`、5 星）排在最前 | TC-US04-21 |
 | `interests-movie-done-mixed.json` | 真实看过页中 12 部电影 + 8 部剧集，`total: 20` | TC-US04-24 |
-| `interests-book-done-manga.json` | 真实读过页前 20 本；测试按 ID 打桩 36484713、36265242、36145936 为漫画，35929511 的 tags 请求失败 | TC-US04-13、24 |
+| `interests-book-done-manga.json` | 真实读过页前 20 本；测试按 ID 打桩 36484713、36265242、36145936 为漫画，35929511 的 tags 请求失败（导入时进 failed） | TC-US04-13、24 |
 
 跳转响应、封面异常（svg / 超大 / 超时 / 非豆瓣域）由测试代码按需构造，不录制。App 分享链接即 dispatch 条目链接，不涉及短链。导入的错误响应（404 / 403 / 要求登录 / 超时）由测试代码构造。

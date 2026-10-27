@@ -1,6 +1,6 @@
 # Sprint 9：书影音
 
-**状态**: in_progress（任务 1–20 全部实现（2026-10-27），待全量回归后补审 12–20；任务 1–11 已实现并完成 code-review（2026-10-23）；任务 12–16（游戏海报墙、"按时间"发行年份、统一海报墙）已实现（2026-10-27）；2026-10-23 再插入任务 15–16 豆瓣批量导入）
+**状态**: in_progress（任务 1–20 全部实现并完成 code-review（2026-10-27），待 verify；任务 1–11 已实现并完成 code-review（2026-10-23）；任务 12–16（游戏海报墙、"按时间"发行年份、统一海报墙）已实现（2026-10-27）；2026-10-23 再插入任务 15–16 豆瓣批量导入）
 **创建**: 2026-10-21
 **Feature**: F-005 书影音（[Backlog: media-douban-sync](../../backlog/media-douban-sync.md)）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）
@@ -79,5 +79,5 @@ DDL 变更：迁移 `0004_shelf_entries.sql`（任务 2 实现时追加到 [ddl-
 
 - [x] 所有任务 completed（1–20，2026-10-27）
 - [x] `npm run lint`、`npm run check`、`npm test`、`npm run test:e2e`（chromium + webkit）、`npm run test:build` 通过（2026-10-22：chromium 全过；webkit / chromium-media 的失败为并发负载超时，单独复跑通过，见 validation）
-- [ ] Backlog 验收条件逐条勾选；code-review → verify（2026-10-23 任务 1–11 code-review 完成，[报告](../../test/features/F-005-书影音/reviews/code-review.md)；任务 12–14 实现后补审）
+- [ ] Backlog 验收条件逐条勾选；code-review → verify（code-review 完成：2026-10-23 任务 1–11、2026-10-27 任务 12–20，[报告](../../test/features/F-005-书影音/reviews/code-review.md)；verify 待补）
 - [x] `ddl-changes.md` 有 0004 条目（⏳ 待执行）

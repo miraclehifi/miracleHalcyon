@@ -24,7 +24,7 @@ export const W = "2026-10-18 08:25:08";
 export const REXXAR = "https://m.douban.com/rexxar/api/v2/";
 export const FIXTURES = { movieDone, movieDoneP2, movieDoneP3, movieDoing, bookDone, bookDoneManga, gameDone, movieDoneIncr, movieDoneDoing2Done, movieDoneMixed };
 export const MANGA = ["36484713", "36265242", "36145936"]; // 书读过页中按漫画打桩的 3 本
-export const TAGS_FAIL = "35929511"; // 标签请求失败 → 按书处理
+export const TAGS_FAIL = "35929511"; // 标签请求失败 → 导入时单条 FETCH_FAILED
 
 type Route = (url: URL, init?: RequestInit) => Response | Promise<Response>;
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });

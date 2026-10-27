@@ -144,6 +144,38 @@ describe("UT-22 导入过程", () => {
     await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("豆瓣上找不到这个用户"));
     expect([imports.length, fetchMock.mock.calls.some(([u]) => String(u).endsWith("/import/finish"))]).toEqual([1, false]);
   });
+
+  // [SC-IMPORT-17] 已导入部分条目后出错：Alert 与汇总、失败列表同时显示；按钮回到打开时的样子
+  it("部分导入后出错", async () => {
+    stub({
+      state: () => json({ uid: "ahbei", categories: categories("2026-10-23T13:30:00.000Z") }),
+      page: (_body, n) => (n === 1 ? json(page({ nextStart: 20, created: 2, failed: [{ doubanId: "1292052", title: null, reason: "PARSE_FAILED" }] })) : json({ error: { code: "DOUBAN_UNAVAILABLE", message: "x" } }, 502)),
+    });
+    open();
+    await waitFor(() => expect(button("同步新标记")).not.toBeNull());
+    fireEvent.click(button("全量导入")!);
+    await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
+    expect([screen.queryByText("已停止：新增 2、更新 0、失败 1、封面失败 0") !== null, screen.queryByText(/豆瓣 1292052/) !== null, button("同步新标记") !== null, button("再次同步")]).toEqual([true, true, true, null]);
+  });
+
+  // 进行中与结束时触发按钮被替换：焦点留在对话框内，Esc 仍能在结束后关闭
+  it("阶段切换后焦点留在对话框、Esc 可关闭", async () => {
+    const onClose = vi.fn();
+    render(
+      <ToastProvider>
+        <DoubanImportDialog open onClose={onClose} onFinished={() => {}} />
+      </ToastProvider>,
+    );
+    await waitFor(() => expect(stateUids.length).toBe(1));
+    fireEvent.change(screen.getByLabelText("豆瓣用户 ID"), { target: { value: "ahbei" } });
+    button("全量导入")!.focus();
+    fireEvent.click(button("全量导入")!);
+    await waitFor(() => expect(screen.getByText(/导入完成/)).toBeTruthy());
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("Checkbox", () => {

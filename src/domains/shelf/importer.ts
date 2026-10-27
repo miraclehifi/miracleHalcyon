@@ -257,9 +257,11 @@ export function createShelfImporter({ repo, store, hooks, douban, stateRepo, tim
           if (req.kind !== "book" && !req.types.includes(pre.fields.type)) return { kind: "skipped" }; // 书要先取标签才能判定漫画
           let m: MappedInterest = pre;
           if (req.kind === "book") {
-            const tags = await call((signal) => client.fetchBookTags(pre.doubanId, signal)).catch(() => [] as string[]);
+            // 与识别不同，导入不按书降级：否则漫画被写成书、已有漫画被覆盖成书（单条失败，重新导入可补）
+            const tags = await call((signal) => client.fetchBookTags(pre.doubanId, signal)).catch(() => null);
             notTimedOut(pre.doubanId, pre.fields.title);
-            m = mapInterest("book", item, { tags: tags === TIMED_OUT ? [] : tags }) as MappedInterest;
+            if (tags === null || tags === TIMED_OUT) throw new ImportItemError(pre.doubanId, "FETCH_FAILED", pre.fields.title);
+            m = mapInterest("book", item, { tags }) as MappedInterest;
             if (!req.types.includes(m.fields.type)) return { kind: "skipped" };
           } else if (req.kind === "game") {
             const game = await call((signal) => client.fetchSubject({ kind: "game", id: pre.doubanId }, signal)).catch(() => undefined);

@@ -107,6 +107,12 @@ export function DoubanImportDialog({ open, onClose, onFinished }: DoubanImportDi
     };
   }, [open]);
 
+  // 开始 / 结束时触发按钮被替换卸载，焦点会掉到 body（Esc 与 Tab 陷阱都失效）：拉回对话框
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (open && dialog && !dialog.contains(document.activeElement)) dialog.focus();
+  }, [open, phase]);
+
   const categories = sync.uid === uid ? sync.categories : [];
   const synced = hasAnySync(categories);
   const formatError = uidError(uid);
@@ -189,6 +195,8 @@ export function DoubanImportDialog({ open, onClose, onFinished }: DoubanImportDi
 
   const step = run && busy ? run.plan[run.stepIndex] : null;
   const shownFailures = run?.failures.slice(0, FAILURE_LIST_MAX) ?? [];
+  // 出错时若已导入部分条目，同时显示汇总（admin-media.md"错误"）
+  const showSummary = phase === "finished" && run !== null && (!run.error || run.totals.created + run.totals.updated + run.totals.failed > 0);
 
   return createPortal(
     <div ref={rootRef} className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -198,8 +206,9 @@ export function DoubanImportDialog({ open, onClose, onFinished }: DoubanImportDi
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         onKeyDown={onKeyDown}
-        className="relative flex max-h-full w-full max-w-[440px] flex-col gap-4 overflow-y-auto rounded-card bg-surface p-6 shadow-[0_12px_32px_rgb(0_0_0/20%)]"
+        className="relative flex outline-none max-h-full w-full max-w-[440px] flex-col gap-4 overflow-y-auto rounded-card bg-surface p-6 shadow-[0_12px_32px_rgb(0_0_0/20%)]"
       >
         <div className="flex items-center gap-2.5">
           <Download size={20} aria-hidden="true" className="shrink-0 text-ink-muted" />
@@ -236,11 +245,11 @@ export function DoubanImportDialog({ open, onClose, onFinished }: DoubanImportDi
               {run.mode === "incremental" && <p className="text-caption text-ink-faint">同步新标记：每类从最新往旧翻，到上次同步的位置即停</p>}
             </>
           )}
-          {phase === "finished" && run && !run.error && (
+          {showSummary && run && (
             <>
               <p className="flex items-center gap-2 text-ui font-medium text-ink">
-                <Done size={16} aria-hidden="true" className="shrink-0 text-ok" />
-                {summaryText(run.totals, run.mode, run.stopped)}
+                {!run.error && <Done size={16} aria-hidden="true" className="shrink-0 text-ok" />}
+                {summaryText(run.totals, run.mode, run.stopped || run.error !== null)}
               </p>
               {shownFailures.length > 0 && (
                 <ul className="flex flex-col gap-1 rounded-control bg-surface-sunken px-3 py-2.5 text-caption text-ink-muted">
@@ -270,7 +279,7 @@ export function DoubanImportDialog({ open, onClose, onFinished }: DoubanImportDi
               </Button>
               {synced && (
                 <Button variant="primary" disabled={!canImport} onClick={() => void start("incremental")}>
-                  {phase === "finished" ? "再次同步" : "同步新标记"}
+                  {phase === "finished" && !run?.error ? "再次同步" : "同步新标记"}
                 </Button>
               )}
             </>

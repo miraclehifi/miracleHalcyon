@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
-import { entryCount, entryOf, fakeDouban, FIXTURES, makeImport, req, resetShelf, seedEntry, W } from "./import-fixtures";
+import { entryCount, entryOf, fakeDouban, FIXTURES, makeImport, req, resetShelf, seedEntry, TAGS_FAIL, W } from "./import-fixtures";
 import { NOW } from "./shelf-fixtures";
 
 // POST /api/admin/shelf/import、/import/finish（api-contract"导入"，ADR-014）：真实 D1 / R2，fetch 返回 interests-* 夹具
@@ -112,11 +112,12 @@ describe("分页、类别与重建", () => {
 
   // [TC-US04-24][SC-IMPORT-28][SC-IMPORT-30] 按类别过滤写入（决策表）
   it.each([
-    ["movie", ["movie"], 12], ["movie", ["series"], 8], ["movie", ["movie", "series"], 20], ["book", ["comic"], 3], ["book", ["book"], 17],
+    ["movie", ["movie"], 12], ["movie", ["series"], 8], ["movie", ["movie", "series"], 20], ["book", ["comic"], 3], ["book", ["book"], 16],
   ])("%s / %j → created %d", async (kind, types, created) => {
     const { fetchImpl, requests } = fakeDouban({ "movie·done·0": FIXTURES.movieDoneMixed, "book·done·0": FIXTURES.bookDoneManga });
     const res = await makeImport(fetchImpl).page(req({ kind, types }));
-    expect([res.body?.created, res.body?.failed, await entryCount(), requests.filter((r) => r.url.includes("doubanio.com")).length]).toEqual([created, [], created, created]);
+    const failed = kind === "book" ? [{ doubanId: TAGS_FAIL, title: "降り積もれ孤独な死よ (3)", reason: "FETCH_FAILED" }] : []; // tags 失败不按书写入
+    expect([res.body?.created, res.body?.failed, await entryCount(), requests.filter((r) => r.url.includes("doubanio.com")).length]).toEqual([created, failed, created, created]);
     if (kind === "book") expect(requests.filter((r) => r.url.endsWith("/tags")).length).toBe(20);
   });
 

@@ -222,7 +222,7 @@ if watermark：page.interests 中 create_time < watermark（字典序）的项�
 items = 剩余项中 status ∈ {done, doing} 的项
 existing = repo.findByDoubanIds(items 的 subject.id)
 对每项（并发，单项异常只进 failed[]）：
-  extra：book → fetchBookTags（失败 → []）；game → fetchSubject(game)（失败 → 缺失）
+  extra：book → fetchBookTags（失败 → 该项 ImportItemError(FETCH_FAILED) 进 failed[]，不按书写入：免得漫画写成书、已有漫画被覆盖；与识别的降级不同）；game → fetchSubject(game)（失败 → 缺失）
   m = mapInterest(...)；skip → 不计数；m.fields.type ∉ types → 跳过（不写入、不下载封面、不计数；书仍需先取标签才能判定）
   if 已有 e：
      data = merge(e, m.fields)：m.fields 中非 undefined 的字段覆盖；hidden、coverKey、coverUrl/宽高、createdAt 不动；

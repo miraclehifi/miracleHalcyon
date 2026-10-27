@@ -2,7 +2,7 @@ feature: F-006
 name: "媒体存储清理"
 status: in_progress
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-27
 backlog: specs/backlog/media-orphan-cleanup.md
 phases:
   feature_overview: done
@@ -15,8 +15,9 @@ phases:
   domain_design: done   # domain_model / api_contract / data_model: self-checked（media §9、post §6.1，无 DDL）
   task_planning: done   # self-checked；Sprint 7 共 4 个任务（2026-10-16）
   implementation: done   # Sprint 7 完成（4 / 4，2026-10-16）
+  code_review: done   # 2026-10-27 无代码 MUST-FIX；规格 MUST-FIX 1 项（media api-contract 截断重复）已修复；CONCERN 记入 backlog storage-review-followups
   validation: pending
-current_phase: code_review
+current_phase: validation
 blockers: []
 notes: "从 F-001 范围外项'图片库管理'中独立出的存储治理：后台 /admin/storage（不用 /admin/media，避免与 F-005 书影音冲突）"
 has_ui_changes: true
@@ -31,4 +32,4 @@ checkpoint:
   current_task: null
   completed_tasks: [implement-orphan-detection-api, implement-orphan-cleanup-api, add-storage-page, add-storage-cleanup-flow]
   test_command: "npx vitest run <文件>（unit jsdom / workers）；E2E npx playwright test <文件> --project chromium"
-  last_updated: "2026-10-16"
+  last_updated: "2026-10-27"

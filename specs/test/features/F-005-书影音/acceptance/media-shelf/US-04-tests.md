@@ -112,7 +112,7 @@
 | `pubdate: ["2024-1"]` | `year: 2024` |
 | `pubdate: []` 或无该字段 | `year: null` |
 | tags 接口含"漫画" | `type: comic` |
-| tags 接口失败 | `type: book`（同 US-02） |
+| tags 接口失败 | 不写入，进 `failed[]`（`FETCH_FAILED`）；与 US-02 识别按 book 降级不同，避免漫画被写成 / 覆盖成书 |
 
 ### TC-US04-03: 游戏映射（决策表）
 
@@ -323,8 +323,8 @@
 | movie / `[movie]` | `interests-movie-done-mixed` | `created: 12`；8 部剧集不写入、不请求其封面、不计 `failed`；本站已有的同豆瓣 ID 剧集条目字段与 `updatedAt` 不变 |
 | movie / `[series]` | 同上 | `created: 8`，电影不写入 |
 | movie / `[movie, series]` | 同上 | `created: 20` |
-| book / `[comic]` | `interests-book-done-manga` | 仍请求每本书的 tags；`created: 3`（漫画）；普通书与 tags 失败的那本（按书处理）都不写入、不下载封面 |
-| book / `[book]` | 同上 | `created: 17`（含 tags 失败那本） |
+| book / `[comic]` | `interests-book-done-manga` | 仍请求每本书的 tags；`created: 3`（漫画）；普通书不写入、不下载封面；tags 失败的那本进 `failed`（`FETCH_FAILED`） |
+| book / `[book]` | 同上 | `created: 16`；tags 失败那本进 `failed`（`FETCH_FAILED`） |
 | movie / `[book]`、`[]`、`[music]`、重复项 `[movie, movie]` | — | 400 `VALIDATION_FAILED`，不发外部请求 |
 
 ### TC-US04-25: 类别 × 状态水位
