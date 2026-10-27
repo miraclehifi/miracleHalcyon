@@ -1,4 +1,4 @@
-// 书影音条目列表主体（admin-media.md §一，US-01）：标题行（计数 + 新增条目）、分类导航（由页面以 tabs 传入）、条目行、空状态。
+// 书影音条目列表主体（admin-media.md §一，US-01）：标题行（计数 + 从豆瓣导入 + 新增条目）、分类导航（由页面以 tabs 传入）、条目行、空状态。
 // 隐藏 / 取消隐藏：请求中按钮禁用，成功后原位切换徽标；删除：确认框 → 成功后移除该行。结果用轻提示；计数随操作更新
 import { useEffect, useState, type ReactNode } from "react";
 import { countLabel, TYPE_LABELS, type ShelfType } from "../../../domains/shelf/entry";
@@ -11,6 +11,7 @@ import type { IconName } from "../../ui/icons";
 import { ToastProvider, useToast } from "../../ui/Toast";
 import { shelfPath } from "../../../lib/reader/shelf";
 import { PageHeader } from "../PageHeader";
+import { DoubanImportDialog } from "./DoubanImportDialog";
 import { MediaEntryRow } from "./MediaEntryRow";
 
 export const EMPTY_ICONS: Record<ShelfType, IconName> = {
@@ -40,6 +41,8 @@ function ListContent({ type, entries: initial, counts: initialCounts, tabs }: Me
   const [busy, setBusy] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<ShelfEntryView | null>(null);
   const [deleteTrigger, setDeleteTrigger] = useState<HTMLElement | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importKey, setImportKey] = useState(0); // 每次打开重新挂载：勾选全选、进度清空
   const toast = useToast();
   const newHref = `/admin/media/new?type=${type}`;
 
@@ -110,10 +113,19 @@ function ListContent({ type, entries: initial, counts: initialCounts, tabs }: Me
           </>
         }
         action={
-          <Button variant="primary" onClick={() => window.location.assign(newHref)}>
-            <span className="max-md:hidden">新增条目</span>
-            <span className="md:hidden">新增</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => {
+                setImportKey((k) => k + 1);
+                setImporting(true);
+              }}>
+              <span className="max-md:hidden">从豆瓣导入</span>
+              <span className="md:hidden">导入</span>
+            </Button>
+            <Button variant="primary" onClick={() => window.location.assign(newHref)}>
+              <span className="max-md:hidden">新增条目</span>
+              <span className="md:hidden">新增</span>
+            </Button>
+          </div>
         }
       />
       {tabs}
@@ -156,6 +168,8 @@ function ListContent({ type, entries: initial, counts: initialCounts, tabs }: Me
         onCancel={cancelDelete}
         returnFocus={deleteTrigger}
       />
+      {/* US-04：导入有变更时关闭后整页刷新列表与计数（列表由服务端渲染） */}
+      <DoubanImportDialog key={importKey} open={importing} onClose={() => setImporting(false)} onFinished={() => window.location.reload()} />
     </main>
   );
 }

@@ -1,5 +1,7 @@
-// 书影音后台接口（shelf api-contract）：条目隐藏 / 删除（任务 4）、新增 / 编辑（任务 5，multipart）、识别（任务 6）。失败抛 ShelfApiError
+// 书影音后台接口（shelf api-contract）：条目隐藏 / 删除（任务 4）、新增 / 编辑（任务 5，multipart）、识别（任务 6）、豆瓣导入（任务 20）。失败抛 ShelfApiError
+import type { ImportKind, ImportStatus } from "../../domains/shelf/douban/import";
 import type { ShelfPlatform, ShelfStatus, ShelfType } from "../../domains/shelf/entry";
+import type { ImportCategoryState } from "../../domains/shelf/import-state-repo";
 import type { RecognizeResponse } from "./recognize";
 
 export interface ShelfEntryView {
@@ -88,4 +90,45 @@ export async function recognize(text: string, excludeId?: string): Promise<Recog
       body: JSON.stringify(excludeId ? { text, excludeId } : { text }),
     }),
   );
+}
+
+// 豆瓣批量导入（US-04，api-contract"导入"）
+export interface DoubanImportState {
+  uid: string | null;
+  categories: ImportCategoryState[];
+}
+
+export interface DoubanImportRequest {
+  uid: string;
+  kind: ImportKind;
+  status: ImportStatus;
+  types: ShelfType[];
+  mode: "full" | "incremental";
+  start: number;
+  head?: string | null;
+}
+
+export interface DoubanImportPage {
+  total: number;
+  head: string | null;
+  nextStart: number | null;
+  created: number;
+  updated: number;
+  coverFailed: number;
+  failed: { doubanId: string | null; title: string | null; reason: string }[];
+}
+
+const IMPORT = "/api/admin/shelf/import";
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
+export async function getDoubanImportState(uid?: string): Promise<DoubanImportState> {
+  return readJson<DoubanImportState>(await fetch(`${IMPORT}/state${uid ? `?uid=${encodeURIComponent(uid)}` : ""}`));
+}
+
+export async function importDoubanPage(request: DoubanImportRequest): Promise<DoubanImportPage> {
+  return readJson<DoubanImportPage>(await fetch(IMPORT, { method: "POST", headers: JSON_HEADERS, body: JSON.stringify(request) }));
+}
+
+export async function finishDoubanImport(changed: number): Promise<void> {
+  await readJson<null>(await fetch(`${IMPORT}/finish`, { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ changed }) }));
 }

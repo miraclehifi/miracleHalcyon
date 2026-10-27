@@ -1,6 +1,6 @@
 # Sprint 9：书影音
 
-**状态**: in_progress（任务 1–11 已实现并完成 code-review（2026-10-23）；任务 12–16（游戏海报墙、"按时间"发行年份、统一海报墙）已实现（2026-10-27）；2026-10-23 再插入任务 15–16 豆瓣批量导入）
+**状态**: in_progress（任务 1–20 全部实现（2026-10-27），待全量回归后补审 12–20；任务 1–11 已实现并完成 code-review（2026-10-23）；任务 12–16（游戏海报墙、"按时间"发行年份、统一海报墙）已实现（2026-10-27）；2026-10-23 再插入任务 15–16 豆瓣批量导入）
 **创建**: 2026-10-21
 **Feature**: F-005 书影音（[Backlog: media-douban-sync](../../backlog/media-douban-sync.md)）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）
@@ -32,7 +32,7 @@
 | 17 | [poster-back-filtered-cover](poster-back-filtered-cover.md) | 海报背面铺滤镜封面：镜像、灰度、30% 不透明 + `flip-surface` 渐变，无封面仍为纯色底（插入任务，[poster-back-filtered-cover](../../backlog/poster-back-filtered-cover.md)） | FRONTEND | 表现层（reader） | US-03 | 10 | 0 | 低 | completed |
 | 18 | [remove-poster-hover-title](remove-poster-hover-title.md) | 海报墙去掉悬停浮出名称（游戏悬停徽标不受影响）（插入任务，[poster-no-hover-title](../../backlog/poster-no-hover-title.md)） | FRONTEND | 表现层（reader） | US-03 | 10 | 0 | 低 | completed |
 | 19 | [add-douban-import-api](add-douban-import-api.md) | 豆瓣批量导入与增量同步接口（6 个类别）：迁移 0006 `shelf_import_state`、`douban/import.ts` 标记映射、`fetchInterests`、`importPage`（全量 / 增量、`types` 类别过滤）/ `importState` / `finishImport`、三个路由、录制 `interests-*` 夹具（插入任务，[douban-bulk-import](../../backlog/douban-bulk-import.md)、[ADR-014](../../engineering/features/F-005-书影音/architecture/adr/ADR-014-douban-bulk-import.md)） | API | 数据 + 领域 + 接口 | US-04 | 12、3 | 1 | 中（豆瓣标记接口改版 / 限流、合并覆盖规则、水位前移时机） | completed |
-| 20 | [add-douban-import-dialog](add-douban-import-dialog.md) | 后台"从豆瓣导入"弹窗：6 个类别勾选、同步状态与 ID 带出、"同步新标记" / "全量导入"、逐页导入、进度 / 停止 / 汇总 / 失败列表、结束时重建一次（插入任务） | FRONTEND | 表现层（admin） | US-04 | 19、4 | 0 | 低 | pending |
+| 20 | [add-douban-import-dialog](add-douban-import-dialog.md) | 后台"从豆瓣导入"弹窗：6 个类别勾选、同步状态与 ID 带出、"同步新标记" / "全量导入"、逐页导入、进度 / 停止 / 汇总 / 失败列表、结束时重建一次（插入任务） | FRONTEND | 表现层（admin） | US-04 | 19、4 | 0 | 低 | completed |
 
 共 20 个任务（任务 19–20 为豆瓣批量导入，6 个类别一次全部支持（作者 2026-10-27）：19 接口依赖任务 12 的游戏平台字段，排在 12 之后；20 弹窗随后；原编号 15–16 与"按时间"发行年份、统一海报墙重号，2026-10-27 改为 19–20；任务 12–14 为 2026-10-23 插入的游戏海报墙增量：先做接口 12，表单 13 与读者页 14 无文件重叠可并行；任务 11 为 2026-10-22 插入的去掉"动画"分类，排在任务 4 之后、任务 5 之前；任务 9 为 2026-10-22 作者插入的全站配色调整，与其他任务无依赖，先做；任务 10 为 2026-10-22 插入的电影、剧集海报墙，接在任务 8 之后，任务 8 先按列表行实现电影、剧集）。任务 1 验证唯一的高风险假设（豆瓣非官方接口在 Worker 出口可用），结论不成立时任务 3、6 回到作者决策（Backlog"技术风险"已列退路）；任务 2 被 3 / 4 / 5 / 7 依赖。任务 7、8 与 3–6 无文件重叠，可在任务 2 之后并行。
 
@@ -77,7 +77,7 @@ DDL 变更：迁移 `0004_shelf_entries.sql`（任务 2 实现时追加到 [ddl-
 
 ## DoD（Sprint 级）
 
-- [ ] 所有任务 completed（1–19 完成；豆瓣导入弹窗 20 待实现）
+- [x] 所有任务 completed（1–20，2026-10-27）
 - [x] `npm run lint`、`npm run check`、`npm test`、`npm run test:e2e`（chromium + webkit）、`npm run test:build` 通过（2026-10-22：chromium 全过；webkit / chromium-media 的失败为并发负载超时，单独复跑通过，见 validation）
 - [ ] Backlog 验收条件逐条勾选；code-review → verify（2026-10-23 任务 1–11 code-review 完成，[报告](../../test/features/F-005-书影音/reviews/code-review.md)；任务 12–14 实现后补审）
 - [x] `ddl-changes.md` 有 0004 条目（⏳ 待执行）

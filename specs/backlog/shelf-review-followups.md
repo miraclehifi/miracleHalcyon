@@ -34,6 +34,9 @@ Sprint 9 代码审查中不阻塞 verify、未在审查阶段修复的问题。
 - `GET /api/admin/shelf/entries` 同一请求查了两次 `listByType`
 - `GET /api/shelf`：考虑构建令牌或短缓存
 
+- 读者页体积（2026-10-27 任务 20 真实导入后发现）：作者全量导入 1,023 条后 `/media/movie.html` 5.5 MB（405 张海报）、`/media/series.html` 3.0 MB；考虑分页 / 按时间段懒渲染 / 精简每张海报的内联数据
+- 导入：本页有 `FETCH_FAILED` / `WRITE_FAILED` 的条目时，增量水位仍会在本步结束时前移（按 ADR-014 §1.1 原文实现），这些条目之后只能靠"全量导入"补回；可考虑本步有此类失败时不前移水位
+
 **测试**
 - 并发插入同一豆瓣 ID → `D1ShelfRepo.insert` 抛 `DuplicateDoubanError`
 - `/covers` 路由参数直接传 `../img/x.jpg`、`2026/10/%2e%2e`；鉴权矩阵补 `GET /api/admin/shelf/entries/1`

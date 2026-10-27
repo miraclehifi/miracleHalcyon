@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 9
 **序号**: 20
-**状态**: pending
+**状态**: completed（2026-10-27）
 **类别**: FRONTEND
 **架构层级**: 表现层（admin：`src/components/admin/media/`、`src/lib/admin/shelf-client.ts`、`src/pages/admin/media/index.astro`）
 **所属 Feature**: [F-005 书影音](../../product/features/F-005-书影音/feature-scope.md)
@@ -37,10 +37,10 @@
 
 ## DoD（完成定义）
 
-- [ ] 页面与 admin.pen 10、11i（首次 / 已同步过 / 进行中 / 完成 / 错误 / 未选类别）一致；新建通用组件 `src/components/ui/Checkbox.tsx`（components.md `Checkbox`），UT-22 覆盖其选中 / 未选 / 禁用与点标签切换
-- [ ] 测试清单全部由红变绿；影响范围：`tests/e2e/admin-media-list.spec.ts`、`tests/unit/admin/*` 原有用例 chromium 通过，本任务 E2E 补跑 webkit
-- [ ] 本地用作者真实账号完整导入一次，再点一次"同步新标记"确认几秒内结束、无新增（`npm run dev:local`），核对汇总与列表、读者页构建，结果记入 validation
-- [ ] `npm run lint`、`npm run check` 通过
+- [x] 页面与 admin.pen 10、11i（首次 / 已同步过 / 进行中 / 完成 / 错误 / 未选类别）一致；新建通用组件 `src/components/ui/Checkbox.tsx`（components.md `Checkbox`），UT-22 覆盖其选中 / 未选 / 禁用与点标签切换
+- [x] 测试清单全部由红变绿；影响范围：`tests/e2e/admin-media-list.spec.ts`、`tests/unit/admin/*` 原有用例 chromium 通过，本任务 E2E 补跑 webkit
+- [x] 本地用作者真实账号完整导入一次，再点一次"同步新标记"确认几秒内结束、无新增（`npm run dev:local`），核对汇总与列表、读者页构建，结果记入 validation
+- [x] `npm run lint`、`npm run check` 通过
 
 ## 依赖
 
