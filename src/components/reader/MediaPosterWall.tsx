@@ -1,5 +1,5 @@
-// MediaPosterWall（components.md"海报墙参数"，reader-media.md"海报墙""按时间分段"）：电影、剧集、游戏满宽海报墙，React 岛（client:load）。
-// 砖块比例按 posterAspect：电影、剧集 2:3，游戏按封面原始比例（无封面 3:4），高 = 列宽 ÷ 比值，封面加载失败时尺寸不变。
+// MediaPosterWall（components.md"海报墙参数"，reader-media.md"海报墙""按时间分段"）：书影音所有分类的满宽海报墙，React 岛（client:load）。
+// 砖块比例按 posterAspect：书、漫画、电影、剧集 2:3，桌游 1:1，游戏按封面原始比例（无封面 3:4），高 = 列宽 ÷ 比值，封面加载失败时尺寸不变。
 // 服务端 / 水合前渲染 [data-poster-static] 静态网格（Masonry 在服务端量不到宽度）；挂载后换成 vendor Masonry 并播放入场。
 // 受控"当前翻开的海报"（最多一张，跨分段），Esc 翻回；"按时间"开关与分段依据（标记时间 / 发行年份）存 localStorage media:by-time
 // （"0" / "marked" / "release"，旧值 "1" 视为 marked），按钮与依据切换经 portal 挂到页面槽位

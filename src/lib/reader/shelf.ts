@@ -23,9 +23,6 @@ export function groupShelf(entries: readonly ShelfPublicEntry[]): Record<ShelfTy
   return Object.fromEntries(SHELF_TYPES.map((type) => [type, sortPublic(entries.filter((entry) => entry.type === type))])) as Record<ShelfType, ShelfPublicEntry[]>;
 }
 
-// 用海报墙展示的分类（其余仍为卡片 / 列表行，media-wall-all-types 统一前）
-export const isPosterType = (type: ShelfType) => type === "movie" || type === "series" || type === "game";
-
 // 海报砖块宽高比（CSS aspect-ratio 写法）：书、漫画、电影、剧集 2:3，桌游 1:1；游戏按 IGDB 大图原始宽高（ADR-013），无封面或宽高无效按 3:4
 export function posterAspect(type: ShelfType, cover: { width: number | null; height: number | null } | null): string {
   if (type === "boardgame") return "1 / 1";

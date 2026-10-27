@@ -239,3 +239,36 @@ describe("MediaPoster 游戏模式", () => {
     expect(tiles.map((li) => li.style.aspectRatio)).toEqual(["810 / 1080", "3 / 4"]);
   });
 });
+
+// [UT-16][SC-SHELF-05][SC-SHELF-06] 所有分类海报墙（media-wall-all-types）：背面状态词、依据文案随分类；超长标题背面 2 行省略（TC-US03-13）
+describe("书、桌游海报", () => {
+  const book = (title: string, extra: Partial<ShelfPublicEntry> = {}) => entry(title, { type: "book", year: 2018, markedOn: "2026-10-01", ...extra });
+  const back = (title: string) => poster(title).querySelector<HTMLElement>("[data-poster-back]")!;
+
+  it("书：背面“读过 · 日期”，进行中为“在读”徽标；依据文案读过时间 / 出版年份", async () => {
+    await renderWall([book("原则"), book("三体", { status: "in_progress", rating: null })]);
+    expect(back("原则").textContent).toContain("读过 · 2026-10-01");
+    expect(back("三体").textContent).toContain("在读");
+    expect(back("三体").textContent).not.toContain("2026-10-01");
+    fireEvent.click(toggle());
+    expect(screen.getAllByRole("radio").map((r) => r.textContent)).toEqual(["读过时间", "出版年份"]);
+    expect(screen.getAllByRole("heading", { level: 2 })[0].textContent).toBe("在读");
+  });
+
+  it("桌游：背面“玩过 · 日期”；依据文案玩过时间 / 发行年份；砖块 1 / 1", async () => {
+    const catan = entry("卡坦岛", { type: "boardgame", markedOn: "2026-06-01" });
+    const html = renderToString(<MediaPosterWall entries={[catan]} />);
+    expect(html).toMatch(/aspect-ratio:\s*1 \/ 1/);
+    await renderWall([catan]);
+    expect(back("卡坦岛").textContent).toContain("玩过 · 2026-06-01");
+    fireEvent.click(toggle());
+    expect(screen.getAllByRole("radio").map((r) => r.textContent)).toEqual(["玩过时间", "发行年份"]);
+  });
+
+  it("超长标题在背面最多 2 行省略；多行短评保留换行", async () => {
+    await renderWall([book("超长".repeat(100), { comment: "第一行\n第二行" })]);
+    const face = back("超长".repeat(100));
+    expect(face.querySelector("p")!.className).toMatch(/line-clamp-2/);
+    expect([...face.querySelectorAll("p")].find((p) => p.textContent === "第一行\n第二行")!.className).toMatch(/whitespace-pre-line/);
+  });
+});

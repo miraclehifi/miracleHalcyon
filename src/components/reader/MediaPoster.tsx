@@ -1,4 +1,4 @@
-// MediaPoster/Front · /Hover · /Back（components.md、"海报墙参数"）：电影、剧集海报，底层 vendor FlipCard。
+// MediaPoster/Front · /Hover · /Back（components.md、"海报墙参数"）：书影音海报，底层 vendor FlipCard。
 // 正面只有封面（不显示状态徽标、悬停不浮出片名，poster-no-hover-title）；点击、Enter、空格翻到背面：
 // 片名、评分、短评、"看过 · yyyy-MM-dd"（进行中为"在看"徽标），不显示导演。"豆瓣 ↗"是 FlipCard 的兄弟节点
 // （FlipCard 根是 role="button"，里面不能嵌链接），覆盖在背面右下角，只在翻开时可点、可聚焦。

@@ -1,7 +1,7 @@
 # 书影音（Reader Media）
 
 **路由**: `/media`（书）、`/media/:type`（`comic` / `movie` / `series` / `game` / `boardgame`）
-**状态**: draft（已实现：Sprint 9 任务 8 页面框架、任务 10 电影 / 剧集海报墙、任务 14 游戏海报墙（平台徽标）、任务 15 游戏年份徽标与"按发行年份"；书 / 漫画 / 桌游改海报墙（任务 16，[media-wall-all-types](../../backlog/media-wall-all-types.md)）待实现）
+**状态**: draft（已实现：Sprint 9 任务 8 页面框架、任务 10 电影 / 剧集海报墙、任务 14 游戏海报墙（平台徽标）、任务 15 游戏年份徽标与"按发行年份"、任务 16 书 / 漫画 / 桌游改海报墙（[media-wall-all-types](../../backlog/media-wall-all-types.md)），全部已实现）
 **关联**: F-005 · US-03 · [Backlog](../../backlog/media-douban-sync.md)
 
 ## 页面用途

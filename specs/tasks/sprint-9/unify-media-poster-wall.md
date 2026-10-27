@@ -2,7 +2,7 @@
 
 **Sprint**: Sprint 9
 **序号**: 16
-**状态**: pending
+**状态**: completed（2026-10-27）
 **类别**: FRONTEND
 **架构层级**: 表现层（reader：`src/components/reader/`、`src/lib/reader/`）
 **所属 Feature**: [F-005 书影音](../../product/features/F-005-书影音/feature-scope.md)
@@ -37,9 +37,16 @@
 
 ## DoD（完成定义）
 
-- [ ] 页面与 admin.pen 09、09m、09c 一致；所有分类左边缘与电影页对齐
-- [ ] `src/components/reader/` 下无 `MediaCard`、`MediaRow`；`grep -r "MediaCard\|MediaRow" src` 只剩后台 `MediaEntryRow`
-- [ ] 测试清单全部由红变绿；`tests/e2e/reader-media.spec.ts` 全部用例 chromium 通过，本任务 E2E 补跑 webkit
+- [x] 页面与 admin.pen 09、09m、09c 一致；所有分类左边缘与电影页对齐
+- [x] `src/components/reader/` 下无 `MediaCard`、`MediaRow`；`grep -r "MediaCard\|MediaRow" src` 只剩后台 `MediaEntryRow`
+- [x] 测试清单全部由红变绿；`tests/e2e/reader-media.spec.ts` 全部用例 chromium 通过，本任务 E2E 补跑 webkit
+
+## 实现记录（2026-10-27）
+
+- `MediaList` 只剩"空状态 / 海报墙"两支；`MediaPage` 一律 `width="full"`，有条目才留"按时间"槽；删除 `MediaCard.astro`、`MediaRow.astro`、`MediaCover.astro`（仅两者使用）与任务 14 临时加的 `isPosterType`
+- `MediaPoster` / `MediaTimeBasis` 本来就按分类取状态词与文案，UT-16 新增的书、桌游用例直接通过（未经红），真正的红在构建测试（TC-US03-04、05、06、07、11、13 共 6 项）
+- TC-US03-13 超长标题：测试数据表各分类条数固定，不另加条目，改由 UT-16（背面标题 `line-clamp-2`、短评 `whitespace-pre-line`）覆盖；构建测试检查"无评桌游"背面多行短评
+- E2E 新增 `settledBox`（等入场缩放结束、尺寸稳定再量），TC-US03-06、15、17 改为按海报比较尺寸
 
 ## 依赖
 

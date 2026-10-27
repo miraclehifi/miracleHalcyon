@@ -17,7 +17,20 @@ const routeIgdb = (page: Page) =>
 const tabs = (page: Page) => page.getByRole("navigation", { name: "书影音分类" });
 const card = (page: Page, title: string) => page.getByRole("button", { name: `《${title}》` });
 const poster = (page: Page, title: string) => page.locator("[data-poster-wall] [data-poster]").filter({ has: card(page, title) });
-const item = (page: Page, title: string) => page.locator("li[data-media-item]").filter({ has: page.locator("[data-media-title]", { hasText: title }) });
+// 入场有 0.96 → 1 的缩放：等尺寸稳定后再量
+const settledBox = async (locator: ReturnType<Page["locator"]>) => {
+  let last = "";
+  await expect
+    .poll(async () => {
+      const box = (await locator.boundingBox())!;
+      const now = JSON.stringify([Math.round(box.width), Math.round(box.height)]);
+      const stable = now === last;
+      last = now;
+      return stable;
+    })
+    .toBe(true);
+  return (await locator.boundingBox())!;
+};
 
 // [TC-US03-01][SC-SHELF-01] 顶栏进入 /media，默认书
 test("[TC-US03-01] 顶栏进入 /media，默认书", async ({ page }) => {
@@ -25,7 +38,7 @@ test("[TC-US03-01] 顶栏进入 /media，默认书", async ({ page }) => {
   await page.getByRole("navigation").getByRole("link", { name: "书影音" }).filter({ visible: true }).click();
   await expect(page).toHaveURL(/\/media$/);
   await expect(tabs(page).getByRole("link", { name: "书" })).toHaveAttribute("aria-current", "page");
-  await expect(item(page, "原则")).toBeVisible();
+  await expect(poster(page, "原则")).toBeVisible();
   await expect(page.locator("header").getByRole("link", { name: "书影音" }).filter({ visible: true })).toHaveAttribute("aria-current", "page");
 });
 
@@ -40,21 +53,25 @@ test("[TC-US03-02] 分类切换与直接访问分类地址", async ({ page }) =>
   await expect(page.locator("[data-poster-wall] [data-poster]")).toHaveCount(2);
   await page.goBack();
   await expect(page).toHaveURL(/\/media$/);
-  await expect(item(page, "原则")).toBeVisible();
+  await expect(poster(page, "原则")).toBeVisible();
   await page.goto("/media/series");
   await waitForHydration(page);
   await expect(tabs(page).getByRole("link", { name: "剧集" })).toHaveAttribute("aria-current", "page");
   await expect(page.locator("[data-poster-wall] [data-poster]")).toHaveCount(3);
 });
 
-// [TC-US03-06][SC-SHELF-06][SC-SHELF-07] 桌游：有评分与无评分两行的年月列左缘对齐（桌游改海报墙见任务 16）
-test("[TC-US03-06] 列表行无评分时年月列对齐", async ({ page }) => {
+// [TC-US03-06][SC-SHELF-06][SC-SHELF-07] 桌游海报墙：两张海报都是正方形且同尺寸；无评分背面无星级
+test("[TC-US03-06] 桌游 1:1 海报与无评分背面", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/media/boardgame");
-  await expect(item(page, "卡坦岛").getByRole("img", { name: "评分 5 / 5" })).toBeVisible();
-  await expect(item(page, "无评桌游").getByRole("img", { name: /评分/ })).toHaveCount(0);
-  const x = async (title: string) => (await item(page, title).locator("[data-media-date]").boundingBox())!.x;
-  expect(Math.abs((await x("卡坦岛")) - (await x("无评桌游")))).toBeLessThanOrEqual(1);
+  await waitForHydration(page);
+  const [a, b] = [await settledBox(poster(page, "卡坦岛")), await settledBox(poster(page, "无评桌游"))];
+  expect(Math.abs(a.width - a.height)).toBeLessThanOrEqual(1);
+  expect([Math.round(b.width), Math.round(b.height)]).toEqual([Math.round(a.width), Math.round(a.height)]);
+  await card(page, "卡坦岛").click();
+  await expect(poster(page, "卡坦岛").locator("[data-poster-back]").getByRole("img", { name: "评分 5 / 5" })).toBeAttached();
+  await expect(poster(page, "卡坦岛").locator("[data-poster-back]")).toContainText("玩过 · 2026-06-01");
+  await expect(poster(page, "无评桌游").locator("[data-poster-back]").getByRole("img", { name: /评分/ })).toHaveCount(0);
 });
 
 // [TC-US03-09][SC-SHELF-14] 未知分类、已去掉的分类、/media/book 都是 404
@@ -83,30 +100,24 @@ test("[TC-US03-10] 不请求豆瓣域名", async ({ page }) => {
   expect(new Set(external)).toEqual(new Set(["/media/game images.igdb.com image"]));
 });
 
-// [TC-US03-15][SC-SHELF-11] 无封面与封面 404 显示占位，尺寸与正常封面相同
+// [TC-US03-15][SC-SHELF-11] 无封面与封面 404 显示占位（图标 + 名称），尺寸与同分类正常海报相同
 test("[TC-US03-15] 封面缺失 / 加载失败占位", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/media");
-  const normal = item(page, "原则").locator("img");
-  await expect(normal).toHaveJSProperty("complete", true);
-  expect(await normal.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
-  const missing = item(page, "手记").getByRole("img", { name: "图片不可用" });
-  await expect(missing).toBeVisible();
-  const [a, b] = [(await normal.boundingBox())!, (await missing.boundingBox())!];
-  expect([b.width, b.height]).toEqual([a.width, a.height]);
-
-  // 海报墙（MediaPoster/Front）：封面 404 → 占位底 + 图标 + 片名，尺寸与正常海报相同
-  await page.goto("/media/movie");
-  await waitForHydration(page);
-  const broken = poster(page, "无名片");
-  await expect(broken.getByRole("img", { name: "图片不可用" })).toBeVisible();
-  await expect(broken.getByRole("img", { name: "图片不可用" })).toContainText("无名片");
-  // 入场有 0.96 → 1 的缩放，等两张都落定再比
-  const size = async (l: ReturnType<typeof poster>) => {
-    const box = (await l.boundingBox())!;
-    return [Math.round(box.width), Math.round(box.height)];
-  };
-  await expect.poll(async () => JSON.stringify(await size(broken)) === JSON.stringify(await size(poster(page, "肖申克的救赎")))).toBe(true);
+  for (const [path, normal, broken] of [
+    ["/media", "原则", "手记"],
+    ["/media/movie", "肖申克的救赎", "无名片"],
+  ] as const) {
+    await page.goto(path);
+    await waitForHydration(page);
+    const cover = poster(page, normal).locator("[data-poster-front] img");
+    await expect(cover).toHaveJSProperty("complete", true);
+    expect(await cover.evaluate((img: HTMLImageElement) => img.naturalWidth), normal).toBeGreaterThan(0);
+    const placeholder = poster(page, broken).getByRole("img", { name: "图片不可用" });
+    await expect(placeholder).toBeVisible();
+    await expect(placeholder).toContainText(broken);
+    const [a, b] = [await settledBox(poster(page, normal)), await settledBox(poster(page, broken))];
+    expect([Math.round(b.width), Math.round(b.height)], broken).toEqual([Math.round(a.width), Math.round(a.height)]);
+  }
 });
 
 // [TC-US03-16][SC-SHELF-12] 空分类空状态（夹具中漫画为空）
@@ -117,33 +128,30 @@ test("[TC-US03-16] 空分类空状态", async ({ page }) => {
   await page.waitForURL(/\/media\/comic$/);
   await expect(page.getByText("还没有记录漫画")).toBeVisible();
   await expect(page.locator("[data-media-count]")).toHaveText("0 本");
-  await expect(page.locator("li[data-media-item]")).toHaveCount(0);
+  await expect(page.locator("[data-poster]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "按时间" })).toHaveCount(0);
 });
 
-// [TC-US03-17][SC-SHELF-15] 手机 390：无横向滚动；分类标签换行全部可见（GooeyNav 不横滑）；行封面 44×66；书卡片单列；游戏海报墙 2 列
+// [TC-US03-17][SC-SHELF-15] 手机 390：无横向滚动；分类标签换行全部可见（GooeyNav 不横滑）；书、桌游、游戏海报墙 2 列，书 2:3、桌游 1:1
 test("[TC-US03-17] 手机 390px 布局", async ({ page }) => {
   await routeIgdb(page);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/media");
-  // 水合后 GooeyNav 画布（外扩 72px）才出现，量宽要等它
-  await waitForHydration(page);
-  await page.waitForTimeout(300);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  const [first, second] = [(await item(page, "三体").boundingBox())!, (await item(page, "原则").boundingBox())!];
-  expect(second.y).toBeGreaterThan(first.y + first.height - 1);
-  await expect(tabs(page).getByRole("link", { name: "桌游" })).toBeInViewport();
-
-  await page.goto("/media/boardgame");
-  await waitForHydration(page);
-  await page.waitForTimeout(300);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  const cover = (await item(page, "卡坦岛").locator("img").boundingBox())!;
-  expect([Math.round(cover.width), Math.round(cover.height)]).toEqual([44, 66]);
-
-  await page.goto("/media/game");
-  await waitForHydration(page);
-  await expect.poll(() => columnsOfFirstRow(page)).toBe(2);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  for (const [path, title, ratio] of [
+    ["/media", "原则", 2 / 3],
+    ["/media/boardgame", "卡坦岛", 1],
+    ["/media/game", null, null],
+  ] as const) {
+    await page.goto(path);
+    // 水合后 GooeyNav 画布（外扩 72px）才出现，量宽要等它
+    await waitForHydration(page);
+    await expect.poll(() => columnsOfFirstRow(page), path).toBe(2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(390);
+    await expect(tabs(page).getByRole("link", { name: "桌游" })).toBeInViewport();
+    if (title) {
+      const box = await settledBox(poster(page, title));
+      expect(Math.abs(box.width / box.height / ratio - 1), path).toBeLessThan(0.01);
+    }
+  }
 });
 
 // 海报墙第一排有几张（入场动画结束后 y 相同）

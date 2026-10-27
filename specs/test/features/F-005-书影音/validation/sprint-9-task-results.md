@@ -63,3 +63,7 @@
 | 2026-10-27 | 15 add-time-basis-release-year | `npm run test:build` | 19 / 19（TC-US03-21 补年份徽标断言） |
 | 2026-10-27 | 15 add-time-basis-release-year | `npx playwright test tests/e2e/reader-media.spec.ts`（chromium / webkit `--workers 4`） | chromium 首跑 15 / 16：TC-US03-24 第 6 步期望值写错（today 2026-10-27 时 8 月归"本年"不是"上个月"），改后 16 / 16；webkit 15 / 15 + 1 跳过 |
 | 2026-10-27 | 15 add-time-basis-release-year | `npm run lint`、`npm run check` | 首跑 1 error（eslint-disable 注释位置随代码移动失效），修正后 0 problems、0 errors |
+| 2026-10-27 | 16 unify-media-poster-wall | `npx vitest run tests/unit/reader/media-poster-wall.test.tsx` | UT-16 书 / 桌游状态词、依据文案、超长标题 3 项直接通过（组件已按分类取文案，未经红）；`tests/unit/reader` 99 / 99 |
+| 2026-10-27 | 16 unify-media-poster-wall | `npm run test:build` | 红：TC-US03-04、05、06、07、11、13 共 6 项；绿：19 / 19 |
+| 2026-10-27 | 16 unify-media-poster-wall | `npx playwright test tests/e2e/reader-media.spec.ts`（chromium / webkit `--workers 4`） | 16 / 16；15 / 15 + 1 跳过（TC-US03-01、02、06、15、16、17 改为海报） |
+| 2026-10-27 | 16 unify-media-poster-wall | `npm run lint`、`npm run check`、`git diff package.json`、`grep MediaCard\|MediaRow src` | 0 problems、0 errors、无新依赖、只剩后台 `MediaEntryRow` |

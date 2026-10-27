@@ -29,9 +29,9 @@ approvals:
   release: false
 checkpoint:
   sprint: sprint-9
-  current_task: unify-media-poster-wall
-  current_phase: pending   # 2026-10-27 任务 12–14、15 add-time-basis-release-year 完成；下一个 16 unify-media-poster-wall
-  completed_tasks: [spike-douban-rexxar, add-shelf-entry-api, add-douban-recognize-api, restyle-blue-accent, add-admin-media-list, drop-anime-type, add-admin-media-form, add-recognize-box, add-shelf-reader-data, add-media-reader-page, add-media-poster-wall, poster-back-filtered-cover, remove-poster-hover-title, add-game-platform-api, add-game-form-fields, add-game-poster-wall, add-time-basis-release-year]
+  current_task: add-douban-import-api
+  current_phase: pending   # 2026-10-27 任务 12–14、15 add-time-basis-release-year、16 unify-media-poster-wall 完成；下一个豆瓣导入 15 add-douban-import-api
+  completed_tasks: [spike-douban-rexxar, add-shelf-entry-api, add-douban-recognize-api, restyle-blue-accent, add-admin-media-list, drop-anime-type, add-admin-media-form, add-recognize-box, add-shelf-reader-data, add-media-reader-page, add-media-poster-wall, poster-back-filtered-cover, remove-poster-hover-title, add-game-platform-api, add-game-form-fields, add-game-poster-wall, add-time-basis-release-year, unify-media-poster-wall]
   blocked_tasks: []
   env_info: "Node 24（本机 PATH 上的 node 可能是 18，跑测试前 export PATH=/d/Coding/environment/nvm/v24.21.0:$PATH）+ npm；Vitest 4.1（unit jsdom / workers workerd）；Playwright chromium + webkit；Windows（Bash 反斜杠会被折叠，含转义内容用 Write）"
   test_command: "npx vitest run <文件>（unit jsdom / workers）；E2E npx playwright test <文件> --project chromium；构建 npm run test:build"

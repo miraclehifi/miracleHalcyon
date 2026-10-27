@@ -104,20 +104,24 @@ describe("reader-fixture 构建产物", () => {
   describe("书影音 /media", () => {
     const MEDIA_PAGES: Record<string, string> = { book: "media.html", comic: "media/comic.html", movie: "media/movie.html", series: "media/series.html", game: "media/game.html", boardgame: "media/boardgame.html" };
     const page = (type: string) => html(MEDIA_PAGES[type]);
-    // 每个条目是 <li data-media-item>…</li>；按出现顺序取出
-    const items = (type: string) => [...page(type).matchAll(/<li[^>]*data-media-item[^>]*>([\s\S]*?)<\/li>/g)].map((m) => m[0]);
-    const item = (type: string, title: string) => items(type).find((li) => li.includes(`>${title}<`)) ?? "";
-    const titleOf = (li: string) => /data-media-title[^>]*>([^<]*)</.exec(li)?.[1];
+    // 海报墙静态网格：每张海报是 <li data-poster-title="…">…</li>（标题按属性转义）；按出现顺序取出
+    const titles = (type: string) => [...page(type).matchAll(/data-poster-title="([^"]*)"/g)].map((m) => m[1]);
+    const tile = (type: string, title: string) => {
+      const doc = page(type);
+      const start = doc.indexOf(`data-poster-title="${title}"`);
+      return start < 0 ? "" : doc.slice(doc.lastIndexOf("<li", start), doc.indexOf("</li>", start));
+    };
+    const mainClass = (type: string) => /<main[^>]*class="([^"]*)"/.exec(page(type))?.[1];
     const header = (type: string) => /data-media-count[^>]*>([^<]*)</.exec(page(type))?.[1];
 
     // [TC-US03-11][SC-SHELF-17] 静态页、/media/book 与已去掉的分类不生成；每页有分类导航岛（服务端输出链接与当前项）；
-    // 电影、剧集、游戏页另有且仅有一个海报墙岛，服务端输出 [data-poster-static] 静态网格（标题、短评、yyyy-MM-dd、豆瓣链接，不含导演）；只允许封面占位的内联 onerror
-    it("[TC-US03-11] 6 个分类静态页；分类导航岛 + 电影 / 剧集 / 游戏海报墙岛", () => {
+    // 有条目的分类页另有且仅有一个海报墙岛（2026-10-23 起所有分类都是海报墙；空分类只有空状态），服务端输出 [data-poster-static] 静态网格（标题、短评、yyyy-MM-dd、豆瓣链接，不含导演）；只允许封面占位的内联 onerror
+    it("[TC-US03-11] 6 个分类静态页；分类导航岛 + 海报墙岛", () => {
       expect(Object.values(MEDIA_PAGES).filter((path) => !existsSync(join(CLIENT, path)))).toEqual([]);
       expect([existsSync(join(CLIENT, "media/book.html")), existsSync(join(CLIENT, "media/anime.html"))]).toEqual([false, false]);
       for (const [type, path] of Object.entries(MEDIA_PAGES)) {
         const doc = html(path);
-        const wall = type === "movie" || type === "series" || type === "game";
+        const wall = type !== "comic"; // 夹具中漫画为空分类
         expect(doc.match(/<astro-island/g)?.length, path).toBe(wall ? 2 : 1);
         expect(doc, path).toMatch(/<astro-island[^>]*component-export="MediaTypeTabs"[^>]*client="load"/);
         expect(/<astro-island[^>]*component-export="MediaPosterWall"[^>]*client="load"/.test(doc), path).toBe(wall);
@@ -145,35 +149,39 @@ describe("reader-fixture 构建产物", () => {
     it("[TC-US03-04] 排序与进行中标记", () => {
       expect([...page("series").matchAll(/data-poster-title="([^"]*)"/g)].map((m) => m[1])).toEqual(["B", "C", "A"]);
       expect(page("series")).toMatch(/data-poster-title="B"[\s\S]*?在看[\s\S]*?data-poster-title="C"/);
-      expect(items("book").map(titleOf)).toEqual(["三体", "原则", "手记", "&lt;b&gt;粗体&lt;/b&gt;"]);
+      expect(titles("book")).toEqual(["三体", "原则", "手记", "&lt;b&gt;粗体&lt;/b&gt;"]);
     });
 
-    // [TC-US03-05][SC-SHELF-05] 书为卡片（漫画夹具为空分类）
-    it("[TC-US03-05] 书卡片内容", () => {
-      const principles = item("book", "原则");
-      expect(principles).toContain('src="/covers/2026/10/k3j7x2m4q5ab.jpg"');
-      expect(principles).toContain('loading="lazy"');
-      for (const text of ["瑞·达利欧", 'aria-label="评分 4 / 5"', "值得反复读", "读过 · 2026-10", "豆瓣 ↗"]) expect(principles, text).toContain(text);
-      const santi = item("book", "三体");
+    // [TC-US03-05][SC-SHELF-05] 书为海报墙：满宽（同电影页）、2:3 砖块；背面名称、评分、短评、"读过 · 日期"，不含作者
+    it("[TC-US03-05] 书海报：正面、背面内容", () => {
+      expect(mainClass("book")).toBe(mainClass("movie"));
+      expect(page("book")).not.toContain("data-media-card");
+      const principles = tile("book", "原则");
+      expect(principles).toMatch(/style="aspect-ratio:\s*2 \/ 3"/);
+      expect(principles).toMatch(/<img[^>]*src="\/covers\/2026\/10\/k3j7x2m4q5ab\.jpg"[^>]*loading="lazy"/);
+      for (const text of ['aria-label="评分 4 / 5"', "值得反复读", "读过 · 2026-10-01", "豆瓣 ↗"]) expect(principles, text).toContain(text);
+      expect(page("book")).not.toContain("瑞·达利欧");
+      const santi = tile("book", "三体");
       expect(santi).toContain("在读");
       expect(santi).not.toMatch(/读过 ·|2026-08|aria-label="评分/);
-      expect(principles).toContain("data-media-card");
     });
 
-    // [TC-US03-06][SC-SHELF-06][SC-SHELF-07] 桌游为列表行；无评分保留评分列占位（桌游改海报墙见任务 16）
-    it("[TC-US03-06] 列表行内容与无评分占位", () => {
-      const catan = item("boardgame", "卡坦岛");
-      expect(catan).toContain("data-media-row");
-      for (const text of ['src="/covers/2026/06/zeldabotw2ab.jpg"', "Klaus Teuber", 'aria-label="评分 5 / 5"', "2026-06"]) expect(catan, text).toContain(text);
-      const unrated = item("boardgame", "无评桌游");
-      expect(unrated).toContain("data-rating-slot");
+    // [TC-US03-06][SC-SHELF-06][SC-SHELF-07] 桌游为海报墙：1:1 砖块；无评分背面无星级；不含开发商
+    it("[TC-US03-06] 桌游 1:1 海报与无评分背面", () => {
+      expect(page("boardgame")).not.toContain("data-media-row");
+      const catan = tile("boardgame", "卡坦岛");
+      expect(catan).toMatch(/style="aspect-ratio:\s*1 \/ 1"/);
+      for (const text of ['src="/covers/2026/06/zeldabotw2ab.jpg"', 'aria-label="评分 5 / 5"', "玩过 · 2026-06-01"]) expect(catan, text).toContain(text);
+      expect(page("boardgame")).not.toContain("Klaus Teuber");
+      const unrated = tile("boardgame", "无评桌游");
+      expect(unrated).toMatch(/style="aspect-ratio:\s*1 \/ 1"/);
       expect(unrated).not.toContain('aria-label="评分');
     });
 
     // [TC-US03-07][SC-SHELF-08][SC-SHELF-09]
     it("[TC-US03-07] 豆瓣外链与不可点击条目", () => {
-      expect(item("book", "原则")).toMatch(/<a[^>]*href="https:\/\/book\.douban\.com\/subject\/27608239\/"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/);
-      const note = item("book", "手记");
+      expect(tile("book", "原则")).toMatch(/<a[^>]*href="https:\/\/book\.douban\.com\/subject\/27608239\/"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/);
+      const note = tile("book", "手记");
       expect(note).not.toContain("<a");
       expect(note).not.toContain("豆瓣 ↗");
       const all = Object.keys(MEDIA_PAGES).map(page).join("\n");
@@ -196,16 +204,17 @@ describe("reader-fixture 构建产物", () => {
       expect(external("game").filter((src) => !src.startsWith("https://images.igdb.com/igdb/image/upload/t_1080p/"))).toEqual([]);
     });
 
-    // [TC-US03-13][SC-SHELF-05] 转义（超长标题、多行短评随所有分类改海报墙在任务 16 补回）
-    it("[TC-US03-13] HTML 转义", () => {
+    // [TC-US03-13][SC-SHELF-05] 转义；多行短评在背面保留换行（超长标题 2 行省略由 UT-16 覆盖：测试数据表各分类条数固定，不另加条目）
+    it("[TC-US03-13] HTML 转义、多行短评", () => {
       expect(page("book")).toContain("&lt;b&gt;粗体&lt;/b&gt;");
       expect(page("book")).not.toContain("<b>粗体</b>");
+      expect(tile("boardgame", "无评桌游")).toMatch(/class="[^"]*whitespace-pre-line[^"]*"[^>]*>第一行\n第二行\n第三行/);
     });
 
     // [TC-US03-16][SC-SHELF-12] 空分类（构建部分）
     it("[TC-US03-16] 空分类空状态", () => {
       expect(page("comic")).toContain("还没有记录漫画");
-      expect(items("comic")).toEqual([]);
+      expect(titles("comic")).toEqual([]);
     });
 
     // [TC-US03-21][SC-SHELF-21] 游戏海报墙：IGDB 原图、原比例砖块、平台与年份徽标（只在正面）、背面不含开发商
@@ -213,20 +222,16 @@ describe("reader-fixture 构建产物", () => {
       const game = page("game");
       const order = ["塞尔达传说：王国之泪", "黑神话：悟空", "博德之门 3", "断链游戏", "某款老游戏"];
       expect([...game.matchAll(/data-poster-title="([^"]*)"/g)].map((m) => m[1])).toEqual(order);
-      const tile = (title: string) => {
-        const start = game.indexOf(`data-poster-title="${title}"`);
-        return game.slice(game.lastIndexOf("<li", start), game.indexOf("</li>", start));
-      };
-      const wukong = tile("黑神话：悟空");
+      const wukong = tile("game", "黑神话：悟空");
       expect(wukong).toMatch(/style="aspect-ratio:\s*810 \/ 1080"/);
       expect(wukong).toMatch(/<img[^>]*src="https:\/\/images\.igdb\.com\/igdb\/image\/upload\/t_1080p\/co8h3y\.jpg"/);
       expect(wukong).toMatch(/<img[^>]*width="810"[^>]*height="1080"[^>]*class="[^"]*object-contain/);
-      expect(tile("博德之门 3")).toMatch(/style="aspect-ratio:\s*600 \/ 900"/);
-      expect(tile("某款老游戏")).toMatch(/style="aspect-ratio:\s*3 \/ 4"/);
-      expect(tile("某款老游戏")).not.toContain("<img");
-      const badge = (title: string) => /<span[^>]*data-platform-badge[^>]*>/.exec(tile(title))?.[0].match(/aria-label="([^"]*)"/)?.[1];
+      expect(tile("game", "博德之门 3")).toMatch(/style="aspect-ratio:\s*600 \/ 900"/);
+      expect(tile("game", "某款老游戏")).toMatch(/style="aspect-ratio:\s*3 \/ 4"/);
+      expect(tile("game", "某款老游戏")).not.toContain("<img");
+      const badge = (title: string) => /<span[^>]*data-platform-badge[^>]*>/.exec(tile("game", title))?.[0].match(/aria-label="([^"]*)"/)?.[1];
       expect(order.map(badge)).toEqual(["平台：Switch", "平台：PS5", "平台：Steam", "平台：Switch 2", "平台：PS4"]);
-      const year = (title: string) => /data-year-badge[^>]*>(\d{4})</.exec(tile(title))?.[1] ?? null;
+      const year = (title: string) => /data-year-badge[^>]*>(\d{4})</.exec(tile("game", title))?.[1] ?? null;
       expect(order.map(year)).toEqual(["2023", "2024", "2023", "2023", null]);
       for (const text of ['aria-label="评分 4 / 5"', "玩过 · 2025-08-20", 'href="https://www.douban.com/game/35140012/"']) expect(wukong, text).toContain(text);
       expect(wukong.slice(wukong.indexOf("data-poster-back"))).not.toContain("data-platform-badge");

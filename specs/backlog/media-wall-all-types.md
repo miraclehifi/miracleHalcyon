@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|-----|
-| 状态 | scheduled |
+| 状态 | done |
 | 类型 | Enhancement |
 | 优先级 | P2-Medium |
 | 来源 | 作者需求 |
@@ -19,11 +19,11 @@
 
 - [x] 设计稿 [admin.pen](../ui/admin.pen)：重做 09（书）、09m（书 · 移动）、09c（桌游，砖块 1:1）；`MediaCard`、`MediaRow` 及 `/Mobile` 移入存档区"已废弃"
 - [x] 规格同步：[reader-media.md](../ui/pages/reader-media.md)（重写为统一海报墙 + 分类差异表）、[components.md](../ui/components.md)、US-03 与验收、reader module-spec、F-005 架构
-- [ ] 所有分类页主体满宽（左右 50px，手机 20px），没有居中窄栏
-- [ ] 书、漫画砖块 2:3、桌游 1:1，`object-fit: cover`；游戏按 IGDB 原比例（[game-case-shelf](game-case-shelf.md)）
-- [ ] 悬停浮出名称（游戏除外）；背面显示名称、评分、短评、"读过 / 玩过 · 日期"、"豆瓣 ↗"，不显示作者 / 开发商
-- [ ] "按时间"所有分类可用，依据文案：书 / 漫画"读过时间 / 出版年份"，桌游"玩过时间 / 发行年份"（[media-time-basis](media-time-basis.md)）
-- [ ] 删除 `MediaCard.astro`、`MediaRow.astro` 及其样式与测试引用；读者页每页都有一个海报墙岛
+- [x] 所有分类页主体满宽（左右 50px，手机 20px），没有居中窄栏
+- [x] 书、漫画砖块 2:3、桌游 1:1，`object-fit: cover`；游戏按 IGDB 原比例（[game-case-shelf](game-case-shelf.md)）
+- [x] 悬停不浮出名称（2026-10-23 [poster-no-hover-title](poster-no-hover-title.md) 取代"悬停浮出名称"）；背面显示名称、评分、短评、"读过 / 玩过 · 日期"、"豆瓣 ↗"，不显示作者 / 开发商
+- [x] "按时间"所有分类可用，依据文案：书 / 漫画"读过时间 / 出版年份"，桌游"玩过时间 / 发行年份"（[media-time-basis](media-time-basis.md)）
+- [x] 删除 `MediaCard.astro`、`MediaRow.astro` 及其样式与测试引用；读者页每页都有一个海报墙岛
 
 ## 影响分析
 

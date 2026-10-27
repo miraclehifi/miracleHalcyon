@@ -465,7 +465,7 @@
 | `TocButton` · `TocDrawer` | `TocDrawer` | 05m 右下角浮动按钮 / 05m-b 底部目录抽屉（< 1280px） |
 | `NotFound` | `NotFound` | 08（404：代码、标题、说明、回首页 / 看看全部文章） |
 | `MediaHeader` | `MediaHeader`（已实现，任务 8） | 09 / 09m（"书影音" + 当前分类数量与进行中数量） |
-| `MediaList` | `MediaList` | 09 / 09m / 09c / 09d / 09e / 09dm / 09f / 09g：所有分类都渲染 `MediaPosterWall`，空分类 `EmptyState`；进行中的条目置顶，其余按标记日期倒序；列表下方一行来源说明（游戏页加"封面来自 IGDB"）；规则见 [reader-media.md](pages/reader-media.md)（2026-10-23 书、漫画、桌游由 `MediaCard` / `MediaRow` 改为海报墙） |
+| `MediaList` | `MediaList`（已实现：所有分类海报墙，Sprint 9 任务 16） | 09 / 09m / 09c / 09d / 09e / 09dm / 09f / 09g：所有分类都渲染 `MediaPosterWall`，空分类 `EmptyState`；进行中的条目置顶，其余按标记日期倒序；列表下方一行来源说明（游戏页加"封面来自 IGDB"）；规则见 [reader-media.md](pages/reader-media.md)（2026-10-23 书、漫画、桌游由 `MediaCard` / `MediaRow` 改为海报墙） |
 | `MediaPosterWall` | `MediaPosterWall`（已实现，任务 10） | 09e（不分段，默认）/ 09d（按时间分段）/ 09d-s（分段标题吸顶）/ 09dm（手机）/ 09f（游戏）：所有分类的海报墙（书、漫画、电影、剧集 2:3，桌游 1:1，游戏保持封面原比例并悬停显示平台与年份），React 岛 `client:load`，底层 React Bits Masonry，砖块为 `MediaPoster`；`MediaTimeToggle` 切换是否分段；同一时间只翻开一张，Esc 翻回；参数与无 JS 兜底见"海报墙参数"
 | `MediaEntryForm` | `MediaEntryForm` | 11 / 11m（书影音录入 / 编辑表单主体：卡片容器（头部图标块 + 标题）内依次 `RecognizeBox`、条目信息（封面区：非游戏 `ShelfCoverField` 上传，游戏 `IgdbCoverField` 只按原比例预览 IGDB 链接；字段，游戏加平台下拉与"封面链接（IGDB）"）、我的记录、底部操作，F-005；见 [admin-media.md](pages/admin-media.md)） |
 | `CoverField` | `CoverField` | 03 设置抽屉（封面：缩略图 + 更换 / 移除，空时为拖放区）。已实现：`src/components/admin/editor/CoverField.tsx` |

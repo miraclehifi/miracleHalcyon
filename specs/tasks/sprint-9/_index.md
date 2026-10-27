@@ -1,6 +1,6 @@
 # Sprint 9：书影音
 
-**状态**: in_progress（任务 1–11 已实现并完成 code-review（2026-10-23）；任务 12–15（"按时间"发行年份）已实现（2026-10-27）；2026-10-23 再插入任务 15–16 豆瓣批量导入）
+**状态**: in_progress（任务 1–11 已实现并完成 code-review（2026-10-23）；任务 12–16（游戏海报墙、"按时间"发行年份、统一海报墙）已实现（2026-10-27）；2026-10-23 再插入任务 15–16 豆瓣批量导入）
 **创建**: 2026-10-21
 **Feature**: F-005 书影音（[Backlog: media-douban-sync](../../backlog/media-douban-sync.md)）
 **规划方式**: 迭代递进（见 [tasks/_index.md](../_index.md)）
@@ -28,7 +28,7 @@
 | 13 | [add-game-form-fields](add-game-form-fields.md) | 录入表单游戏分支：平台下拉、IGDB 封面链接与原比例预览、切换分类、错误提示（插入任务） | FRONTEND | 表现层（admin） | US-01、02 | 12、5、6 | 0 | 低 | completed |
 | 14 | [add-game-poster-wall](add-game-poster-wall.md) | 游戏海报墙：`posterAspect` 原比例砖块、`PlatformBadge`、`MediaPoster` 游戏模式（悬停显示平台、背面加平台）、夹具调整（插入任务） | FRONTEND | 表现层（reader） | US-03 | 12、10 | 0 | 中（非 2:3 砖块与静态网格、外链图片的 E2E 拦截） | completed |
 | 15 | [add-time-basis-release-year](add-time-basis-release-year.md) | "按时间"可选标记时间 / 发行年份（电影、剧集、游戏）、`groupByReleaseYear`、`MediaTimeBasis`；游戏悬停 `YearBadge`（插入任务，[media-time-basis](../../backlog/media-time-basis.md)） | FRONTEND | 表现层（reader） | US-03 | 14 | 0 | 低 | completed |
-| 16 | [unify-media-poster-wall](unify-media-poster-wall.md) | 书、漫画、桌游改为海报墙（桌游 1:1），所有分类满宽统一；删除 `MediaCard`、`MediaRow`（插入任务，[media-wall-all-types](../../backlog/media-wall-all-types.md)） | FRONTEND | 表现层（reader） | US-03 | 14、15 | 0 | 低 | pending |
+| 16 | [unify-media-poster-wall](unify-media-poster-wall.md) | 书、漫画、桌游改为海报墙（桌游 1:1），所有分类满宽统一；删除 `MediaCard`、`MediaRow`（插入任务，[media-wall-all-types](../../backlog/media-wall-all-types.md)） | FRONTEND | 表现层（reader） | US-03 | 14、15 | 0 | 低 | completed |
 | 15 | [add-douban-import-api](add-douban-import-api.md) | 豆瓣批量导入与增量同步接口（6 个类别）：迁移 0006 `shelf_import_state`、`douban/import.ts` 标记映射、`fetchInterests`、`importPage`（全量 / 增量、`types` 类别过滤）/ `importState` / `finishImport`、三个路由、录制 `interests-*` 夹具（插入任务，[douban-bulk-import](../../backlog/douban-bulk-import.md)、[ADR-014](../../engineering/features/F-005-书影音/architecture/adr/ADR-014-douban-bulk-import.md)） | API | 数据 + 领域 + 接口 | US-04 | 12、3 | 1 | 中（豆瓣标记接口改版 / 限流、合并覆盖规则、水位前移时机） | pending |
 | 16 | [add-douban-import-dialog](add-douban-import-dialog.md) | 后台"从豆瓣导入"弹窗：6 个类别勾选、同步状态与 ID 带出、"同步新标记" / "全量导入"、逐页导入、进度 / 停止 / 汇总 / 失败列表、结束时重建一次（插入任务） | FRONTEND | 表现层（admin） | US-04 | 15、4 | 0 | 低 | pending |
 | 17 | [poster-back-filtered-cover](poster-back-filtered-cover.md) | 海报背面铺滤镜封面：镜像、灰度、30% 不透明 + `flip-surface` 渐变，无封面仍为纯色底（插入任务，[poster-back-filtered-cover](../../backlog/poster-back-filtered-cover.md)） | FRONTEND | 表现层（reader） | US-03 | 10 | 0 | 低 | completed |
@@ -77,7 +77,7 @@ DDL 变更：迁移 `0004_shelf_entries.sql`（任务 2 实现时追加到 [ddl-
 
 ## DoD（Sprint 级）
 
-- [ ] 所有任务 completed（1–14、发行年份 15、17、18 完成；统一海报墙 16、豆瓣导入 15 / 16 待实现）
+- [ ] 所有任务 completed（1–14、发行年份 15、统一海报墙 16、17、18 完成；豆瓣导入 15 / 16 待实现）
 - [x] `npm run lint`、`npm run check`、`npm test`、`npm run test:e2e`（chromium + webkit）、`npm run test:build` 通过（2026-10-22：chromium 全过；webkit / chromium-media 的失败为并发负载超时，单独复跑通过，见 validation）
 - [ ] Backlog 验收条件逐条勾选；code-review → verify（2026-10-23 任务 1–11 code-review 完成，[报告](../../test/features/F-005-书影音/reviews/code-review.md)；任务 12–14 实现后补审）
 - [x] `ddl-changes.md` 有 0004 条目（⏳ 待执行）
